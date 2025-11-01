@@ -49,7 +49,6 @@ export default function LoginPage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white">
       <h1 className="text-3xl font-bold mb-6 text-blue-500">Patient Digital Twin</h1>
-
       <div className="flex gap-4">
         <button
           onClick={() => setShowLogin(true)}
