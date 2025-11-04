@@ -4,7 +4,7 @@ import { useState } from "react";
 export default function LoginPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   async function handleSubmit(endpoint: "login" | "register") {
@@ -12,17 +12,16 @@ export default function LoginPage() {
       const res = await fetch(`http://localhost:4000/api/v1/auth/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
       alert(JSON.stringify(data, null, 2));
       setShowLogin(false);
       setShowRegister(false);
-      setEmail("");
+      setUsername("");
       setPassword("");
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Error connecting to server");
     }
   }
@@ -48,11 +47,11 @@ export default function LoginPage() {
       {showLogin && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/50"
-          onClick={() => setShowLogin(false)} // close on background click
+          onClick={() => setShowLogin(false)}
         >
           <div
             className="bg-white p-6 rounded shadow-md w-80"
-            onClick={(e) => e.stopPropagation()} // keep open if clicking inside
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl mb-4">Login</h2>
             <form
@@ -62,10 +61,10 @@ export default function LoginPage() {
               }}
             >
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
                 className="block mb-2 border p-2 w-full"
               />
               <input
@@ -75,10 +74,7 @@ export default function LoginPage() {
                 placeholder="Password"
                 className="block mb-4 border p-2 w-full"
               />
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white p-2 rounded"
-              >
+              <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
                 Submit
               </button>
             </form>
@@ -89,11 +85,11 @@ export default function LoginPage() {
       {showRegister && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/50"
-          onClick={() => setShowRegister(false)} // close on background click
+          onClick={() => setShowRegister(false)}
         >
           <div
             className="bg-white p-6 rounded shadow-md w-80"
-            onClick={(e) => e.stopPropagation()} // keep open if clicking inside
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl mb-4">Register</h2>
             <form
@@ -103,10 +99,10 @@ export default function LoginPage() {
               }}
             >
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
                 className="block mb-2 border p-2 w-full"
               />
               <input
@@ -116,10 +112,7 @@ export default function LoginPage() {
                 placeholder="Password"
                 className="block mb-4 border p-2 w-full"
               />
-              <button
-                type="submit"
-                className="w-full bg-green-600 text-white p-2 rounded"
-              >
+              <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
                 Submit
               </button>
             </form>
