@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, QueryResultRow } from "pg";
 
 const ssl =
   process.env.PGSSLMODE === "require" || process.env.NODE_ENV === "production"
@@ -11,7 +11,7 @@ export const pool = new Pool({
 });
 
 export const db = {
-  query<T = any>(text: string, params?: any[]) {
+  async query<T extends QueryResultRow = any>(text: string, params?: any[]) {
     return pool.query<T>(text, params);
   },
 };
