@@ -11,5 +11,8 @@
     "start": "concurrently -k -n server,client -c auto \"npm:start -w server\" \"npm:start -w client\"",
     "lint": "npm run -w client lint",
     "typecheck": "npm run -w client typecheck"
+  },
+  "dependencies": {
+    "react-icons": "^5.5.0"
   }
 }
