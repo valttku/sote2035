@@ -2,32 +2,32 @@ import { db } from "../db.js";
 
 export type User = {
   id: number;
-  username: string;
+  email: string;
   password: string;
 };
 
 // return all users
 export async function listUsers(): Promise<User[]> {
   const { rows } = await db.query<User>(
-    "select id, username, password from app.users order by id asc"
+    "select id, email, password from app.users order by id asc"
   );
   return rows;
 }
 
-// find one user by username
-export async function findUserByUsername(username: string): Promise<User | null> {
+// find one user by email
+export async function findUserByEmail(email: string): Promise<User | null> {
   const { rows } = await db.query<User>(
-    "select id, username, password from app.users where username = $1",
-    [username]
+    "select id, email, password from app.users where email = $1",
+    [email]
   );
   return rows[0] ?? null;
 }
 
 // create a new user
-export async function createUser(username: string, password: string): Promise<User> {
+export async function createUser(email: string, password: string): Promise<User> {
   const { rows } = await db.query<User>(
-    "insert into app.users (username, password) values ($1, $2) returning id, username, password",
-    [username, password]
+    "insert into app.users (email, password) values ($1, $2) returning id, email, password",
+    [email, password]
   );
   return rows[0];
 }
