@@ -1,26 +1,40 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Modal from "../../components/Modal";
+import LoginForm from "../../components/LoginForm";
+import RegisterForm from "../../components/RegisterForm";
 
 export default function LoginPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  async function handleSubmit(endpoint: "login" | "register") {
+  async function handleSubmit(
+    endpoint: "login" | "register",
+    email: string,
+    password: string
+  ) {
     try {
       const res = await fetch(`http://localhost:4000/api/v1/auth/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
-      alert(JSON.stringify(data, null, 2));
-      setShowLogin(false);
-      setShowRegister(false);
-      setUsername("");
-      setPassword("");
+
+      if (res.ok) {
+        if (endpoint === "login") {
+          router.push("/"); // redirect to home
+        } else {
+          alert("Registration successful! You can now log in.");
+          setShowRegister(false);
+          setShowLogin(true);
+        }
+      } else {
+        alert(data.error || "Something went wrong");
+      }
     } catch {
       alert("Error connecting to server");
     }
@@ -45,79 +59,17 @@ export default function LoginPage() {
       </div>
 
       {showLogin && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black/50"
-          onClick={() => setShowLogin(false)}
-        >
-          <div
-            className="bg-white p-6 rounded shadow-md w-80"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl mb-4">Login</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit("login");
-              }}
-            >
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-                className="block mb-2 border p-2 w-full"
-              />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="block mb-4 border p-2 w-full"
-              />
-              <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
-                Submit
-              </button>
-            </form>
-          </div>
-        </div>
+        <Modal onClose={() => setShowLogin(false)}>
+          <LoginForm onSubmit={(email, password) => handleSubmit("login", email, password)} />
+        </Modal>
       )}
 
       {showRegister && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black/50"
-          onClick={() => setShowRegister(false)}
-        >
-          <div
-            className="bg-white p-6 rounded shadow-md w-80"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl mb-4">Register</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit("register");
-              }}
-            >
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-                className="block mb-2 border p-2 w-full"
-              />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="block mb-4 border p-2 w-full"
-              />
-              <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
-                Submit
-              </button>
-            </form>
-          </div>
-        </div>
+        <Modal onClose={() => setShowRegister(false)}>
+          <RegisterForm
+            onSubmit={(email, password) => handleSubmit("register", email, password)}
+          />
+        </Modal>
       )}
     </main>
   );
