@@ -7,7 +7,8 @@ export const authRouter = Router();
 // Register
 authRouter.post("/register", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, displayName } = req.body;
+
     if (!email || !password)
       return res.status(400).json({ error: "Missing fields" });
 
@@ -16,8 +17,13 @@ authRouter.post("/register", async (req, res, next) => {
       return res.status(409).json({ error: "User already exists" });
 
     const hash = await bcrypt.hash(password, 10);
-    const user = await createUser(email, hash);
-    res.status(201).json({ id: user.id, email: user.email });
+    const user = await createUser(email, hash, displayName ?? null);
+
+    res.status(201).json({
+      id: user.id,
+      email: user.email,
+      displayName: user.display_name
+    });
   } catch (e) {
     next(e);
   }
@@ -28,12 +34,17 @@ authRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await findUserByEmail(email);
+
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-    res.json({ message: "Login successful", email: user.email });
+    res.json({
+      message: "Login successful",
+      email: user.email,
+      displayName: user.display_name
+    });
   } catch (e) {
     next(e);
   }
