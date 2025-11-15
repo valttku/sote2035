@@ -33,5 +33,14 @@ export async function ensureSchema() {
     for each row
     execute function app.update_updated_at_column();
   `);
-  
+
+  // sessions table
+  await db.query(`
+    create table if not exists app.sessions (
+      id uuid primary key default gen_random_uuid(),
+      user_id integer not null references app.users(id) on delete cascade,
+      created_at timestamptz not null default now(),
+      expires_at timestamptz not null
+    );
+  `);
 }
