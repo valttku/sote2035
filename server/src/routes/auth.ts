@@ -5,10 +5,11 @@ import {
   findUserByEmail,
   updateLastLogin,
 } from "../db/users/repo.js";
+import { db } from "../db/db.js";
 
 export const authRouter = Router();
 
-// Register
+// register
 authRouter.post("/register", async (req, res, next) => {
   try {
     const { email, password, displayName } = req.body;
@@ -35,7 +36,7 @@ authRouter.post("/register", async (req, res, next) => {
   }
 });
 
-// Login
+// login
 authRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -48,11 +49,30 @@ authRouter.post("/login", async (req, res, next) => {
 
     await updateLastLogin(user.id);
 
+    // create session valid for 7 days
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const result = await db.query(
+      `insert into app.sessions (user_id, expires_at)
+       values ($1, $2)
+       returning id`,
+      [user.id, expires]
+    );
+
+    const sessionId = result.rows[0].id;
+
+    // set HTTP-only cookie
+    res.cookie("session", sessionId, {
+      httpOnly: true,
+      secure: false, // true in production with HTTPS
+      sameSite: "lax",
+      path: "/",
+      expires,
+    });
+
     res.json({
       message: "Login successful",
       email: user.email,
       display_name: user.display_name,
-      last_login: new Date().toISOString(),
     });
   } catch (e) {
     next(e);

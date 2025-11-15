@@ -33,5 +33,33 @@ export async function ensureSchema() {
     for each row
     execute function app.update_updated_at_column();
   `);
+
+  // sessions table
+  await db.query(`
+    create table if not exists app.sessions (
+      id uuid primary key default gen_random_uuid(),
+      user_id integer not null references app.users(id) on delete cascade,
+      created_at timestamptz not null default now(),
+      expires_at timestamptz not null
+    );
+  `);
+
+  // update updated_at on every row update
+  await db.query(`
+    create or replace function app.update_updated_at_column()
+    returns trigger as $$
+    begin
+      new.updated_at = now();
+      return new;
+    end;
+    $$ language plpgsql;
+
+    drop trigger if exists update_users_updated_at on app.users;
+
+    create trigger update_users_updated_at
+    before update on app.users
+    for each row
+    execute function app.update_updated_at_column();
+  `);
   
 }

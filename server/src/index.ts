@@ -1,17 +1,26 @@
 import { env } from './config/env.js';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import { ensureSchema } from "./db/init.js";
 import { dbOk } from "./db/health.js";
 
 import { homeRouter } from "./routes/home.js";
 import { authRouter } from "./routes/auth.js";
+import { meRouter } from "./routes/me.js";
+
 import { errorHandler } from "./middleware/error.js";
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
+
 app.use(express.json());
+app.use(cookieParser());
 
 // health and status check
 app.get('/health', (_req, res) => res.json({ ok: true }));
@@ -29,6 +38,7 @@ app.get("/health/db", async (_req, res) => {
 // routes
 app.use("/api/v1", homeRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/me", meRouter);
 
 // global error handler
 app.use(errorHandler);
