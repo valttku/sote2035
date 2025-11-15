@@ -5,16 +5,20 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 export default function RegisterForm({
   onSubmit,
 }: {
-  onSubmit: (email: string, password: string) => void;
+  onSubmit: (email: string, password: string, displayName: string | null) => void;
 }) {
   const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmError, setConfirmError] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
 
   const emailRef = useRef<HTMLInputElement>(null);
@@ -54,15 +58,17 @@ export default function RegisterForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
-    await onSubmit(email, password);
+    await onSubmit(email, password, displayName.trim() || null);
     setLoading(false);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-2 w-80">
       <h2 className="text-xl mb-2">Register</h2>
 
+      {/* Email */}
       <label htmlFor="reg-email" className="sr-only">
         Email
       </label>
@@ -81,11 +87,21 @@ export default function RegisterForm({
         aria-invalid={!!emailError}
       />
       {emailError && (
-        <p className="text-red-600 text-sm" aria-live="polite" role="alert">
+        <p className="text-red-600 text-sm" role="alert">
           {emailError}
         </p>
       )}
 
+      {/* Display Name */}
+      <input
+        type="text"
+        value={displayName}
+        onChange={(e) => setDisplayName(e.target.value)}
+        placeholder="Display Name (optional)"
+        className="block border p-2 w-full"
+      />
+
+      {/* Password */}
       <label htmlFor="reg-password" className="sr-only">
         Password
       </label>
@@ -113,11 +129,12 @@ export default function RegisterForm({
         </button>
       </div>
       {passwordError && (
-        <p className="text-red-600 text-sm" aria-live="polite" role="alert">
+        <p className="text-red-600 text-sm" role="alert">
           {passwordError}
         </p>
       )}
 
+      {/* Confirm Password */}
       <label htmlFor="reg-confirm" className="sr-only">
         Confirm Password
       </label>
@@ -144,11 +161,12 @@ export default function RegisterForm({
         </button>
       </div>
       {confirmError && (
-        <p className="text-red-600 text-sm" aria-live="polite" role="alert">
+        <p className="text-red-600 text-sm" role="alert">
           {confirmError}
         </p>
       )}
 
+      {/* Button */}
       <button
         type="submit"
         disabled={loading}

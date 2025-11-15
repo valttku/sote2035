@@ -4,12 +4,18 @@ export type User = {
   id: number;
   email: string;
   password: string;
+  display_name: string | null;
+  created_at: string;
+  updated_at: string;
+  last_login: string | null;
 };
 
 // return all users
 export async function listUsers(): Promise<User[]> {
   const { rows } = await db.query<User>(
-    "select id, email, password from app.users order by id asc"
+    `select id, email, password, display_name, created_at, updated_at, last_login
+     from app.users
+     order by id asc`
   );
   return rows;
 }
@@ -17,19 +23,37 @@ export async function listUsers(): Promise<User[]> {
 // find one user by email
 export async function findUserByEmail(email: string): Promise<User | null> {
   const { rows } = await db.query<User>(
-    "select id, email, password from app.users where email = $1",
+    `select id, email, password, display_name, created_at, updated_at, last_login
+     from app.users
+     where email = $1`,
     [email]
   );
   return rows[0] ?? null;
 }
 
 // create a new user
-export async function createUser(email: string, password: string): Promise<User> {
+export async function createUser(
+  email: string,
+  password: string,
+  displayName: string | null
+): Promise<User> {
   const { rows } = await db.query<User>(
-    "insert into app.users (email, password) values ($1, $2) returning id, email, password",
-    [email, password]
+    `insert into app.users (email, password, display_name)
+     values ($1, $2, $3)
+     returning id, email, password, display_name, created_at, updated_at, last_login`,
+    [email, password, displayName]
   );
   return rows[0];
+}
+
+// update last_login timestamp
+export async function updateLastLogin(id: number): Promise<void> {
+  await db.query(
+    `update app.users
+     set last_login = now()
+     where id = $1`,
+    [id]
+  );
 }
 
 // delete a user by id

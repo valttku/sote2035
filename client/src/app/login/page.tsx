@@ -13,13 +13,19 @@ export default function LoginPage() {
   async function handleSubmit(
     endpoint: "login" | "register",
     email: string,
-    password: string
+    password: string,
+    displayName?: string | null
   ) {
     try {
+      const body =
+        endpoint === "register"
+          ? { email, password, displayName }
+          : { email, password };
+
       const res = await fetch(`http://localhost:4000/api/v1/auth/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -43,6 +49,7 @@ export default function LoginPage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white">
       <h1 className="text-3xl font-bold mb-6 text-blue-500">Patient Digital Twin</h1>
+
       <div className="flex gap-4">
         <button
           onClick={() => setShowLogin(true)}
@@ -60,14 +67,20 @@ export default function LoginPage() {
 
       {showLogin && (
         <Modal onClose={() => setShowLogin(false)}>
-          <LoginForm onSubmit={(email, password) => handleSubmit("login", email, password)} />
+          <LoginForm
+            onSubmit={(email, password) =>
+              handleSubmit("login", email, password)
+            }
+          />
         </Modal>
       )}
 
       {showRegister && (
         <Modal onClose={() => setShowRegister(false)}>
           <RegisterForm
-            onSubmit={(email, password) => handleSubmit("register", email, password)}
+            onSubmit={(email, password, displayName) =>
+              handleSubmit("register", email, password, displayName)
+            }
           />
         </Modal>
       )}
