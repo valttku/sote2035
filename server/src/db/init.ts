@@ -43,4 +43,23 @@ export async function ensureSchema() {
       expires_at timestamptz not null
     );
   `);
+
+  // update updated_at on every row update
+  await db.query(`
+    create or replace function app.update_updated_at_column()
+    returns trigger as $$
+    begin
+      new.updated_at = now();
+      return new;
+    end;
+    $$ language plpgsql;
+
+    drop trigger if exists update_users_updated_at on app.users;
+
+    create trigger update_users_updated_at
+    before update on app.users
+    for each row
+    execute function app.update_updated_at_column();
+  `);
+  
 }
