@@ -22,6 +22,7 @@ authRouter.post("/register", async (req, res, next) => {
       return res.status(409).json({ error: "User already exists" });
 
     const hash = await bcrypt.hash(password, 10);
+
     const user = await createUser(email, hash, displayName ?? null);
 
     res.status(201).json({
@@ -39,8 +40,8 @@ authRouter.post("/register", async (req, res, next) => {
 authRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await findUserByEmail(email);
 
+    const user = await findUserByEmail(email);
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
     const ok = await bcrypt.compare(password, user.password);
