@@ -6,9 +6,6 @@ import cookieParser from 'cookie-parser';
 import { ensureSchema } from "./db/init.js";
 import { dbOk } from "./db/health.js";
 
-import { ensureSchema } from "./db/init.js";
-import { dbOk } from "./db/health.js";
-
 import { homeRouter } from "./routes/home.js";
 import { authRouter } from "./routes/auth.js";
 import { meRouter } from "./routes/me.js";
