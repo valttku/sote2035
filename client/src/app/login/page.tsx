@@ -25,6 +25,7 @@ export default function LoginPage() {
       const res = await fetch(`http://localhost:4000/api/v1/auth/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // IMPORTANT: allows cookie to be set
         body: JSON.stringify(body),
       });
 
@@ -47,30 +48,18 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-zinc-50 dark:bg-black text-black dark:text-white">
-      <h1 className="text-3xl font-bold mb-6 text-blue-500">Patient Digital Twin</h1>
+    <main className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="text-3xl font-bold mb-6">Patient Digital Twin</h1>
 
       <div className="flex gap-4">
-        <button
-          onClick={() => setShowLogin(true)}
-          className="px-6 py-2 rounded bg-blue-600 text-white"
-        >
-          Login
-        </button>
-        <button
-          onClick={() => setShowRegister(true)}
-          className="px-6 py-2 rounded bg-green-600 text-white"
-        >
-          Register
-        </button>
+        <button onClick={() => setShowLogin(true)}>Login</button>
+        <button onClick={() => setShowRegister(true)}>Register</button>
       </div>
 
       {showLogin && (
         <Modal onClose={() => setShowLogin(false)}>
           <LoginForm
-            onSubmit={(email, password) =>
-              handleSubmit("login", email, password)
-            }
+            onSubmit={(email, password) => handleSubmit("login", email, password)}
           />
         </Modal>
       )}
