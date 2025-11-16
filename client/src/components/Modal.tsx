@@ -8,18 +8,21 @@ type ModalProps = {
 
 export default function Modal({ children, onClose }: ModalProps) {
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black/50"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
       <div
         className="
-          bg-white p-6 rounded shadow-md 
-          w-full max-w-md 
+          bg-white p-6 rounded shadow-md
+          w-full max-w-md
           max-h-[90vh] overflow-y-auto
         "
-        onClick={(e) => e.stopPropagation()}
       >
+        <button
+          type="button"
+          onClick={onClose}
+          className="mb-2"
+        >
+          Close
+        </button>
         {children}
       </div>
     </div>
