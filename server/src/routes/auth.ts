@@ -78,3 +78,31 @@ authRouter.post("/login", async (req, res, next) => {
     next(e);
   }
 });
+
+// logout
+authRouter.post("/logout", async (req, res, next) => {
+  try {
+    const sessionId = req.cookies?.session;
+
+    if (sessionId) {
+      await db.query(
+        `delete from app.sessions
+         where id = $1`,
+        [sessionId]
+      );
+    }
+
+    // clearing cookie
+    res.clearCookie("session", {
+      httpOnly: true,
+      secure: false, // set to true in production with HTTPS
+      sameSite: "lax",
+      path: "/",
+    });
+
+    res.json({ message: "Logged out" });
+  } catch (e) {
+    next(e);
+  }
+});
+

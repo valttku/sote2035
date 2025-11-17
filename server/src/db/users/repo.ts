@@ -60,3 +60,12 @@ export async function updateLastLogin(id: number): Promise<void> {
 export async function deleteUser(id: number): Promise<void> {
   await db.query("delete from app.users where id = $1", [id]);
 }
+
+// delete a session by id
+export async function deleteSession(sessionId: string): Promise<void> {
+  await db.query(
+    `delete from app.sessions
+     where id = $1`,
+    [sessionId]
+  );
+}
