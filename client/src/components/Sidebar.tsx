@@ -12,6 +12,7 @@ export default function Sidebar() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Load user data
   useEffect(() => {
     async function loadUser() {
       try {
@@ -20,15 +21,13 @@ export default function Sidebar() {
         });
 
         if (!res.ok) {
-          // not logged in = go to login page
-          router.replace("/login");
-          return;
+          setUser(null);
+        } else {
+          const data = await res.json();
+          setUser(data);
         }
-
-        const data = await res.json();
-        setUser(data);
       } catch {
-        router.replace("/login");
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -37,14 +36,18 @@ export default function Sidebar() {
     loadUser();
   }, [router]);
 
-  // while loading /me, render nothing
+  // Redirect ONLY after loading, and ONLY inside useEffect
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login");
+    }
+  }, [loading, user, router]);
+
+  // While checking session, show nothing
   if (loading) return null;
 
-  // ff somehow no user (shouldn't happen), force login
-  if (!user) {
-    router.replace("/login");
-    return null;
-  }
+  // After redirect triggers, also render nothing
+  if (!user) return null;
 
   const displayName = user.display_name || user.email;
 
@@ -61,7 +64,18 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <button className="mt-auto">Log off</button>
+      <button
+        className="mt-auto"
+        onClick={async () => {
+          await fetch("http://localhost:4000/api/v1/auth/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+          router.replace("/login");
+        }}
+      >
+        Log off
+      </button>
     </aside>
   );
 }
