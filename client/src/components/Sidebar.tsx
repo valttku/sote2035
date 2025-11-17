@@ -5,14 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
-  const [user, setUser] = useState<
-    { email: string; display_name: string | null } | null
-  >(null);
-
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{ email: string; display_name: string | null } | null>(null);
   const router = useRouter();
 
-  // Load user data
+  // load user data
   useEffect(() => {
     async function loadUser() {
       try {
@@ -20,41 +16,34 @@ export default function Sidebar() {
           credentials: "include",
         });
 
-        if (!res.ok) {
-          setUser(null);
-        } else {
+        if (res.ok) {
           const data = await res.json();
           setUser(data);
         }
       } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
+        // theoretically should never happen due to middleware
       }
     }
 
     loadUser();
-  }, [router]);
+  }, []);
 
-  // Redirect ONLY after loading, and ONLY inside useEffect
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login");
-    }
-  }, [loading, user, router]);
-
-  // While checking session, show nothing
-  if (loading) return null;
-
-  // After redirect triggers, also render nothing
   if (!user) return null;
 
   const displayName = user.display_name || user.email;
 
+  async function handleLogout() {
+    await fetch("http://localhost:4000/api/v1/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    router.replace("/login");
+  }
+
   return (
-    <aside className="fixed left-0 top-0 h-full w-64">
-      <div>
-        <p>{displayName}</p>
+    <aside className="fixed left-0 top-0 h-full w-64 p-4 border-r">
+      <div className="mb-8">
+        <p className="font-bold">{displayName}</p>
 
         <nav>
           <ul className="flex flex-col gap-4 mt-6">
@@ -64,16 +53,7 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <button
-        className="mt-auto"
-        onClick={async () => {
-          await fetch("http://localhost:4000/api/v1/auth/logout", {
-            method: "POST",
-            credentials: "include",
-          });
-          router.replace("/login");
-        }}
-      >
+      <button onClick={handleLogout} className="mt-auto">
         Log off
       </button>
     </aside>
