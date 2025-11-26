@@ -1,27 +1,52 @@
 name: CI
+
 on:
   pull_request:
     branches: [ main ]
   push:
     branches: [ main ]
+
 jobs:
   checks:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
-      - name: Lint
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      # ===== FRONTEND =====
+      - name: Install frontend dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: ./client
         run: npm run lint
-      - name: Typecheck
+
+      - name: Typecheck frontend
+        working-directory: ./client
         run: npm run typecheck
-      - name: Build
+
+      - name: Build frontend
+        working-directory: ./client
         run: npm run build
-        env:
-          NEXTAUTH_URL: "http://localhost:3000"
-          NEXTAUTH_SECRET: "devdevdevdevdevdevdevdev"
+
+      # ===== BACKEND =====
+      - name: Install backend dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Typecheck backend
+        working-directory: ./server
+        run: npx tsc --noEmit
+
+      - name: Build backend
+        working-directory: ./server
+        run: npm run build
