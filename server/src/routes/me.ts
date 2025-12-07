@@ -1,24 +1,18 @@
 import { Router } from "express";
 import { db } from "../db/db.js";
+import { authRequired } from "../middleware/authRequired.js";
 
 export const meRouter = Router();
 
-meRouter.get("/", async (req, res) => {
-  const sessionId = req.cookies?.session;
-  if (!sessionId)
-    return res.status(401).json({ error: "Not logged in" });
+meRouter.get("/", authRequired, async (req, res) => {
+  const userId = (req as any).userId;
 
   const result = await db.query(
-    `select u.id, u.email, u.display_name
-     from app.sessions s
-     join app.users u on u.id = s.user_id
-     where s.id = $1
-       and s.expires_at > now()`,
-    [sessionId]
+    `select id, email, display_name
+     from app.users
+     where id = $1`,
+    [userId]
   );
 
-  if (result.rowCount === 0)
-    return res.status(401).json({ error: "Session expired or invalid" });
-
-  return res.json(result.rows[0]);
+  res.json(result.rows[0]);
 });

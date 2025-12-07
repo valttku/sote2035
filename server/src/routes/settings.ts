@@ -1,34 +1,13 @@
 import { Router } from "express";
 import { db } from "../db/db.js";
 import bcrypt from "bcrypt";
+import { authRequired } from "../middleware/authRequired.js";
 
 export const settingsRouter = Router();
 
-// helper: get user id based on session cookie
-async function getUserIdFromSession(sessionId: string | undefined) {
-  if (!sessionId) return null;
-
-  const result = await db.query(
-    `select user_id
-     from app.sessions
-     where id = $1
-       and expires_at > now()`,
-    [sessionId]
-  );
-
-  if (result.rowCount === 0) return null;
-
-  return result.rows[0].user_id;
-}
-
-
 // GET /api/v1/settings
-// returns user profile info
-settingsRouter.get("/", async (req, res) => {
-  const sessionId = req.cookies?.session;
-  const userId = await getUserIdFromSession(sessionId);
-
-  if (!userId) return res.status(401).json({ error: "Not logged in" });
+settingsRouter.get("/", authRequired, async (req, res) => {
+  const userId = (req as any).userId;
 
   const result = await db.query(
     `select id, email, display_name, created_at, updated_at, last_login
@@ -37,17 +16,12 @@ settingsRouter.get("/", async (req, res) => {
     [userId]
   );
 
-  return res.json(result.rows[0]);
+  res.json(result.rows[0]);
 });
 
 // PUT /api/v1/settings/display-name
-// update display name
-settingsRouter.put("/display-name", async (req, res) => {
-  const sessionId = req.cookies?.session;
-  const userId = await getUserIdFromSession(sessionId);
-
-  if (!userId) return res.status(401).json({ error: "Not logged in" });
-
+settingsRouter.put("/display-name", authRequired, async (req, res) => {
+  const userId = (req as any).userId;
   const { displayName } = req.body;
 
   await db.query(
@@ -61,15 +35,10 @@ settingsRouter.put("/display-name", async (req, res) => {
 });
 
 // PUT /api/v1/settings/password
-// change password (requires old password)
-settingsRouter.put("/password", async (req, res) => {
-  const sessionId = req.cookies?.session;
-  const userId = await getUserIdFromSession(sessionId);
-
-  if (!userId) return res.status(401).json({ error: "Not logged in" });
+settingsRouter.put("/password", authRequired, async (req, res) => {
+  const userId = (req as any).userId;
 
   const { oldPassword, newPassword } = req.body;
-
   if (!oldPassword || !newPassword)
     return res.status(400).json({ error: "Missing password fields" });
 
@@ -98,18 +67,13 @@ settingsRouter.put("/password", async (req, res) => {
 });
 
 // DELETE /api/v1/settings/delete-account
-// permanently delete user account + sessions
-settingsRouter.delete("/delete-account", async (req, res) => {
-  const sessionId = req.cookies?.session;
-  const userId = await getUserIdFromSession(sessionId);
+settingsRouter.delete("/delete-account", authRequired, async (req, res) => {
+  const userId = (req as any).userId;
 
-  if (!userId) return res.status(401).json({ error: "Not logged in" });
-
-  // delete all sessions and user
+  // remove user & sessions
   await db.query(`delete from app.sessions where user_id = $1`, [userId]);
   await db.query(`delete from app.users where id = $1`, [userId]);
 
-  // clear cookie
   res.clearCookie("session", {
     httpOnly: true,
     sameSite: "lax",
