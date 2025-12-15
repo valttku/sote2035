@@ -1,6 +1,11 @@
 import { db } from "./db.js";
 
 export async function ensureSchema() {
+  
+  // make sure the "app" schema exists
+  await db.query(`
+    create schema if not exists app;
+  `);
 
   // create users table
   await db.query(`
