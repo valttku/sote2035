@@ -22,12 +22,15 @@ export default function LoginPage() {
           ? { email, password, displayName }
           : { email, password };
 
-      const res = await fetch(`http://localhost:4000/api/v1/auth/${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // IMPORTANT: allows cookie to be set
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        `http://localhost:4000/api/v1/auth/${endpoint}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // IMPORTANT: allows cookie to be set
+          body: JSON.stringify(body),
+        }
+      );
 
       const data = await res.json();
 
@@ -59,8 +62,20 @@ export default function LoginPage() {
       {showLogin && (
         <Modal onClose={() => setShowLogin(false)}>
           <LoginForm
-            onSubmit={(email, password) => handleSubmit("login", email, password)}
+            onSubmit={(email, password) =>
+              handleSubmit("login", email, password)
+            }
           />
+
+          {/* Forgot password link */}
+          <div className="text-center mt-3">
+            <a
+              href="/forgot-password"
+              className="text-sm text-blue-600 underline"
+            >
+              Forgot password?
+            </a>
+          </div>
         </Modal>
       )}
 

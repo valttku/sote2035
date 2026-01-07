@@ -1,0 +1,99 @@
+"use client";
+
+import { useState } from "react";
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/v1/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      // Response is intentionally generic
+      await res.json();
+      setDone(true);
+    } catch {
+      setError("Failed to contact server");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <main className="p-6 max-w-md mx-auto">
+        <h1 className="text-xl font-bold mb-2">
+          Check your email
+        </h1>
+
+        <p className="mb-4">
+          If an account exists for this email, a password reset link has been sent.
+        </p>
+
+        <a
+          href="/login"
+          className="text-sm text-blue-600 underline"
+        >
+          Back to login
+        </a>
+      </main>
+    );
+  }
+
+  return (
+    <main className="p-6 max-w-md mx-auto">
+      <h1 className="text-xl font-bold mb-4">
+        Forgot password
+      </h1>
+
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <input
+          type="email"
+          required
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border p-2 w-full"
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50"
+        >
+          {loading ? "Sending..." : "Send reset link"}
+        </button>
+      </form>
+
+      {error && (
+        <p className="text-red-600 text-sm mt-2">{error}</p>
+      )}
+
+      <div className="mt-4">
+        <a
+          href="/login"
+          className="text-sm text-blue-600 underline"
+        >
+          Back to login
+        </a>
+      </div>
+    </main>
+  );
+}
