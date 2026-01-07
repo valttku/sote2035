@@ -40,8 +40,15 @@ export default async function Sidebar() {
 
         <nav>
           <ul className="flex flex-col gap-4 mt-6">
-            <li><Link href="/calendar">Calendar</Link></li>
-            <li><Link href="/settings">Settings</Link></li>
+            <li>
+              <Link href="/">Home</Link>
+            </li>
+            <li>
+              <Link href="/calendar">Calendar</Link>
+            </li>
+            <li>
+              <Link href="/settings">Settings</Link>
+            </li>
           </ul>
         </nav>
       </div>
