@@ -22,19 +22,8 @@ polarRouter.get("/connect", authRequired, async (req, res, next) => {
 
     const userId = (req as any).userId as number;
 
-    // CSRF protection: create a random state and store it in DB (short-lived)
     const state = crypto.randomUUID();
     const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    await db.query(
-      `
-      create table if not exists app.oauth_states (
-        state uuid primary key,
-        user_id integer not null references app.users(id) on delete cascade,
-        expires_at timestamptz not null
-      );
-      `
-    );
 
     await db.query(
       `insert into app.oauth_states (state, user_id, expires_at)
@@ -48,9 +37,6 @@ polarRouter.get("/connect", authRequired, async (req, res, next) => {
     url.searchParams.set("redirect_uri", REDIRECT_URI);
     url.searchParams.set("state", state);
 
-    // scopes are controlled in Polar admin by selected data types; Polar docs show scope usage
-    // Some clients still require a scope param; if Polar rejects without it, add scope here.
-
     res.redirect(url.toString());
   } catch (e) {
     next(e);
@@ -58,11 +44,13 @@ polarRouter.get("/connect", authRequired, async (req, res, next) => {
 });
 
 // GET /api/v1/integrations/polar/callback?code=...&state=...
-polarRouter.get("/callback", async (req, res, next) => {
+polarRouter.get("/callback", authRequired, async (req, res, next) => {
   try {
     mustEnv("POLAR_CLIENT_ID", CLIENT_ID);
     mustEnv("POLAR_CLIENT_SECRET", CLIENT_SECRET);
     mustEnv("POLAR_REDIRECT_URI", REDIRECT_URI);
+
+    const loggedInUserId = (req as any).userId as number;
 
     const code = typeof req.query.code === "string" ? req.query.code : "";
     const state = typeof req.query.state === "string" ? req.query.state : "";
@@ -71,7 +59,6 @@ polarRouter.get("/callback", async (req, res, next) => {
       return res.status(400).send("Missing code/state");
     }
 
-    // verify state -> get userId
     const st = await db.query(
       `select user_id, expires_at from app.oauth_states where state = $1`,
       [state]
@@ -79,17 +66,23 @@ polarRouter.get("/callback", async (req, res, next) => {
 
     if (st.rowCount === 0) return res.status(400).send("Invalid state");
 
-    const { user_id, expires_at } = st.rows[0];
+    const { user_id, expires_at } = st.rows[0] as {
+      user_id: number;
+      expires_at: string;
+    };
+
+    // state must belong to current logged-in user
+    if (user_id !== loggedInUserId) {
+      return res.status(403).send("State does not belong to this session");
+    }
 
     if (new Date(expires_at).getTime() < Date.now()) {
       await db.query(`delete from app.oauth_states where state = $1`, [state]);
       return res.status(400).send("Expired state");
     }
 
-    // one-time use state
     await db.query(`delete from app.oauth_states where state = $1`, [state]);
 
-    // exchange code -> access token
     const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
 
     const tokenRes = await fetch("https://polarremote.com/v2/oauth2/token", {
@@ -114,9 +107,17 @@ polarRouter.get("/callback", async (req, res, next) => {
     }
 
     const accessToken = tokenJson.access_token as string;
+    const refreshToken =
+      typeof tokenJson.refresh_token === "string" ? tokenJson.refresh_token : null;
+    const expiresIn =
+      typeof tokenJson.expires_in === "number" ? tokenJson.expires_in : null;
+
     if (!accessToken) return res.status(400).send("No access_token returned");
 
-    // register user in AccessLink (required)
+    const tokenExpiresAt =
+      expiresIn !== null ? new Date(Date.now() + expiresIn * 1000) : null;
+
+    // register user in AccessLink (may fail if already registered)
     const regRes = await fetch("https://www.polaraccesslink.com/v3/users", {
       method: "POST",
       headers: {
@@ -124,42 +125,62 @@ polarRouter.get("/callback", async (req, res, next) => {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({
-        "member-id": String(user_id), // use your user id as stable member-id
-      }),
+      body: JSON.stringify({ "member-id": String(user_id) }),
     });
 
     const regJson: any = await regRes.json().catch(() => ({}));
 
-    if (!regRes.ok) {
+    // if already registered, polar may respond with an error.
+    // in that case, proceed without failing hard.
+    const registerOk = regRes.ok;
+    const polarUserId =
+      regJson["polar-user-id"] ?? regJson["polar_user_id"] ?? regJson.user_id ?? null;
+
+    if (!registerOk && !polarUserId) {
       return res
         .status(400)
         .send(`User register failed: ${JSON.stringify(regJson)}`);
     }
 
-    // Polar returns a polar-user-id field (string/number depending on API)
-    const polarUserId =
-      regJson["polar-user-id"] ?? regJson["polar_user_id"] ?? regJson.user_id;
+    await db.query("begin");
 
-    if (!polarUserId) {
-      return res.status(400).send(`Missing polar user id: ${JSON.stringify(regJson)}`);
-    }
-
-    // store in app.polar_accounts (your table)
     await db.query(
       `
-      insert into app.polar_accounts (user_id, polar_user_id, access_token)
-      values ($1, $2, $3)
-      on conflict (user_id)
-      do update set polar_user_id = excluded.polar_user_id,
-                    access_token = excluded.access_token
+      insert into app.user_integrations
+        (user_id, provider, provider_user_id, access_token, refresh_token, token_expires_at)
+      values
+        ($1, 'polar', $2, $3, $4, $5)
+      on conflict (user_id, provider)
+      do update set
+        provider_user_id = excluded.provider_user_id,
+        access_token = excluded.access_token,
+        refresh_token = excluded.refresh_token,
+        token_expires_at = excluded.token_expires_at,
+        updated_at = now()
       `,
-      [user_id, String(polarUserId), accessToken]
+      [
+        user_id,
+        polarUserId ? String(polarUserId) : null,
+        accessToken,
+        refreshToken,
+        tokenExpiresAt,
+      ]
     );
 
-    // redirect back to frontend
-    res.redirect(`${APP_BASE_URL}`);
+    await db.query(
+      `update app.users
+       set active_provider = 'polar'
+       where id = $1`,
+      [user_id]
+    );
+
+    await db.query("commit");
+
+    res.redirect(`${APP_BASE_URL}/`);
   } catch (e) {
+    try {
+      await db.query("rollback");
+    } catch {}
     next(e);
   }
 });

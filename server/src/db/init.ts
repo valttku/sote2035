@@ -19,6 +19,7 @@ export async function ensureSchema() {
       email varchar(255) unique not null,
       password varchar(255) not null,
       display_name varchar(100),
+      active_provider varchar(50), -- 'polar' | 'garmin' | null,
 
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
@@ -155,4 +156,16 @@ export async function ensureSchema() {
     execute function app.update_updated_at_column();
   `);
 
+  // OAuth state storage for integrations (CSRF protection)
+  await db.query(`
+    create table if not exists app.oauth_states (
+      state uuid primary key,
+      user_id integer not null references app.users(id) on delete cascade,
+      expires_at timestamptz not null
+    );
+
+    create index if not exists idx_oauth_states_expires_at
+      on app.oauth_states (expires_at);
+  `);
+  
 }
