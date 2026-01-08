@@ -127,4 +127,32 @@ export async function ensureSchema() {
     execute function app.ensure_health_day_exists();
   `);
 
+
+  // store external provider connections (Polar, Garmin, etc.)
+  await db.query(`
+    create table if not exists app.user_integrations (
+      id uuid primary key default gen_random_uuid(),
+      user_id integer not null references app.users(id) on delete cascade,
+
+      provider varchar(50) not null,        -- 'polar', 'garmin'
+      provider_user_id varchar(100),        -- Polar user-id (from Polar), etc.
+      access_token text not null,
+      refresh_token text,
+      token_expires_at timestamptz,
+
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+
+      unique (user_id, provider)
+    );
+
+    -- automatically update user_integrations.updated_at on every update
+    drop trigger if exists update_user_integrations_updated_at on app.user_integrations;
+
+    create trigger update_user_integrations_updated_at
+    before update on app.user_integrations
+    for each row
+    execute function app.update_updated_at_column();
+  `);
+
 }
