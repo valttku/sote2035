@@ -14,6 +14,35 @@ function mustEnv(name: string, value: string) {
   if (!value) throw new Error(`${name} is required`);
 }
 
+// GET /api/v1/integrations/polar/status
+polarRouter.get("/status", authRequired, async (req, res, next) => {
+  try {
+    const userId = (req as any).userId as number;
+
+    const r = await db.query(
+      `
+      select provider_user_id, created_at, updated_at
+      from app.user_integrations
+      where user_id = $1 and provider = 'polar'
+      `,
+      [userId]
+    );
+
+    if (r.rowCount === 0) {
+      return res.json({ linked: false });
+    }
+
+    return res.json({
+      linked: true,
+      provider_user_id: r.rows[0].provider_user_id,
+      created_at: r.rows[0].created_at,
+      updated_at: r.rows[0].updated_at,
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+
 // GET /api/v1/integrations/polar/connect
 polarRouter.get("/connect", authRequired, async (req, res, next) => {
   try {
@@ -23,7 +52,7 @@ polarRouter.get("/connect", authRequired, async (req, res, next) => {
     const userId = (req as any).userId as number;
 
     const state = crypto.randomUUID();
-    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expires = new Date(Date.now() + 10 * 60 * 1000);
 
     await db.query(
       `insert into app.oauth_states (state, user_id, expires_at)
@@ -44,13 +73,12 @@ polarRouter.get("/connect", authRequired, async (req, res, next) => {
 });
 
 // GET /api/v1/integrations/polar/callback?code=...&state=...
-polarRouter.get("/callback", authRequired, async (req, res, next) => {
+// NOTE: no authRequired here. We bind the callback to a user via the state row.
+polarRouter.get("/callback", async (req, res, next) => {
   try {
     mustEnv("POLAR_CLIENT_ID", CLIENT_ID);
     mustEnv("POLAR_CLIENT_SECRET", CLIENT_SECRET);
     mustEnv("POLAR_REDIRECT_URI", REDIRECT_URI);
-
-    const loggedInUserId = (req as any).userId as number;
 
     const code = typeof req.query.code === "string" ? req.query.code : "";
     const state = typeof req.query.state === "string" ? req.query.state : "";
@@ -70,11 +98,6 @@ polarRouter.get("/callback", authRequired, async (req, res, next) => {
       user_id: number;
       expires_at: string;
     };
-
-    // state must belong to current logged-in user
-    if (user_id !== loggedInUserId) {
-      return res.status(403).send("State does not belong to this session");
-    }
 
     if (new Date(expires_at).getTime() < Date.now()) {
       await db.query(`delete from app.oauth_states where state = $1`, [state]);
@@ -101,9 +124,7 @@ polarRouter.get("/callback", authRequired, async (req, res, next) => {
     const tokenJson: any = await tokenRes.json();
 
     if (!tokenRes.ok) {
-      return res
-        .status(400)
-        .send(`Token exchange failed: ${JSON.stringify(tokenJson)}`);
+      return res.status(400).send(`Token exchange failed: ${JSON.stringify(tokenJson)}`);
     }
 
     const accessToken = tokenJson.access_token as string;
@@ -117,7 +138,6 @@ polarRouter.get("/callback", authRequired, async (req, res, next) => {
     const tokenExpiresAt =
       expiresIn !== null ? new Date(Date.now() + expiresIn * 1000) : null;
 
-    // register user in AccessLink (may fail if already registered)
     const regRes = await fetch("https://www.polaraccesslink.com/v3/users", {
       method: "POST",
       headers: {
@@ -130,16 +150,11 @@ polarRouter.get("/callback", authRequired, async (req, res, next) => {
 
     const regJson: any = await regRes.json().catch(() => ({}));
 
-    // if already registered, polar may respond with an error.
-    // in that case, proceed without failing hard.
-    const registerOk = regRes.ok;
     const polarUserId =
       regJson["polar-user-id"] ?? regJson["polar_user_id"] ?? regJson.user_id ?? null;
 
-    if (!registerOk && !polarUserId) {
-      return res
-        .status(400)
-        .send(`User register failed: ${JSON.stringify(regJson)}`);
+    if (!regRes.ok && !polarUserId) {
+      return res.status(400).send(`User register failed: ${JSON.stringify(regJson)}`);
     }
 
     await db.query("begin");
@@ -167,20 +182,77 @@ polarRouter.get("/callback", authRequired, async (req, res, next) => {
       ]
     );
 
-    await db.query(
-      `update app.users
-       set active_provider = 'polar'
-       where id = $1`,
-      [user_id]
-    );
+    await db.query(`update app.users set active_provider = 'polar' where id = $1`, [
+      user_id,
+    ]);
 
     await db.query("commit");
 
     res.redirect(`${APP_BASE_URL}/`);
   } catch (e) {
-    try {
-      await db.query("rollback");
-    } catch {}
+    await db.query("rollback").catch(() => {});
+    next(e);
+  }
+});
+
+// DELETE /api/v1/integrations/polar/unlink
+polarRouter.delete("/unlink", authRequired, async (req, res, next) => {
+  try {
+    const userId = (req as any).userId as number;
+
+    const integ = await db.query(
+      `
+      select provider_user_id, access_token
+      from app.user_integrations
+      where user_id = $1 and provider = 'polar'
+      `,
+      [userId]
+    );
+
+    if (integ.rowCount === 0) {
+      return res.json({ message: "Not linked" });
+    }
+
+    const { provider_user_id, access_token } = integ.rows[0] as {
+      provider_user_id: string | null;
+      access_token: string | null;
+    };
+
+    // Best-effort deregister from Polar; do not block unlink on expected statuses
+    if (provider_user_id && access_token) {
+      const r = await fetch(
+        `https://www.polaraccesslink.com/v3/users/${encodeURIComponent(provider_user_id)}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${access_token}` },
+        }
+      );
+
+      if (![204, 401, 403, 404].includes(r.status)) {
+        const text = await r.text().catch(() => "");
+        return res.status(400).json({ error: `Polar unlink failed: ${r.status} ${text}` });
+      }
+    }
+
+    await db.query("begin");
+
+    await db.query(
+      `delete from app.user_integrations where user_id = $1 and provider = 'polar'`,
+      [userId]
+    );
+
+    await db.query(
+      `update app.users
+       set active_provider = null
+       where id = $1 and active_provider = 'polar'`,
+      [userId]
+    );
+
+    await db.query("commit");
+
+    res.json({ message: "Unlinked" });
+  } catch (e) {
+    await db.query("rollback").catch(() => {});
     next(e);
   }
 });

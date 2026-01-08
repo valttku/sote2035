@@ -17,7 +17,10 @@ async function deregisterFromPolar(userId: number) {
 
   if (integ.rowCount === 0) return;
 
-  const { provider_user_id, access_token } = integ.rows[0];
+  const { provider_user_id, access_token } = integ.rows[0] as {
+    provider_user_id: string | null;
+    access_token: string | null;
+  };
 
   if (!provider_user_id || !access_token) return;
 
@@ -37,7 +40,6 @@ async function deregisterFromPolar(userId: number) {
   }
 }
 
-// GET /api/v1/settings
 settingsRouter.get("/", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
@@ -59,7 +61,6 @@ settingsRouter.get("/", authRequired, async (req, res, next) => {
   }
 });
 
-// PUT /api/v1/settings/display-name
 settingsRouter.put("/display-name", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
@@ -90,7 +91,6 @@ settingsRouter.put("/display-name", authRequired, async (req, res, next) => {
   }
 });
 
-// PUT /api/v1/settings/password
 settingsRouter.put("/password", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
@@ -101,9 +101,7 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
     }
 
     if (newPassword.length < 8) {
-      return res
-        .status(400)
-        .json({ error: "Password must be at least 8 characters" });
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
     }
 
     const result = await db.query(
@@ -137,7 +135,6 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
   }
 });
 
-// DELETE /api/v1/settings/delete-account
 settingsRouter.delete("/delete-account", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId as number;
@@ -145,11 +142,8 @@ settingsRouter.delete("/delete-account", authRequired, async (req, res, next) =>
     await deregisterFromPolar(userId);
 
     await db.query("begin");
-    // One delete; DB cascades remove sessions, reset tokens, health data, integrations, etc.
-    const result = await db.query(
-      `delete from app.users where id = $1`,
-      [userId]
-    );
+
+    const result = await db.query(`delete from app.users where id = $1`, [userId]);
 
     if (result.rowCount === 0) {
       await db.query("rollback");
