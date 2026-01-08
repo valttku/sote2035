@@ -5,7 +5,41 @@ import { authRequired } from "../middleware/authRequired.js";
 
 export const settingsRouter = Router();
 
-// GET /api/v1/settings
+async function deregisterFromPolar(userId: number) {
+  const integ = await db.query(
+    `
+    select provider_user_id, access_token
+    from app.user_integrations
+    where user_id = $1 and provider = 'polar'
+    `,
+    [userId]
+  );
+
+  if (integ.rowCount === 0) return;
+
+  const { provider_user_id, access_token } = integ.rows[0] as {
+    provider_user_id: string | null;
+    access_token: string | null;
+  };
+
+  if (!provider_user_id || !access_token) return;
+
+  const res = await fetch(
+    `https://www.polaraccesslink.com/v3/users/${encodeURIComponent(provider_user_id)}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    }
+  );
+
+  if (![204, 401, 403, 404].includes(res.status)) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Polar deregistration failed: ${res.status} ${text}`);
+  }
+}
+
 settingsRouter.get("/", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
@@ -27,7 +61,6 @@ settingsRouter.get("/", authRequired, async (req, res, next) => {
   }
 });
 
-// PUT /api/v1/settings/display-name
 settingsRouter.put("/display-name", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
@@ -58,7 +91,6 @@ settingsRouter.put("/display-name", authRequired, async (req, res, next) => {
   }
 });
 
-// PUT /api/v1/settings/password
 settingsRouter.put("/password", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
@@ -69,9 +101,7 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
     }
 
     if (newPassword.length < 8) {
-      return res
-        .status(400)
-        .json({ error: "Password must be at least 8 characters" });
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
     }
 
     const result = await db.query(
@@ -85,9 +115,7 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const user = result.rows[0];
-
-    const ok = await bcrypt.compare(oldPassword, user.password);
+    const ok = await bcrypt.compare(oldPassword, result.rows[0].password);
     if (!ok) {
       return res.status(403).json({ error: "Old password incorrect" });
     }
@@ -107,15 +135,20 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
   }
 });
 
-// DELETE /api/v1/settings/delete-account
 settingsRouter.delete("/delete-account", authRequired, async (req, res, next) => {
   try {
-    const userId = (req as any).userId;
+    const userId = (req as any).userId as number;
+
+    await deregisterFromPolar(userId);
 
     await db.query("begin");
 
-    await db.query(`delete from app.sessions where user_id = $1`, [userId]);
-    await db.query(`delete from app.users where id = $1`, [userId]);
+    const result = await db.query(`delete from app.users where id = $1`, [userId]);
+
+    if (result.rowCount === 0) {
+      await db.query("rollback");
+      return res.status(404).json({ error: "User not found" });
+    }
 
     await db.query("commit");
 
@@ -128,7 +161,7 @@ settingsRouter.delete("/delete-account", authRequired, async (req, res, next) =>
 
     res.json({ message: "Account deleted permanently" });
   } catch (e) {
-    await db.query("rollback");
+    await db.query("rollback").catch(() => {});
     next(e);
   }
 });

@@ -8,9 +8,11 @@ import { dbOk } from "./db/health.js";
 
 import { homeRouter } from "./routes/home.js";
 import { authRouter } from "./routes/auth.js";
+import { calendarRouter } from "./routes/calendar.js";
 import { settingsRouter } from "./routes/settings.js";
 import { meRouter } from "./routes/me.js";
 
+import { polarRouter } from "./routes/integrations/polar.js";
 
 import { errorHandler } from "./middleware/error.js";
 
@@ -40,8 +42,12 @@ app.get("/health/db", async (_req, res) => {
 // routes
 app.use("/api/v1", homeRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/calendar", calendarRouter);
 app.use("/api/v1/settings", settingsRouter);
 app.use("/api/v1/me", meRouter);
+
+// providers (polar, garmin etc.)
+app.use("/api/v1/integrations/polar", polarRouter);
 
 // global error handler
 app.use(errorHandler);

@@ -14,12 +14,23 @@ type SettingsData = {
   last_login: string | null;
 };
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+type PolarStatus =
+  | { linked: false }
+  | {
+      linked: true;
+      provider_user_id?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    };
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export default function SettingsClient() {
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [polarStatus, setPolarStatus] = useState<PolarStatus>({ linked: false });
+  const [polarBusy, setPolarBusy] = useState(false);
 
   // modal state
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -39,6 +50,15 @@ export default function SettingsClient() {
 
   const router = useRouter();
 
+  async function loadPolarStatus() {
+    const res = await fetch(`${API_BASE}/api/v1/integrations/polar/status`, {
+      credentials: "include",
+    });
+
+    const json = await res.json();
+    if (res.ok) setPolarStatus(json);
+  }
+
   useEffect(() => {
     async function loadSettings() {
       try {
@@ -55,6 +75,8 @@ export default function SettingsClient() {
 
         setData(json);
         setDisplayName(json.display_name ?? "");
+
+        await loadPolarStatus();
       } catch {
         setError("Failed to connect to server");
       }
@@ -66,15 +88,12 @@ export default function SettingsClient() {
   async function saveProfile() {
     setSavingProfile(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/settings/display-name`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ displayName }),
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/v1/settings/display-name`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ displayName }),
+      });
 
       const json = await res.json();
 
@@ -104,15 +123,12 @@ export default function SettingsClient() {
 
     setChangingPassword(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/settings/password`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ oldPassword, newPassword }),
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/v1/settings/password`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
 
       const json = await res.json();
 
@@ -135,19 +151,47 @@ export default function SettingsClient() {
     }
   }
 
+  function linkPolar() {
+    // This endpoint redirects to Polar Flow OAuth
+    window.location.href = `${API_BASE}/api/v1/integrations/polar/connect`;
+  }
+
+  async function unlinkPolar() {
+    if (!confirm("Unlink Polar from your account?")) return;
+
+    setPolarBusy(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/integrations/polar/unlink`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        alert(json.error || "Failed to unlink Polar");
+        return;
+      }
+
+      await loadPolarStatus();
+      router.refresh();
+    } catch {
+      alert("Failed to connect to server");
+    } finally {
+      setPolarBusy(false);
+    }
+  }
+
   async function deleteAccount() {
     if (!confirm("This will permanently delete your account. Continue?")) {
       return;
     }
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/settings/delete-account`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/v1/settings/delete-account`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       const json = await res.json();
 
@@ -171,9 +215,7 @@ export default function SettingsClient() {
 
       {/* PROFILE */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">
-          Profile
-        </h2>
+        <h2 className="text-lg font-semibold mb-2">Profile</h2>
 
         <p>Email: {data.email}</p>
         <p>Username: {data.display_name ?? "(not set)"}</p>
@@ -195,22 +237,38 @@ export default function SettingsClient() {
         </div>
       </section>
 
+      {/* PROVIDER */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2">Provider</h2>
+
+        {polarStatus.linked ? (
+          <button
+            onClick={unlinkPolar}
+            disabled={polarBusy}
+            className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          >
+            {polarBusy ? "Unlinking..." : "Unlink Polar"}
+          </button>
+        ) : (
+          <button
+            onClick={linkPolar}
+            disabled={polarBusy}
+            className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          >
+            Link Polar
+          </button>
+        )}
+      </section>
+
       {/* LANGUAGE */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">
-          Language
-        </h2>
-
-        <p className="text-sm text-gray-600">
-          Language settings coming soon.
-        </p>
+        <h2 className="text-lg font-semibold mb-2">Language</h2>
+        <p className="text-sm text-gray-600">Language settings coming soon.</p>
       </section>
 
       {/* ACCOUNT MANAGEMENT */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">
-          Account management
-        </h2>
+        <h2 className="text-lg font-semibold mb-2">Account management</h2>
 
         <button
           onClick={deleteAccount}
@@ -256,7 +314,6 @@ export default function SettingsClient() {
         <Modal onClose={() => setShowChangePassword(false)}>
           <h2 className="text-lg font-bold mb-4">Change password</h2>
 
-          {/* Old password */}
           <div className="relative mb-2">
             <input
               type={showOldPassword ? "text" : "password"}
@@ -274,7 +331,6 @@ export default function SettingsClient() {
             </button>
           </div>
 
-          {/* New password */}
           <div className="relative mb-4">
             <input
               type={showNewPassword ? "text" : "password"}
