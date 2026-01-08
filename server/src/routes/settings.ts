@@ -114,8 +114,13 @@ settingsRouter.delete("/delete-account", authRequired, async (req, res, next) =>
 
     await db.query("begin");
 
-    await db.query(`delete from app.sessions where user_id = $1`, [userId]);
-    await db.query(`delete from app.users where id = $1`, [userId]);
+    // One delete; DB cascades remove sessions, reset tokens, health data, integrations, etc.
+    const result = await db.query(`delete from app.users where id = $1`, [userId]);
+
+    if (result.rowCount === 0) {
+      await db.query("rollback");
+      return res.status(404).json({ error: "User not found" });
+    }
 
     await db.query("commit");
 
