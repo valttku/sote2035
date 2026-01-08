@@ -5,16 +5,20 @@ import Modal from "../Modal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
+type DayStatsEntry = {
+  id: string;
+  kind: string;
+  source: string | null;
+  data: unknown;
+  created_at: string;
+};
+
 type DayStatsResponse = {
   date: string;
-  entries: Array<{
-    id: string;
-    kind: string;
-    source: string | null;
-    data: any;
-    created_at: string;
-  }>;
+  entries: DayStatsEntry[];
 };
+
+type MonthDaysResponse = string[]; // ["YYYY-MM-DD", ...]
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -25,45 +29,48 @@ function toYmd(year: number, month1to12: number, day: number) {
 }
 
 function daysInMonth(year: number, month1to12: number) {
-  // month1to12: 1-12
   return new Date(year, month1to12, 0).getDate();
 }
 
 export default function CalendarClient() {
-  // use local time; minimal
   const now = useMemo(() => new Date(), []);
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1); // 1-12
 
-  // days that have dots
   const [daysWithData, setDaysWithData] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
-  // modal/day state
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dayStats, setDayStats] = useState<DayStatsResponse | null>(null);
   const [loadingDay, setLoadingDay] = useState(false);
 
-  // fetch month dots
   useEffect(() => {
     async function loadMonth() {
       setError(null);
+
       try {
         const res = await fetch(
           `${API_BASE}/api/v1/calendar/month?year=${year}&month=${month}`,
           { credentials: "include" }
         );
-        const json = await res.json();
+
+        const json: unknown = await res.json();
 
         if (!res.ok) {
-          setError(json.error || "Failed to load calendar month");
+          const err =
+            typeof json === "object" && json !== null && "error" in json
+              ? String((json as { error?: unknown }).error ?? "")
+              : "";
+          setError(err || "Failed to load calendar month");
           setDaysWithData(new Set());
           return;
         }
 
-        // Expect array of "YYYY-MM-DD"
-        const set = new Set<string>((json as any[]).map((d) => String(d)));
-        setDaysWithData(set);
+        const days = Array.isArray(json)
+          ? (json.map((d) => String(d)) as MonthDaysResponse)
+          : [];
+
+        setDaysWithData(new Set(days));
       } catch {
         setError("Failed to connect to server");
         setDaysWithData(new Set());
@@ -81,18 +88,37 @@ export default function CalendarClient() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+        `${API_BASE}/api/v1/calendar/health-stats?date=${encodeURIComponent(
+          date
+        )}`,
         { credentials: "include" }
       );
-      const json = await res.json();
+
+      const json: unknown = await res.json();
 
       if (!res.ok) {
-        setError(json.error || "Failed to load health stats");
+        const err =
+          typeof json === "object" && json !== null && "error" in json
+            ? String((json as { error?: unknown }).error ?? "")
+            : "";
+        setError(err || "Failed to load health stats");
         setDayStats(null);
         return;
       }
 
-      setDayStats(json as DayStatsResponse);
+      // Minimal runtime shape check
+      if (
+        typeof json === "object" &&
+        json !== null &&
+        "date" in json &&
+        "entries" in json &&
+        Array.isArray((json as { entries: unknown }).entries)
+      ) {
+        setDayStats(json as DayStatsResponse);
+      } else {
+        setError("Unexpected response from server");
+        setDayStats(null);
+      }
     } catch {
       setError("Failed to connect to server");
       setDayStats(null);
@@ -137,7 +163,6 @@ export default function CalendarClient() {
     <main className="p-6 max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold">Calendar</h1>
 
-      {/* month controls */}
       <div className="flex items-center gap-2">
         <button onClick={prevMonth} className="border px-3 py-1 rounded">
           Prev
@@ -152,7 +177,6 @@ export default function CalendarClient() {
 
       {error && <p className="text-red-600">{error}</p>}
 
-      {/* minimal calendar grid: just day buttons */}
       <section className="grid grid-cols-7 gap-2">
         {Array.from({ length: totalDays }, (_, i) => {
           const day = i + 1;
@@ -175,7 +199,6 @@ export default function CalendarClient() {
         })}
       </section>
 
-      {/* day modal */}
       {selectedDate && (
         <Modal onClose={closeModal}>
           <h2 className="text-lg font-bold mb-2">{selectedDate}</h2>
@@ -193,9 +216,7 @@ export default function CalendarClient() {
 
           {!loadingDay && dayStats && (
             <div className="space-y-2">
-              <p className="text-sm">
-                Entries: {dayStats.entries.length}
-              </p>
+              <p className="text-sm">Entries: {dayStats.entries.length}</p>
 
               <pre className="text-xs border p-2 rounded overflow-auto max-h-64">
                 {JSON.stringify(dayStats.entries, null, 2)}
