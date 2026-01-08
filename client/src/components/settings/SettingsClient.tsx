@@ -14,22 +14,18 @@ type SettingsData = {
   last_login: string | null;
 };
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export default function SettingsClient() {
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // modal state
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
-  // edit profile
   const [displayName, setDisplayName] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
-  // change password
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
@@ -63,18 +59,20 @@ export default function SettingsClient() {
     loadSettings();
   }, []);
 
+  function linkPolar() {
+    // This triggers the OAuth redirect flow.
+    window.location.href = `${API_BASE}/api/v1/integrations/polar/connect`;
+  }
+
   async function saveProfile() {
     setSavingProfile(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/settings/display-name`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ displayName }),
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/v1/settings/display-name`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ displayName }),
+      });
 
       const json = await res.json();
 
@@ -104,15 +102,12 @@ export default function SettingsClient() {
 
     setChangingPassword(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/settings/password`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ oldPassword, newPassword }),
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/v1/settings/password`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
 
       const json = await res.json();
 
@@ -141,13 +136,10 @@ export default function SettingsClient() {
     }
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/settings/delete-account`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/v1/settings/delete-account`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       const json = await res.json();
 
@@ -171,9 +163,7 @@ export default function SettingsClient() {
 
       {/* PROFILE */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">
-          Profile
-        </h2>
+        <h2 className="text-lg font-semibold mb-2">Profile</h2>
 
         <p>Email: {data.email}</p>
         <p>Username: {data.display_name ?? "(not set)"}</p>
@@ -195,22 +185,32 @@ export default function SettingsClient() {
         </div>
       </section>
 
+      {/* PROVIDER */}
+      <section>
+        <h2 className="text-lg font-semibold mb-2">Provider</h2>
+
+        <p className="text-sm text-gray-600 mb-3">
+          Link a health data provider to sync your data.
+        </p>
+
+        <button
+          onClick={linkPolar}
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Link Polar account
+        </button>
+      </section>
+
       {/* LANGUAGE */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">
-          Language
-        </h2>
+        <h2 className="text-lg font-semibold mb-2">Language</h2>
 
-        <p className="text-sm text-gray-600">
-          Language settings coming soon.
-        </p>
+        <p className="text-sm text-gray-600">Language settings coming soon.</p>
       </section>
 
       {/* ACCOUNT MANAGEMENT */}
       <section>
-        <h2 className="text-lg font-semibold mb-2">
-          Account management
-        </h2>
+        <h2 className="text-lg font-semibold mb-2">Account management</h2>
 
         <button
           onClick={deleteAccount}
@@ -256,7 +256,6 @@ export default function SettingsClient() {
         <Modal onClose={() => setShowChangePassword(false)}>
           <h2 className="text-lg font-bold mb-4">Change password</h2>
 
-          {/* Old password */}
           <div className="relative mb-2">
             <input
               type={showOldPassword ? "text" : "password"}
@@ -274,7 +273,6 @@ export default function SettingsClient() {
             </button>
           </div>
 
-          {/* New password */}
           <div className="relative mb-4">
             <input
               type={showNewPassword ? "text" : "password"}
