@@ -2,87 +2,92 @@
 import { useState } from "react";
 import TwinPanel from "./twinPanel";
 
-export type BodyPartId = "brain" | "heart" | "lungs" | "feet";
+export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
-const PARTS: { id: BodyPartId; label: string }[] = [
-  { id: "brain", label: "Brain" },
-  { id: "heart", label: "Heart" },
-  { id: "lungs", label: "Lungs" },
-  { id: "feet", label: "Feet" },
+const BODY_PARTS: Array<{
+    id: BodyPartId;
+    label: string;
+    top: string;
+    left: string;
+}> = [
+    { id: "brain", label: "Brain", top: "3%", left: "45%" },
+    { id: "heart", label: "Heart", top: "25%", left: "50%" },
+    { id: "lungs", label: "Lungs", top: "22%", left: "35%" },
+    { id: "legs", label: "Legs", top: "75%", left: "62%" },
 ];
 
 export default function TwinView() {
-  const [selected, setSelected] = useState<BodyPartId | null>(null);
+    const [selected, setSelected] = useState<BodyPartId | null>(null);
 
     return (
-        <div className="avatar-buttons-panel">
-
-            {/* AVATAR */}
-            <div className="avatar" style={{ width: 250, marginLeft: "10%", display: "block" }}>
+        <div className="avatar-panel">
+            {/* Avatar + dots */}
+            <div className="avatar-wrapper">
                 <img
-                src="/avatar.png"
-                alt="Digital twin"
-                style={{ width: "100%", height: "auto", display: "block" }}
+                    src="/avatar.png"
+                    alt="Digital twin"
+                    style={{ width: "100%", height: "auto", display: "block" }}
                 />
+
+                {BODY_PARTS.map(({ id, top, left }) => (
+                    <div
+                        key={id}
+                        onClick={() => setSelected(id)}
+                        style={{
+                            position: "absolute",
+                            width: 20,
+                            height: 20,
+                            borderRadius: "50%",
+                            cursor: "pointer",
+                            top,
+                            left,
+                            background:
+                                selected === id
+                                    ? "rgba(19, 19, 133, 0.3)"
+                                    : "rgba(213, 213, 255, 0.8)",
+                        }}
+                        aria-label={id}
+                    />
+                ))}
             </div>
 
-            {/* BUTTONS */}
-            <div className="title-and-buttons" style={{ width: 320, marginLeft: "10%", display: "block" }}>
-                <h1>Select a body part:</h1>
-
-                <div className="body-part-buttons">
-                    <button className="bodypart-name" onClick={() => setSelected("brain")}>brain</button>
-                    <button className="bodypart-name" onClick={() => setSelected("heart")}>heart</button>
-                    <button className="bodypart-name" onClick={() => setSelected("lungs")}>lungs</button>
-                    <button className="bodypart-name" onClick={() => setSelected("feet")}>feet</button>
-                </div>
-                
-                <div>
-                    {selected && <TwinPanel selected={selected} onClose={() => setSelected(null)} />}
-                </div>
+            {/* Title + panel */}
+            <div className="title-and-panel" style={{ width: 320, marginLeft: "10%" }}>
+                <h1>Select a body part by clicking on a white dot on the body</h1>
+                {selected && (
+                    <TwinPanel
+                        selected={selected}
+                        onClose={() => setSelected(null)}
+                    />
+                )}
             </div>
 
-        {/* style is here for now */}
-        <style jsx>{`
-            .avatar-buttons-panel {
-                display: flex;
-                align-items: flex-start;
-                gap: 40px;
-                margin-top: 20px;
-            }
+            <style jsx>{`
+                .avatar-panel {
+                    display: flex;
+                    align-items: flex-start;
+                    width: auto;
+                    min-height: 100vh;
+                    padding: 50px;
+                }
 
-            .title-and-buttons h1 {
-                margin-bottom: 10px;
-                font-size: 24px;
-                color: #470ad6;
-            }
-            
-            .body-part-buttons {
-                margin-bottom: 10px;
-                color: #470ad6;
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
+                .avatar-wrapper {
+                    position: relative;
+                    width: 230px;
+                    margin-left: 10%;
+                    margin-top: 5%;
+                }
 
-            .bodypart-name {
-                font-size: 20px;
-                padding: 5px;
-                border-radius: 10px; 
-                transition: all 0.2s ease;
-            }
-
-            .bodypart-name:hover {
-                background: #d3d3fc;
-                cursor: pointer;
-            }
-
-            .bodypart-name.active {
-                background: #d3d3fc;
-            }
-
-        `}</style>
-
+                .title-and-panel h1 {
+                    font-size: 18px;
+                    color: #470ad6;
+                    background: #e2e0ff;
+                    margin-bottom: 10px;
+                    margin-top: 20px;
+                    padding: 10px;
+                    border-radius: 8px;
+                }
+            `}</style>
         </div>
     );
 }

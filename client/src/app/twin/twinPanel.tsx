@@ -11,28 +11,26 @@ const TITLE: Record<BodyPartId, string> = {
   brain: "Brain",
   heart: "Heart",
   lungs: "Lungs",
-  feet: "Feet",
+  legs: "Legs",
 };
 
 const MOCK: Record<BodyPartId, Record<string, string | number>> = {
   heart: { "HR avg": 62, HRV: 78, "Resting HR": 48 },
   lungs: { "Resp rate": 14, "SpO₂": "98%" },
   brain: { "Sleep (h)": 7.2, Stress: "Low" },
-  feet: { Steps: 12000 },
+  legs: { Steps: 12000 },
 };
 
 export default function TwinPanel({ selected, onClose }: Props) {
   const metrics = MOCK[selected];
 
   return (
-        <div className="panel" style={{ minWidth: 320 }}>
+        <div className="panel">
             <div className="panel-body">
                 <div className="title-and-close-button">
                     <h1 className="panel-title">{TITLE[selected]}</h1>
                     <button className="close-button" onClick={onClose}>✕</button>
                 </div>
-
-                <hr />
 
                 <ul className="metrics-list">
                     {Object.entries(metrics).map(([k, v]) => (
@@ -54,6 +52,16 @@ export default function TwinPanel({ selected, onClose }: Props) {
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
                     background: radial-gradient(circle at top left, #6c6efc, #48499f);
                     opacity: 0.9;
+                    animation: fade 0.3s ease-in-out forwards;
+                }
+
+                @keyframes fade {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 0.9;
+                    }
                 }
 
                 .title-and-close-button {
@@ -68,6 +76,7 @@ export default function TwinPanel({ selected, onClose }: Props) {
                 .metrics-list {
                     list-style: none;
                     padding-top: 5px;
+                    padding-left: 0;
                 }
 
                 .panel-title {
