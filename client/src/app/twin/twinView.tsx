@@ -84,7 +84,6 @@ export default function TwinView() {
 
                 .title-and-panel h1 {
                     font-size: 18px;
-                    color: #6682C8;
                     margin-bottom: 10px;
                     margin-top: 70px;
                     padding: 10px;
