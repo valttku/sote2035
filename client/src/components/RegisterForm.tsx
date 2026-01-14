@@ -161,11 +161,6 @@ export default function RegisterForm({
           {showPassword ? <FaEyeSlash /> : <FaEye />}
         </button>
       </div>
-      {passwordError && (
-        <p className="text-red-600 text-sm" role="alert">
-          {passwordError}
-        </p>
-      )}
 
       {/* Password strength indicator */}
       <div
