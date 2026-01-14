@@ -19,14 +19,18 @@ const BODY_PARTS: Array<{
 export default function TwinView() {
     const [selected, setSelected] = useState<BodyPartId | null>(null);
 
+    const [avatarType, setAvatarType] = useState<"male" | "female">("male");
+    const isFemale = avatarType === "female";
+    const avatarWidth = isFemale ? 208 : 244;
+
     return (
         <div className="avatar-panel">
             {/* Avatar + dots */}
             <div className="avatar-wrapper">
                 <img
-                    src="/avatar.png"
+                    src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
                     alt="Digital twin"
-                    style={{ width: "100%", height: "auto", display: "block" }}
+                    style={{ width: `${avatarWidth}px`, height: "737px", display: "block" }}
                 />
 
                 {BODY_PARTS.map(({ id, top, left }) => (
