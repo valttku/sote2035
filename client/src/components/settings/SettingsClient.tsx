@@ -321,7 +321,7 @@ export default function SettingsClient() {
           <h2 className="text-lg font-bold mb-4">Change display name</h2>
 
           <input
-            className="border p-2 w-full mb-3"
+            className="border p-2 w-full mb-3 text-black"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Display name"
@@ -349,12 +349,12 @@ export default function SettingsClient() {
       {/* CHANGE PASSWORD MODAL */}
       {showChangePassword && (
         <Modal onClose={() => setShowChangePassword(false)}>
-          <h2 className="text-lg font-bold mb-4">Change password</h2>
+          <h2 className="text-lg font-bold mb-4 text-black">Change password</h2>
 
           <div className="relative mb-2">
             <input
               type={showOldPassword ? "text" : "password"}
-              className="border p-2 w-full pr-10"
+              className="border p-2 w-full pr-10 text-black"
               placeholder="Old password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
@@ -371,7 +371,7 @@ export default function SettingsClient() {
             <div className="relative mb-4">
             <input
               type={showNewPassword ? "text" : "password"}
-              className="border p-2 w-full pr-10"
+              className="border p-2 w-full pr-10 text-black"
               placeholder="New password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}

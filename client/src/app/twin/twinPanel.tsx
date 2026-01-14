@@ -47,12 +47,12 @@ export default function TwinPanel({ selected, onClose }: Props) {
                 .panel {
                     width: 320px;
                     color: white;
-                    border-radius: 10px;
                     padding: 16px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-                    background: radial-gradient(circle at top left, #6c6efc, #48499f);
-                    opacity: 0.9;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
                     animation: fade 0.3s ease-in-out forwards;
+                    background: rgba(7, 8, 61, 0.3); 
+                    border-radius: 10px;
+                    border: 1px solid rgba(179, 196, 243, 0.8);
                 }
 
                 @keyframes fade {
@@ -60,7 +60,7 @@ export default function TwinPanel({ selected, onClose }: Props) {
                         opacity: 0;
                     }
                     to {
-                        opacity: 0.9;
+                        opacity: 0.8;
                     }
                 }
 

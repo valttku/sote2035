@@ -47,8 +47,8 @@ export default function TwinView() {
                             left,
                             background:
                                 selected === id
-                                    ? "rgba(19, 19, 133, 0.3)"
-                                    : "rgba(213, 213, 255, 0.8)",
+                                    ? "rgba(10, 33, 90, 0.7)"
+                                    : "rgba(211, 211, 255, 0.8)",
                         }}
                         aria-label={id}
                     />
@@ -84,10 +84,9 @@ export default function TwinView() {
 
                 .title-and-panel h1 {
                     font-size: 18px;
-                    color: #470ad6;
-                    background: #e2e0ff;
+                    color: #6682C8;
                     margin-bottom: 10px;
-                    margin-top: 20px;
+                    margin-top: 70px;
                     padding: 10px;
                     border-radius: 8px;
                 }
