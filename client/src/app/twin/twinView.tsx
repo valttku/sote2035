@@ -24,72 +24,49 @@ export default function TwinView() {
     const avatarWidth = isFemale ? 208 : 244;
 
     return (
-        <div className="avatar-panel">
-            {/* Avatar + dots */}
-            <div className="avatar-wrapper">
-                <img
-                    src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
-                    alt="Digital twin"
-                    style={{ width: `${avatarWidth}px`, height: "737px", display: "block" }}
-                />
+        <div className="min-h-screen p-12">
+            <div className="mx-auto flex flex-row items-start justify-start gap-x-20 max-w-[1200px]">
+                <h1 className="text-5xl m-10">Today</h1>
 
-                {BODY_PARTS.map(({ id, top, left }) => (
-                    <div
-                        key={id}
-                        onClick={() => setSelected(id)}
-                        style={{
-                            position: "absolute",
-                            width: 20,
-                            height: 20,
-                            borderRadius: "50%",
-                            cursor: "pointer",
-                            top,
-                            left,
-                            background:
-                                selected === id
-                                    ? "rgba(10, 33, 90, 0.7)"
-                                    : "rgba(211, 211, 255, 0.8)",
-                        }}
-                        aria-label={id}
+                {/* Avatar + dots */}
+                <div className="relative w-[230px] mt-[5%] flex-shrink-0">
+                    <img
+                        src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
+                        alt="Digital twin"
+                        style={{ width: `${avatarWidth}px`, height: "737px", display: "block" }}
                     />
-                ))}
+
+                    {BODY_PARTS.map(({ id, top, left }) => (
+                        <div
+                            key={id}
+                            onClick={() => setSelected(id)}
+                            style={{
+                                position: "absolute",
+                                width: 20,
+                                height: 20,
+                                borderRadius: "50%",
+                                cursor: "pointer",
+                                top,
+                                left,
+                                background:
+                                    selected === id
+                                        ? "rgba(10, 33, 90, 0.7)"
+                                        : "rgba(211, 211, 255, 0.8)",
+                            }}
+                            aria-label={id}
+                        />
+                    ))}
+                </div>
+
+                {/* Title + panel */}
+                <div className="w-[320px] flex-shrink-0">
+                    <h1 className="text-[18px] mb-[10px] mt-[70px] p-[10px] rounded-[8px]">
+                    Select a body part by clicking on a white dot on the body
+                    </h1>
+
+                    {selected && <TwinPanel selected={selected} onClose={() => setSelected(null)} />}
+                </div>
             </div>
-
-            {/* Title + panel */}
-            <div className="title-and-panel" style={{ width: 320, marginLeft: "10%" }}>
-                <h1>Select a body part by clicking on a white dot on the body</h1>
-                {selected && (
-                    <TwinPanel
-                        selected={selected}
-                        onClose={() => setSelected(null)}
-                    />
-                )}
-            </div>
-
-            <style jsx>{`
-                .avatar-panel {
-                    display: flex;
-                    align-items: flex-start;
-                    width: auto;
-                    min-height: 100vh;
-                    padding: 50px;
-                }
-
-                .avatar-wrapper {
-                    position: relative;
-                    width: 230px;
-                    margin-left: 10%;
-                    margin-top: 5%;
-                }
-
-                .title-and-panel h1 {
-                    font-size: 18px;
-                    margin-bottom: 10px;
-                    margin-top: 70px;
-                    padding: 10px;
-                    border-radius: 8px;
-                }
-            `}</style>
         </div>
     );
 }
