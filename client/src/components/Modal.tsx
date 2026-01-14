@@ -14,6 +14,7 @@ export default function Modal({ children, onClose }: ModalProps) {
           bg-white p-6 rounded shadow-md
           w-full max-w-md
           max-h-[90vh] overflow-y-auto
+          dark:text-black
         "
       >
         <button
