@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Modal from "../Modal";
@@ -47,6 +47,36 @@ export default function SettingsClient() {
 
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+
+  // Password requirements
+  const requirements = [
+      { regex: /.{8,}/, text: "At least 8 characters" },
+      { regex: /[0-9]/, text: "At least 1 number" },
+      { regex: /[a-z]/, text: "At least 1 lowercase letter" },
+      { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+      { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
+  ];
+
+  // Calculate strength score
+  const strengthScore = useMemo(() => {
+    return requirements.filter((req) => req.regex.test(newPassword)).length;
+  }, [newPassword]);
+
+  // Get color for strength indicator
+  const getStrengthColor = (score: number) => {
+    if (score === 0) return "bg-gray-200";
+    if (score <= 2) return "bg-red-500";
+    if (score <= 4) return "bg-amber-500";
+    return "bg-emerald-500";
+  };
+
+  // Get text for strength indicator
+  const getStrengthText = (score: number) => {
+    if (score === 0) return "Enter a password";
+    if (score <= 2) return "Weak password";
+    if (score <= 4) return "Medium password";
+    return "Strong password";
+  };
 
   const router = useRouter();
 
@@ -118,6 +148,13 @@ export default function SettingsClient() {
   async function changePassword() {
     if (!oldPassword || !newPassword) {
       alert("Please fill both fields");
+      return;
+    }
+
+    // Password strength check
+    const failedReqs = requirements.filter((req) => !req.regex.test(newPassword));
+    if (failedReqs.length > 0) {
+      alert(`Password isn't strong enough`);
       return;
     }
 
@@ -331,13 +368,14 @@ export default function SettingsClient() {
             </button>
           </div>
 
-          <div className="relative mb-4">
+            <div className="relative mb-4">
             <input
               type={showNewPassword ? "text" : "password"}
               className="border p-2 w-full pr-10"
               placeholder="New password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              required
             />
             <button
               type="button"
@@ -346,6 +384,42 @@ export default function SettingsClient() {
             >
               {showNewPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
+
+            {/* Password strength indicator */}
+            <div
+              className="h-1 w-full bg-gray-200 rounded-full overflow-hidden mb-4 mt-4"
+              role="progressbar"
+              aria-valuenow={strengthScore}
+              aria-valuemin={0}
+              aria-valuemax={5}
+              aria-label="Password strength"
+            >
+              <div
+                className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500 ease-out`}
+                style={{ width: `${(strengthScore / 5) * 100}%` }}
+              ></div>
+            </div>
+
+            {/* Password strength description */}
+            <p
+              id="password-strength"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
+              {getStrengthText(strengthScore)}. Password must contain:
+            </p>
+
+            {/* Password requirements list */}
+            <ul className="space-y-1" aria-label="Password requirements">
+              {requirements.map((req) => (
+                <li
+              key={req.text}
+              className={`text-sm flex items-center gap-2 ${req.regex.test(newPassword) ? "text-green-600" : "text-red-600"}`}
+                >
+              {req.text}
+              {req.regex.test(newPassword) ? "✓" : "✕"}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="flex gap-2">
