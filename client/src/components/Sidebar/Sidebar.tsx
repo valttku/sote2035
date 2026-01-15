@@ -34,12 +34,13 @@ export default async function Sidebar() {
   const displayName = user.display_name || user.email;
 
   return (
-    <aside className="
+    <aside
+      className="
       fixed left-0 top-0 h-full w-64 p-4
       flex flex-col
-      bg-indigo-950/80
+      bg-indigo-950/70
       border border-[rgba(179,196,243,0.8)]
-      rounded-r-2xl
+      rounded-r-3xl
       shadow-lg"
     >
       <div>
