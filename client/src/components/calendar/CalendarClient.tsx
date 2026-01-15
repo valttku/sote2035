@@ -160,77 +160,98 @@ export default function CalendarClient() {
   const totalDays = daysInMonth(year, month);
 
   return (
-    <main className="p-6 max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Calendar</h1>
+    <main className="min-h-screen w-[calc(100vw-16rem)] flex items-center justify-center border overflow-x-hidden">
+      <div
+        className="
+        p-6 space-y-6 mx-auto
+        w-full max-w-4xl
+        min-w-[20rem]
+        max-h-[calc(100vh-8rem)]
+        overflow-hidden
+        rounded-2xl shadow-lg
+        bg-indigo-950/50 text-white
+        border border-[rgba(179,196,243,0.8)]
+      "
+      >
+        <h1 className="text-3xl">Calendar</h1>
 
-      <div className="flex items-center gap-2">
-        <button onClick={prevMonth} className="border px-3 py-1 rounded">
-          Prev
-        </button>
-        <div className="font-semibold">
-          {year}-{pad2(month)}
-        </div>
-        <button onClick={nextMonth} className="border px-3 py-1 rounded">
-          Next
-        </button>
-      </div>
-
-      {error && <p className="text-red-600">{error}</p>}
-
-      <section className="grid grid-cols-7 gap-2">
-        {Array.from({ length: totalDays }, (_, i) => {
-          const day = i + 1;
-          const date = toYmd(year, month, day);
-          const hasData = daysWithData.has(date);
-
-          return (
-            <button
-              key={date}
-              onClick={() => openDay(date)}
-              className="border rounded p-2 text-left"
-              title={hasData ? "Has health data" : "No health data"}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-medium">{day}</span>
-                {hasData && <span className="text-xs">•</span>}
-              </div>
-            </button>
-          );
-        })}
-      </section>
-
-      {selectedDate && (
-        <Modal onClose={closeModal}>
-          <h2 className="text-lg font-bold mb-2 text-black">{selectedDate}</h2>
-
-          <button
-            type="button"
-            className="w-full bg-blue-600 text-white p-2 rounded mb-3 disabled:opacity-50"
-            onClick={() => openDay(selectedDate)}
-            disabled={loadingDay}
-          >
-            {loadingDay ? "Loading..." : "Health Stats"}
+        <div className="flex items-center gap-2">
+          <button onClick={prevMonth} className="border px-3 py-1 rounded">
+            Prev
           </button>
+          <div className="font-semibold">
+            {year}-{pad2(month)}
+          </div>
+          <button onClick={nextMonth} className="border px-3 py-1 rounded">
+            Next
+          </button>
+        </div>
 
-          {loadingDay && <p className="text-sm text-black">Loading entries...</p>}
+        {error && <p className="text-red-600">{error}</p>}
 
-          {!loadingDay && dayStats && (
-            <div className="space-y-2">
-              <p className="text-sm text-black">Entries: {dayStats.entries.length}</p>
+        <section className="grid grid-cols-7 gap-2">
+          {Array.from({ length: totalDays }, (_, i) => {
+            const day = i + 1;
+            const date = toYmd(year, month, day);
+            const hasData = daysWithData.has(date);
 
-              <pre className="text-xs border p-2 rounded overflow-auto max-h-64 text-black">
-                {JSON.stringify(dayStats.entries, null, 2)}
-              </pre>
-            </div>
-          )}
+            return (
+              <button
+                key={date}
+                onClick={() => openDay(date)}
+                className="border rounded text-left p-2 min-h-12 w-full overflow-hidden"
+                title={hasData ? "Has health data" : "No health data"}
+              >
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="font-medium leading-none">{day}</span>
+                  {hasData && (
+                    <span className="text-xs leading-none shrink-0">•</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </section>
 
-          {!loadingDay && !dayStats && (
-            <p className="text-sm text-gray-600">
-              Click “Health Stats” to load data for this day.
-            </p>
-          )}
-        </Modal>
-      )}
+        {selectedDate && (
+          <Modal onClose={closeModal}>
+            <h2 className="text-lg font-bold mb-2 text-black">
+              {selectedDate}
+            </h2>
+
+            <button
+              type="button"
+              className="w-full bg-blue-600 text-white p-2 rounded mb-3 disabled:opacity-50"
+              onClick={() => openDay(selectedDate)}
+              disabled={loadingDay}
+            >
+              {loadingDay ? "Loading..." : "Health Stats"}
+            </button>
+
+            {loadingDay && (
+              <p className="text-sm text-black">Loading entries...</p>
+            )}
+
+            {!loadingDay && dayStats && (
+              <div className="space-y-2">
+                <p className="text-sm text-black">
+                  Entries: {dayStats.entries.length}
+                </p>
+
+                <pre className="text-xs border p-2 rounded overflow-auto max-h-64 text-black">
+                  {JSON.stringify(dayStats.entries, null, 2)}
+                </pre>
+              </div>
+            )}
+
+            {!loadingDay && !dayStats && (
+              <p className="text-sm text-gray-600">
+                Click "Health Stats" to load data for this day.
+              </p>
+            )}
+          </Modal>
+        )}
+      </div>
     </main>
   );
 }
