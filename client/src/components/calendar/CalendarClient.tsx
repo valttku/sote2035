@@ -246,7 +246,7 @@ export default function CalendarClient() {
 
             {!loadingDay && !dayStats && (
               <p className="text-sm text-gray-600">
-                Click "Health Stats" to load data for this day.
+                Click &quot;Health Stats&quot; to load data for this day.
               </p>
             )}
           </Modal>
