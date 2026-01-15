@@ -24,7 +24,7 @@ export default function TwinView() {
   const avatarWidth = isFemale ? 208 : 244;
 
   return (
-    <div className="min-h-screen flex flex-row items-start gap-x-45">
+    <div className="min-h-screen ml-64 w-[calc(100vw-16rem)] flex flex-row items-start gap-x-20 overflow-x-hidden">
       <h1 className="text-5xl m-10">Today</h1>
 
       {/* Avatar + dots */}
