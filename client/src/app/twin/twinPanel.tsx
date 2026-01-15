@@ -25,65 +25,38 @@ export default function TwinPanel({ selected, onClose }: Props) {
   const metrics = MOCK[selected];
 
   return (
-        <div className="panel">
-            <div className="panel-body">
-                <div className="title-and-close-button">
-                    <h1 className="panel-title">{TITLE[selected]}</h1>
-                    <button className="close-button" onClick={onClose}>✕</button>
-                </div>
+    <div className="panel-animation width-320px p-4 pt-2 rounded-2xl shadow-lg bg-indigo-950/70 text-white border border-[rgba(179,196,243,0.8)]">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl mb-2">{TITLE[selected]}</h1>
+        <button className="cursor-pointer mb-5" onClick={onClose}>
+          ✕
+        </button>
+      </div>
 
-                <ul className="metrics-list">
-                    {Object.entries(metrics).map(([k, v]) => (
-                        <li key={k}>
-                        <span className="metric-name">{k}: </span>
-                        {v}
-                        </li>
-                    ))}
-                </ul>
-            </div>
+      <ul>
+        {Object.entries(metrics).map(([k, v]) => (
+          <li key={k}>
+            <span className="font-semibold">{k}: </span>
+            {v}
+          </li>
+        ))}
+      </ul>
 
-            {/* style is here for now */}
-            <style jsx>{`
-                .panel {
-                    width: 320px;
-                    color: white;
-                    padding: 16px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                    animation: fade 0.3s ease-in-out forwards;
-                    background: rgba(7, 8, 61, 0.3); 
-                    border-radius: 10px;
-                    border: 1px solid rgba(179, 196, 243, 0.8);
-                }
+      {/* animation for panel */}
+      <style jsx>{`
+        .panel-animation {
+          animation: fade 0.3s ease-in-out forwards;
+        }
 
-                @keyframes fade {
-                    from {
-                        opacity: 0;
-                    }
-                    to {
-                        opacity: 0.8;
-                    }
-                }
-
-                .title-and-close-button {
-                    display: flex;
-                    justify-content: space-between;
-                }
-
-                .close-button:hover {
-                    cursor: pointer;
-                }
-                
-                .metrics-list {
-                    list-style: none;
-                    padding-top: 5px;
-                    padding-left: 0;
-                }
-
-                .panel-title {
-                    font-size: 18px;
-                }
-                
-            `}</style>
+        @keyframes fade {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 0.8;
+          }
+        }
+      `}</style>
     </div>
   );
 }
