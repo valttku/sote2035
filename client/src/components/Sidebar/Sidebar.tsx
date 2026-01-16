@@ -36,6 +36,7 @@ export default async function Sidebar() {
   return (
     <aside
       className="
+      ui-component-styles
       fixed left-0 top-0 h-full w-64 p-4
       flex flex-col
       shrink-0

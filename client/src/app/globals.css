@@ -21,7 +21,15 @@ body {
   padding: 0;
 }
 
-/*Sidebar, infoPanel, calendarClient, settingsClient*/
+button {
+  cursor: pointer;
+}
+
+li:hover {
+  color: #22bfd4;
+}
+
+/*Used in: Sidebar, infoPanel, calendarClient, settingsClient*/
 .ui-component-styles {
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   background-color: rgb(30 27 75 / 0.5);
@@ -29,11 +37,7 @@ body {
   border: 1px solid rgba(179, 196, 243, 0.8);
 }
 
-button {
-  cursor: pointer;
-}
-
-/*calendarClient, settingsClient*/
+/*Used in: modals, forms*/
 .button-style-blue {
   background-color: #22bfd4;
   color: white;
