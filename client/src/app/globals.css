@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #c3dafe;
+  --background: #ffffff;
   --foreground: #171717;
 }
 
@@ -23,10 +23,6 @@ body {
 
 button {
   cursor: pointer;
-}
-
-li:hover {
-  color: #22bfd4;
 }
 
 /*Used in: Sidebar, infoPanel, calendarClient, settingsClient*/
