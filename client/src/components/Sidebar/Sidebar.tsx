@@ -38,6 +38,7 @@ export default async function Sidebar() {
       className="
       fixed left-0 top-0 h-full w-64 p-4
       flex flex-col
+      shrink-0
       bg-indigo-950/70
       border border-[rgba(179,196,243,0.8)]
       rounded-r-3xl

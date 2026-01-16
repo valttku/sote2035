@@ -160,17 +160,16 @@ export default function CalendarClient() {
   const totalDays = daysInMonth(year, month);
 
   return (
-    <main className="min-h-screen w-[calc(100vw-16rem)] flex items-center justify-center border overflow-x-hidden">
+    <div className="min-h-screen flex items-center justify-center">
       <div
         className="
         p-6 space-y-6 mx-auto
         w-full max-w-4xl
-        min-w-[20rem]
-        max-h-[calc(100vh-8rem)]
-        overflow-hidden
+        min-w-0
         rounded-2xl shadow-lg
         bg-indigo-950/50 text-white
-        border border-[rgba(179,196,243,0.8)]
+        border-[3px]
+        border border-[rgba(179,196,243)]
       "
       >
         <h1 className="text-3xl">Calendar</h1>
@@ -199,10 +198,10 @@ export default function CalendarClient() {
               <button
                 key={date}
                 onClick={() => openDay(date)}
-                className="border rounded text-left p-2 min-h-12 w-full overflow-hidden"
+                className="border rounded text-left p-3 min-h-20 w-full overflow-hidden"
                 title={hasData ? "Has health data" : "No health data"}
               >
-                <div className="flex items-center justify-between gap-2 min-w-0">
+                <div className="flex items-center justify-between gap-2">
                   <span className="font-medium leading-none">{day}</span>
                   {hasData && (
                     <span className="text-xs leading-none shrink-0">•</span>
@@ -252,6 +251,6 @@ export default function CalendarClient() {
           </Modal>
         )}
       </div>
-    </main>
+    </div>
   );
 }
