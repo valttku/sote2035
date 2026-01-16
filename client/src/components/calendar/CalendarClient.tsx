@@ -166,10 +166,8 @@ export default function CalendarClient() {
         p-6 space-y-6 mx-auto
         w-full max-w-4xl
         min-w-0
-        rounded-2xl shadow-lg
-        bg-indigo-950/50 text-white
-        border-[3px]
-        border border-[rgba(179,196,243)]
+        rounded-2xl
+        ui-component-styles
       "
       >
         <h1 className="text-3xl">Calendar</h1>

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import TwinPanel from "./twinPanel";
+import TwinPanel from "./infoPanel";
 
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
