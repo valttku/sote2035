@@ -300,7 +300,7 @@ export default function SettingsClient() {
       {/* LANGUAGE */}
       <section>
         <h2 className="text-lg font-semibold mb-2">Language</h2>
-        <p className="text-sm text-gray-600">Language settings coming soon.</p>
+        <p className="text-sm">Language settings coming soon.</p>
       </section>
 
       {/* ACCOUNT MANAGEMENT */}
@@ -321,7 +321,7 @@ export default function SettingsClient() {
           <h2 className="text-lg font-bold mb-4">Change display name</h2>
 
           <input
-            className="border p-2 w-full mb-3 text-black"
+            className="border p-2 w-full mb-3"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Display name"
@@ -349,19 +349,19 @@ export default function SettingsClient() {
       {/* CHANGE PASSWORD MODAL */}
       {showChangePassword && (
         <Modal onClose={() => setShowChangePassword(false)}>
-          <h2 className="text-lg font-bold mb-4 text-black">Change password</h2>
+          <h2 className="text-lg font-bold mb-4">Change password</h2>
 
           <div className="relative mb-2">
             <input
               type={showOldPassword ? "text" : "password"}
-              className="border p-2 w-full pr-10 text-black"
+              className="border p-2 w-full pr-10"
               placeholder="Old password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
             />
             <button
               type="button"
-              className="absolute right-2 top-2 text-gray-600"
+              className="absolute right-2 top-2"
               onClick={() => setShowOldPassword(!showOldPassword)}
             >
               {showOldPassword ? <FaEyeSlash /> : <FaEye />}
@@ -371,7 +371,7 @@ export default function SettingsClient() {
             <div className="relative mb-4">
             <input
               type={showNewPassword ? "text" : "password"}
-              className="border p-2 w-full pr-10 text-black"
+              className="border p-2 w-full pr-10"
               placeholder="New password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -403,7 +403,7 @@ export default function SettingsClient() {
             {/* Password strength description */}
             <p
               id="password-strength"
-              className="text-sm font-medium text-gray-700 mb-2"
+              className="text-sm font-medium  mb-2"
             >
               {getStrengthText(strengthScore)}. Password must contain:
             </p>

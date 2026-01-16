@@ -212,7 +212,7 @@ export default function CalendarClient() {
 
         {selectedDate && (
           <Modal onClose={closeModal}>
-            <h2 className="text-lg font-bold mb-2 text-black">
+            <h2 className="text-lg font-bold mb-2">
               {selectedDate}
             </h2>
 
@@ -226,16 +226,16 @@ export default function CalendarClient() {
             </button>
 
             {loadingDay && (
-              <p className="text-sm text-black">Loading entries...</p>
+              <p className="text-sm">Loading entries...</p>
             )}
 
             {!loadingDay && dayStats && (
               <div className="space-y-2">
-                <p className="text-sm text-black">
+                <p className="text-sm">
                   Entries: {dayStats.entries.length}
                 </p>
 
-                <pre className="text-xs border p-2 rounded overflow-auto max-h-64 text-black">
+                <pre className="text-xs border p-2 rounded overflow-auto max-h-64">
                   {JSON.stringify(dayStats.entries, null, 2)}
                 </pre>
               </div>
