@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #c3dafe;
+  --background: #ffffff;
   --foreground: #171717;
 }
 
@@ -25,8 +25,21 @@ button {
   cursor: pointer;
 }
 
-li:hover {
-  color: #22bfd4;
+input,
+textarea,
+select {
+  background-color: rgb(228, 234, 252);
+  color: black;
+  padding: 8px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #22bfd4;
 }
 
 /*Used in: Sidebar, infoPanel, calendarClient, settingsClient*/
@@ -37,7 +50,7 @@ li:hover {
   border: 1px solid rgba(179, 196, 243, 0.8);
 }
 
-/*Used in: modals, forms*/
+/*Button-styles*/
 .button-style-blue {
   background-color: #22bfd4;
   color: white;
@@ -47,4 +60,38 @@ li:hover {
 
 .button-style-blue:hover {
   background-color: #1aa5b0;
+}
+
+.cancel-button-style {
+  background-color: #f2345d;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.cancel-button-style:hover {
+  background-color: #e30f3d;
+}
+
+/*Show password*/
+.fa-eye {
+  cursor: pointer;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgb(116, 116, 116);
+  display: flex;
+  align-items: center;
+}
+
+/*password strength indicator*/
+.progress-bar {
+  height: 4px;
+  width: 100%;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
