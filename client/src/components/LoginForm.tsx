@@ -37,9 +37,9 @@ export default function LoginForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
-      <h2 className="text-xl mb-2">Login</h2>
+      <h1 className="text-3xl mb-8 text-center">LOGIN</h1>
 
-      <label htmlFor="login-email" className="sr-only">
+      <label htmlFor="login-email">
         Email
       </label>
       <input
@@ -51,8 +51,7 @@ export default function LoginForm({
         spellCheck={false}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        className="block border p-2 w-full"
+        className="block w-full"
         required
         aria-invalid={!!emailError}
       />
@@ -62,7 +61,7 @@ export default function LoginForm({
         </p>
       )}
 
-      <label htmlFor="login-password" className="sr-only">
+      <label htmlFor="login-password">
         Password
       </label>
       <div className="relative">
@@ -72,13 +71,12 @@ export default function LoginForm({
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="block border p-2 w-full pr-10"
+          className="block w-full"
           required
         />
         <button
           type="button"
-          className="absolute right-2 top-2"
+          className="fa-eye"
           onClick={() => setShowPassword(!showPassword)}
           aria-label={showPassword ? "Hide password" : "Show password"}
         >

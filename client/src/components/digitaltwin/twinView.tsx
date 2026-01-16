@@ -55,7 +55,7 @@ export default function TwinView() {
                 background:
                   selected === id
                     ? "rgba(10, 33, 90, 0.7)"
-                    : "rgba(113, 229, 245, 0.5)",
+                    : "rgba(203, 215, 249, 0.8)",
               }}
               aria-label={id}
             />

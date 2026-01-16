@@ -99,10 +99,10 @@ export default function RegisterForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
-      <h2 className="text-xl mb-2">Register</h2>
+      <h2 className="text-3xl mb-8 text-center">REGISTER</h2>
 
       {/* Email */}
-      <label htmlFor="reg-email" className="sr-only">
+      <label htmlFor="reg-email">
         Email
       </label>
       <input
@@ -115,7 +115,7 @@ export default function RegisterForm({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
-        className="block border p-2 w-full"
+        className="block w-full"
         required
         aria-invalid={!!emailError}
       />
@@ -126,16 +126,19 @@ export default function RegisterForm({
       )}
 
       {/* Display Name */}
+      <label htmlFor="reg-displayname">
+        Display Name
+      </label>
       <input
         type="text"
         value={displayName}
         onChange={(e) => setDisplayName(e.target.value)}
         placeholder="Display Name (optional)"
-        className="block border p-2 w-full"
+        className="block w-full"
       />
 
       {/* Password */}
-      <label htmlFor="reg-password" className="sr-only">
+      <label htmlFor="reg-password">
         Password
       </label>
       <div className="relative">
@@ -148,13 +151,13 @@ export default function RegisterForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="block border p-2 w-full pr-10"
+          className="block w-full"
           required
           aria-invalid={!!passwordError}
         />
         <button
           type="button"
-          className="absolute right-2 top-2"
+          className="fa-eye"
           onClick={() => setShowPassword(!showPassword)}
           aria-label={showPassword ? "Hide password" : "Show password"}
         >
@@ -164,7 +167,7 @@ export default function RegisterForm({
 
       {/* Password strength indicator */}
       <div
-        className="h-1 w-full bg-gray-200 rounded-full overflow-hidden mb-4"
+        className="progress-bar"
         role="progressbar"
         aria-valuenow={strengthScore}
         aria-valuemin={0}
@@ -191,7 +194,7 @@ export default function RegisterForm({
         {requirements.map((req) => (
           <li
         key={req.text}
-        className={`text-sm flex items-center gap-2 ${req.regex.test(password) ? "text-green-600" : "text-red-600"}`}
+        className={`text-sm flex items-center gap-2 ${req.regex.test(password) ? "text-green-600" : "text-red-500"}`}
           >
         {req.text}
         {req.regex.test(password) ? "✓" : "✕"}
@@ -200,7 +203,7 @@ export default function RegisterForm({
       </ul>
 
       {/* Confirm Password */}
-      <label htmlFor="reg-confirm" className="sr-only">
+      <label htmlFor="reg-confirm">
         Confirm Password
       </label>
       <div className="relative">
@@ -212,13 +215,13 @@ export default function RegisterForm({
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Confirm Password"
-          className="block border p-2 w-full pr-10"
+          className="block w-full"
           required
           aria-invalid={!!confirmError}
         />
         <button
           type="button"
-          className="absolute right-2 top-2"
+          className="fa-eye"
           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           aria-label={showConfirmPassword ? "Hide password" : "Show password"}
         >

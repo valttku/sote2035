@@ -28,7 +28,7 @@ export default function InfoPanel({ selected, onClose }: Props) {
     <div className="panel-animation ui-component-styles p-4 pt-2 rounded-2xl">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl mb-2">{TITLE[selected]}</h1>
-        <button className="cursor-pointer mb-5" onClick={onClose}>
+        <button className="mb-5" onClick={onClose}>
           ✕
         </button>
       </div>

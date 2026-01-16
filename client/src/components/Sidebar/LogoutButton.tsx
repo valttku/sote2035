@@ -16,9 +16,8 @@ export default function LogoutButton() {
 
   return (
     <button onClick={handleLogout} 
-      className="cursor-pointer text-indigo-200 hover:text-red-400 transition">
+      className="cursor-pointer text-indigo-200 hover:text-[#f2345d] transition">
       <span className="bi bi-power"></span>
-
       Log off
     </button>
   );

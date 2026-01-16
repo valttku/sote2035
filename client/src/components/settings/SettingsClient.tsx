@@ -315,19 +315,19 @@ export default function SettingsClient() {
 
           <button
             onClick={deleteAccount}
-            className="bg-red-600 text-white px-4 py-2 rounded w-full hover:bg-red-700"
+            className="bg-[#f2345d] text-white px-4 py-2 rounded w-full hover:bg-[#e30f3d]"
           >
-            PERMAENTLY DELETE ACCOUNT
+            PERMANENTLY DELETE ACCOUNT
           </button>
         </section>
 
         {/* EDIT PROFILE MODAL */}
         {showEditProfile && (
           <Modal onClose={() => setShowEditProfile(false)}>
-            <h2 className="text-lg font-bold mb-4">Change display name</h2>
+            <h2 className="text-lg font-bold mb-4 text-center">Change display name</h2>
 
             <input
-              className="border p-2 w-full mb-3"
+              className="block w-full"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Display name"
@@ -344,7 +344,7 @@ export default function SettingsClient() {
 
               <button
                 onClick={() => setShowEditProfile(false)}
-                className="w-full border p-2 rounded"
+                className="cancel-button-style w-full"
               >
                 Cancel
               </button>
@@ -355,19 +355,19 @@ export default function SettingsClient() {
         {/* CHANGE PASSWORD MODAL */}
         {showChangePassword && (
           <Modal onClose={() => setShowChangePassword(false)}>
-            <h2 className="text-lg font-bold mb-4">Change password</h2>
+            <h2 className="text-lg font-bold mb-4 text-center">Change password</h2>
 
             <div className="relative mb-2">
               <input
                 type={showOldPassword ? "text" : "password"}
-                className="border p-2 w-full pr-10"
+                className="block w-full"
                 placeholder="Old password"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
               />
               <button
                 type="button"
-                className="absolute right-2 top-2"
+                className="fa-eye"
                 onClick={() => setShowOldPassword(!showOldPassword)}
               >
                 {showOldPassword ? <FaEyeSlash /> : <FaEye />}
@@ -377,7 +377,7 @@ export default function SettingsClient() {
             <div className="relative mb-4">
               <input
                 type={showNewPassword ? "text" : "password"}
-                className="border p-2 w-full pr-10"
+                className="block w-full"
                 placeholder="New password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -385,51 +385,51 @@ export default function SettingsClient() {
               />
               <button
                 type="button"
-                className="absolute right-2 top-2 text-gray-600"
+                className="fa-eye"
                 onClick={() => setShowNewPassword(!showNewPassword)}
               >
                 {showNewPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
-
-              {/* Password strength indicator */}
-              <div
-                className="h-1 w-full bg-gray-200 rounded-full overflow-hidden mb-4 mt-4"
-                role="progressbar"
-                aria-valuenow={strengthScore}
-                aria-valuemin={0}
-                aria-valuemax={5}
-                aria-label="Password strength"
-              >
-                <div
-                  className={`h-full ${getStrengthColor(
-                    strengthScore
-                  )} transition-all duration-500 ease-out`}
-                  style={{ width: `${(strengthScore / 5) * 100}%` }}
-                ></div>
-              </div>
-
-              {/* Password strength description */}
-              <p id="password-strength" className="text-sm font-medium mb-2">
-                {getStrengthText(strengthScore)}. Password must contain:
-              </p>
-
-              {/* Password requirements list */}
-              <ul className="space-y-1" aria-label="Password requirements">
-                {requirements.map((req) => (
-                  <li
-                    key={req.text}
-                    className={`text-sm flex items-center gap-2 ${
-                      req.regex.test(newPassword)
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {req.text}
-                    {req.regex.test(newPassword) ? "✓" : "✕"}
-                  </li>
-                ))}
-              </ul>
             </div>
+
+            {/* Password strength indicator */}
+            <div
+              className="progress-bar"
+              role="progressbar"
+              aria-valuenow={strengthScore}
+              aria-valuemin={0}
+              aria-valuemax={5}
+              aria-label="Password strength"
+            >
+              <div
+                className={`h-full ${getStrengthColor(
+                  strengthScore
+                )} transition-all duration-500 ease-out`}
+                style={{ width: `${(strengthScore / 5) * 100}%` }}
+              ></div>
+            </div>
+
+            {/* Password strength description */}
+            <p id="password-strength" className="text-sm font-medium mb-2">
+              {getStrengthText(strengthScore)}. Password must contain:
+            </p>
+
+            {/* Password requirements list */}
+            <ul className="space-y-1 mb-5" aria-label="Password requirements">
+              {requirements.map((req) => (
+                <li
+                  key={req.text}
+                  className={`text-sm flex items-center gap-2 ${
+                    req.regex.test(newPassword)
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {req.text}
+                  {req.regex.test(newPassword) ? "✓" : "✕"}
+                </li>
+              ))}
+            </ul>
 
             <div className="flex flex-col sm:flex-row gap-2">
               <button
@@ -442,7 +442,7 @@ export default function SettingsClient() {
 
               <button
                 onClick={() => setShowChangePassword(false)}
-                className="w-full border p-2 rounded"
+                className="cancel-button-style w-full"
               >
                 Cancel
               </button>

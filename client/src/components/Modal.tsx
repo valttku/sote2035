@@ -22,7 +22,7 @@ export default function Modal({ children, onClose }: ModalProps) {
           onClick={onClose}
           className="mb-2 cursor-pointer float-right"
         >
-          Close
+          ✕
         </button>
         {children}
       </div>
