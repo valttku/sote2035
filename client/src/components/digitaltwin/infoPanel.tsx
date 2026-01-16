@@ -21,7 +21,7 @@ const MOCK: Record<BodyPartId, Record<string, string | number>> = {
   legs: { Steps: 12000 },
 };
 
-export default function TwinPanel({ selected, onClose }: Props) {
+export default function InfoPanel({ selected, onClose }: Props) {
   const metrics = MOCK[selected];
 
   return (

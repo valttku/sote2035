@@ -165,7 +165,6 @@ export default function CalendarClient() {
         className="
         p-6 space-y-6 mx-auto
         w-full max-w-4xl
-        min-w-0
         rounded-2xl
         ui-component-styles
       "
@@ -218,7 +217,7 @@ export default function CalendarClient() {
 
             <button
               type="button"
-              className="w-full bg-blue-600 text-white p-2 rounded mb-3 disabled:opacity-50"
+              className="button-style-blue w-full mb-3 disabled:opacity-50"
               onClick={() => openDay(selectedDate)}
               disabled={loadingDay}
             >

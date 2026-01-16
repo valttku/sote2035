@@ -8,7 +8,7 @@ type ModalProps = {
 
 export default function Modal({ children, onClose }: ModalProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center bg-indigo-950/50 backdrop-blur-sm">
       <div
         className="
           ui-component-styles
@@ -20,7 +20,7 @@ export default function Modal({ children, onClose }: ModalProps) {
         <button
           type="button"
           onClick={onClose}
-          className="mb-2"
+          className="mb-2 cursor-pointer float-right"
         >
           Close
         </button>

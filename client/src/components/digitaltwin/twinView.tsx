@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import TwinPanel from "./infoPanel";
+import { useState, useRef } from "react";
+import InfoPanel from "./infoPanel";
 
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
@@ -55,7 +55,7 @@ export default function TwinView() {
                 background:
                   selected === id
                     ? "rgba(10, 33, 90, 0.7)"
-                    : "rgba(211, 211, 255, 0.8)",
+                    : "rgba(113, 229, 245, 0.5)",
               }}
               aria-label={id}
             />
@@ -69,7 +69,7 @@ export default function TwinView() {
           </h2>
 
           {selected && (
-            <TwinPanel selected={selected} onClose={() => setSelected(null)} />
+            <InfoPanel selected={selected} onClose={() => setSelected(null)} />
           )}
         </div>
       </div>
