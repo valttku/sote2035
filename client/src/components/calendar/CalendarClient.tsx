@@ -172,13 +172,13 @@ export default function CalendarClient() {
         <h1 className="text-3xl">Calendar</h1>
 
         <div className="flex items-center gap-2">
-          <button onClick={prevMonth} className="border px-3 py-1 rounded">
+          <button onClick={prevMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/20">
             Prev
           </button>
           <div className="font-semibold">
             {year}-{pad2(month)}
           </div>
-          <button onClick={nextMonth} className="border px-3 py-1 rounded">
+          <button onClick={nextMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/20">
             Next
           </button>
         </div>
@@ -195,7 +195,7 @@ export default function CalendarClient() {
               <button
                 key={date}
                 onClick={() => openDay(date)}
-                className="border rounded text-left p-3 min-h-20 w-full overflow-hidden"
+                className="border rounded text-left p-3 min-h-20 w-full overflow-hidden hover:bg-[#1aa5b0]/20"
                 title={hasData ? "Has health data" : "No health data"}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -211,9 +211,7 @@ export default function CalendarClient() {
 
         {selectedDate && (
           <Modal onClose={closeModal}>
-            <h2 className="text-lg font-bold mb-2">
-              {selectedDate}
-            </h2>
+            <h2 className="text-lg font-bold mb-2">{selectedDate}</h2>
 
             <button
               type="button"
@@ -224,15 +222,11 @@ export default function CalendarClient() {
               {loadingDay ? "Loading..." : "Health Stats"}
             </button>
 
-            {loadingDay && (
-              <p className="text-sm">Loading entries...</p>
-            )}
+            {loadingDay && <p className="text-sm">Loading entries...</p>}
 
             {!loadingDay && dayStats && (
               <div className="space-y-2">
-                <p className="text-sm">
-                  Entries: {dayStats.entries.length}
-                </p>
+                <p className="text-sm">Entries: {dayStats.entries.length}</p>
 
                 <pre className="text-xs border p-2 rounded overflow-auto max-h-64">
                   {JSON.stringify(dayStats.entries, null, 2)}
