@@ -165,11 +165,8 @@ export default function CalendarClient() {
         className="
         p-6 space-y-6 mx-auto
         w-full max-w-4xl
-        min-w-0
-        rounded-2xl shadow-lg
-        bg-indigo-950/50 text-white
-        border-[3px]
-        border border-[rgba(179,196,243)]
+        rounded-2xl
+        ui-component-styles
       "
       >
         <h1 className="text-3xl">Calendar</h1>
@@ -214,13 +211,13 @@ export default function CalendarClient() {
 
         {selectedDate && (
           <Modal onClose={closeModal}>
-            <h2 className="text-lg font-bold mb-2 text-black">
+            <h2 className="text-lg font-bold mb-2">
               {selectedDate}
             </h2>
 
             <button
               type="button"
-              className="w-full bg-blue-600 text-white p-2 rounded mb-3 disabled:opacity-50"
+              className="button-style-blue w-full mb-3 disabled:opacity-50"
               onClick={() => openDay(selectedDate)}
               disabled={loadingDay}
             >
@@ -228,16 +225,16 @@ export default function CalendarClient() {
             </button>
 
             {loadingDay && (
-              <p className="text-sm text-black">Loading entries...</p>
+              <p className="text-sm">Loading entries...</p>
             )}
 
             {!loadingDay && dayStats && (
               <div className="space-y-2">
-                <p className="text-sm text-black">
+                <p className="text-sm">
                   Entries: {dayStats.entries.length}
                 </p>
 
-                <pre className="text-xs border p-2 rounded overflow-auto max-h-64 text-black">
+                <pre className="text-xs border p-2 rounded overflow-auto max-h-64">
                   {JSON.stringify(dayStats.entries, null, 2)}
                 </pre>
               </div>

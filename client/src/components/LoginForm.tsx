@@ -78,7 +78,7 @@ export default function LoginForm({
         />
         <button
           type="button"
-          className="absolute right-2 top-2 text-gray-600"
+          className="absolute right-2 top-2"
           onClick={() => setShowPassword(!showPassword)}
           aria-label={showPassword ? "Hide password" : "Show password"}
         >
@@ -89,9 +89,9 @@ export default function LoginForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white p-2 rounded mt-2 disabled:opacity-50"
+        className="button-style-blue w-full p-2 mt-2 disabled:opacity-50"
       >
-        {loading ? "Loading..." : "Submit"}
+        {loading ? "Loading..." : "Login"}
       </button>
     </form>
   );

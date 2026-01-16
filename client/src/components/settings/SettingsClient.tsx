@@ -29,7 +29,9 @@ export default function SettingsClient() {
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [polarStatus, setPolarStatus] = useState<PolarStatus>({ linked: false });
+  const [polarStatus, setPolarStatus] = useState<PolarStatus>({
+    linked: false,
+  });
   const [polarBusy, setPolarBusy] = useState(false);
 
   // modal state
@@ -50,11 +52,11 @@ export default function SettingsClient() {
 
   // Password requirements
   const requirements = [
-      { regex: /.{8,}/, text: "At least 8 characters" },
-      { regex: /[0-9]/, text: "At least 1 number" },
-      { regex: /[a-z]/, text: "At least 1 lowercase letter" },
-      { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
-      { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
+    { regex: /.{8,}/, text: "At least 8 characters" },
+    { regex: /[0-9]/, text: "At least 1 number" },
+    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
+    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
   ];
 
   // Calculate strength score
@@ -152,7 +154,9 @@ export default function SettingsClient() {
     }
 
     // Password strength check
-    const failedReqs = requirements.filter((req) => !req.regex.test(newPassword));
+    const failedReqs = requirements.filter(
+      (req) => !req.regex.test(newPassword)
+    );
     if (failedReqs.length > 0) {
       alert(`Password isn't strong enough`);
       return;
@@ -247,199 +251,205 @@ export default function SettingsClient() {
   if (!data) return null;
 
   return (
-    <main className="p-6 max-w-2xl space-y-8">
-      <h1 className="text-2xl font-bold">Settings</h1>
+    <main className="min-h-screen w-full flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-4xl space-y-4">
+        <h1 className="text-5xl mb-10">Settings</h1>
 
-      {/* PROFILE */}
-      <section>
-        <h2 className="text-lg font-semibold mb-2">Profile</h2>
+        {/* PROFILE */}
+        <section className="ui-component-styles p-4 rounded-2xl">
+          <h2 className="text-lg font-semibold mb-2">PROFILE AND ACCOUNT</h2>
 
-        <p>Email: {data.email}</p>
-        <p>Username: {data.display_name ?? "(not set)"}</p>
+          <div className="flex flex-col sm:flex-row sm:justify-between mt-3 gap-3">
+            <p>EMAIL: {data.email}</p>
+            <button
+              onClick={() => setShowEditProfile(true)}
+              className="button-style-blue w-full sm:w-auto min-w-[20%]"
+            >
+              EDIT PROFILE
+            </button>
+          </div>
 
-        <div className="flex gap-2 mt-3">
+          <div className="flex flex-col sm:flex-row sm:justify-between mt-3 gap-3">
+            <p>USERNAME: {data.display_name ?? "(not set)"}</p>
+            <button
+              onClick={() => setShowChangePassword(true)}
+              className="button-style-blue w-full sm:w-auto min-w-[20%]"
+            >
+              CHANGE PASSWORD
+            </button>
+          </div>
+        </section>
+
+        {/* PROVIDER */}
+        <section className="ui-component-styles p-4 rounded-2xl">
+          <h2 className="text-lg font-semibold mb-2">PROVIDER</h2>
+
+          {polarStatus.linked ? (
+            <button
+              onClick={unlinkPolar}
+              disabled={polarBusy}
+              className="button-style-blue w-full disabled:opacity-50"
+            >
+              {polarBusy ? "Unlinking..." : "Unlink Polar"}
+            </button>
+          ) : (
+            <button
+              onClick={linkPolar}
+              disabled={polarBusy}
+              className="button-style-blue w-full disabled:opacity-50"
+            >
+              LINK POLAR
+            </button>
+          )}
+        </section>
+
+        {/* LANGUAGE */}
+        <section className="ui-component-styles p-4 rounded-2xl">
+          <h2 className="text-lg font-semibold mb-2">LANGUAGE</h2>
+          <p className="text-sm">Language settings coming soon.</p>
+        </section>
+
+        {/* ACCOUNT MANAGEMENT */}
+        <section className="ui-component-styles p-4 rounded-2xl">
+          <h2 className="text-lg font-semibold mb-2">ACCOUNT MANAGEMENT</h2>
+
           <button
-            onClick={() => setShowEditProfile(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={deleteAccount}
+            className="bg-red-600 text-white px-4 py-2 rounded w-full hover:bg-red-700"
           >
-            Edit profile
+            PERMAENTLY DELETE ACCOUNT
           </button>
+        </section>
 
-          <button
-            onClick={() => setShowChangePassword(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Change password
-          </button>
-        </div>
-      </section>
+        {/* EDIT PROFILE MODAL */}
+        {showEditProfile && (
+          <Modal onClose={() => setShowEditProfile(false)}>
+            <h2 className="text-lg font-bold mb-4">Change display name</h2>
 
-      {/* PROVIDER */}
-      <section>
-        <h2 className="text-lg font-semibold mb-2">Provider</h2>
+            <input
+              className="border p-2 w-full mb-3"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Display name"
+            />
 
-        {polarStatus.linked ? (
-          <button
-            onClick={unlinkPolar}
-            disabled={polarBusy}
-            className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          >
-            {polarBusy ? "Unlinking..." : "Unlink Polar"}
-          </button>
-        ) : (
-          <button
-            onClick={linkPolar}
-            disabled={polarBusy}
-            className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          >
-            Link Polar
-          </button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={saveProfile}
+                disabled={savingProfile}
+                className="button-style-blue w-full disabled:opacity-50"
+              >
+                {savingProfile ? "Saving..." : "Save"}
+              </button>
+
+              <button
+                onClick={() => setShowEditProfile(false)}
+                className="w-full border p-2 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </Modal>
         )}
-      </section>
 
-      {/* LANGUAGE */}
-      <section>
-        <h2 className="text-lg font-semibold mb-2">Language</h2>
-        <p className="text-sm text-gray-600">Language settings coming soon.</p>
-      </section>
+        {/* CHANGE PASSWORD MODAL */}
+        {showChangePassword && (
+          <Modal onClose={() => setShowChangePassword(false)}>
+            <h2 className="text-lg font-bold mb-4">Change password</h2>
 
-      {/* ACCOUNT MANAGEMENT */}
-      <section>
-        <h2 className="text-lg font-semibold mb-2">Account management</h2>
-
-        <button
-          onClick={deleteAccount}
-          className="bg-red-600 text-white px-4 py-2 rounded"
-        >
-          Permanently delete account
-        </button>
-      </section>
-
-      {/* EDIT PROFILE MODAL */}
-      {showEditProfile && (
-        <Modal onClose={() => setShowEditProfile(false)}>
-          <h2 className="text-lg font-bold mb-4">Change display name</h2>
-
-          <input
-            className="border p-2 w-full mb-3 text-black"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Display name"
-          />
-
-          <div className="flex gap-2">
-            <button
-              onClick={saveProfile}
-              disabled={savingProfile}
-              className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50"
-            >
-              {savingProfile ? "Saving..." : "Save"}
-            </button>
-
-            <button
-              onClick={() => setShowEditProfile(false)}
-              className="w-full border p-2 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </Modal>
-      )}
-
-      {/* CHANGE PASSWORD MODAL */}
-      {showChangePassword && (
-        <Modal onClose={() => setShowChangePassword(false)}>
-          <h2 className="text-lg font-bold mb-4 text-black">Change password</h2>
-
-          <div className="relative mb-2">
-            <input
-              type={showOldPassword ? "text" : "password"}
-              className="border p-2 w-full pr-10 text-black"
-              placeholder="Old password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-            />
-            <button
-              type="button"
-              className="absolute right-2 top-2 text-gray-600"
-              onClick={() => setShowOldPassword(!showOldPassword)}
-            >
-              {showOldPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-
-            <div className="relative mb-4">
-            <input
-              type={showNewPassword ? "text" : "password"}
-              className="border p-2 w-full pr-10 text-black"
-              placeholder="New password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-            <button
-              type="button"
-              className="absolute right-2 top-2 text-gray-600"
-              onClick={() => setShowNewPassword(!showNewPassword)}
-            >
-              {showNewPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-
-            {/* Password strength indicator */}
-            <div
-              className="h-1 w-full bg-gray-200 rounded-full overflow-hidden mb-4 mt-4"
-              role="progressbar"
-              aria-valuenow={strengthScore}
-              aria-valuemin={0}
-              aria-valuemax={5}
-              aria-label="Password strength"
-            >
-              <div
-                className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500 ease-out`}
-                style={{ width: `${(strengthScore / 5) * 100}%` }}
-              ></div>
+            <div className="relative mb-2">
+              <input
+                type={showOldPassword ? "text" : "password"}
+                className="border p-2 w-full pr-10"
+                placeholder="Old password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-2"
+                onClick={() => setShowOldPassword(!showOldPassword)}
+              >
+                {showOldPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
 
-            {/* Password strength description */}
-            <p
-              id="password-strength"
-              className="text-sm font-medium text-gray-700 mb-2"
-            >
-              {getStrengthText(strengthScore)}. Password must contain:
-            </p>
+            <div className="relative mb-4">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                className="border p-2 w-full pr-10"
+                placeholder="New password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-2 text-gray-600"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+              >
+                {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
 
-            {/* Password requirements list */}
-            <ul className="space-y-1" aria-label="Password requirements">
-              {requirements.map((req) => (
-                <li
-              key={req.text}
-              className={`text-sm flex items-center gap-2 ${req.regex.test(newPassword) ? "text-green-600" : "text-red-600"}`}
-                >
-              {req.text}
-              {req.regex.test(newPassword) ? "✓" : "✕"}
-                </li>
-              ))}
-            </ul>
-          </div>
+              {/* Password strength indicator */}
+              <div
+                className="h-1 w-full bg-gray-200 rounded-full overflow-hidden mb-4 mt-4"
+                role="progressbar"
+                aria-valuenow={strengthScore}
+                aria-valuemin={0}
+                aria-valuemax={5}
+                aria-label="Password strength"
+              >
+                <div
+                  className={`h-full ${getStrengthColor(
+                    strengthScore
+                  )} transition-all duration-500 ease-out`}
+                  style={{ width: `${(strengthScore / 5) * 100}%` }}
+                ></div>
+              </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={changePassword}
-              disabled={changingPassword}
-              className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50"
-            >
-              {changingPassword ? "Changing..." : "Change password"}
-            </button>
+              {/* Password strength description */}
+              <p id="password-strength" className="text-sm font-medium mb-2">
+                {getStrengthText(strengthScore)}. Password must contain:
+              </p>
 
-            <button
-              onClick={() => setShowChangePassword(false)}
-              className="w-full border p-2 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </Modal>
-      )}
+              {/* Password requirements list */}
+              <ul className="space-y-1" aria-label="Password requirements">
+                {requirements.map((req) => (
+                  <li
+                    key={req.text}
+                    className={`text-sm flex items-center gap-2 ${
+                      req.regex.test(newPassword)
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {req.text}
+                    {req.regex.test(newPassword) ? "✓" : "✕"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={changePassword}
+                disabled={changingPassword}
+                className="button-style-blue w-full disabled:opacity-50"
+              >
+                {changingPassword ? "Changing..." : "Change password"}
+              </button>
+
+              <button
+                onClick={() => setShowChangePassword(false)}
+                className="w-full border p-2 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </Modal>
+        )}
+      </div>
     </main>
   );
 }

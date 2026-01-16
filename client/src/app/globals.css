@@ -14,9 +14,33 @@
 */
 
 body {
-  background: linear-gradient(#040531,#6682C8,#040531);
+  background: linear-gradient(#040531, #6682c8, #040531);
   color: var(--background);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
+}
+
+/*Sidebar, infoPanel, calendarClient, settingsClient*/
+.ui-component-styles {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  background-color: rgb(30 27 75 / 0.5);
+  color: white;
+  border: 1px solid rgba(179, 196, 243, 0.8);
+}
+
+button {
+  cursor: pointer;
+}
+
+/*calendarClient, settingsClient*/
+.button-style-blue {
+  background-color: #22bfd4;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.button-style-blue:hover {
+  background-color: #1aa5b0;
 }

@@ -98,7 +98,7 @@ export default function RegisterForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 w-80">
+    <form onSubmit={handleSubmit} className="space-y-2">
       <h2 className="text-xl mb-2">Register</h2>
 
       {/* Email */}
@@ -154,7 +154,7 @@ export default function RegisterForm({
         />
         <button
           type="button"
-          className="absolute right-2 top-2 text-gray-600"
+          className="absolute right-2 top-2"
           onClick={() => setShowPassword(!showPassword)}
           aria-label={showPassword ? "Hide password" : "Show password"}
         >
@@ -180,7 +180,7 @@ export default function RegisterForm({
       {/* Password strength description */}
       <p
         id="password-strength"
-        className="text-sm font-medium text-gray-700 mb-2"
+        className="text-sm font-medium mb-2"
       >
         {getStrengthText(strengthScore)}. Password must contain:
       </p>
@@ -218,7 +218,7 @@ export default function RegisterForm({
         />
         <button
           type="button"
-          className="absolute right-2 top-2 text-gray-600"
+          className="absolute right-2 top-2"
           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           aria-label={showConfirmPassword ? "Hide password" : "Show password"}
         >
@@ -235,9 +235,9 @@ export default function RegisterForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-green-600 text-white p-2 rounded mt-2 disabled:opacity-50"
+        className="button-style-blue w-full mt-2 disabled:opacity-50"
       >
-        {loading ? "Loading..." : "Submit"}
+        {loading ? "Loading..." : "Register"}
       </button>
     </form>
   );

@@ -21,11 +21,11 @@ const MOCK: Record<BodyPartId, Record<string, string | number>> = {
   legs: { Steps: 12000 },
 };
 
-export default function TwinPanel({ selected, onClose }: Props) {
+export default function InfoPanel({ selected, onClose }: Props) {
   const metrics = MOCK[selected];
 
   return (
-    <div className="panel-animation p-4 pt-2 rounded-2xl shadow-lg bg-indigo-950/50 text-white border border-[rgba(179,196,243,0.8)]">
+    <div className="panel-animation ui-component-styles p-4 pt-2 rounded-2xl">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl mb-2">{TITLE[selected]}</h1>
         <button className="cursor-pointer mb-5" onClick={onClose}>
