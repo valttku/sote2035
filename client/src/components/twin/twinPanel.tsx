@@ -25,7 +25,7 @@ export default function TwinPanel({ selected, onClose }: Props) {
   const metrics = MOCK[selected];
 
   return (
-    <div className="panel-animation width-320px p-4 pt-2 rounded-2xl shadow-lg bg-indigo-950/70 text-white border border-[rgba(179,196,243,0.8)]">
+    <div className="panel-animation p-4 pt-2 rounded-2xl shadow-lg bg-indigo-950/50 text-white border border-[rgba(179,196,243,0.8)]">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl mb-2">{TITLE[selected]}</h1>
         <button className="cursor-pointer mb-5" onClick={onClose}>
@@ -53,7 +53,7 @@ export default function TwinPanel({ selected, onClose }: Props) {
             opacity: 0;
           }
           to {
-            opacity: 0.8;
+            opacity: 1;
           }
         }
       `}</style>
