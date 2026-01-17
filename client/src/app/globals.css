@@ -14,7 +14,18 @@
 */
 
 body {
-  background: linear-gradient(#040531, #6682c8, #040531);
+background:
+  radial-gradient(
+    circle at 50% 40%,
+    rgba(90, 114, 191, 0.35),
+    transparent 60%
+  ),
+  linear-gradient(
+    180deg,
+    #171741 0%,
+    #5a72bf 50%,
+    #171741 100%
+  );
   color: var(--background);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   margin: 0;
