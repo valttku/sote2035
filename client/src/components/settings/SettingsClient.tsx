@@ -253,7 +253,7 @@ export default function SettingsClient() {
   return (
     <main className="min-h-screen w-full flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-4xl space-y-4">
-        <h1 className="text-5xl mb-10">Settings</h1>
+        <h1 className="text-5xl mb-5">Settings</h1>
 
         {/* PROFILE */}
         <section className="ui-component-styles p-4 rounded-2xl">
