@@ -25,6 +25,10 @@ button {
   cursor: pointer;
 }
 
+h2 {
+  color: rgba(179, 196, 243, 0.8);
+}
+
 input,
 textarea,
 select {
@@ -47,7 +51,7 @@ select:focus {
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   background-color: rgb(30 27 75 / 0.5);
   color: white;
-  border: 1px solid rgba(179, 196, 243, 0.8);
+  border: 2px solid rgba(179, 196, 243, 0.8);
 }
 
 /*Button-styles*/

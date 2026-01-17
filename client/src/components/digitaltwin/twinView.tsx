@@ -64,9 +64,9 @@ export default function TwinView() {
 
         {/* Guide + info-panel */}
         <div className="w-[320px] flex-shrink-0 mt-30 p-5">
-          <h2 className="mb-10 ml-2">
+          <p className="mb-10 ml-2">
             Select a body part by clicking on a white dot on the body
-          </h2>
+          </p>
 
           {selected && (
             <InfoPanel selected={selected} onClose={() => setSelected(null)} />

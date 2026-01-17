@@ -45,7 +45,7 @@ export default async function Sidebar() {
     "
     >
       <div>
-        <h1 className="text-3xl  mb-4">Digital Twin</h1>
+        <h2 className="text-3xl  mb-4">Digital Twin</h2>
         <p className="text-lg">{displayName}</p>
 
         <nav>

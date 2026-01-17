@@ -32,6 +32,10 @@ function daysInMonth(year: number, month1to12: number) {
   return new Date(year, month1to12, 0).getDate();
 }
 
+function getDaysOfWeek() {
+  return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+}
+
 export default function CalendarClient() {
   const now = useMemo(() => new Date(), []);
   const [year, setYear] = useState(now.getFullYear());
@@ -51,7 +55,7 @@ export default function CalendarClient() {
       try {
         const res = await fetch(
           `${API_BASE}/api/v1/calendar/month?year=${year}&month=${month}`,
-          { credentials: "include" }
+          { credentials: "include" },
         );
 
         const json: unknown = await res.json();
@@ -89,9 +93,9 @@ export default function CalendarClient() {
     try {
       const res = await fetch(
         `${API_BASE}/api/v1/calendar/health-stats?date=${encodeURIComponent(
-          date
+          date,
         )}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
 
       const json: unknown = await res.json();
@@ -158,6 +162,8 @@ export default function CalendarClient() {
   }
 
   const totalDays = daysInMonth(year, month);
+  const firstDay = new Date(year, month - 1, 1).getDay(); // 0=Sun..6=Sat
+  const offset = (firstDay + 6) % 7; // 0=Mon..6=Sun
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -169,16 +175,22 @@ export default function CalendarClient() {
         ui-component-styles
       "
       >
-        <h1 className="text-3xl">Calendar</h1>
+        <h2 className="text-3xl">Calendar</h2>
 
         <div className="flex items-center gap-2">
-          <button onClick={prevMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/20">
+          <button
+            onClick={prevMonth}
+            className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+          >
             Prev
           </button>
           <div className="font-semibold">
             {year}-{pad2(month)}
           </div>
-          <button onClick={nextMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/20">
+          <button
+            onClick={nextMonth}
+            className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+          >
             Next
           </button>
         </div>
@@ -186,6 +198,19 @@ export default function CalendarClient() {
         {error && <p className="text-red-600">{error}</p>}
 
         <section className="grid grid-cols-7 gap-2">
+          {getDaysOfWeek().map((day) => (
+            <div
+              key={day}
+              className="font-bold text-center pb-1"
+            >{day}</div>
+          ))}
+        </section>
+
+        <section className="grid grid-cols-7 gap-2">
+          {Array.from({ length: offset }).map((_, i) => (
+            <div key={`blank-${year}-${month}-${i}`} className="min-h-20 w-full" />
+          ))}
+
           {Array.from({ length: totalDays }, (_, i) => {
             const day = i + 1;
             const date = toYmd(year, month, day);
@@ -195,11 +220,11 @@ export default function CalendarClient() {
               <button
                 key={date}
                 onClick={() => openDay(date)}
-                className="border rounded text-left p-3 min-h-20 w-full overflow-hidden hover:bg-[#1aa5b0]/20"
+                className="border rounded min-h-20 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
                 title={hasData ? "Has health data" : "No health data"}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium leading-none">{day}</span>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="leading-none">{day}</span>
                   {hasData && (
                     <span className="text-xs leading-none shrink-0">•</span>
                   )}
