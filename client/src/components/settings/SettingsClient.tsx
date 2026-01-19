@@ -23,6 +23,14 @@ type PolarStatus =
       updated_at?: string;
     };
 
+const PASSWORD_REQUIREMENTS = [
+  { regex: /.{8,}/, text: "At least 8 characters" },
+  { regex: /[0-9]/, text: "At least 1 number" },
+  { regex: /[a-z]/, text: "At least 1 lowercase letter" },
+  { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+  { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
+] as const;
+
 export default function SettingsClient() {
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,15 +55,6 @@ export default function SettingsClient() {
 
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-
-  // Password requirements
-  const PASSWORD_REQUIREMENTS = [
-    { regex: /.{8,}/, text: "At least 8 characters" },
-    { regex: /[0-9]/, text: "At least 1 number" },
-    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
-    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
-    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
-  ];
 
   // Calculate strength score
   const strengthScore = useMemo(() => {
@@ -419,7 +418,7 @@ export default function SettingsClient() {
 
             {/* Password requirements list */}
             <ul className="space-y-1 mb-5" aria-label="Password requirements">
-              {requirements.map((req) => (
+              {PASSWORD_REQUIREMENTS.map((req) => (
                 <li
                   key={req.text}
                   className={`text-sm flex items-center gap-2 ${
