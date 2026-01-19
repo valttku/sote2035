@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import type { BodyPartId } from "./twinView";
+import type { BodyPartId } from "./DigitalTwinClient";
 
 type Props = {
   selected: BodyPartId;
