@@ -15,7 +15,6 @@ const TITLE: Record<BodyPartId, string> = {
 };
 
 /*Get health data from database */
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 type HealthMetrics = Record<string, string | number>;
 
 export default function HealthClient({ selected, onClose }: Props) {
@@ -24,48 +23,47 @@ export default function HealthClient({ selected, onClose }: Props) {
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
 
     async function fetchHealthMetrics() {
       setLoading(true);
       setError(null);
 
       try {
-        const date = "2026-01-18"; // example date, replace with actual date as needed
+        const date = "2026-01-18"; // replace later with chosen date
 
-        const url = `${API_BASE}/api/v1/digitalTwin?date=${date}&part=${selected}`;
-        console.log("Fetching:", url);
+        const res = await fetch(
+          `/api/v1/digitalTwin?date=${date}&part=${selected}`,
+          { credentials: "include"},
+        );
 
-        const response = await fetch(url);
-        const text = await response.text();
-        console.log("Status:", response.status, "Body:", text);
+        if (!res.ok) {
+          // Read body ONCE only in the error case
+          const bodyText = await res.text().catch(() => "");
+          console.log("Status:", res.status, "Body:", bodyText);
 
-        if (!response.ok)
-          throw new Error(`Request failed (${response.status})`);
+          if (res.status === 401) {
+            throw new Error("Unauthorized (401): please log in again.");
+          }
+          throw new Error(`Request failed (${res.status})`);
+        }
 
-        const data = JSON.parse(text);
-        if (!cancelled) setMetrics(data.metrics ?? {});
+        // OK case: parse JSON (don’t also read text)
+        const data = await res.json();
+        setMetrics(data.metrics ?? {});
       } catch (e: unknown) {
+        if ((e as any)?.name === "AbortError") return;
+
         console.error(e);
-        const message =
-          e instanceof Error ? e.message : "Failed to load metrics";
-        if (!cancelled) setError(message);
-        if (!cancelled) setMetrics({});
+        setMetrics({});
+        setError(e instanceof Error ? e.message : "Failed to load metrics");
       } finally {
-        if (!cancelled) setLoading(false);
-        {
-          loading && <p className="opacity-80">Loading…</p>;
-        }
-        {
-          error && <p className="text-red-400">{error}</p>;
-        }
+        setLoading(false);
       }
     }
 
     fetchHealthMetrics();
-    return () => {
-      cancelled = true;
-    };
+    return () => controller.abort();
   }, [selected]);
 
   return (

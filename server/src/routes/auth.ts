@@ -19,8 +19,7 @@ authRouter.post("/register", async (req, res, next) => {
       return res.status(400).json({ error: "Missing fields" });
 
     const existing = await findUserByEmail(email);
-    if (existing)
-      return res.status(409).json({ error: "User already exists" });
+    if (existing) return res.status(409).json({ error: "User already exists" });
 
     const hash = await bcrypt.hash(password, 10);
 
@@ -56,7 +55,7 @@ authRouter.post("/login", async (req, res, next) => {
       `insert into app.sessions (user_id, expires_at)
        values ($1, $2)
        returning id`,
-      [user.id, expires]
+      [user.id, expires],
     );
 
     const sessionId = result.rows[0].id;
@@ -67,6 +66,7 @@ authRouter.post("/login", async (req, res, next) => {
       secure: false, // true in production with HTTPS
       sameSite: "lax",
       path: "/",
+      domain: "localhost",
       expires,
     });
 
@@ -89,7 +89,7 @@ authRouter.post("/logout", async (req, res, next) => {
       await db.query(
         `delete from app.sessions
          where id = $1`,
-        [sessionId]
+        [sessionId],
       );
     }
 
@@ -99,6 +99,7 @@ authRouter.post("/logout", async (req, res, next) => {
       secure: false, // set to true in production with HTTPS
       sameSite: "lax",
       path: "/",
+      domain: "localhost",
     });
 
     res.json({ message: "Logged out" });
@@ -120,7 +121,7 @@ authRouter.post("/forgot-password", async (req, res, next) => {
 
     if (!user) {
       return res.json({
-        message: "If this email exists, a password reset email has been sent."
+        message: "If this email exists, a password reset email has been sent.",
       });
     }
 
@@ -128,7 +129,7 @@ authRouter.post("/forgot-password", async (req, res, next) => {
     await db.query(
       `delete from app.password_reset_tokens
        where user_id = $1`,
-      [user.id]
+      [user.id],
     );
 
     const token = crypto.randomUUID();
@@ -137,7 +138,7 @@ authRouter.post("/forgot-password", async (req, res, next) => {
     await db.query(
       `insert into app.password_reset_tokens (token, user_id, expires_at)
        values ($1, $2, $3)`,
-      [token, user.id, expires]
+      [token, user.id, expires],
     );
 
     // in production, send an email (not implemented yet)
@@ -145,7 +146,7 @@ authRouter.post("/forgot-password", async (req, res, next) => {
     console.log("Password reset token for", email, "=>", token);
 
     return res.json({
-      message: "If this email exists, a password reset email has been sent."
+      message: "If this email exists, a password reset email has been sent.",
     });
   } catch (e) {
     next(e);
@@ -164,7 +165,7 @@ authRouter.post("/reset-password", async (req, res, next) => {
       `select user_id, expires_at
        from app.password_reset_tokens
        where token = $1`,
-      [token]
+      [token],
     );
 
     if (result.rowCount === 0) {
@@ -174,10 +175,9 @@ authRouter.post("/reset-password", async (req, res, next) => {
     const { user_id, expires_at } = result.rows[0];
 
     if (new Date(expires_at).getTime() < Date.now()) {
-      await db.query(
-        `delete from app.password_reset_tokens where token = $1`,
-        [token]
-      );
+      await db.query(`delete from app.password_reset_tokens where token = $1`, [
+        token,
+      ]);
       return res.status(400).json({ error: "Invalid or expired token" });
     }
 
@@ -187,26 +187,25 @@ authRouter.post("/reset-password", async (req, res, next) => {
       `update app.users
        set password = $1
        where id = $2`,
-      [hash, user_id]
+      [hash, user_id],
     );
 
     // remove reset token
-    await db.query(
-      `delete from app.password_reset_tokens where token = $1`,
-      [token]
-    );
+    await db.query(`delete from app.password_reset_tokens where token = $1`, [
+      token,
+    ]);
 
     // delete all sessions
     await db.query(
       `delete from app.sessions
        where user_id = $1`,
-      [user_id]
+      [user_id],
     );
 
-    return res.json({ message: "Password has been reset. You can now log in." });
+    return res.json({
+      message: "Password has been reset. You can now log in.",
+    });
   } catch (e) {
     next(e);
   }
 });
-
-

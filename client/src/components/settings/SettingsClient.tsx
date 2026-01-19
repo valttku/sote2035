@@ -83,7 +83,7 @@ export default function SettingsClient() {
   const router = useRouter();
 
   async function loadPolarStatus() {
-    const res = await fetch(`${API_BASE}/api/v1/integrations/polar/status`, {
+    const res = await fetch(`/api/v1/integrations/polar/status`, {
       credentials: "include",
     });
 
@@ -94,7 +94,7 @@ export default function SettingsClient() {
   useEffect(() => {
     async function loadSettings() {
       try {
-        const res = await fetch(`${API_BASE}/api/v1/settings`, {
+        const res = await fetch(`/api/v1/settings`, {
           credentials: "include",
         });
 
@@ -120,7 +120,7 @@ export default function SettingsClient() {
   async function saveProfile() {
     setSavingProfile(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/settings/display-name`, {
+      const res = await fetch(`/api/v1/settings/display-name`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -155,7 +155,7 @@ export default function SettingsClient() {
 
     // Password strength check
     const failedReqs = requirements.filter(
-      (req) => !req.regex.test(newPassword)
+      (req) => !req.regex.test(newPassword),
     );
     if (failedReqs.length > 0) {
       alert(`Password isn't strong enough`);
@@ -164,7 +164,7 @@ export default function SettingsClient() {
 
     setChangingPassword(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/settings/password`, {
+      const res = await fetch(`/api/v1/settings/password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -202,7 +202,7 @@ export default function SettingsClient() {
 
     setPolarBusy(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/integrations/polar/unlink`, {
+      const res = await fetch(`/api/v1/integrations/polar/unlink`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -229,7 +229,7 @@ export default function SettingsClient() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/settings/delete-account`, {
+      const res = await fetch(`/api/v1/settings/delete-account`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -324,7 +324,9 @@ export default function SettingsClient() {
         {/* EDIT PROFILE MODAL */}
         {showEditProfile && (
           <Modal onClose={() => setShowEditProfile(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">Change display name</h2>
+            <h2 className="text-lg font-bold mb-4 text-center">
+              Change display name
+            </h2>
 
             <input
               className="block w-full"
@@ -355,7 +357,9 @@ export default function SettingsClient() {
         {/* CHANGE PASSWORD MODAL */}
         {showChangePassword && (
           <Modal onClose={() => setShowChangePassword(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">Change password</h2>
+            <h2 className="text-lg font-bold mb-4 text-center">
+              Change password
+            </h2>
 
             <div className="relative mb-2">
               <input
@@ -403,7 +407,7 @@ export default function SettingsClient() {
             >
               <div
                 className={`h-full ${getStrengthColor(
-                  strengthScore
+                  strengthScore,
                 )} transition-all duration-500 ease-out`}
                 style={{ width: `${(strengthScore / 5) * 100}%` }}
               ></div>

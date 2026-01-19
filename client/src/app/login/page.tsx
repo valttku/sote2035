@@ -22,7 +22,7 @@ export default function LoginPage() {
           ? { email, password, displayName }
           : { email, password };
 
-      const res = await fetch(`http://localhost:4000/api/v1/auth/${endpoint}`, {
+      const res = await fetch(`/api/v1/auth/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // IMPORTANT: allows cookie to be set
