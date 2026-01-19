@@ -6,11 +6,11 @@ export default function LogoutButton() {
   const router = useRouter();
 
   async function handleLogout() {
-    await fetch("http://localhost:4000/api/v1/auth/logout", {
+    await fetch("/api/v1/auth/logout", {
       method: "POST",
       credentials: "include",
     });
-
+    
     router.replace("/login");
   }
 

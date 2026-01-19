@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
-import HealthInfoPanel from "./healthInfoPanel";
+import HealthStatsPanel from "./healthStatsPanel";
 
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
@@ -69,7 +69,7 @@ export default function TwinView() {
           </p>
 
           {selected && (
-            <HealthInfoPanel selected={selected} onClose={() => setSelected(null)} />
+            <HealthStatsPanel selected={selected} onClose={() => setSelected(null)} />
           )}
         </div>
       </div>

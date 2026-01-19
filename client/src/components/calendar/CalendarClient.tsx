@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Modal from "../Modal";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import HealthStatsList from "../calendar/HealthStatsList";
 
 type DayStatsEntry = {
   id: string;
@@ -54,7 +53,7 @@ export default function CalendarClient() {
 
       try {
         const res = await fetch(
-          `${API_BASE}/api/v1/calendar/month?year=${year}&month=${month}`,
+          `/api/v1/calendar/month?year=${year}&month=${month}`,
           { credentials: "include" },
         );
 
@@ -92,9 +91,7 @@ export default function CalendarClient() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/calendar/health-stats?date=${encodeURIComponent(
-          date,
-        )}`,
+        `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
         { credentials: "include" },
       );
 
@@ -199,16 +196,18 @@ export default function CalendarClient() {
 
         <section className="grid grid-cols-7 gap-2">
           {getDaysOfWeek().map((day) => (
-            <div
-              key={day}
-              className="font-bold text-center pb-1"
-            >{day}</div>
+            <div key={day} className="font-bold text-center pb-1">
+              {day}
+            </div>
           ))}
         </section>
 
         <section className="grid grid-cols-7 gap-2">
           {Array.from({ length: offset }).map((_, i) => (
-            <div key={`blank-${year}-${month}-${i}`} className="min-h-20 w-full" />
+            <div
+              key={`blank-${year}-${month}-${i}`}
+              className="min-h-20 w-full"
+            />
           ))}
 
           {Array.from({ length: totalDays }, (_, i) => {
@@ -252,10 +251,7 @@ export default function CalendarClient() {
             {!loadingDay && dayStats && (
               <div className="space-y-2">
                 <p className="text-sm">Entries: {dayStats.entries.length}</p>
-
-                <pre className="text-xs border p-2 rounded overflow-auto max-h-64">
-                  {JSON.stringify(dayStats.entries, null, 2)}
-                </pre>
+                <HealthStatsList entries={dayStats.entries} />
               </div>
             )}
 
