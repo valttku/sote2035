@@ -1,7 +1,7 @@
-import { env } from './config/env.js';
-import express from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
+import { env } from "./config/env.js";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 import { ensureSchema } from "./db/init.js";
 import { dbOk } from "./db/health.js";
@@ -11,6 +11,7 @@ import { authRouter } from "./routes/auth.js";
 import { calendarRouter } from "./routes/calendar.js";
 import { settingsRouter } from "./routes/settings.js";
 import { meRouter } from "./routes/me.js";
+import { digitalTwinRouter } from "./routes/digitalTwinRouter.js";
 
 import { polarRouter } from "./routes/integrations/polar.js";
 
@@ -18,17 +19,19 @@ import { errorHandler } from "./middleware/error.js";
 
 const app = express();
 
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(cookieParser());
 
 // health and status check
-app.get('/health', (_req, res) => res.json({ ok: true }));
-app.get('/api/v1/status', (_req, res) => res.json({ api: 'v1', ok: true }));
+app.get("/health", (_req, res) => res.json({ ok: true }));
+app.get("/api/v1/status", (_req, res) => res.json({ api: "v1", ok: true }));
 
 // database connectivity check
 app.get("/health/db", async (_req, res) => {
@@ -45,6 +48,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/calendar", calendarRouter);
 app.use("/api/v1/settings", settingsRouter);
 app.use("/api/v1/me", meRouter);
+app.use("/api/v1/digitalTwin", digitalTwinRouter);
 
 // providers (polar, garmin etc.)
 app.use("/api/v1/integrations/polar", polarRouter);

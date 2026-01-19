@@ -14,7 +14,7 @@ export default function LoginPage() {
     endpoint: "login" | "register",
     email: string,
     password: string,
-    displayName?: string | null
+    displayName?: string | null,
   ) {
     try {
       const body =
