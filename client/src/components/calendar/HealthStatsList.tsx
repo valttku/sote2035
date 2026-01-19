@@ -38,7 +38,7 @@ export default function HealthStatsList({ entries }: { entries: DayStatsEntry[] 
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 h-96 overflow-y-auto">
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">

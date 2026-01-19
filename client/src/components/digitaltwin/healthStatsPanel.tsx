@@ -30,7 +30,10 @@ export default function HealthClient({ selected, onClose }: Props) {
       setError(null);
 
       try {
-        const date = "2026-01-18"; // replace later with chosen date
+
+        //const date = "2026-01-19"; // to test with a fixed date
+
+        const date = new Date().toISOString().split("T")[0];
 
         const res = await fetch(
           `/api/v1/digitalTwin?date=${date}&part=${selected}`,
@@ -47,6 +50,14 @@ export default function HealthClient({ selected, onClose }: Props) {
           }
           throw new Error(`Request failed (${res.status})`);
         }
+
+        const data: unknown = await res.json();
+        const metricsObj =
+          typeof data === "object" && data !== null && "metrics" in data
+            ? ((data as { metrics?: HealthMetrics }).metrics ?? {})
+            : {};
+
+        setMetrics(metricsObj);
 
         // OK case: parse JSON (don’t also read text)
       } catch (e: unknown) {
@@ -78,6 +89,13 @@ export default function HealthClient({ selected, onClose }: Props) {
           ✕
         </button>
       </div>
+
+      {loading && <p className="opacity-80">Loading…</p>}
+      {error && <p className="text-red-400">{error}</p>}
+
+      {!loading && !error && Object.keys(metrics).length === 0 && (
+        <p className="opacity-80 text-sm">No metrics for this day.</p>
+      )}
 
       <ul>
         {Object.entries(metrics).map(([k, v]) => (

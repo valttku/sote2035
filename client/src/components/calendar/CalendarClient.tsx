@@ -83,9 +83,15 @@ export default function CalendarClient() {
     loadMonth();
   }, [year, month]);
 
-  async function openDay(date: string) {
+  function openDay(date: string) {
     setSelectedDate(date);
     setDayStats(null);
+    setError(null);
+    setLoadingDay(false);
+  }
+
+  // Fetches health stats
+  async function loadHealthStats(date: string) {
     setLoadingDay(true);
     setError(null);
 
@@ -107,7 +113,6 @@ export default function CalendarClient() {
         return;
       }
 
-      // Minimal runtime shape check
       if (
         typeof json === "object" &&
         json !== null &&
@@ -126,6 +131,12 @@ export default function CalendarClient() {
     } finally {
       setLoadingDay(false);
     }
+  }
+
+  function closeHealthStats() {
+    setDayStats(null);
+    setError(null);
+    setLoadingDay(false);
   }
 
   function closeModal() {
@@ -166,11 +177,11 @@ export default function CalendarClient() {
     <div className="min-h-screen flex items-center justify-center">
       <div
         className="
-        p-6 space-y-6 mx-auto
-        w-full max-w-4xl
-        rounded-2xl
-        ui-component-styles
-      "
+          p-6 space-y-6 mx-auto
+          w-full max-w-4xl
+          rounded-2xl
+          ui-component-styles
+        "
       >
         <h2 className="text-3xl">Calendar</h2>
 
@@ -192,7 +203,7 @@ export default function CalendarClient() {
           </button>
         </div>
 
-        {error && <p className="text-red-600">{error}</p>}
+        {error && !selectedDate && <p className="text-red-600">{error}</p>}
 
         <section className="grid grid-cols-7 gap-2">
           {getDaysOfWeek().map((day) => (
@@ -237,28 +248,40 @@ export default function CalendarClient() {
           <Modal onClose={closeModal}>
             <h2 className="text-lg font-bold mb-2">{selectedDate}</h2>
 
-            <button
-              type="button"
-              className="button-style-blue w-full mb-3 disabled:opacity-50"
-              onClick={() => openDay(selectedDate)}
-              disabled={loadingDay}
-            >
-              {loadingDay ? "Loading..." : "Health Stats"}
-            </button>
+            {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
 
-            {loadingDay && <p className="text-sm">Loading entries...</p>}
-
-            {!loadingDay && dayStats && (
+            {loadingDay ? (
+              <button
+                type="button"
+                className="button-style-blue w-full mb-3 disabled:opacity-50"
+                disabled
+              >
+                Loading...
+              </button>
+            ) : dayStats ? (
               <div className="space-y-2">
                 <p className="text-sm">Entries: {dayStats.entries.length}</p>
                 <HealthStatsList entries={dayStats.entries} />
+                <button
+                  onClick={closeHealthStats}
+                  className="cancel-button-style w-full mt-4"
+                >
+                  Close Health Stats
+                </button>
               </div>
+            ) : (
+              <button
+                type="button"
+                className="button-style-blue w-full mb-3"
+                onClick={() => loadHealthStats(selectedDate)}
+                disabled={loadingDay}
+              >
+                Health Stats
+              </button>
             )}
 
-            {!loadingDay && !dayStats && (
-              <p className="text-sm text-gray-600">
-                Click &quot;Health Stats&quot; to load data for this day.
-              </p>
+            {!loadingDay && !dayStats && !error && (
+              <p>Click &quot;Health Stats&quot; to load data for this day.</p>
             )}
           </Modal>
         )}
