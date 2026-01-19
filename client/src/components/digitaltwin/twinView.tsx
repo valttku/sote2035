@@ -25,7 +25,7 @@ export default function TwinView() {
 
   return (
     <div className="min-h-screen w-full min-w-0 mx-auto overflow-x-hidden">
-      <div className="flex items-start justify-start gap-[15%] min-w-0 flex-col md:flex-row">
+      <div className="flex items-start justify-between min-w-0 flex-col md:flex-row mr-[20%]">
         <h1 className="text-5xl mt-10 ml-10 shrink-0">Today</h1>
 
         {/* Avatar + dots */}

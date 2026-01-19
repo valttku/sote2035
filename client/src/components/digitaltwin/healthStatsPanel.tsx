@@ -28,9 +28,9 @@ export default function HealthClient({ selected, onClose }: Props) {
     async function fetchHealthMetrics() {
       setLoading(true);
       setError(null);
+      setMetrics({});
 
       try {
-
         //const date = "2026-01-19"; // to test with a fixed date
 
         const date = new Date().toISOString().split("T")[0];
@@ -58,8 +58,6 @@ export default function HealthClient({ selected, onClose }: Props) {
             : {};
 
         setMetrics(metricsObj);
-
-        // OK case: parse JSON (don’t also read text)
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === "AbortError") return;
 
@@ -68,12 +66,6 @@ export default function HealthClient({ selected, onClose }: Props) {
         setError(e instanceof Error ? e.message : "Failed to load metrics");
       } finally {
         setLoading(false);
-        {
-          loading && <p className="opacity-80">Loading…</p>;
-        }
-        {
-          error && <p className="text-red-400">{error}</p>;
-        }
       }
     }
 
