@@ -58,10 +58,6 @@ export async function getHealthData(
         metrics["Training load"] = data.training_load;
     }
 
-    if (row.kind === "spo2_daily" && data.spo2 != null) {
-      metrics["SpO₂"] = `${data.spo2}%`;
-    }
-
     if (row.kind === "resp_daily" && data.resp_rate != null) {
       metrics["Resp rate"] = data.resp_rate;
     }

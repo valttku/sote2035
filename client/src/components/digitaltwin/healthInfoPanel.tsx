@@ -45,14 +45,20 @@ export default function HealthClient({ selected, onClose }: Props) {
 
         const data = JSON.parse(text);
         if (!cancelled) setMetrics(data.metrics ?? {});
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error(e);
-        if (!cancelled) {
-          setError(e?.message ?? "Failed to load metrics");
-          setMetrics({});
-        }
+        const message =
+          e instanceof Error ? e.message : "Failed to load metrics";
+        if (!cancelled) setError(message);
+        if (!cancelled) setMetrics({});
       } finally {
         if (!cancelled) setLoading(false);
+        {
+          loading && <p className="opacity-80">Loading…</p>;
+        }
+        {
+          error && <p className="text-red-400">{error}</p>;
+        }
       }
     }
 
