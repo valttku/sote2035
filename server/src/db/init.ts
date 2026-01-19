@@ -1,7 +1,6 @@
 import { db } from "./db.js";
 
 export async function ensureSchema() {
-  
   // make sure the "app" schema exists
   await db.query(`
     create schema if not exists app;
@@ -101,11 +100,25 @@ export async function ensureSchema() {
     kind varchar(80) not null,  -- free text for now
     data jsonb not null,
 
-    created_at timestamptz not null default now()
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
   );
 
   create index if not exists idx_health_stat_entries_user_day
     on app.health_stat_entries (user_id, day_date);
+
+  create unique index if not exists ux_health_stat_entries_user_day_kind
+  on app.health_stat_entries (user_id, day_date, kind);
+`);
+
+  // automatically update health_stat_entries
+  await db.query(`
+  drop trigger if exists update_health_stat_entries_updated_at on app.health_stat_entries;
+
+  create trigger update_health_stat_entries_updated_at
+  before update on app.health_stat_entries
+  for each row
+  execute function app.update_updated_at_column();
 `);
 
   // keep health_days in sync: inserting health data auto-creates the day row
@@ -123,11 +136,10 @@ export async function ensureSchema() {
     drop trigger if exists trg_ensure_health_day_exists on app.health_stat_entries;
 
     create trigger trg_ensure_health_day_exists
-    after insert on app.health_stat_entries
+    after insert or update on app.health_stat_entries
     for each row
     execute function app.ensure_health_day_exists();
   `);
-
 
   // store external provider connections (Polar, Garmin, etc.)
   await db.query(`
@@ -167,5 +179,4 @@ export async function ensureSchema() {
     create index if not exists idx_oauth_states_expires_at
       on app.oauth_states (expires_at);
   `);
-  
 }

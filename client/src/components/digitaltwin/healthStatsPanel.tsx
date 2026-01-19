@@ -28,9 +28,12 @@ export default function HealthClient({ selected, onClose }: Props) {
     async function fetchHealthMetrics() {
       setLoading(true);
       setError(null);
+      setMetrics({});
 
       try {
-        const date = "2026-01-18"; // replace later with chosen date
+        //const date = "2026-01-19"; // to test with a fixed date
+
+        const date = new Date().toISOString().split("T")[0];
 
         const res = await fetch(
           `/api/v1/digitalTwin?date=${date}&part=${selected}`,
@@ -48,7 +51,13 @@ export default function HealthClient({ selected, onClose }: Props) {
           throw new Error(`Request failed (${res.status})`);
         }
 
-        // OK case: parse JSON (don’t also read text)
+        const data: unknown = await res.json();
+        const metricsObj =
+          typeof data === "object" && data !== null && "metrics" in data
+            ? ((data as { metrics?: HealthMetrics }).metrics ?? {})
+            : {};
+
+        setMetrics(metricsObj);
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === "AbortError") return;
 
@@ -57,12 +66,6 @@ export default function HealthClient({ selected, onClose }: Props) {
         setError(e instanceof Error ? e.message : "Failed to load metrics");
       } finally {
         setLoading(false);
-        {
-          loading && <p className="opacity-80">Loading…</p>;
-        }
-        {
-          error && <p className="text-red-400">{error}</p>;
-        }
       }
     }
 
@@ -78,6 +81,13 @@ export default function HealthClient({ selected, onClose }: Props) {
           ✕
         </button>
       </div>
+
+      {loading && <p className="opacity-80">Loading…</p>}
+      {error && <p className="text-red-400">{error}</p>}
+
+      {!loading && !error && Object.keys(metrics).length === 0 && (
+        <p className="opacity-80 text-sm">No metrics for this day.</p>
+      )}
 
       <ul>
         {Object.entries(metrics).map(([k, v]) => (
