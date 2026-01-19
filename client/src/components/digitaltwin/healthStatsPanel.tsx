@@ -34,7 +34,7 @@ export default function HealthClient({ selected, onClose }: Props) {
 
         const res = await fetch(
           `/api/v1/digitalTwin?date=${date}&part=${selected}`,
-          { credentials: "include"},
+          { credentials: "include" },
         );
 
         if (!res.ok) {
@@ -49,16 +49,20 @@ export default function HealthClient({ selected, onClose }: Props) {
         }
 
         // OK case: parse JSON (don’t also read text)
-        const data = await res.json();
-        setMetrics(data.metrics ?? {});
       } catch (e: unknown) {
-        if ((e as any)?.name === "AbortError") return;
+        if (e instanceof DOMException && e.name === "AbortError") return;
 
         console.error(e);
         setMetrics({});
         setError(e instanceof Error ? e.message : "Failed to load metrics");
       } finally {
         setLoading(false);
+        {
+          loading && <p className="opacity-80">Loading…</p>;
+        }
+        {
+          error && <p className="text-red-400">{error}</p>;
+        }
       }
     }
 

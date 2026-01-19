@@ -5,7 +5,11 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 export default function RegisterForm({
   onSubmit,
 }: {
-  onSubmit: (email: string, password: string, displayName: string | null) => void;
+  onSubmit: (
+    email: string,
+    password: string,
+    displayName: string | null,
+  ) => void;
 }) {
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -27,17 +31,18 @@ export default function RegisterForm({
   const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
   // Password requirements
-  const requirements = [
-      { regex: /.{8,}/, text: "At least 8 characters" },
-      { regex: /[0-9]/, text: "At least 1 number" },
-      { regex: /[a-z]/, text: "At least 1 lowercase letter" },
-      { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
-      { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
+  const PASSWORD_REQUIREMENTS = [
+    { regex: /.{8,}/, text: "At least 8 characters" },
+    { regex: /[0-9]/, text: "At least 1 number" },
+    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
+    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
   ];
 
   // Calculate strength score
   const strengthScore = useMemo(() => {
-    return requirements.filter((req) => req.regex.test(password)).length;
+    return PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(password))
+      .length;
   }, [password]);
 
   // Get color for strength indicator
@@ -68,9 +73,13 @@ export default function RegisterForm({
     }
 
     // Password strength check
-    const failedReqs = requirements.filter((req) => !req.regex.test(password));
+    const failedReqs = PASSWORD_REQUIREMENTS.filter(
+      (req) => !req.regex.test(password),
+    );
     if (failedReqs.length > 0) {
-      setPasswordError(`Password must have: ${failedReqs.map(r => r.text).join(", ")}`);
+      setPasswordError(
+        `Password must have: ${failedReqs.map((r) => r.text).join(", ")}`,
+      );
       if (ok) passwordRef.current?.focus();
       ok = false;
     } else {
@@ -102,9 +111,7 @@ export default function RegisterForm({
       <h2 className="text-3xl mb-8 text-center">REGISTER</h2>
 
       {/* Email */}
-      <label htmlFor="reg-email">
-        Email
-      </label>
+      <label htmlFor="reg-email">Email</label>
       <input
         id="reg-email"
         ref={emailRef}
@@ -126,9 +133,7 @@ export default function RegisterForm({
       )}
 
       {/* Display Name */}
-      <label htmlFor="reg-displayname">
-        Display Name
-      </label>
+      <label htmlFor="reg-displayname">Display Name</label>
       <input
         type="text"
         value={displayName}
@@ -138,9 +143,7 @@ export default function RegisterForm({
       />
 
       {/* Password */}
-      <label htmlFor="reg-password">
-        Password
-      </label>
+      <label htmlFor="reg-password">Password</label>
       <div className="relative">
         <input
           id="reg-password"
@@ -181,31 +184,25 @@ export default function RegisterForm({
       </div>
 
       {/* Password strength description */}
-      <p
-        id="password-strength"
-        className="text-sm font-medium mb-2"
-      >
+      <p id="password-strength" className="text-sm font-medium mb-2">
         {getStrengthText(strengthScore)}. Password must contain:
       </p>
 
-
       {/* Password requirements list */}
       <ul className="space-y-1" aria-label="Password requirements">
-        {requirements.map((req) => (
+        {PASSWORD_REQUIREMENTS.map((req) => (
           <li
-        key={req.text}
-        className={`text-sm flex items-center gap-2 ${req.regex.test(password) ? "text-green-600" : "text-red-500"}`}
+            key={req.text}
+            className={`text-sm flex items-center gap-2 ${req.regex.test(password) ? "text-green-600" : "text-red-500"}`}
           >
-        {req.text}
-        {req.regex.test(password) ? "✓" : "✕"}
+            {req.text}
+            {req.regex.test(password) ? "✓" : "✕"}
           </li>
         ))}
       </ul>
 
       {/* Confirm Password */}
-      <label htmlFor="reg-confirm">
-        Confirm Password
-      </label>
+      <label htmlFor="reg-confirm">Confirm Password</label>
       <div className="relative">
         <input
           id="reg-confirm"

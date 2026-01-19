@@ -23,8 +23,6 @@ type PolarStatus =
       updated_at?: string;
     };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
 export default function SettingsClient() {
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +49,7 @@ export default function SettingsClient() {
   const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Password requirements
-  const requirements = [
+  const PASSWORD_REQUIREMENTS = [
     { regex: /.{8,}/, text: "At least 8 characters" },
     { regex: /[0-9]/, text: "At least 1 number" },
     { regex: /[a-z]/, text: "At least 1 lowercase letter" },
@@ -61,7 +59,8 @@ export default function SettingsClient() {
 
   // Calculate strength score
   const strengthScore = useMemo(() => {
-    return requirements.filter((req) => req.regex.test(newPassword)).length;
+    return PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(newPassword))
+      .length;
   }, [newPassword]);
 
   // Get color for strength indicator
@@ -154,7 +153,7 @@ export default function SettingsClient() {
     }
 
     // Password strength check
-    const failedReqs = requirements.filter(
+    const failedReqs = PASSWORD_REQUIREMENTS.filter(
       (req) => !req.regex.test(newPassword),
     );
     if (failedReqs.length > 0) {
@@ -194,7 +193,7 @@ export default function SettingsClient() {
 
   function linkPolar() {
     // This endpoint redirects to Polar Flow OAuth
-    window.location.href = `${API_BASE}/api/v1/integrations/polar/connect`;
+    window.location.href = `/api/v1/integrations/polar/connect`;
   }
 
   async function unlinkPolar() {
