@@ -2,9 +2,6 @@
 
 import { useState } from "react";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
@@ -18,13 +15,17 @@ export default function ForgotPasswordPage() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/auth/forgot-password`,
+        "http://localhost:4000/api/v1/auth/forgot-password",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({ email }),
-        }
+        },
       );
+
+      if (!res.ok) throw new Error("Server error");
 
       // Response is intentionally generic
       await res.json();
@@ -39,18 +40,14 @@ export default function ForgotPasswordPage() {
   if (done) {
     return (
       <main className="p-6 max-w-md mx-auto">
-        <h1 className="text-xl font-bold mb-2">
-          Check your email
-        </h1>
+        <h1 className="text-xl font-bold mb-2">Check your email</h1>
 
         <p className="mb-4">
-          If an account exists for this email, a password reset link has been sent.
+          If an account exists for this email, a password reset link has been
+          sent.
         </p>
 
-        <a
-          href="/login"
-          className="text-sm text-blue-600 underline"
-        >
+        <a href="/login" className="text-sm text-blue-600 underline">
           Back to login
         </a>
       </main>
@@ -59,9 +56,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="p-6 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">
-        Forgot password
-      </h1>
+      <h1 className="text-xl font-bold mb-4">Forgot password</h1>
 
       <form onSubmit={handleSubmit} className="space-y-2">
         <input
@@ -82,15 +77,10 @@ export default function ForgotPasswordPage() {
         </button>
       </form>
 
-      {error && (
-        <p className="text-red-600 text-sm mt-2">{error}</p>
-      )}
+      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
       <div className="mt-4">
-        <a
-          href="/login"
-          className="text-sm text-blue-600 underline"
-        >
+        <a href="/login" className="text-sm text-blue-600 underline">
           Back to login
         </a>
       </div>

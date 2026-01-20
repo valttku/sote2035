@@ -14,7 +14,18 @@
 */
 
 body {
-  background: linear-gradient(#040531, #6682c8, #040531);
+background:
+  radial-gradient(
+    circle at 50% 40%,
+    rgba(90, 114, 191, 0.35),
+    transparent 60%
+  ),
+  linear-gradient(
+    180deg,
+    #171741 0%,
+    #5a72bf 50%,
+    #171741 100%
+  );
   color: var(--background);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   margin: 0;
@@ -23,6 +34,10 @@ body {
 
 button {
   cursor: pointer;
+}
+
+h2 {
+  color: rgba(179, 196, 243, 0.8);
 }
 
 input,
@@ -47,7 +62,7 @@ select:focus {
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   background-color: rgb(30 27 75 / 0.5);
   color: white;
-  border: 1px solid rgba(179, 196, 243, 0.8);
+  border: 2px solid rgba(179, 196, 243, 0.8);
 }
 
 /*Button-styles*/

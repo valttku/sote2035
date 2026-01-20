@@ -23,12 +23,12 @@ export default async function Sidebar() {
   }
 
   // fetch user info from backend
-  const res = await fetch(`${base}/api/v1/me`, {
-    method: "GET",
+  const res = await fetch("http://localhost:3000/api/v1/me", {
+    cache: "no-store",
     headers: {
+      // forward cookies explicitly for server fetch
       Cookie: `session=${session}`,
     },
-    cache: "no-store",
   });
 
   if (!res.ok) return null;
@@ -48,7 +48,7 @@ export default async function Sidebar() {
     "
     >
       <div>
-        <h1 className="text-3xl  mb-4">Digital Twin</h1>
+        <h2 className="text-3xl  mb-4">Digital Twin</h2>
         <p className="text-lg">{displayName}</p>
 
         <nav>

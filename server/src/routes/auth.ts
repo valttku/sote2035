@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import { transporter } from "../nodemailer";
 import {
   createUser,
   findUserByEmail,
@@ -19,8 +20,7 @@ authRouter.post("/register", async (req, res, next) => {
       return res.status(400).json({ error: "Missing fields" });
 
     const existing = await findUserByEmail(email);
-    if (existing)
-      return res.status(409).json({ error: "User already exists" });
+    if (existing) return res.status(409).json({ error: "User already exists" });
 
     const hash = await bcrypt.hash(password, 10);
 
@@ -56,7 +56,7 @@ authRouter.post("/login", async (req, res, next) => {
       `insert into app.sessions (user_id, expires_at)
        values ($1, $2)
        returning id`,
-      [user.id, expires]
+      [user.id, expires],
     );
 
     const sessionId = result.rows[0].id;
@@ -67,6 +67,7 @@ authRouter.post("/login", async (req, res, next) => {
       secure: false, // true in production with HTTPS
       sameSite: "lax",
       path: "/",
+      domain: "localhost",
       expires,
     });
 
@@ -89,7 +90,7 @@ authRouter.post("/logout", async (req, res, next) => {
       await db.query(
         `delete from app.sessions
          where id = $1`,
-        [sessionId]
+        [sessionId],
       );
     }
 
@@ -99,6 +100,7 @@ authRouter.post("/logout", async (req, res, next) => {
       secure: false, // set to true in production with HTTPS
       sameSite: "lax",
       path: "/",
+      domain: "localhost",
     });
 
     res.json({ message: "Logged out" });
@@ -111,102 +113,96 @@ authRouter.post("/logout", async (req, res, next) => {
 authRouter.post("/forgot-password", async (req, res, next) => {
   try {
     const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
+    if (!email) return res.status(400).json({ error: "Email required" });
 
     const user = await findUserByEmail(email);
 
     if (!user) {
+      // Always respond the same way for security
       return res.json({
-        message: "If this email exists, a password reset email has been sent."
+        message: "If this email exists, a password reset email has been sent.",
       });
     }
 
-    // removing possible old tokens
-    await db.query(
-      `delete from app.password_reset_tokens
-       where user_id = $1`,
-      [user.id]
-    );
+    // Remove old tokens
+    await db.query(`DELETE FROM app.password_reset_tokens WHERE user_id = $1`, [
+      user.id,
+    ]);
 
+    // Create new token
     const token = crypto.randomUUID();
-    const expires = new Date(Date.now() + 60 * 60 * 1000); // expires in 1 hour
-
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await db.query(
-      `insert into app.password_reset_tokens (token, user_id, expires_at)
-       values ($1, $2, $3)`,
-      [token, user.id, expires]
+      `INSERT INTO app.password_reset_tokens (token, user_id, expires_at)
+       VALUES ($1, $2, $3)`,
+      [token, user.id, expires],
     );
 
-    // in production, send an email (not implemented yet)
-    // during development, show the token in console:
-    console.log("Password reset token for", email, "=>", token);
+    // Create reset URL
+    const resetUrl = `http://localhost:3000/reset-password?token=${token}`;
+
+    // Send the actual email
+    await transporter.sendMail({
+      from: `"Digital Twin" <${process.env.MAIL_USER}>`,
+      to: email,
+      subject: "Reset your password",
+      html: `
+        <p>You requested a password reset.</p>
+        <p>Click <a href="${resetUrl}">here</a> to reset your password.</p>
+        <p>This link will expire in 1 hour.</p>
+      `,
+    });
+
+    console.log("Password reset email sent to", email);
 
     return res.json({
-      message: "If this email exists, a password reset email has been sent."
+      message: "If this email exists, a password reset email has been sent.",
     });
-  } catch (e) {
-    next(e);
+  } catch (err) {
+    next(err);
   }
 });
 
-// reset password (after user clicks the link in email)
+// reset password
 authRouter.post("/reset-password", async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;
 
-    if (!token || !newPassword)
-      return res.status(400).json({ error: "Missing fields" });
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: "Token and new password required" });
+    }
 
+    // Find token in DB
     const result = await db.query(
-      `select user_id, expires_at
-       from app.password_reset_tokens
-       where token = $1`,
-      [token]
+      `SELECT user_id, expires_at FROM app.password_reset_tokens WHERE token = $1`,
+      [token],
     );
 
-    if (result.rowCount === 0) {
+    if (!result.rows.length) {
       return res.status(400).json({ error: "Invalid or expired token" });
     }
 
     const { user_id, expires_at } = result.rows[0];
-
-    if (new Date(expires_at).getTime() < Date.now()) {
-      await db.query(
-        `delete from app.password_reset_tokens where token = $1`,
-        [token]
-      );
-      return res.status(400).json({ error: "Invalid or expired token" });
+    if (new Date() > expires_at) {
+      return res.status(400).json({ error: "Token expired" });
     }
 
+    // Hash the new password
     const hash = await bcrypt.hash(newPassword, 10);
 
-    await db.query(
-      `update app.users
-       set password = $1
-       where id = $2`,
-      [hash, user_id]
-    );
+    // Update user password
+    await db.query(`UPDATE app.users SET password = $1 WHERE id = $2`, [
+      hash,
+      user_id,
+    ]);
 
-    // remove reset token
-    await db.query(
-      `delete from app.password_reset_tokens where token = $1`,
-      [token]
-    );
+    // Delete the token after use
+    await db.query(`DELETE FROM app.password_reset_tokens WHERE token = $1`, [
+      token,
+    ]);
 
-    // delete all sessions
-    await db.query(
-      `delete from app.sessions
-       where user_id = $1`,
-      [user_id]
-    );
-
-    return res.json({ message: "Password has been reset. You can now log in." });
-  } catch (e) {
-    next(e);
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    next(err);
   }
 });
-
-

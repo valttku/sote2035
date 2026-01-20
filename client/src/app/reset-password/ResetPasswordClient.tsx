@@ -3,9 +3,6 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
 export default function ResetPasswordPage() {
   const params = useSearchParams();
   const token = params.get("token");
@@ -19,9 +16,7 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <main className="p-6 max-w-md mx-auto">
-        <p className="text-red-600">
-          Invalid or missing reset token.
-        </p>
+        <p className="text-red-600">Invalid or missing reset token.</p>
       </main>
     );
   }
@@ -44,12 +39,14 @@ export default function ResetPasswordPage() {
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/auth/reset-password`,
+        "http://localhost:4000/api/v1/auth/reset-password",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({ token, newPassword: password }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -68,16 +65,14 @@ export default function ResetPasswordPage() {
 
   return (
     <main className="p-6 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">
-        Reset password
-      </h1>
+      <h1 className="text-xl font-bold mb-4">Reset password</h1>
 
       <form onSubmit={handleSubmit} className="space-y-2">
         <input
           type="password"
           placeholder="New password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           className="border p-2 w-full"
           required
         />
@@ -86,7 +81,7 @@ export default function ResetPasswordPage() {
           type="password"
           placeholder="Confirm password"
           value={confirm}
-          onChange={e => setConfirm(e.target.value)}
+          onChange={(e) => setConfirm(e.target.value)}
           className="border p-2 w-full"
           required
         />
@@ -100,9 +95,7 @@ export default function ResetPasswordPage() {
         </button>
       </form>
 
-      {error && (
-        <p className="text-red-600 text-sm mt-2">{error}</p>
-      )}
+      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
     </main>
   );
 }

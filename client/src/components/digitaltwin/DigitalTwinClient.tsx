@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
-import InfoPanel from "./infoPanel";
+import HealthStatsPanel from "./healthStatsPanel";
 
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
@@ -25,11 +25,11 @@ export default function TwinView() {
 
   return (
     <div className="min-h-screen w-full min-w-0 mx-auto overflow-x-hidden">
-      <div className="flex items-start justify-start gap-[12%] min-w-0 ">
+      <div className="flex items-start justify-between min-w-0 flex-col md:flex-row mr-[20%]">
         <h1 className="text-5xl mt-10 ml-10 shrink-0">Today</h1>
 
         {/* Avatar + dots */}
-        <div className="relative w-[230px] mt-45 shrink-0">
+        <div className="relative w-[230px] mt-10 md:mt-45 ml-[10%] md:ml-[5%] shrink-0">
           <img
             src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
             alt="Digital twin"
@@ -63,13 +63,13 @@ export default function TwinView() {
         </div>
 
         {/* Guide + info-panel */}
-        <div className="w-[320px] flex-shrink-0 mt-30 p-5">
-          <h2 className="mb-10 ml-2">
+        <div className="w-full max-w-[320px] flex-shrink-0 mt-5 md:mt-30 p-5">
+          <p className="mb-10 ml-2">
             Select a body part by clicking on a white dot on the body
-          </h2>
+          </p>
 
           {selected && (
-            <InfoPanel selected={selected} onClose={() => setSelected(null)} />
+            <HealthStatsPanel selected={selected} onClose={() => setSelected(null)} />
           )}
         </div>
       </div>

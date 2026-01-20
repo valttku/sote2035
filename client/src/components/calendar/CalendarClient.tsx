@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Modal from "../Modal";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import HealthStatsList from "../calendar/HealthStatsList";
 
 type DayStatsEntry = {
   id: string;
@@ -32,6 +31,10 @@ function daysInMonth(year: number, month1to12: number) {
   return new Date(year, month1to12, 0).getDate();
 }
 
+function getDaysOfWeek() {
+  return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+}
+
 export default function CalendarClient() {
   const now = useMemo(() => new Date(), []);
   const [year, setYear] = useState(now.getFullYear());
@@ -50,8 +53,8 @@ export default function CalendarClient() {
 
       try {
         const res = await fetch(
-          `${API_BASE}/api/v1/calendar/month?year=${year}&month=${month}`,
-          { credentials: "include" }
+          `/api/v1/calendar/month?year=${year}&month=${month}`,
+          { credentials: "include" },
         );
 
         const json: unknown = await res.json();
@@ -80,18 +83,22 @@ export default function CalendarClient() {
     loadMonth();
   }, [year, month]);
 
-  async function openDay(date: string) {
+  function openDay(date: string) {
     setSelectedDate(date);
     setDayStats(null);
+    setError(null);
+    setLoadingDay(false);
+  }
+
+  // Fetches health stats
+  async function loadHealthStats(date: string) {
     setLoadingDay(true);
     setError(null);
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/v1/calendar/health-stats?date=${encodeURIComponent(
-          date
-        )}`,
-        { credentials: "include" }
+        `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+        { credentials: "include" },
       );
 
       const json: unknown = await res.json();
@@ -106,7 +113,6 @@ export default function CalendarClient() {
         return;
       }
 
-      // Minimal runtime shape check
       if (
         typeof json === "object" &&
         json !== null &&
@@ -125,6 +131,12 @@ export default function CalendarClient() {
     } finally {
       setLoadingDay(false);
     }
+  }
+
+  function closeHealthStats() {
+    setDayStats(null);
+    setError(null);
+    setLoadingDay(false);
   }
 
   function closeModal() {
@@ -158,34 +170,57 @@ export default function CalendarClient() {
   }
 
   const totalDays = daysInMonth(year, month);
+  const firstDay = new Date(year, month - 1, 1).getDay(); // 0=Sun..6=Sat
+  const offset = (firstDay + 6) % 7; // 0=Mon..6=Sun
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div
         className="
-        p-6 space-y-6 mx-auto
-        w-full max-w-4xl
-        rounded-2xl
-        ui-component-styles
-      "
+          p-6 space-y-6 mx-auto
+          w-full max-w-4xl
+          rounded-2xl
+          ui-component-styles
+        "
       >
-        <h1 className="text-3xl">Calendar</h1>
+        <h2 className="text-3xl">Calendar</h2>
 
         <div className="flex items-center gap-2">
-          <button onClick={prevMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/20">
+          <button
+            onClick={prevMonth}
+            className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+          >
             Prev
           </button>
           <div className="font-semibold">
             {year}-{pad2(month)}
           </div>
-          <button onClick={nextMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/20">
+          <button
+            onClick={nextMonth}
+            className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+          >
             Next
           </button>
         </div>
 
-        {error && <p className="text-red-600">{error}</p>}
+        {error && !selectedDate && <p className="text-red-600">{error}</p>}
 
         <section className="grid grid-cols-7 gap-2">
+          {getDaysOfWeek().map((day) => (
+            <div key={day} className="font-bold text-center pb-1">
+              {day}
+            </div>
+          ))}
+        </section>
+
+        <section className="grid grid-cols-7 gap-2">
+          {Array.from({ length: offset }).map((_, i) => (
+            <div
+              key={`blank-${year}-${month}-${i}`}
+              className="min-h-20 w-full"
+            />
+          ))}
+
           {Array.from({ length: totalDays }, (_, i) => {
             const day = i + 1;
             const date = toYmd(year, month, day);
@@ -195,11 +230,11 @@ export default function CalendarClient() {
               <button
                 key={date}
                 onClick={() => openDay(date)}
-                className="border rounded text-left p-3 min-h-20 w-full overflow-hidden hover:bg-[#1aa5b0]/20"
+                className="border rounded min-h-20 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
                 title={hasData ? "Has health data" : "No health data"}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium leading-none">{day}</span>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="leading-none">{day}</span>
                   {hasData && (
                     <span className="text-xs leading-none shrink-0">•</span>
                   )}
@@ -213,31 +248,40 @@ export default function CalendarClient() {
           <Modal onClose={closeModal}>
             <h2 className="text-lg font-bold mb-2">{selectedDate}</h2>
 
-            <button
-              type="button"
-              className="button-style-blue w-full mb-3 disabled:opacity-50"
-              onClick={() => openDay(selectedDate)}
-              disabled={loadingDay}
-            >
-              {loadingDay ? "Loading..." : "Health Stats"}
-            </button>
+            {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
 
-            {loadingDay && <p className="text-sm">Loading entries...</p>}
-
-            {!loadingDay && dayStats && (
+            {loadingDay ? (
+              <button
+                type="button"
+                className="button-style-blue w-full mb-3 disabled:opacity-50"
+                disabled
+              >
+                Loading...
+              </button>
+            ) : dayStats ? (
               <div className="space-y-2">
                 <p className="text-sm">Entries: {dayStats.entries.length}</p>
-
-                <pre className="text-xs border p-2 rounded overflow-auto max-h-64">
-                  {JSON.stringify(dayStats.entries, null, 2)}
-                </pre>
+                <HealthStatsList entries={dayStats.entries} />
+                <button
+                  onClick={closeHealthStats}
+                  className="cancel-button-style w-full mt-4"
+                >
+                  Close Health Stats
+                </button>
               </div>
+            ) : (
+              <button
+                type="button"
+                className="button-style-blue w-full mb-3"
+                onClick={() => loadHealthStats(selectedDate)}
+                disabled={loadingDay}
+              >
+                Health Stats
+              </button>
             )}
 
-            {!loadingDay && !dayStats && (
-              <p className="text-sm text-gray-600">
-                Click &quot;Health Stats&quot; to load data for this day.
-              </p>
+            {!loadingDay && !dayStats && !error && (
+              <p>Click &quot;Health Stats&quot; to load data for this day.</p>
             )}
           </Modal>
         )}
