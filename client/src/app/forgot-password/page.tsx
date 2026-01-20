@@ -1,5 +1,6 @@
 "use client";
 
+import Modal from "@/components/Modal";
 import { useState } from "react";
 
 export default function ForgotPasswordPage() {
@@ -27,7 +28,6 @@ export default function ForgotPasswordPage() {
 
       if (!res.ok) throw new Error("Server error");
 
-      // Response is intentionally generic
       await res.json();
       setDone(true);
     } catch {
@@ -37,53 +37,53 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  if (done) {
-    return (
-      <main className="p-6 max-w-md mx-auto">
-        <h1 className="text-xl font-bold mb-2">Check your email</h1>
-
-        <p className="mb-4">
-          If an account exists for this email, a password reset link has been
-          sent.
-        </p>
-
-        <a href="/login" className="text-sm text-blue-600 underline">
-          Back to login
-        </a>
-      </main>
-    );
+  function closeModal() {
+    window.history.back();
   }
 
+
   return (
-    <main className="p-6 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">Forgot password</h1>
+    <main className="flex items-center justify-center min-h-screen">
+      <Modal onClose={() => closeModal()}>
+        {done ? (
+          <div className="text-center">
+            <h1 className="text-xl mb-2">Check your email</h1>
+            <p className="mb-4">
+              If an account exists for this email, a password reset link has
+              been sent.
+            </p>
+            <a href="/login" className="text-sm text-[#c3dafe]/80 underline">
+              Back to login
+            </a>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <h1 className="text-2xl text-center mb-4">Forgot password?</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 w-full"
-        />
+            <label htmlFor="email" className="block text-left">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border p-2 w-full rounded"
+            />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50"
-        >
-          {loading ? "Sending..." : "Send reset link"}
-        </button>
-      </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="button-style-blue w-full disabled:opacity-50"
+            >
+              {loading ? "Sending..." : "Send password reset link to email"}
+            </button>
 
-      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
-
-      <div className="mt-4">
-        <a href="/login" className="text-sm text-blue-600 underline">
-          Back to login
-        </a>
-      </div>
+            {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+          </form>
+        )}
+      </Modal>
     </main>
   );
 }

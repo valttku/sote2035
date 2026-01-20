@@ -1,5 +1,5 @@
 "use client";
-
+import Modal from "@/components/Modal";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -63,39 +63,45 @@ export default function ResetPasswordPage() {
     }
   }
 
+  function closeModal() {
+    alert("Please complete the password reset.");
+  }
+
   return (
-    <main className="p-6 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">Reset password</h1>
+    <main className="flex items-center justify-center min-h-screen">
+      <Modal onClose={closeModal}>
+        <h1 className="text-2xl text-center mb-4">Reset password</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <input
-          type="password"
-          placeholder="New password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 w-full"
-          required
-        />
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <label htmlFor="password">New Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="border p-2 w-full"
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Confirm password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className="border p-2 w-full"
-          required
-        />
+          <label htmlFor="confirm">Confirm Password</label>
+          <input
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className="border p-2 w-full"
+            required
+          />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50"
-        >
-          {loading ? "Resetting..." : "Reset password"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="button-style-blue w-full disabled:opacity-50"
+          >
+            {loading ? "Resetting..." : "Reset password"}
+          </button>
+        </form>
 
-      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+        {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+      </Modal>
     </main>
   );
 }

@@ -26,6 +26,7 @@ background:
     #5a72bf 50%,
     #171741 100%
   );
+  background-repeat: no-repeat;
   color: var(--background);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   margin: 0;
