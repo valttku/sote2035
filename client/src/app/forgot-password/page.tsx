@@ -37,9 +37,14 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  function closeModal() {
+    window.history.back();
+  }
+
+
   return (
     <main className="flex items-center justify-center min-h-screen">
-      <Modal onClose={() => console.log("Modal closed")}>
+      <Modal onClose={() => closeModal()}>
         {done ? (
           <div className="text-center">
             <h1 className="text-xl mb-2">Check your email</h1>
@@ -47,15 +52,13 @@ export default function ForgotPasswordPage() {
               If an account exists for this email, a password reset link has
               been sent.
             </p>
-            <a href="/login" className="text-sm text-blue-600 underline">
+            <a href="/login" className="text-sm text-[#c3dafe]/80 underline">
               Back to login
             </a>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h1 className="text-2xl text-center mb-4">
-              Forgot password?
-            </h1>
+            <h1 className="text-2xl text-center mb-4">Forgot password?</h1>
 
             <label htmlFor="email" className="block text-left">
               Email
@@ -78,12 +81,6 @@ export default function ForgotPasswordPage() {
             </button>
 
             {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
-
-            <div className="text-center mt-2">
-              <a href="/login" className="text-sm text-[#c3dafe]/80 underline">
-                Go back
-              </a>
-            </div>
           </form>
         )}
       </Modal>
