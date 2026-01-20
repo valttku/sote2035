@@ -1,5 +1,6 @@
 "use client";
 
+import Modal from "@/components/Modal";
 import { useState } from "react";
 
 export default function ForgotPasswordPage() {
@@ -55,35 +56,37 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="p-6 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">Forgot password</h1>
+    <main className="flex flex-col items-center justify-center min-h-screen">
+      <Modal>
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <h1 className="text-3xl mb-8 text-center">Forgot password?</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 w-full"
-        />
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="border p-2 w-full"
+          />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50"
-        >
-          {loading ? "Sending..." : "Send reset link"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="button-style-blue w-full disabled:opacity-50"
+          >
+            {loading ? "Sending..." : "Send password reset link to email"}
+          </button>
+        </form>
 
-      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+        {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
-      <div className="mt-4">
-        <a href="/login" className="text-sm text-blue-600 underline">
-          Back to login
-        </a>
-      </div>
+        <div className="text-center mt-3">
+          <a href="/login" className="text-sm text-[#c3dafe]/80 underline">
+            Go back
+          </a>
+        </div>
+      </Modal>
     </main>
   );
 }
