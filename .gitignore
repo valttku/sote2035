@@ -31,8 +31,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# env files
-.env*
+# env files (ignore real envs, allow example)
+.env
+.env.*
+!.env.example
 
 # vercel
 **/.vercel/
@@ -40,3 +42,10 @@ pnpm-debug.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright test artifacts
+client/test-results/
+client/playwright-report/
+client/blob-report/
+client/.playwright/
+client/tests/**/.last-run.json

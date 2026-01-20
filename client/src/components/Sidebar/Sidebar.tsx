@@ -3,6 +3,11 @@ import LogoutButton from "./LogoutButton";
 import { cookies } from "next/headers";
 
 export default async function Sidebar() {
+  const base =
+    process.env.API_INTERNAL_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "http://localhost:4000";
+
   const cookieStore = await cookies();
   let session = "";
 
