@@ -66,6 +66,10 @@ export default async function Sidebar() {
               <Link href="/settings">Settings</Link>
             </li>
             <hr />
+            <li>
+              <Link href="/health-insights">Health Insights</Link>
+            </li>
+            <hr />
           </ul>
         </nav>
       </div>

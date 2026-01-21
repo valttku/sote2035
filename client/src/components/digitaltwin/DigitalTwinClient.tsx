@@ -16,7 +16,7 @@ const BODY_PARTS: Array<{
   { id: "legs", label: "Legs", top: "75%", left: "52%" },
 ];
 
-export default function TwinView() {
+export default function DigitalTwinClient() {
   const [selected, setSelected] = useState<BodyPartId | null>(null);
 
   const [avatarType, setAvatarType] = useState<"male" | "female">("male");
@@ -24,9 +24,9 @@ export default function TwinView() {
   const avatarWidth = isFemale ? 208 : 244;
 
   return (
-    <div className="min-h-screen w-full min-w-0 mx-auto overflow-x-hidden">
+    <div className="min-h-screen w-full min-w-0 mx-auto overflow-x-hidden m-10">
       <div className="flex items-start justify-between min-w-0 flex-col md:flex-row mr-[20%]">
-        <h1 className="text-5xl mt-10 ml-10 shrink-0">Today</h1>
+        <h1 className="text-5xl ml-10 shrink-0">Today</h1>
 
         {/* Avatar + dots */}
         <div className="relative w-[230px] mt-10 md:mt-45 ml-[10%] md:ml-[5%] shrink-0">
@@ -69,7 +69,10 @@ export default function TwinView() {
           </p>
 
           {selected && (
-            <HealthStatsPanel selected={selected} onClose={() => setSelected(null)} />
+            <HealthStatsPanel
+              selected={selected}
+              onClose={() => setSelected(null)}
+            />
           )}
         </div>
       </div>
