@@ -19,10 +19,6 @@ export default function RegisterForm({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [confirmError, setConfirmError] = useState<string | null>(null);
-
   const [loading, setLoading] = useState(false);
 
   const emailRef = useRef<HTMLInputElement>(null);
@@ -62,14 +58,10 @@ export default function RegisterForm({
   };
 
   function validate(): boolean {
-    let ok = true;
-
     if (!emailOk(email)) {
-      setEmailError("Enter a valid email address");
+      alert("Enter a valid email address");
       emailRef.current?.focus();
-      ok = false;
-    } else {
-      setEmailError(null);
+      return false;
     }
 
     // Password strength check
@@ -77,24 +69,18 @@ export default function RegisterForm({
       (req) => !req.regex.test(password),
     );
     if (failedReqs.length > 0) {
-      setPasswordError(
-        `Password must have: ${failedReqs.map((r) => r.text).join(", ")}`,
-      );
-      if (ok) passwordRef.current?.focus();
-      ok = false;
-    } else {
-      setPasswordError(null);
+      alert(`Password is too weak`);
+      passwordRef.current?.focus();
+      return false;
     }
 
     // Check if passwords match
     if (password !== confirmPassword) {
-      setConfirmError("Passwords do not match");
-      ok = false;
-    } else {
-      setConfirmError(null);
+      alert("Passwords do not match");
+      return false;
     }
 
-    return ok;
+    return true;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -124,13 +110,7 @@ export default function RegisterForm({
         placeholder="Email"
         className="block w-full"
         required
-        aria-invalid={!!emailError}
       />
-      {emailError && (
-        <p className="text-red-600 text-sm" role="alert">
-          {emailError}
-        </p>
-      )}
 
       {/* Display Name */}
       <label htmlFor="reg-displayname">Display Name</label>
@@ -150,13 +130,11 @@ export default function RegisterForm({
           ref={passwordRef}
           type={showPassword ? "text" : "password"}
           autoComplete="new-password"
-          minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
           className="block w-full"
           required
-          aria-invalid={!!passwordError}
         />
         <button
           type="button"
@@ -208,13 +186,11 @@ export default function RegisterForm({
           id="reg-confirm"
           type={showConfirmPassword ? "text" : "password"}
           autoComplete="new-password"
-          minLength={8}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Confirm Password"
           className="block w-full"
           required
-          aria-invalid={!!confirmError}
         />
         <button
           type="button"
@@ -225,11 +201,6 @@ export default function RegisterForm({
           {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
         </button>
       </div>
-      {confirmError && (
-        <p className="text-red-600 text-sm" role="alert">
-          {confirmError}
-        </p>
-      )}
 
       {/* Button */}
       <button
