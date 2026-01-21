@@ -1,9 +1,9 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import Modal from "../Modal";
 import HealthStatsList from "../calendar/HealthStatsList";
 
+// Type definitions for API responses
 type DayStatsEntry = {
   id: string;
   kind: string;
@@ -19,34 +19,44 @@ type DayStatsResponse = {
 
 type MonthDaysResponse = string[]; // ["YYYY-MM-DD", ...]
 
+// Utility: Pad numbers to 2 digits (e.g., 1 -> "01")
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
 
+// Utility: Format date as YYYY-MM-DD
 function toYmd(year: number, month1to12: number, day: number) {
   return `${year}-${pad2(month1to12)}-${pad2(day)}`;
 }
 
+// Utility: Get the number of days in a given month
 function daysInMonth(year: number, month1to12: number) {
   return new Date(year, month1to12, 0).getDate();
 }
 
+// Utility: Get array of weekday names
 function getDaysOfWeek() {
   return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 }
 
 export default function CalendarClient() {
+  // Current date (memoized)
   const now = useMemo(() => new Date(), []);
+
+  // Calendar state
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1); // 1-12
 
+  // Days with health data for the current month
   const [daysWithData, setDaysWithData] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
+  // Modal and health stats state
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dayStats, setDayStats] = useState<DayStatsResponse | null>(null);
   const [loadingDay, setLoadingDay] = useState(false);
 
+  // Fetch days with data for the current month
   useEffect(() => {
     async function loadMonth() {
       setError(null);
@@ -83,6 +93,7 @@ export default function CalendarClient() {
     loadMonth();
   }, [year, month]);
 
+  // Open day details modal
   function openDay(date: string) {
     setSelectedDate(date);
     setDayStats(null);
@@ -90,7 +101,7 @@ export default function CalendarClient() {
     setLoadingDay(false);
   }
 
-  // Fetches health stats
+  // Fetch health stats for a specific date
   async function loadHealthStats(date: string) {
     setLoadingDay(true);
     setError(null);
@@ -113,6 +124,7 @@ export default function CalendarClient() {
         return;
       }
 
+      // Validate response structure
       if (
         typeof json === "object" &&
         json !== null &&
@@ -133,18 +145,21 @@ export default function CalendarClient() {
     }
   }
 
+  // Close health stats display
   function closeHealthStats() {
     setDayStats(null);
     setError(null);
     setLoadingDay(false);
   }
 
+  // Close day details modal
   function closeModal() {
     setSelectedDate(null);
     setDayStats(null);
     setLoadingDay(false);
   }
 
+  // Navigate to previous month
   function prevMonth() {
     setDayStats(null);
     setSelectedDate(null);
@@ -157,6 +172,7 @@ export default function CalendarClient() {
     }
   }
 
+  // Navigate to next month
   function nextMonth() {
     setDayStats(null);
     setSelectedDate(null);
@@ -169,6 +185,7 @@ export default function CalendarClient() {
     }
   }
 
+  // Calculate calendar grid dimensions (weekdays offset and total days)
   const totalDays = daysInMonth(year, month);
   const firstDay = new Date(year, month - 1, 1).getDay(); // 0=Sun..6=Sat
   const offset = (firstDay + 6) % 7; // 0=Mon..6=Sun
@@ -185,6 +202,7 @@ export default function CalendarClient() {
       >
         <h2 className="text-3xl">Calendar</h2>
 
+        {/* Month navigation */}
         <div className="flex items-center gap-2">
           <button
             onClick={prevMonth}
@@ -203,8 +221,10 @@ export default function CalendarClient() {
           </button>
         </div>
 
+        {/* Error message (only when no date selected) */}
         {error && !selectedDate && <p className="text-red-600">{error}</p>}
 
+        {/* Weekday headers */}
         <section className="grid grid-cols-7 gap-2">
           {getDaysOfWeek().map((day) => (
             <div key={day} className="font-bold text-center pb-1">
@@ -213,7 +233,9 @@ export default function CalendarClient() {
           ))}
         </section>
 
+        {/* Calendar grid */}
         <section className="grid grid-cols-7 gap-2">
+          {/* Empty cells for days before month starts */}
           {Array.from({ length: offset }).map((_, i) => (
             <div
               key={`blank-${year}-${month}-${i}`}
@@ -221,6 +243,7 @@ export default function CalendarClient() {
             />
           ))}
 
+          {/* Day cells */}
           {Array.from({ length: totalDays }, (_, i) => {
             const day = i + 1;
             const date = toYmd(year, month, day);
@@ -235,21 +258,21 @@ export default function CalendarClient() {
               >
                 <div className="flex items-center justify-center gap-2">
                   <span className="leading-none">{day}</span>
-                  {hasData && (
-                    <span className="text-xs leading-none shrink-0">•</span>
-                  )}
                 </div>
               </button>
             );
           })}
         </section>
 
+        {/* Day details modal */}
         {selectedDate && (
           <Modal onClose={closeModal}>
             <h2 className="text-lg font-bold mb-2">{selectedDate}</h2>
 
+            {/* Error message inside modal */}
             {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
 
+            {/* Loading, loaded, or empty state */}
             {loadingDay ? (
               <button
                 type="button"
@@ -280,6 +303,7 @@ export default function CalendarClient() {
               </button>
             )}
 
+            {/* Placeholder text if there's no data */}
             {!loadingDay && !dayStats && !error && (
               <p>Click &quot;Health Stats&quot; to load data for this day.</p>
             )}

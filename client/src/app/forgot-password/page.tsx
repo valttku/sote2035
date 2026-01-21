@@ -4,11 +4,13 @@ import Modal from "@/components/Modal";
 import { useState } from "react";
 
 export default function ForgotPasswordPage() {
+  // States variables for email, completion status, error message, and loading
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  //Handles form submission to send password reset email
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -29,6 +31,7 @@ export default function ForgotPasswordPage() {
       if (!res.ok) throw new Error("Server error");
 
       await res.json();
+      // Mark as complete to show success message
       setDone(true);
     } catch {
       setError("Failed to contact server");
@@ -37,15 +40,17 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  //Closes the modal by navigating back in browser history
   function closeModal() {
     window.history.back();
   }
 
-
   return (
     <main className="flex items-center justify-center min-h-screen">
+      {/*Modal for forgotten password*/}
       <Modal onClose={() => closeModal()}>
         {done ? (
+          // Success message displayed after email is sent
           <div className="text-center">
             <h1 className="text-xl mb-2">Check your email</h1>
             <p className="mb-4">
@@ -57,9 +62,11 @@ export default function ForgotPasswordPage() {
             </a>
           </div>
         ) : (
+          // Form for entering email to request password reset
           <form onSubmit={handleSubmit} className="space-y-4">
             <h1 className="text-2xl text-center mb-4">Forgot password?</h1>
 
+            {/* Email label and input field */}
             <label htmlFor="email" className="block text-left">
               Email
             </label>
@@ -72,6 +79,7 @@ export default function ForgotPasswordPage() {
               className="border p-2 w-full rounded"
             />
 
+            {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
@@ -80,6 +88,7 @@ export default function ForgotPasswordPage() {
               {loading ? "Sending..." : "Send password reset link to email"}
             </button>
 
+            {/* Error message displayed if request fails */}
             {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
           </form>
         )}
