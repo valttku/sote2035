@@ -26,6 +26,27 @@ authRouter.post("/register", async (req, res, next) => {
 
     const user = await createUser(email, hash, displayName ?? null);
 
+    // --- NEW SESSION CREATION ---
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const result = await db.query(
+      `INSERT INTO app.sessions (user_id, expires_at)
+       VALUES ($1, $2)
+       RETURNING id`,
+      [user.id, expires],
+    );
+
+    const sessionId = result.rows[0].id;
+
+    res.cookie("session", sessionId, {
+      httpOnly: true,
+      secure: false, // true in production
+      sameSite: "lax",
+      path: "/",
+      domain: "localhost",
+      expires,
+    });
+
+    // respond with user info
     res.status(201).json({
       id: user.id,
       email: user.email,
