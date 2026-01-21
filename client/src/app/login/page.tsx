@@ -43,10 +43,10 @@ export default function LoginPage() {
           // Already registered → go straight to homepage
           router.push("/");
         } else {
-          // New user → go to choose-device page
+          // New user → go to choose-service page
           setShowRegister(false);
           setShowLogin(false);
-          router.push("/choose-device");
+          router.push("/choose-service");
         }
       } else {
         alert(data.error || "Something went wrong");
