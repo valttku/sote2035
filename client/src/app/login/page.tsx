@@ -6,10 +6,14 @@ import LoginForm from "../../components/LoginForm";
 import RegisterForm from "../../components/RegisterForm";
 
 export default function LoginPage() {
+  // States to track if login and registration modal visibility
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+
+  // Next.js router for client-side navigation
   const router = useRouter();
 
+  //Handles form submission for both login and registration flows
   async function handleSubmit(
     endpoint: "login" | "register",
     email: string,
@@ -17,23 +21,26 @@ export default function LoginPage() {
     displayName?: string | null,
   ) {
     try {
+      // Build request body based on endpoint type
       const body =
         endpoint === "register"
           ? { email, password, displayName }
           : { email, password };
 
+      // Call authentication API
       const res = await fetch(`/api/v1/auth/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // IMPORTANT: allows cookie to be set
+        credentials: "include", // Enable cookie handling for session management
         body: JSON.stringify(body),
       });
 
       const data = await res.json();
 
+      // Handle successful response
       if (res.ok) {
         if (endpoint === "login") {
-          router.push("/"); // redirect to home
+          router.push("/"); // Redirect authenticated user to home page
         } else {
           alert("Registration successful! You can now log in.");
           setShowRegister(false);
@@ -49,12 +56,14 @@ export default function LoginPage() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen">
+      {/* Page title */}
       <h1 className="text-7xl font-bold mb-10 text-center">
         Patient
         <br />
         Digital Twin
       </h1>
 
+      {/* Login and Registration buttons */}
       <div className="flex flex-col gap-4 min-w-80">
         <button
           className="text-2xl bg-[#c3dafe]/70 px-4 py-5 rounded-2xl font-bold hover:bg-[#b3c4f3]/50"
@@ -70,6 +79,7 @@ export default function LoginPage() {
         </button>
       </div>
 
+      {/* Login modal */}
       {showLogin && (
         <Modal onClose={() => setShowLogin(false)}>
           <LoginForm
@@ -78,7 +88,7 @@ export default function LoginPage() {
             }
           />
 
-          {/* Forgot password link */}
+          {/* Password recovery link */}
           <div className="text-center mt-3">
             <a
               href="/forgot-password"
@@ -90,6 +100,7 @@ export default function LoginPage() {
         </Modal>
       )}
 
+      {/* Registration modal */}
       {showRegister && (
         <Modal onClose={() => setShowRegister(false)}>
           <RegisterForm
