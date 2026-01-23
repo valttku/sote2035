@@ -1,5 +1,7 @@
 import { db } from "./db.js";
 
+// THIS FILE CONTAINS DB QUERIES RELATED TO health_stat_entries table
+
 // checks if the database connection works
 export async function dbOk() {
   const result = await db.query("select 1 as ok");
