@@ -4,7 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import { ensureSchema } from "./db/init.js";
-import { dbOk } from "./db/health.js";
+import { dbOk } from "./db/healthCheck.js";
 
 import { homeRouter } from "./routes/home.js";
 import { authRouter } from "./routes/auth.js";
