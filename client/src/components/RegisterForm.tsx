@@ -108,7 +108,8 @@ export default function RegisterForm({
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
-        className="block w-full"
+        /*add here for dark mode support*/ 
+        className="block w-full bg-[var(--input-bg)] text-[var(--input-text)]"
         required
       />
 
@@ -119,7 +120,7 @@ export default function RegisterForm({
         value={displayName}
         onChange={(e) => setDisplayName(e.target.value)}
         placeholder="Display Name (optional)"
-        className="block w-full"
+        className="block w-full bg-[var(--input-bg)] text-[var(--input-text)]"
       />
 
       {/* Password */}
@@ -133,7 +134,7 @@ export default function RegisterForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="block w-full"
+          className="block w-full bg-[var(--input-bg)] text-[var(--input-text)]"
           required
         />
         <button
@@ -189,7 +190,7 @@ export default function RegisterForm({
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Confirm Password"
-          className="block w-full"
+          className="block w-fullbg-[var(--input-bg)] text-[var(--input-text)] "
           required
         />
         <button

@@ -1,55 +1,115 @@
 @import "tailwindcss";
 
+/* Root color variables for light mode */
 :root {
-  --background: #ffffff;
+  
   --foreground: #171717;
+
+  /* UI component colors */
+  --ui-bg: rgba(30, 27, 75, 0.5);
+  --ui-border: rgba(179, 196, 243, 0.8);
+  --button-blue-bg: #22bfd4;
+  --button-blue-hover: #1aa5b0;
+  --cancel-button-bg: #f2345d;
+  --cancel-button-hover: #e30f3d;
 }
 
-/* Dark mode styles disabled for now
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-*/
+/* Dark mode color variables */
+html.dark {
+  --background: r  radial-gradient(circle at 50% 40%, rgba(90, 114, 191, 0.35), transparent 60%),
+   linear-gradient(180deg, #171741 0%, #5a72bf 50%, #171741 100%);
+  
+  --foreground: #ededed;
+  
+  
+
+  --ui-bg: rgba(20, 20, 40, 0.6);
+  --ui-border: rgba(120, 130, 180, 0.8);
+  --button-blue-bg: #1aa5b0;
+  --button-blue-hover: #1590a0;
+  --cancel-button-bg: #e30f3d;
+  --cancel-button-hover: #c5002a;
+}
+
+/* Apply colors to html and body */
+html {
+  background-color: var(--background);
+  color: var(--foreground);
+}
 
 body {
-background:
-  radial-gradient(
-    circle at 50% 40%,
-    rgba(90, 114, 191, 0.35),
-    transparent 60%
-  ),
-  linear-gradient(
-    180deg,
-    #171741 0%,
-    #5a72bf 50%,
-    #171741 100%
-  );
-  background-repeat: no-repeat;
-  color: var(--background);
+  @apply min-h-screen font-sans m-0 p-0;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
-  margin: 0;
-  padding: 0;
+
+  /* Light mode gradient */
+  background:
+    radial-gradient(circle at 50% 40%, rgba(90, 114, 191, 0.35), transparent 60%),
+    linear-gradient(180deg, #0a0a1f 0%, #3f4a8c 50%, #0a0a1f 100%);
+   
+  background-repeat: no-repeat;
+  color: var(--foreground);
 }
 
-button {
-  cursor: pointer;
+/* Dark mode gradient */
+html.dark body {
+  backgroung:
+   radial-gradient(circle at 50% 40%, rgba(90, 114, 191, 0.35), transparent 60%),
+   linear-gradient(180deg, #171741 0%, #5a72bf 50%, #171741 100%);
+  
 }
 
-h2 {
-  color: rgba(179, 196, 243, 0.8);
+/* Buttons */
+.button-style-blue {
+  background-color: var(--button-blue-bg);
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
 }
 
+.button-style-blue:hover {
+  background-color: var(--button-blue-hover);
+}
+
+.cancel-button-style {
+  background-color: var(--cancel-button-bg);
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.cancel-button-style:hover {
+  background-color: var(--cancel-button-hover);
+}
+
+/* UI components */
+.ui-component-styles {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  background-color: var(--ui-bg);
+  color: var(--foreground);
+  border: 1px solid var(--ui-border);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+/* Inputs, textareas, selects */
 input,
 textarea,
 select {
-  background-color: rgb(228, 234, 252);
+  background-color: rgb(228 234 252);
   color: black;
   padding: 8px;
   margin-bottom: 15px;
   border-radius: 6px;
   font-size: 1rem;
+  border: 1px solid #ccc;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #1f2937; /* dark gray */
+  color: #ededed;
+  border: 1px solid #374151;
 }
 
 input:focus,
@@ -58,38 +118,12 @@ select:focus {
   outline: 2px solid #22bfd4;
 }
 
-/*Used in: Sidebar, infoPanel, calendarClient, settingsClient*/
-.ui-component-styles {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  background-color: rgb(30 27 75 / 0.5);
-  color: white;
-  border: 2px solid rgba(179, 196, 243, 0.8);
+/* Headings */
+h2 {
+  color: rgba(179, 196, 243, 0.8);
 }
 
-/*Button-styles*/
-.button-style-blue {
-  background-color: #22bfd4;
-  color: white;
-  padding: 10px;
-  border-radius: 6px;
-}
-
-.button-style-blue:hover {
-  background-color: #1aa5b0;
-}
-
-.cancel-button-style {
-  background-color: #f2345d;
-  color: white;
-  padding: 10px;
-  border-radius: 6px;
-}
-
-.cancel-button-style:hover {
-  background-color: #e30f3d;
-}
-
-/*Show password*/
+/* Password eye icon */
 .fa-eye {
   cursor: pointer;
   position: absolute;
@@ -101,7 +135,7 @@ select:focus {
   align-items: center;
 }
 
-/*password strength indicator*/
+/* Password strength bar */
 .progress-bar {
   height: 4px;
   width: 100%;
@@ -111,3 +145,17 @@ select:focus {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
+
+/* Dark mode text adjustments for strong contrasts */
+html.dark h2,
+html.dark p,
+html.dark span {
+  color: #c5c7d1;
+}
+
+
+
+
+
+
+

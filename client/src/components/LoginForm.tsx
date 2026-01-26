@@ -51,7 +51,7 @@ export default function LoginForm({
         spellCheck={false}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="block w-full"
+        className="block w-full bg-[var (--input-bg)] text[var(--input-text)"
         required
         aria-invalid={!!emailError}
       />
