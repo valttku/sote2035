@@ -12,6 +12,7 @@ import { calendarRouter } from "./routes/calendar.js";
 import { settingsRouter } from "./routes/settings.js";
 import { meRouter } from "./routes/me.js";
 import { digitalTwinRouter } from "./routes/digitalTwin.js";
+import { openAIRouter } from "./routes/openAI.js";
 
 import { polarRouter } from "./routes/integrations/polar.js";
 import { garminRouter } from "./routes/integrations/garmin.js";
@@ -50,6 +51,7 @@ app.use("/api/v1/calendar", calendarRouter);
 app.use("/api/v1/settings", settingsRouter);
 app.use("/api/v1/me", meRouter);
 app.use("/api/v1/digitalTwin", digitalTwinRouter);
+app.use("/api/v1/openai", openAIRouter);
 
 // providers (polar, garmin etc.)
 app.use("/api/v1/integrations/polar", polarRouter);
