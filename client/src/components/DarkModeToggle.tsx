@@ -1,29 +1,49 @@
+
 "use client";
 
-// Dark Mode Toggle Component
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { FaMoon, FaSun } from "react-icons/fa";
 
 export default function DarkModeToggle() {
-  const { theme, setTheme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
-  // Prevent hydration mismatch
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    // wrap in setTimeout to avoid calling setState synchronously in the effect body
+    setTimeout(() => {
+      const saved = localStorage.getItem("darkMode");
+      if (saved === "true") {
+        document.documentElement.classList.add("dark");
+        setDarkMode(true);
+      } else {
+        document.documentElement.classList.remove("dark");
+        setDarkMode(false);
+      }
+      setMounted(true);
+    }, 0);
+  }, []);
+
   if (!mounted) return null;
 
-  const currentTheme = theme === "system" ? systemTheme : theme;
+  const toggleDarkMode = () => {
+    if (darkMode) {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("darkMode", "false");
+      setDarkMode(false);
+    } else {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("darkMode", "true");
+      setDarkMode(true);
+    }
+  };
 
   return (
     <button
-      onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
-      className="px-3 py-1 rounded-md 
-                 bg-gray-200 dark:bg-gray-700 
-                 text-gray-900 dark:text-gray-200 
-                 hover:bg-gray-300 dark:hover:bg-gray-600 
-                 transition"
+      onClick={toggleDarkMode}
+      className="flex items-center justify-center gap-2 w-full p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
     >
-      {currentTheme === "dark" ? "Light Mode" : "Dark Mode"}
+      {darkMode ? <FaSun /> : <FaMoon />}
+      {darkMode ? "Light Mode" : "Dark Mode"}
     </button>
   );
 }

@@ -1,50 +1,36 @@
-
-"use client"; // needed because we use useState and useEffect
-
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import LogoutButton from "./LogoutButton"; // adjust path if needed
-import { FaMoon, FaSun } from "react-icons/fa";
+import LogoutButton from "./LogoutButton";
+import DarkModeToggle from "../DarkModeToggle"; 
+import { cookies } from "next/headers";
 
-export default function Sidebar() {
-  const [displayName, setDisplayName] = useState("User"); // replace with actual data if available
-  const [darkMode, setDarkMode] = useState(false);
+export default async function Sidebar() {
+  const cookieStore = await cookies();
+  let session = "";
 
-  // On mount, load saved dark mode preference
-  useEffect(() => {
-    const saved = localStorage.getItem("darkMode");
-    if (saved === "true") {
-      document.documentElement.classList.add("dark");
-      setDarkMode(true);
-    } else {
-      document.documentElement.classList.remove("dark");
-      setDarkMode(false);
+  for (const c of cookieStore.getAll()) {
+    if (c.name === "session") {
+      session = c.value;
+      break;
     }
-  }, []);
+  }
 
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    if (darkMode) {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("darkMode", "false");
-      setDarkMode(false);
-    } else {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("darkMode", "true");
-      setDarkMode(true);
-    }
-  };
+  if (!session) return null; // proxy.ts will redirect
+
+  // fetch user info from backend
+  const res = await fetch("http://localhost:3000/api/v1/me", {
+    cache: "no-store",
+    headers: {
+      Cookie: `session=${session}`,
+    },
+  });
+
+  if (!res.ok) return null;
+
+  const user = await res.json();
+  const displayName = user.display_name || user.email;
 
   return (
-    <aside
-      className="
-        ui-component-styles
-        fixed left-0 top-0 h-full w-64 p-4
-        flex flex-col
-        shrink-0
-        rounded-r-3xl
-      "
-    >
+    <aside className="ui-component-styles fixed left-0 top-0 h-full w-64 p-4 flex flex-col shrink-0 rounded-r-3xl">
       <div>
         <h2 className="text-3xl mb-4">Digital Twin</h2>
         <p className="text-lg">{displayName}</p>
@@ -52,17 +38,13 @@ export default function Sidebar() {
         <nav>
           <ul className="flex flex-col gap-4 mt-6">
             <hr />
-            <li>
-              <Link href="/">Home</Link>
-            </li>
+            <li><Link href="/">Home</Link></li>
             <hr />
-            <li>
-              <Link href="/calendar">Calendar</Link>
-            </li>
+            <li><Link href="/calendar">Calendar</Link></li>
             <hr />
-            <li>
-              <Link href="/settings">Settings</Link>
-            </li>
+            <li><Link href="/settings">Settings</Link></li>
+            <hr />
+            <li><Link href="/health-insights">Health Insights</Link></li>
             <hr />
             <li>
               <Link href="/health-insights">Health Insights</Link>
@@ -72,17 +54,8 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* Dark Mode Toggle */}
       <div className="mt-auto flex flex-col gap-2">
-        <button
-          onClick={toggleDarkMode}
-          className="flex items-center justify-center gap-2 w-full p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-        >
-          {darkMode ? <FaSun /> : <FaMoon />}
-          {darkMode ? "Light Mode" : "Dark Mode"}
-        </button>
-
-        {/* Logout Button below dark mode toggle */}
+        <DarkModeToggle /> {/* client dark mode toggle */}
         <LogoutButton />
       </div>
     </aside>
