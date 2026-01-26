@@ -25,7 +25,7 @@ garminRouter.get("/status", authRequired, async (req, res, next) => {
       from app.user_integrations
       where user_id = $1 and provider = 'garmin'
       `,
-      [userId]
+      [userId],
     );
 
     if (r.rowCount === 0) return res.json({ linked: false });
@@ -55,14 +55,13 @@ garminRouter.get("/connect", authRequired, async (req, res, next) => {
     await db.query(
       `insert into app.oauth_states (state, user_id, expires_at)
        values ($1, $2, $3)`,
-      [state, userId, expires]
+      [state, userId, expires],
     );
 
     const url = new URL("https://connect.garmin.com/oauthConfirm");
+    url.searchParams.set("response_type", "code");
     url.searchParams.set("client_id", CLIENT_ID);
     url.searchParams.set("redirect_uri", REDIRECT_URI);
-    url.searchParams.set("response_type", "code");
-    url.searchParams.set("scope", "profile activity"); // adjust as needed
     url.searchParams.set("state", state);
 
     res.redirect(url.toString());
@@ -73,6 +72,21 @@ garminRouter.get("/connect", authRequired, async (req, res, next) => {
 
 // GET /api/v1/integrations/garmin/callback
 garminRouter.get("/callback", async (req, res, next) => {
+  // Handle OAuth errors from Garmin
+  if (typeof req.query.error === "string") {
+    const error = req.query.error;
+    const state = typeof req.query.state === "string" ? req.query.state : null;
+
+    // Optional: clean up stored state
+    if (state) {
+      await db.query(`delete from app.oauth_states where state = $1`, [state]);
+    }
+
+    return res.redirect(
+      `${APP_BASE_URL}/settings?garminError=${encodeURIComponent(error)}`,
+    );
+  }
+
   try {
     mustEnv("GARMIN_CLIENT_ID", CLIENT_ID);
     mustEnv("GARMIN_CLIENT_SECRET", CLIENT_SECRET);
@@ -85,7 +99,7 @@ garminRouter.get("/callback", async (req, res, next) => {
 
     const st = await db.query(
       `select user_id, expires_at from app.oauth_states where state = $1`,
-      [state]
+      [state],
     );
 
     if (st.rowCount === 0) return res.status(400).send("Invalid state");
@@ -103,7 +117,9 @@ garminRouter.get("/callback", async (req, res, next) => {
     await db.query(`delete from app.oauth_states where state = $1`, [state]);
 
     // Exchange code for tokens
-    const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
+    const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
+      "base64",
+    );
 
     const tokenRes = await fetch("https://connect.garmin.com/oauth/token", {
       method: "POST",
@@ -124,12 +140,17 @@ garminRouter.get("/callback", async (req, res, next) => {
     const accessToken = tokenJson.access_token as string;
     const refreshToken = tokenJson.refresh_token as string | null;
     const expiresIn = tokenJson.expires_in as number | null;
-    const tokenExpiresAt = expiresIn ? new Date(Date.now() + expiresIn * 1000) : null;
+    const tokenExpiresAt = expiresIn
+      ? new Date(Date.now() + expiresIn * 1000)
+      : null;
 
     // Optional: get Garmin user id via API
-    const profileRes = await fetch("https://apis.garmin.com/wellness-api/rest/user/id", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const profileRes = await fetch(
+      "https://apis.garmin.com/wellness-api/rest/user/id",
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
     const profileJson: any = await profileRes.json();
     const garminUserId = profileJson.userId ?? null;
 
@@ -148,12 +169,12 @@ garminRouter.get("/callback", async (req, res, next) => {
         token_expires_at = excluded.token_expires_at,
         updated_at = now()
       `,
-      [user_id, garminUserId, accessToken, refreshToken, tokenExpiresAt]
+      [user_id, garminUserId, accessToken, refreshToken, tokenExpiresAt],
     );
 
     await db.query(
       `update app.users set active_provider = 'garmin' where id = $1`,
-      [user_id]
+      [user_id],
     );
     await db.query("commit");
 
@@ -171,7 +192,7 @@ garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
 
     const integ = await db.query(
       `select provider_user_id, access_token from app.user_integrations where user_id = $1 and provider = 'garmin'`,
-      [userId]
+      [userId],
     );
 
     if (integ.rowCount === 0) return res.json({ message: "Not linked" });
@@ -183,15 +204,15 @@ garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
 
     // Optional: deregister from Garmin if API supports
     // (Garmin API may not provide delete endpoints for user unlink)
-    
+
     await db.query("begin");
     await db.query(
       `delete from app.user_integrations where user_id = $1 and provider = 'garmin'`,
-      [userId]
+      [userId],
     );
     await db.query(
       `update app.users set active_provider = null where id = $1 and active_provider = 'garmin'`,
-      [userId]
+      [userId],
     );
     await db.query("commit");
 

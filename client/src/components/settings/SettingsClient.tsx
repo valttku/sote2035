@@ -40,6 +40,11 @@ export default function SettingsClient() {
   });
   const [polarBusy, setPolarBusy] = useState(false);
 
+  const [garminStatus, setGarminStatus] = useState<PolarStatus>({
+    linked: false,
+  });
+  const [garminBusy, setGarminBusy] = useState(false);
+
   // modal state
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -87,6 +92,15 @@ export default function SettingsClient() {
 
     const json = await res.json();
     if (res.ok) setPolarStatus(json);
+  }
+
+  async function loadGarminStatus() {
+    const res = await fetch(`/api/v1/integrations/garmin/status`, {
+      credentials: "include",
+    });
+
+    const json = await res.json();
+    if (res.ok) setGarminStatus(json);
   }
 
   useEffect(() => {
@@ -190,6 +204,36 @@ export default function SettingsClient() {
     }
   }
 
+  function linkGarmin() {
+    // This endpoint redirects to Garmin OAuth
+    window.location.href = `/api/v1/integrations/garmin/connect`;
+  }
+
+  async function unlinkGarmin() {
+    if (!confirm("Unlink Garmin from your account?")) return;
+    setGarminBusy(true);
+    try {
+      const res = await fetch(`/api/v1/integrations/garmin/unlink`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        alert(json.error || "Failed to unlink Garmin");
+        return;
+      }
+
+      await loadGarminStatus();
+      router.refresh();
+    } catch {
+      alert("Failed to connect to server");
+    } finally {
+      setGarminBusy(false);
+    }
+  }
+
   function linkPolar() {
     // This endpoint redirects to Polar Flow OAuth
     window.location.href = `/api/v1/integrations/polar/connect`;
@@ -279,7 +323,7 @@ export default function SettingsClient() {
         </section>
 
         {/* PROVIDER */}
-        <section className="ui-component-styles p-4 rounded-2xl">
+        <section className="ui-component-styles p-4 rounded-2xl space-y-4">
           <h2 className="text-lg font-semibold mb-2">PROVIDER</h2>
 
           {polarStatus.linked ? (
@@ -297,6 +341,24 @@ export default function SettingsClient() {
               className="button-style-blue w-full disabled:opacity-50"
             >
               LINK POLAR
+            </button>
+          )}
+
+          {garminStatus.linked ? (
+            <button
+              onClick={unlinkGarmin}
+              disabled={garminBusy}
+              className="button-style-blue w-full disabled:opacity-50"
+            >
+              {garminBusy ? "Unlinking..." : "Unlink Garmin"}
+            </button>
+          ) : (
+            <button
+              onClick={linkGarmin}
+              disabled={garminBusy}
+              className="button-style-blue w-full disabled:opacity-50"
+            >
+              LINK GARMIN
             </button>
           )}
         </section>
