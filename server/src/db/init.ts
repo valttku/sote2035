@@ -63,33 +63,75 @@ export async function ensureSchema() {
     );
   `);
 
-  // create health-days index (used to show calendar dots for days with data)
+  // --- create health_days table ---
   await db.query(`
-    create table if not exists app.health_days (
-      user_id integer not null references app.users(id) on delete cascade,
-      day_date date not null,
-      created_at timestamptz not null default now(),
-      updated_at timestamptz not null default now(),
-      primary key (user_id, day_date)
-    );
+  create table if not exists app.health_days (
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    primary key (user_id, day_date)
+  );
 
-    create or replace function app.update_health_days_updated_at()
-    returns trigger as $$
-    begin
-      new.updated_at = now();
-      return new;
-    end;
-    $$ language plpgsql;
+  create or replace function app.update_health_days_updated_at()
+  returns trigger as $$
+  begin
+    new.updated_at = now();
+    return new;
+  end;
+  $$ language plpgsql;
 
-    drop trigger if exists update_health_days_updated_at on app.health_days;
+  drop trigger if exists update_health_days_updated_at on app.health_days;
 
-    create trigger update_health_days_updated_at
-    before update on app.health_days
-    for each row
-    execute function app.update_health_days_updated_at();
-  `);
+  create trigger update_health_days_updated_at
+  before update on app.health_days
+  for each row
+  execute function app.update_health_days_updated_at();
+`);
 
-  // store provider-agnostic health stats as raw JSON (for future Garmin/Polar integration)
+  // create daily_health_metrics table. THIS IS WILL REPLACE health_stat_entries table LATER
+  await db.query(`
+  create table if not exists app.health_metrics_daily (
+    id uuid primary key default gen_random_uuid(),
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    source varchar(32) not null,   -- 'garmin', 'polar'
+    metric varchar(64) not null,   -- 'resting_hr', 'steps', etc
+    value_number double precision,
+    value_json jsonb,
+    unit varchar(32),
+    created_at timestamptz not null default now(),
+    unique (user_id, day_date, source, metric)
+  );
+
+  create index if not exists idx_health_metrics_daily_user_day
+    on app.health_metrics_daily (user_id, day_date);
+
+  create index if not exists idx_health_metrics_daily_user_metric
+    on app.health_metrics_daily (user_id, metric);
+`);
+
+  // ensure health_days entry exists when inserting/updating health_metrics_daily
+  await db.query(`
+  create or replace function app.ensure_health_day_exists_for_metrics()
+  returns trigger as $$
+  begin
+    insert into app.health_days (user_id, day_date)
+    values (new.user_id, new.day_date)
+    on conflict (user_id, day_date) do nothing;
+    return new;
+  end;
+  $$ language plpgsql;
+
+  drop trigger if exists trg_ensure_health_day_exists_on_metrics on app.health_metrics_daily;
+
+  create trigger trg_ensure_health_day_exists_on_metrics
+  after insert or update on app.health_metrics_daily
+  for each row
+  execute function app.ensure_health_day_exists_for_metrics();
+`);
+
+  // create health_stat_entries table (will be replaced by health_metrics_daily later)
   await db.query(`
   create table if not exists app.health_stat_entries (
     id uuid primary key default gen_random_uuid(),
@@ -111,35 +153,85 @@ export async function ensureSchema() {
   on app.health_stat_entries (user_id, day_date, kind);
 `);
 
-  // automatically update health_stat_entries
+  // ensure health_days entry exists when inserting into health_stat_entries (to be removed later)
   await db.query(`
-  drop trigger if exists update_health_stat_entries_updated_at on app.health_stat_entries;
+  create or replace function app.ensure_health_day_exists_for_stats()
+  returns trigger as $$
+  begin
+    insert into app.health_days (user_id, day_date)
+    values (new.user_id, new.day_date)
+    on conflict (user_id, day_date) do nothing;
+    return new;
+  end;
+  $$ language plpgsql;
 
-  create trigger update_health_stat_entries_updated_at
-  before update on app.health_stat_entries
+  drop trigger if exists trg_ensure_health_day_exists_on_stats on app.health_stat_entries;
+
+  create trigger trg_ensure_health_day_exists_on_stats
+  after insert or update on app.health_stat_entries
   for each row
-  execute function app.update_updated_at_column();
+  execute function app.ensure_health_day_exists_for_stats();
 `);
 
-  // keep health_days in sync: inserting health data auto-creates the day row
+  // create activities table in the database
   await db.query(`
-    create or replace function app.ensure_health_day_exists()
-    returns trigger as $$
-    begin
-      insert into app.health_days (user_id, day_date)
-      values (new.user_id, new.day_date)
-      on conflict do nothing;
-      return new;
-    end;
-    $$ language plpgsql;
+create table if not exists app.activities (
+    id uuid primary key default gen_random_uuid(),
 
-    drop trigger if exists trg_ensure_health_day_exists on app.health_stat_entries;
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    source varchar(32) not null,            -- 'garmin' | 'polar'
 
-    create trigger trg_ensure_health_day_exists
-    after insert or update on app.health_stat_entries
-    for each row
-    execute function app.ensure_health_day_exists();
-  `);
+    type varchar(32) not null,              -- 'running', 'cycling', etc.
+    start_time timestamptz not null,
+    end_time timestamptz,
+    duration_seconds integer,
+    distance_meters double precision,
+    calories double precision,
+    steps integer,
+    heart_rate_zones jsonb,
+    inactive_seconds integer,
+
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_activities_user_day
+    on app.activities(user_id, day_date);
+
+create index if not exists idx_activities_user_type
+    on app.activities(user_id, type);
+`);
+
+  // automatically update activities.updated_at on every update
+  await db.query(`
+drop trigger if exists update_activities_updated_at on app.activities;
+
+create trigger update_activities_updated_at
+before update on app.activities
+for each row
+execute function app.update_updated_at_column();
+`);
+
+  // ensure health_days entry exists when inserting into activities
+  await db.query(`
+create or replace function app.ensure_health_day_exists_for_activity()
+returns trigger as $$
+begin
+    insert into app.health_days(user_id, day_date)
+    values (new.user_id, new.day_date)
+    on conflict (user_id, day_date) do nothing;
+    return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_ensure_health_day_exists_on_activities on app.activities;
+
+create trigger trg_ensure_health_day_exists_on_activities
+after insert or update on app.activities
+for each row
+execute function app.ensure_health_day_exists_for_activity();
+`);
 
   // store external provider connections (Polar, Garmin, etc.)
   await db.query(`

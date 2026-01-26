@@ -40,11 +40,13 @@ export default function LoginPage() {
       // Handle successful response
       if (res.ok) {
         if (endpoint === "login") {
-          router.push("/"); // Redirect authenticated user to home page
+          // Already registered → go straight to homepage
+          router.push("/");
         } else {
-          alert("Registration successful! You can now log in.");
+          // New user → go to choose-service page
           setShowRegister(false);
-          setShowLogin(true);
+          setShowLogin(false);
+          router.push("/choose-service");
         }
       } else {
         alert(data.error || "Something went wrong");

@@ -4,16 +4,18 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import { ensureSchema } from "./db/init.js";
-import { dbOk } from "./db/health.js";
+import { dbOk } from "./db/healthCheck.js";
 
 import { homeRouter } from "./routes/home.js";
 import { authRouter } from "./routes/auth.js";
 import { calendarRouter } from "./routes/calendar.js";
 import { settingsRouter } from "./routes/settings.js";
 import { meRouter } from "./routes/me.js";
-import { digitalTwinRouter } from "./routes/digitalTwinRouter.js";
+import { digitalTwinRouter } from "./routes/digitalTwin.js";
+import { openAIRouter } from "./routes/openAI.js";
 
 import { polarRouter } from "./routes/integrations/polar.js";
+import { garminRouter } from "./routes/integrations/garmin.js";
 
 import { errorHandler } from "./middleware/error.js";
 
@@ -49,9 +51,11 @@ app.use("/api/v1/calendar", calendarRouter);
 app.use("/api/v1/settings", settingsRouter);
 app.use("/api/v1/me", meRouter);
 app.use("/api/v1/digitalTwin", digitalTwinRouter);
+app.use("/api/v1/openai", openAIRouter);
 
 // providers (polar, garmin etc.)
 app.use("/api/v1/integrations/polar", polarRouter);
+app.use("/api/v1/integrations/garmin", garminRouter);
 
 // global error handler
 app.use(errorHandler);

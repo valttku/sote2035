@@ -1,10 +1,7 @@
 import { db } from "./db.js";
 
-// checks if the database connection works
-export async function dbOk() {
-  const result = await db.query("select 1 as ok");
-  return result.rows[0]?.ok === 1;
-}
+// THIS FILE CONTAINS DB QUERIES RELATED TO health_stat_entries table
+// WILL BE DELETED LATER WHEN health_metrics_daily TABLE IS FULLY IN USE
 
 export type HealthData = Record<string, string | number>;
 
