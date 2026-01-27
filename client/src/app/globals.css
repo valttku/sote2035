@@ -10,34 +10,19 @@
     ),
     linear-gradient(180deg, #171741 0%, #5a72bf 50%, #171741 100%);
   --foreground: #ededed;
-  --ui-bg: rgba(46, 43, 92, 0.5);
+  --ui-bg: rgba(40, 37, 84, 0.5);
   --ui-border: rgba(179, 196, 243, 0.8);
   --button-blue-bg: #45c4cd;
-  --button-blue-hover: #29b4c6;
+  --button-blue-hover: #1d9dad;
   --cancel-button-bg: #e30f3d;
   --cancel-button-hover: #c5002a;
 }
 
 html.dark {
-  background:
-    radial-gradient(
-      circle at 50% 40%,
-      rgba(90, 114, 191, 0.35),
-      transparent 60%
-    ),
-    linear-gradient(180deg, #0a0a1f 0%, #3f4a8c 50%, #0a0a1f 100%);
-  --foreground:  #bbc3ed;
+  --foreground: #bbc3ed;
   --ui-bg: rgba(23, 23, 60, 0.6);
   --ui-border: rgba(120, 130, 180, 0.8);
 }
-
-/* Dark mode text adjustments for strong contrasts */
-html.dark h2,
-html.dark p,
-html.dark span {
-  color: #bbc3ed;
-}
-
 
 /* Dark mode gradient */
 html.dark body {
@@ -48,9 +33,21 @@ html.dark body {
       transparent 60%
     ),
     linear-gradient(180deg, #0a0a1f 0%, #3f4a8c 50%, #0a0a1f 100%);
+  --button-blue-bg: #20a0b0;
+  --button-blue-hover: #118892;
+  --cancel-button-bg: #b41f3f;
+  --cancel-button-hover: #a00f2c;
 }
 
-/* Apply colors to html and body */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #404650; /* dark gray */
+  color: #ededed;
+  border: 1px solid #374151;
+}
+
+/* Apply colors to html and body (default light mode)*/
 html {
   background-color: var(--background);
   color: var(--foreground);
@@ -66,7 +63,12 @@ body {
   background-repeat: no-repeat;
   color: var(--foreground);
 }
+
 /* Buttons */
+button {
+  cursor: pointer;
+}
+
 .button-style-blue {
   background-color: var(--button-blue-bg);
   color: white;
@@ -110,14 +112,6 @@ select {
   border-radius: 6px;
   font-size: 1rem;
   border: 1px solid #ccc;
-}
-
-html.dark input,
-html.dark textarea,
-html.dark select {
-  background-color: #1f2937; /* dark gray */
-  color: #ededed;
-  border: 1px solid #374151;
 }
 
 input:focus,
