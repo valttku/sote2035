@@ -46,16 +46,12 @@ export default async function Sidebar() {
             <hr />
             <li><Link href="/health-insights">Health Insights</Link></li>
             <hr />
-            <li>
-              <Link href="/health-insights">Health Insights</Link>
-            </li>
-            <hr />
           </ul>
         </nav>
       </div>
 
       <div className="mt-auto flex flex-col gap-2">
-        <DarkModeToggle /> {/* client dark mode toggle */}
+        <DarkModeToggle />
         <LogoutButton />
       </div>
     </aside>

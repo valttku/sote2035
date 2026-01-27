@@ -375,7 +375,7 @@ export default function SettingsClient() {
 
           <button
             onClick={deleteAccount}
-            className="bg-[#f2345d] text-white px-4 py-2 rounded w-full hover:bg-[#e30f3d]"
+            className="cancel-button-style cancel-button-hover w-full"
           >
             PERMANENTLY DELETE ACCOUNT
           </button>
@@ -406,7 +406,7 @@ export default function SettingsClient() {
 
               <button
                 onClick={() => setShowEditProfile(false)}
-                className="cancel-button-style w-full"
+                className="cancel-button-style cancel-button-hover w-full"
               >
                 Cancel
               </button>
@@ -506,7 +506,7 @@ export default function SettingsClient() {
 
               <button
                 onClick={() => setShowChangePassword(false)}
-                className="cancel-button-style w-full"
+                className="cancel-button-style w-full disabled:opacity-50"
               >
                 Cancel
               </button>
