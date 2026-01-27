@@ -25,7 +25,7 @@ export default function DigitalTwinClient() {
   const avatarWidth = isFemale ? 208 : 244;
 
   return (
-    <div className="min-h-screen w-full min-w-0 mx-auto overflow-x-hidden m-10">
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden pt-10">
       <div className="flex items-start justify-between min-w-0 flex-col md:flex-row mr-[20%]">
         <h1 className="text-5xl ml-10 shrink-0">Today</h1>
 

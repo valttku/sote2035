@@ -2,33 +2,52 @@
 
 /* Root color variables for light mode */
 :root {
-  
-  --foreground: #171717;
-
-  /* UI component colors */
-  --ui-bg: rgba(30, 27, 75, 0.5);
-  --ui-border: rgba(179, 196, 243, 0.8);
-  --button-blue-bg: #22bfd4;
-  --button-blue-hover: #1aa5b0;
-  --cancel-button-bg: #f2345d;
-  --cancel-button-hover: #e30f3d;
-}
-
-/* Dark mode color variables */
-html.dark {
-  --background: r  radial-gradient(circle at 50% 40%, rgba(90, 114, 191, 0.35), transparent 60%),
-   linear-gradient(180deg, #171741 0%, #5a72bf 50%, #171741 100%);
-  
+  --background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(90, 114, 191, 0.35),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #171741 0%, #5a72bf 50%, #171741 100%);
   --foreground: #ededed;
-  
-  
-
-  --ui-bg: rgba(20, 20, 40, 0.6);
-  --ui-border: rgba(120, 130, 180, 0.8);
-  --button-blue-bg: #1aa5b0;
-  --button-blue-hover: #1590a0;
+  --ui-bg: rgba(46, 43, 92, 0.5);
+  --ui-border: rgba(179, 196, 243, 0.8);
+  --button-blue-bg: #45c4cd;
+  --button-blue-hover: #29b4c6;
   --cancel-button-bg: #e30f3d;
   --cancel-button-hover: #c5002a;
+}
+
+html.dark {
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(90, 114, 191, 0.35),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #0a0a1f 0%, #3f4a8c 50%, #0a0a1f 100%);
+  --foreground:  #bbc3ed;
+  --ui-bg: rgba(23, 23, 60, 0.6);
+  --ui-border: rgba(120, 130, 180, 0.8);
+}
+
+/* Dark mode text adjustments for strong contrasts */
+html.dark h2,
+html.dark p,
+html.dark span {
+  color: #bbc3ed;
+}
+
+
+/* Dark mode gradient */
+html.dark body {
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(90, 114, 191, 0.35),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #0a0a1f 0%, #3f4a8c 50%, #0a0a1f 100%);
 }
 
 /* Apply colors to html and body */
@@ -38,26 +57,15 @@ html {
 }
 
 body {
-  @apply min-h-screen font-sans m-0 p-0;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
-
-  /* Light mode gradient */
-  background:
-    radial-gradient(circle at 50% 40%, rgba(90, 114, 191, 0.35), transparent 60%),
-    linear-gradient(180deg, #0a0a1f 0%, #3f4a8c 50%, #0a0a1f 100%);
-   
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: var(--background);
   background-repeat: no-repeat;
   color: var(--foreground);
 }
-
-/* Dark mode gradient */
-html.dark body {
-  backgroung:
-   radial-gradient(circle at 50% 40%, rgba(90, 114, 191, 0.35), transparent 60%),
-   linear-gradient(180deg, #171741 0%, #5a72bf 50%, #171741 100%);
-  
-}
-
 /* Buttons */
 .button-style-blue {
   background-color: var(--button-blue-bg);
@@ -145,17 +153,3 @@ h2 {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
-
-/* Dark mode text adjustments for strong contrasts */
-html.dark h2,
-html.dark p,
-html.dark span {
-  color: #c5c7d1;
-}
-
-
-
-
-
-
-

@@ -43,7 +43,7 @@ export default function DarkModeToggle() {
       className="flex items-center justify-center gap-2 w-full p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
     >
       {darkMode ? <FaSun /> : <FaMoon />}
-      {darkMode ? "Light Mode" : "Dark Mode"}
+      {darkMode ? "Switch To Light Mode" : "Switch To Dark Mode"}
     </button>
   );
 }
