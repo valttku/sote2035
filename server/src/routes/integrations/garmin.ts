@@ -7,6 +7,8 @@ import { db } from "../../db/db.js";
 
 export const garminRouter = express.Router();
 
+// Router for Garmin integration, doesn't work with localhost due to Garmin restrictions
+
 // GET /api/v1/integrations/garmin/connect
 garminRouter.get("/connect", authRequired, (req, res) => {
   const userId = (req as any).userId as number;
