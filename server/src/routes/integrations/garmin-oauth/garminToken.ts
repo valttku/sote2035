@@ -1,12 +1,9 @@
-import axios from "axios";
-
 const GARMIN_TOKEN_URL = "https://apis.garmin.com/oauth2/token";
 
 export async function exchangeGarminCodeForToken(
   code: string,
   verifier: string,
 ) {
-  // Log everything first
   console.log("Exchanging Garmin code for token...");
   console.log("code:", code);
   console.log("verifier:", verifier);
@@ -26,21 +23,30 @@ export async function exchangeGarminCodeForToken(
   ).toString("base64");
 
   try {
-    const response = await axios.post(GARMIN_TOKEN_URL, body.toString(), {
+    const response = await fetch(GARMIN_TOKEN_URL, {
+      method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Basic ${basic}`,
       },
+      body: body.toString(),
     });
 
-    console.log("Garmin token response:", response.data);
-    return response.data;
-  } catch (err: any) {
-    console.error(
-      "Garmin token exchange failed:",
-      err.response?.status,
-      err.response?.data,
-    );
-    throw err; // rethrow to let callback handle
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error(
+        "Garmin token exchange failed:",
+        response.status,
+        errorData,
+      );
+      throw new Error(`Token exchange failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Garmin token response:", data);
+    return data;
+  } catch (err) {
+    console.error("Error exchanging Garmin code for token:", err);
+    throw err;
   }
 }
