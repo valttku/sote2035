@@ -16,6 +16,9 @@ export default function Modal({ children, onClose }: ModalProps) {
           w-full max-w-md
           max-h-[90vh] overflow-y-auto
         "
+
+        // Dark mode variables applied here
+        style= {{ backgroundColor:  "var(--input-bg)", color: "var(--foreground)" }}
       >
         <button
           type="button"
@@ -24,6 +27,8 @@ export default function Modal({ children, onClose }: ModalProps) {
         >
           ✕
         </button>
+
+           {/* Modal content */}
         {children}
       </div>
     </div>

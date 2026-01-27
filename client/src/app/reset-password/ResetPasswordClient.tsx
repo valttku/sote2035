@@ -9,7 +9,9 @@ export default function ResetPasswordPage() {
   const token = params.get("token");
   const router = useRouter();
 
-  const [passwordError, setPasswordError] = useState<string | null>(null);
+  //const [passwordError ] = useState<string | null>(null);
+  const [passwordError] = useState(""); 
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -31,6 +33,9 @@ export default function ResetPasswordPage() {
     return PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(password))
       .length;
   }, [password]);
+
+
+
 
   // Get color for strength indicator
   const getStrengthColor = (score: number) => {

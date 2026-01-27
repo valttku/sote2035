@@ -1,6 +1,7 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import HealthStatsPanel from "./healthStatsPanel";
+
 
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
@@ -19,7 +20,7 @@ const BODY_PARTS: Array<{
 export default function DigitalTwinClient() {
   const [selected, setSelected] = useState<BodyPartId | null>(null);
 
-  const [avatarType, setAvatarType] = useState<"male" | "female">("male");
+  const [avatarType] = useState<"male" | "female">("male");
   const isFemale = avatarType === "female";
   const avatarWidth = isFemale ? 208 : 244;
 
@@ -38,6 +39,7 @@ export default function DigitalTwinClient() {
               height: "auto",
               display: "block",
             }}
+           
           />
 
           {BODY_PARTS.map(({ id, top, left }) => (
