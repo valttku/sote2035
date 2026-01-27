@@ -1,13 +1,9 @@
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
+import DarkModeToggle from "../DarkModeToggle"; 
 import { cookies } from "next/headers";
 
 export default async function Sidebar() {
-  const base =
-    process.env.API_INTERNAL_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:4000";
-
   const cookieStore = await cookies();
   let session = "";
 
@@ -18,15 +14,12 @@ export default async function Sidebar() {
     }
   }
 
-  if (!session) {
-    return null; // proxy.ts will redirect
-  }
+  if (!session) return null; // proxy.ts will redirect
 
   // fetch user info from backend
   const res = await fetch("http://localhost:3000/api/v1/me", {
     cache: "no-store",
     headers: {
-      // forward cookies explicitly for server fetch
       Cookie: `session=${session}`,
     },
   });
@@ -37,34 +30,21 @@ export default async function Sidebar() {
   const displayName = user.display_name || user.email;
 
   return (
-    <aside
-      className="
-      ui-component-styles
-      fixed left-0 top-0 h-full w-64 p-4
-      flex flex-col
-      shrink-0
-      rounded-r-3xl
-      ui-component-styles
-    "
-    >
+    <aside className="ui-component-styles fixed left-0 top-0 h-full w-64 p-4 flex flex-col shrink-0 rounded-r-3xl">
       <div>
-        <h2 className="text-3xl  mb-4">Digital Twin</h2>
+        <h2 className="text-3xl mb-4">Digital Twin</h2>
         <p className="text-lg">{displayName}</p>
 
         <nav>
           <ul className="flex flex-col gap-4 mt-6">
             <hr />
-            <li>
-              <Link href="/">Home</Link>
-            </li>
+            <li><Link href="/">Home</Link></li>
             <hr />
-            <li>
-              <Link href="/calendar">Calendar</Link>
-            </li>
+            <li><Link href="/calendar">Calendar</Link></li>
             <hr />
-            <li>
-              <Link href="/settings">Settings</Link>
-            </li>
+            <li><Link href="/settings">Settings</Link></li>
+            <hr />
+            <li><Link href="/health-insights">Health Insights</Link></li>
             <hr />
             <li>
               <Link href="/health-insights">Health Insights</Link>
@@ -74,7 +54,8 @@ export default async function Sidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto">
+      <div className="mt-auto flex flex-col gap-2">
+        <DarkModeToggle /> {/* client dark mode toggle */}
         <LogoutButton />
       </div>
     </aside>

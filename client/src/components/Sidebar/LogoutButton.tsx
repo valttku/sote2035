@@ -10,6 +10,10 @@ export default function LogoutButton() {
       method: "POST",
       credentials: "include",
     });
+
+    // dark mode on homepage after logout
+      document.documentElement.classList.add("dark"); // add the dark class
+      localStorage.setItem("darkMode", "true");
     
     router.replace("/login");
   }
