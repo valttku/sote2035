@@ -90,15 +90,15 @@ export default function LoginPage() {
             }
           />
 
-          {/* Password recovery link */}
-          <div className="text-center mt-3">
+          {/* Password recovery link
+         <div className="text-center mt-3">
             <a
               href="/forgot-password"
               className="text-sm text-[#c3dafe]/80 underline"
             >
               Forgot password?
             </a>
-          </div>
+          </div>*/}
         </Modal>
       )}
 
