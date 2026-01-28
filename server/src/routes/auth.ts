@@ -38,12 +38,15 @@ authRouter.post("/register", async (req, res, next) => {
 
     const sessionId = result.rows[0].id;
 
+    const isProd = process.env.NODE_ENV === "production";
+    const cookieDomain = isProd ? "sote2035-client.onrender.com" : "localhost";
+
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: false, // true in production
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax", // "none" needed for cross-site cookies
       path: "/",
-      domain: "localhost",
+      domain: cookieDomain,
       expires,
     });
 
@@ -83,13 +86,16 @@ authRouter.post("/login", async (req, res, next) => {
 
     const sessionId = result.rows[0].id;
 
+    const isProd = process.env.NODE_ENV === "production";
+    const cookieDomain = isProd ? "sote2035-client.onrender.com" : "localhost";
+
     // set HTTP-only cookie
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: false, // true in production with HTTPS
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
-      domain: "localhost",
+      domain: cookieDomain,
       expires,
     });
 
@@ -116,13 +122,16 @@ authRouter.post("/logout", async (req, res, next) => {
       );
     }
 
+    const isProd = process.env.NODE_ENV === "production";
+    const cookieDomain = isProd ? "sote2035-client.onrender.com" : "localhost";
+
     // clearing cookie
     res.clearCookie("session", {
       httpOnly: true,
-      secure: false, // set to true in production with HTTPS
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
-      domain: "localhost",
+      domain: cookieDomain,
     });
 
     res.json({ message: "Logged out" });
