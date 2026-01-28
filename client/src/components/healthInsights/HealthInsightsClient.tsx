@@ -8,6 +8,9 @@ export default function HealthInsightsClient() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+
   const mockHealthData = {
     recoveryAndSleep: {
       sleepHours: 8,
@@ -34,20 +37,17 @@ export default function HealthInsightsClient() {
     setShowResult(false);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/openai`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: `Analyze my health data:\n${JSON.stringify(
-              mockHealthData,
-              null,
-              2,
-            )}`,
-          }),
-        },
-      );
+      const response = await fetch(`${apiUrl}/api/v1/openai`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Analyze my health data:\n${JSON.stringify(
+            mockHealthData,
+            null,
+            2,
+          )}`,
+        }),
+      });
 
       const data = await response.json();
       setResult(data.result);

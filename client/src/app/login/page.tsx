@@ -13,6 +13,9 @@ export default function LoginPage() {
   // Next.js router for client-side navigation
   const router = useRouter();
 
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+
   //Handles form submission for both login and registration flows
   async function handleSubmit(
     endpoint: "login" | "register",
@@ -28,15 +31,12 @@ export default function LoginPage() {
           : { email, password };
 
       // Call authentication API
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/${endpoint}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // Enable cookie handling for session management
-          body: JSON.stringify(body),
-        },
-      );
+      const res = await fetch(`${apiUrl}/api/v1/auth/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // Enable cookie handling for session management
+        body: JSON.stringify(body),
+      });
 
       const data = await res.json();
 
