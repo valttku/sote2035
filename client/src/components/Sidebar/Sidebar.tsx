@@ -1,7 +1,8 @@
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
-import DarkModeToggle from "../DarkModeToggle"; 
+import DarkModeToggle from "../DarkModeToggle";
 import { cookies } from "next/headers";
+import { env } from "process";
 
 export default async function Sidebar() {
   const cookieStore = await cookies();
@@ -14,10 +15,12 @@ export default async function Sidebar() {
     }
   }
 
+  const apiBaseUrl = env.APP_BASE_URL || "http://localhost:3000";
+
   if (!session) return null; // proxy.ts will redirect
 
   // fetch user info from backend
-  const res = await fetch("http://localhost:3000/api/v1/me", {
+  const res = await fetch(`${apiBaseUrl}/api/v1/me`, {
     cache: "no-store",
     headers: {
       Cookie: `session=${session}`,
@@ -38,13 +41,21 @@ export default async function Sidebar() {
         <nav>
           <ul className="flex flex-col gap-4 mt-6">
             <hr />
-            <li><Link href="/">Home</Link></li>
+            <li>
+              <Link href="/">Home</Link>
+            </li>
             <hr />
-            <li><Link href="/calendar">Calendar</Link></li>
+            <li>
+              <Link href="/calendar">Calendar</Link>
+            </li>
             <hr />
-            <li><Link href="/settings">Settings</Link></li>
+            <li>
+              <Link href="/settings">Settings</Link>
+            </li>
             <hr />
-            <li><Link href="/health-insights">Health Insights</Link></li>
+            <li>
+              <Link href="/health-insights">Health Insights</Link>
+            </li>
             <hr />
           </ul>
         </nav>
