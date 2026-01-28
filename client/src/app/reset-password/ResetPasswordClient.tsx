@@ -9,8 +9,11 @@ export default function ResetPasswordPage() {
   const token = params.get("token");
   const router = useRouter();
 
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+
   //const [passwordError ] = useState<string | null>(null);
-  const [passwordError] = useState(""); 
+  const [passwordError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -33,9 +36,6 @@ export default function ResetPasswordPage() {
     return PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(password))
       .length;
   }, [password]);
-
-
-
 
   // Get color for strength indicator
   const getStrengthColor = (score: number) => {
@@ -83,16 +83,13 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "http://localhost:4000/api/v1/auth/reset-password",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ token, newPassword: password }),
+      const res = await fetch(`${apiUrl}/api/v1/auth/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ token, newPassword: password }),
+      });
 
       const data = await res.json();
 
