@@ -12,11 +12,10 @@ import { db } from "../db/db.js";
 
 export const authRouter = Router();
 
-// register
+// --- REGISTER ---
 authRouter.post("/register", async (req, res, next) => {
   try {
     const { email, password, displayName } = req.body;
-
     if (!email || !password)
       return res.status(400).json({ error: "Missing fields" });
 
@@ -24,11 +23,10 @@ authRouter.post("/register", async (req, res, next) => {
     if (existing) return res.status(409).json({ error: "User already exists" });
 
     const hash = await bcrypt.hash(password, 10);
-
     const user = await createUser(email, hash, displayName ?? null);
 
-    // --- NEW SESSION CREATION ---
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    // Create session valid for 7 days
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const result = await db.query(
       `INSERT INTO app.sessions (user_id, expires_at)
        VALUES ($1, $2)
@@ -37,19 +35,16 @@ authRouter.post("/register", async (req, res, next) => {
     );
 
     const sessionId = result.rows[0].id;
-
     const isProd = process.env.NODE_ENV === "production";
-    const cookieDomain = isProd ? "sote2035-client.onrender.com" : "localhost";
 
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax", // "none" needed for cross-site cookies
+      secure: isProd, // HTTPS only in prod
+      sameSite: isProd ? "none" : "lax", // "none" needed for cross-site in prod
       path: "/",
       expires,
     });
 
-    // respond with user info
     res.status(201).json({
       id: user.id,
       email: user.email,
@@ -61,7 +56,7 @@ authRouter.post("/register", async (req, res, next) => {
   }
 });
 
-// login
+// --- LOGIN ---
 authRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -74,21 +69,20 @@ authRouter.post("/login", async (req, res, next) => {
 
     await updateLastLogin(user.id);
 
-    // create session valid for 7 days
+    // remove old sessions
+    await db.query(`DELETE FROM app.sessions WHERE user_id = $1`, [user.id]);
+
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const result = await db.query(
-      `insert into app.sessions (user_id, expires_at)
-       values ($1, $2)
-       returning id`,
+      `INSERT INTO app.sessions (user_id, expires_at)
+       VALUES ($1, $2)
+       RETURNING id`,
       [user.id, expires],
     );
 
     const sessionId = result.rows[0].id;
-
     const isProd = process.env.NODE_ENV === "production";
-    const cookieDomain = isProd ? "sote2035-client.onrender.com" : "localhost";
 
-    // set HTTP-only cookie
     res.cookie("session", sessionId, {
       httpOnly: true,
       secure: isProd,
@@ -107,23 +101,17 @@ authRouter.post("/login", async (req, res, next) => {
   }
 });
 
-// logout
+// --- LOGOUT ---
 authRouter.post("/logout", async (req, res, next) => {
   try {
     const sessionId = req.cookies?.session;
 
     if (sessionId) {
-      await db.query(
-        `delete from app.sessions
-         where id = $1`,
-        [sessionId],
-      );
+      await db.query(`DELETE FROM app.sessions WHERE id = $1`, [sessionId]);
     }
 
     const isProd = process.env.NODE_ENV === "production";
-    const cookieDomain = isProd ? "sote2035-client.onrender.com" : "localhost";
 
-    // clearing cookie
     res.clearCookie("session", {
       httpOnly: true,
       secure: isProd,
