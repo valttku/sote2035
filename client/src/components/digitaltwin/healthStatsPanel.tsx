@@ -36,7 +36,7 @@ export default function HealthClient({ selected, onClose }: Props) {
         const date = new Date().toISOString().split("T")[0];
 
         const res = await fetch(
-          `/api/v1/digitalTwin?date=${date}&part=${selected}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/digitalTwin?date=${date}&part=${selected}`,
           { credentials: "include" },
         );
 

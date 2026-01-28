@@ -63,7 +63,7 @@ export default function CalendarClient() {
 
       try {
         const res = await fetch(
-          `/api/v1/calendar/month?year=${year}&month=${month}`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/calendar/month?year=${year}&month=${month}`,
           { credentials: "include" },
         );
 
@@ -108,7 +108,7 @@ export default function CalendarClient() {
 
     try {
       const res = await fetch(
-        `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
         { credentials: "include" },
       );
 

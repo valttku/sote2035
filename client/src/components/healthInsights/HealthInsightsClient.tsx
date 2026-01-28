@@ -34,17 +34,20 @@ export default function HealthInsightsClient() {
     setShowResult(false);
 
     try {
-      const response = await fetch("/api/v1/openai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: `Analyze my health data:\n${JSON.stringify(
-            mockHealthData,
-            null,
-            2,
-          )}`,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/openai`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: `Analyze my health data:\n${JSON.stringify(
+              mockHealthData,
+              null,
+              2,
+            )}`,
+          }),
+        },
+      );
 
       const data = await response.json();
       setResult(data.result);

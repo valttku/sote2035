@@ -10,7 +10,7 @@ export default function ChooseServicePage() {
     try {
       if (provider === "polar") {
         // Go straight to Polar OAuth
-        window.location.href = "/api/v1/integrations/polar/connect";
+        window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/integrations/polar/connect`;
       } else if (provider === "skip") {
         router.push("/");
       } else {
