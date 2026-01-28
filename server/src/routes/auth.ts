@@ -46,7 +46,6 @@ authRouter.post("/register", async (req, res, next) => {
       secure: isProd,
       sameSite: isProd ? "none" : "lax", // "none" needed for cross-site cookies
       path: "/",
-      domain: cookieDomain,
       expires,
     });
 
@@ -95,7 +94,6 @@ authRouter.post("/login", async (req, res, next) => {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
-      domain: cookieDomain,
       expires,
     });
 
@@ -131,7 +129,6 @@ authRouter.post("/logout", async (req, res, next) => {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
-      domain: cookieDomain,
     });
 
     res.json({ message: "Logged out" });
