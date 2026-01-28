@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { transporter } from "../nodemailer.js";
+import { transporter } from "../nodemailer";
 
 import {
   createUser,
