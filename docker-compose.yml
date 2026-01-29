@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   db:
     image: postgres:16
@@ -16,42 +18,19 @@ services:
       timeout: 3s
       retries: 20
 
-  server:
+  app:
     build:
-      context: ./server
+      context: .
       dockerfile: Dockerfile
-    container_name: sote2035-server
+    container_name: sote2035-app
     env_file:
       - .env
-    environment:
-      PORT: ${PORT}
-      DATABASE_URL: ${DATABASE_URL}
-      PGSSLMODE: ${PGSSLMODE}
-      JWT_SECRET: ${JWT_SECRET}
-      APP_BASE_URL: ${APP_BASE_URL}
-      POLAR_CLIENT_ID: ${POLAR_CLIENT_ID}
-      POLAR_CLIENT_SECRET: ${POLAR_CLIENT_SECRET}
-      POLAR_REDIRECT_URI: ${POLAR_REDIRECT_URI}
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "4000:4000"
-
-  client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    container_name: sote2035-client
-    env_file:
-      - .env
-    environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-      API_INTERNAL_URL: ${API_INTERNAL_URL}
-    depends_on:
-      - server
-    ports:
-      - "3000:3000"
+      - "4000:4000" # server
+      - "3000:3000" # client
 
 volumes:
   db_data:
