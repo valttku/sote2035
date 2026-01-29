@@ -24,7 +24,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://sote2035.onrender.com",
+  "https://sote2035-server.onrender.com",
 ];
 
 app.use(
@@ -68,14 +68,6 @@ app.use("/api/v1/openai", openAIRouter);
 // providers (polar, garmin etc.)
 app.use("/api/v1/integrations/polar", polarRouter);
 app.use("/api/v1/integrations/garmin", garminRouter);
-
-// Serve frontend for everything else
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(process.cwd(), "client/out")));
-  app.get("*", (_req, res) => {
-    res.sendFile(path.join(process.cwd(), "client/out", "index.html"));
-  });
-}
 
 // global error handler
 app.use(errorHandler);
