@@ -1,17 +1,19 @@
-# -------- Build frontend --------
+# -------- Frontend build --------
 FROM node:20-alpine AS client-build
 WORKDIR /client
 COPY client/package*.json ./
 RUN npm ci
 COPY client/ ./
-RUN npm run build
+RUN npm run build   # build Next.js for production
 
-# -------- Build backend --------
+# -------- Backend build --------
 FROM node:20-alpine AS server-build
 WORKDIR /server
 COPY server/package*.json ./
-RUN npm ci --production
+RUN npm ci
 COPY server/ ./
+RUN npm run build
+RUN npm prune --production
 
 # -------- Final image --------
 FROM node:20-alpine
@@ -25,13 +27,9 @@ COPY --from=client-build /client/.next /app/client/.next
 COPY --from=client-build /client/public /app/client/public
 COPY --from=client-build /client/package.json /app/client/package.json
 
-# Set working directories
-WORKDIR /app/server
-
-# Set port
+# Set environment variables
 ENV PORT=4000
+EXPOSE 4000
 
-EXPOSE 4000 3000
-
-# Start backend and frontend together
+# Run backend + frontend
 CMD ["npx", "concurrently", "npm --prefix server run start", "npm --prefix client run start"]
