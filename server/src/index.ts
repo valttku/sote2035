@@ -2,7 +2,6 @@ import { env } from "./config/env.js";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import session from "express-session";
 
 import { ensureSchema } from "./db/init.js";
 import { dbOk } from "./db/healthCheck.js";
@@ -42,23 +41,6 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
-
-const SESSION_SECRET = process.env.SESSION_SECRET || "devsecret123";
-
-app.use(
-  session({
-    name: "session",
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: env.NODE_ENV === "production", // only true on HTTPS
-      httpOnly: true,
-      sameSite: "none", // allows cross-origin cookies
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-    },
-  }),
-);
 
 // health and status check
 app.get("/health", (_req, res) => res.json({ ok: true }));
