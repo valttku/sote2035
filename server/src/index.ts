@@ -24,8 +24,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://sote2035-server.onrender.com",
-  "http://sote2035-client.onrender.com",
+  "https://sote2035-client.onrender.com",
 ];
 
 app.use(
