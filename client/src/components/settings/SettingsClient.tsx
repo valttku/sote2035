@@ -33,7 +33,7 @@ const PASSWORD_REQUIREMENTS = [
 
 export default function SettingsClient() {
   const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);

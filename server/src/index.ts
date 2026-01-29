@@ -21,10 +21,7 @@ import { errorHandler } from "./middleware/error.js";
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://sote2035-client.onrender.com",
-];
+const allowedOrigins = ["http://localhost:3000"];
 
 app.use(
   cors({
