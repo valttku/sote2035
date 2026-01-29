@@ -25,13 +25,18 @@ authRouter.post("/register", async (req, res, next) => {
     const hash = await bcrypt.hash(password, 10);
     const user = await createUser(email, hash, displayName ?? null);
 
-    // Create session valid for 7 days
+    // Create session valid for 7 days (one session per user)
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const newSessionId = crypto.randomUUID();
     const result = await db.query(
-      `INSERT INTO app.sessions (user_id, expires_at)
-       VALUES ($1, $2)
+      `INSERT INTO app.sessions (id, user_id, expires_at)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id)
+       DO UPDATE SET id = EXCLUDED.id,
+                     expires_at = EXCLUDED.expires_at,
+                     created_at = now()
        RETURNING id`,
-      [user.id, expires],
+      [newSessionId, user.id, expires],
     );
 
     const sessionId = result.rows[0].id;
@@ -68,15 +73,18 @@ authRouter.post("/login", async (req, res, next) => {
 
     await updateLastLogin(user.id);
 
-    // remove old sessions
-    await db.query(`DELETE FROM app.sessions WHERE user_id = $1`, [user.id]);
-
+    // Create session valid for 7 days (one session per user)
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const newSessionId = crypto.randomUUID();
     const result = await db.query(
-      `INSERT INTO app.sessions (user_id, expires_at)
-       VALUES ($1, $2)
+      `INSERT INTO app.sessions (id, user_id, expires_at)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id)
+       DO UPDATE SET id = EXCLUDED.id,
+                     expires_at = EXCLUDED.expires_at,
+                     created_at = now()
        RETURNING id`,
-      [user.id, expires],
+      [newSessionId, user.id, expires],
     );
 
     const sessionId = result.rows[0].id;
