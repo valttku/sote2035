@@ -35,12 +35,11 @@ authRouter.post("/register", async (req, res, next) => {
     );
 
     const sessionId = result.rows[0].id;
-    const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: isProd, // HTTPS only in prod
-      sameSite: isProd ? "none" : "lax", // "none" needed for cross-site in prod
+      secure: true,
+      sameSite: "none",
       path: "/",
       expires,
     });
@@ -81,12 +80,11 @@ authRouter.post("/login", async (req, res, next) => {
     );
 
     const sessionId = result.rows[0].id;
-    const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
       expires,
     });
@@ -110,12 +108,10 @@ authRouter.post("/logout", async (req, res, next) => {
       await db.query(`DELETE FROM app.sessions WHERE id = $1`, [sessionId]);
     }
 
-    const isProd = process.env.NODE_ENV === "production";
-
     res.clearCookie("session", {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
     });
 
