@@ -2,10 +2,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copy everything first (so src/ exists) and package files
+COPY . .
+
+# Install dependencies
 RUN npm ci
 
-COPY . .
+# Build TypeScript
+RUN npm run build
 
 EXPOSE 4000
 
