@@ -18,7 +18,6 @@ WORKDIR /app
 
 COPY --from=server-build /server /app/server
 COPY --from=client-build /client /app/client
-COPY .env ./
 
 EXPOSE 4000 3000
 
