@@ -44,9 +44,7 @@ export default function LoginPage() {
       if (res.ok) {
         if (endpoint === "login") {
           // Already registered → go straight to homepage
-          setShowLogin(false); // close modal
-          setShowRegister(false);
-          window.location.href = process.env.APP_BASE_URL || "/";
+          router.push("/");
         } else {
           // New user → go to choose-service page
           setShowRegister(false);
