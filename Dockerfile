@@ -21,4 +21,5 @@ COPY --from=client-build /client /app/client
 
 EXPOSE 4000 3000
 
-CMD ["sh", "-c", "cd server && npm run dev & cd ../client && npm run dev -H 0.0.0.0 -p 3000"]
+CMD ["npx", "concurrently", "npm --prefix server run dev", "npm --prefix client run dev -- -H 0.0.0.0 -p 3000"]
+

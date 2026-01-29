@@ -10,7 +10,7 @@ export default function ResetPasswordPage() {
   const router = useRouter();
 
   const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
   //const [passwordError ] = useState<string | null>(null);
   const [passwordError] = useState("");

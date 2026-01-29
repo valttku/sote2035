@@ -57,7 +57,7 @@ export default function CalendarClient() {
   const [loadingDay, setLoadingDay] = useState(false);
 
   const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
   // Fetch days with data for the current month
   useEffect(() => {
