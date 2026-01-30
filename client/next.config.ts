@@ -5,12 +5,18 @@ const nextConfig = {
   },
 
   async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "http://localhost:4000/api/:path*",
-      },
-    ];
+    if (process.env.NODE_ENV === "production") {
+      // Forward /api/... requests to your backend in production
+      return [
+        {
+          source: "/api/:path*",
+          destination: "https://sote2035-server.onrender.com/api/:path*",
+        },
+      ];
+    }
+
+    // Locally, no rewrites needed
+    return [];
   },
 };
 
