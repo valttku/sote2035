@@ -42,10 +42,8 @@ authRouter.post("/register", async (req, res, next) => {
       displayName ?? null,
       gender ?? null,
       height ?? null,
-      weight ?? null
+      weight ?? null,
     );
-
-
 
     // Create session valid for 7 days (one session per user)
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -63,16 +61,13 @@ authRouter.post("/register", async (req, res, next) => {
 
     const sessionId = result.rows[0].id;
 
-    const isProd = process.env.NODE_ENV === "production";
-
     res.cookie("session", sessionId, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      secure: true,
+      sameSite: "none",
       path: "/",
       expires,
     });
-
     res.status(201).json({
       id: user.id,
       email: user.email,
@@ -113,12 +108,10 @@ authRouter.post("/login", async (req, res, next) => {
 
     const sessionId = result.rows[0].id;
 
-    const isProd = process.env.NODE_ENV === "production";
-
     res.cookie("session", sessionId, {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      secure: true,
+      sameSite: "none",
       path: "/",
       expires,
     });
@@ -142,12 +135,10 @@ authRouter.post("/logout", async (req, res, next) => {
       await db.query(`DELETE FROM app.sessions WHERE id = $1`, [sessionId]);
     }
 
-    const isProd = process.env.NODE_ENV === "production";
-
     res.clearCookie("session", {
       httpOnly: true,
-      sameSite: isProd ? "none" : "lax",
-      secure: isProd,
+      secure: true,
+      sameSite: "none",
       path: "/",
     });
 
@@ -187,7 +178,7 @@ authRouter.post("/forgot-password", async (req, res, next) => {
     );
 
     // Create reset URL
-    const resetUrl = `http://localhost:3000/reset-password?token=${token}`;
+    const resetUrl = `${process.env.APP_BASE_URL}/reset-password?token=${token}`;
 
     // Send the actual email
     await transporter.sendMail({

@@ -312,6 +312,7 @@ export default function CalendarClient() {
 
                {/* Add Activity Form */}
             {!loadingDay && (
+              
               <div className="mt-4 border-t pt-4">
                 <h3 className="font-semibold mb-2">Add Activity</h3>
                 <form
