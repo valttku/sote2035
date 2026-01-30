@@ -82,9 +82,6 @@ export default function RegisterForm({
 
   return (
     <div className="space-y-4">
-      {/* Add dark mode toggle at top */}
-      <DarkModeToggle />
-
       <form onSubmit={handleSubmit} className="space-y-2">
         <h2 className="text-3xl mb-8 text-center">REGISTER</h2>
 
