@@ -64,3 +64,28 @@ calendarRouter.get("/health-stats", authRequired, async (req, res, next) => {
     next(e);
   }
 });
+
+// POST /api/v1/calendar/activities
+calendarRouter.post("/activities", authRequired, async (req, res, next) => {
+  try {
+    const userId = (req as any).userId as number;
+    const { date, title, type, duration, calories, steps, notes } = req.body;
+
+    if (!date || !title) return res.status(400).json({ error: "Date and title required" });
+
+    // Insert as activity_daily entry for modal compatibility
+    const result = await db.query(
+      `
+      INSERT INTO app.health_stat_entries (user_id, day_date, kind, source, data)
+      VALUES ($1, $2, 'activity_daily', 'manual', $3)
+      RETURNING *
+      `,
+      [userId, date, { title, type, duration, calories, steps, notes }]
+    );
+
+    res.json({ success: true, entry: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+

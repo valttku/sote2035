@@ -42,6 +42,8 @@ function getDaysOfWeek() {
 export default function CalendarClient() {
   // Current date (memoized)
   const now = useMemo(() => new Date(), []);
+  const [daysWithActivity, setDaysWithActivity] = useState<Set<string>>(new Set());
+
 
   // Calendar state
   const [year, setYear] = useState(now.getFullYear());
@@ -105,48 +107,44 @@ export default function CalendarClient() {
   }
 
   // Fetch health stats for a specific date
-  async function loadHealthStats(date: string) {
-    setLoadingDay(true);
-    setError(null);
-
-    try {
-      const res = await fetch(
-        `${apiUrl}/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
-        { credentials: "include" },
-      );
-
-      const json: unknown = await res.json();
-
-      if (!res.ok) {
-        const err =
-          typeof json === "object" && json !== null && "error" in json
-            ? String((json as { error?: unknown }).error ?? "")
-            : "";
-        setError(err || "Failed to load health stats");
-        setDayStats(null);
-        return;
-      }
-
-      // Validate response structure
-      if (
-        typeof json === "object" &&
-        json !== null &&
-        "date" in json &&
-        "entries" in json &&
-        Array.isArray((json as { entries: unknown }).entries)
-      ) {
-        setDayStats(json as DayStatsResponse);
-      } else {
-        setError("Unexpected response from server");
-        setDayStats(null);
-      }
-    } catch {
-      setError("Failed to connect to server");
+ async function loadHealthStats(date: string) {
+  setLoadingDay(true);
+  setError(null);
+  try {
+    const res = await fetch(
+      `${apiUrl}/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+      { credentials: "include" }
+    );
+    const json: unknown = await res.json();
+    if (!res.ok) {
+      setError("Failed to load health stats");
       setDayStats(null);
-    } finally {
-      setLoadingDay(false);
+      return;
     }
+
+    // Validate response structure
+    if (
+      typeof json === "object" &&
+      json !== null &&
+      "date" in json &&
+      "entries" in json &&
+      Array.isArray((json as { entries: unknown }).entries)
+    ) {
+      const stats = json as DayStatsResponse;
+      setDayStats(stats);
+
+      // mark day as having activity if any entry is activity_daily
+      if (stats.entries.some((e) => e.kind === "activity_daily")) {
+        setDaysWithActivity((prev) => new Set(prev).add(date));
+      }
+    }
+  } catch {
+    setError("Failed to connect to server");
+    setDayStats(null);
+  } finally {
+    setLoadingDay(false);
   }
+}
 
   // Close health stats display
   function closeHealthStats() {
@@ -251,6 +249,7 @@ export default function CalendarClient() {
             const day = i + 1;
             const date = toYmd(year, month, day);
             const hasData = daysWithData.has(date);
+            const hasActivity: boolean = daysWithActivity.has(date); 
 
             return (
               <button
@@ -261,6 +260,11 @@ export default function CalendarClient() {
               >
                 <div className="flex items-center justify-center gap-2">
                   <span className="leading-none">{day}</span>
+
+                {/* --- ADDED: Green dot for activity --- */}
+                  {hasActivity && (
+                    <span className="w-2 h-2 bg-green-500 rounded-full block"></span>
+                  )}  
                 </div>
               </button>
             );
@@ -304,6 +308,91 @@ export default function CalendarClient() {
               >
                 Health Stats
               </button>
+            )}
+
+               {/* Add Activity Form */}
+            {!loadingDay && (
+              <div className="mt-4 border-t pt-4">
+                <h3 className="font-semibold mb-2">Add Activity</h3>
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const form = e.currentTarget as HTMLFormElement;
+                    const formData = new FormData(form);
+                    const title = formData.get("title") as string;
+                    const type = formData.get("type") as string;
+                    const duration = Number(formData.get("duration") || 0);
+                    const calories = Number(formData.get("calories") || 0);
+                    const steps = Number(formData.get("steps") || 0);
+                    const notes = formData.get("notes") as string;
+
+                    try {
+                      await fetch(`${apiUrl}/api/v1/calendar/activities`, {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          date: selectedDate,
+                          title,
+                          type,
+                          duration,
+                          calories,
+                          steps,
+                          notes,
+                        }),
+                      });
+                      loadHealthStats(selectedDate); // refresh modal
+                      form.reset();
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                  className="space-y-2"
+                >
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Activity Title"
+                    required
+                    className="w-full border rounded p-1"
+                  />
+                  <input
+                    type="text"
+                    name="type"
+                    placeholder="Type (e.g., Run)"
+                    className="w-full border rounded p-1"
+                  />
+                  <input
+                    type="number"
+                    name="duration"
+                    placeholder="Duration (minutes)"
+                    className="w-full border rounded p-1"
+                  />
+                  <input
+                    type="number"
+                    name="calories"
+                    placeholder="Calories"
+                    className="w-full border rounded p-1"
+                  />
+                  <input
+                    type="number"
+                    name="steps"
+                    placeholder="Steps"
+                    className="w-full border rounded p-1"
+                  />
+                  <textarea
+                    name="notes"
+                    placeholder="Notes"
+                    className="w-full border rounded p-1"
+                  />
+                  <button
+                    type="submit"
+                    className="button-style-blue w-full"
+                  >
+                    Add Activity
+                  </button>
+                </form>
+              </div>
             )}
 
             {/* Placeholder text if there's no data */}
