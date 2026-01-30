@@ -15,15 +15,37 @@ export const authRouter = Router();
 // --- REGISTER ---
 authRouter.post("/register", async (req, res, next) => {
   try {
-    const { email, password, displayName } = req.body;
-    if (!email || !password)
+    const { email, password, displayName, gender, height, weight } = req.body;
+
+    if (!email || !password) {
       return res.status(400).json({ error: "Missing fields" });
+    }
 
     const existing = await findUserByEmail(email);
     if (existing) return res.status(409).json({ error: "User already exists" });
 
+    // optional: validate new fields
+    if (gender && !["male", "female", "other", "unknown"].includes(gender)) {
+      return res.status(400).json({ error: "Invalid gender" });
+    }
+    if (height !== undefined && (isNaN(height) || height < 0)) {
+      return res.status(400).json({ error: "Invalid height" });
+    }
+    if (weight !== undefined && (isNaN(weight) || weight < 0)) {
+      return res.status(400).json({ error: "Invalid weight" });
+    }
+
     const hash = await bcrypt.hash(password, 10);
-    const user = await createUser(email, hash, displayName ?? null);
+    const user = await createUser(
+      email,
+      hash,
+      displayName ?? null,
+      gender ?? null,
+      height ?? null,
+      weight ?? null
+    );
+
+
 
     // Create session valid for 7 days (one session per user)
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);

@@ -5,6 +5,8 @@ import { authRequired } from "../middleware/authRequired.js";
 
 export const settingsRouter = Router();
 
+//Deregister from polar
+
 async function deregisterFromPolar(userId: number) {
   const integ = await db.query(
     `
@@ -40,12 +42,15 @@ async function deregisterFromPolar(userId: number) {
   }
 }
 
+//GET /api/v1/settings
+
 settingsRouter.get("/", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
+//add here parameters
 
     const result = await db.query(
-      `select id, email, display_name, created_at, updated_at, last_login
+      `select id, email, display_name,gender, height, weight, created_at, updated_at, last_login
        from app.users
        where id = $1`,
       [userId]
@@ -55,37 +60,52 @@ settingsRouter.get("/", authRequired, async (req, res, next) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    //add console for checking
+    console.log("SETTINGS USER FROM DB:", result.rows[0]);
+
     res.json(result.rows[0]);
   } catch (e) {
     next(e);
   }
 });
 
-settingsRouter.put("/display-name", authRequired, async (req, res, next) => {
+// PUT /api/v1/settings/profile
+settingsRouter.put("/profile", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
-    const { displayName } = req.body;
+    let { displayName, gender, height, weight } = req.body;
 
-    if (
-      displayName !== null &&
-      displayName !== undefined &&
-      typeof displayName !== "string"
-    ) {
-      return res.status(400).json({ error: "Invalid display name" });
-    }
+    // Convert height/weight to numbers if they come as strings
+    if (height !== undefined) height = Number(height);
+    if (weight !== undefined) weight = Number(weight);
 
-    if (typeof displayName === "string" && displayName.length > 100) {
+    // Validation
+    if (displayName && displayName.length > 100) {
       return res.status(400).json({ error: "Display name too long" });
     }
+    if (height !== undefined && (isNaN(height) || height < 0)) {
+      return res.status(400).json({ error: "Invalid height" });
+    }
+    if (weight !== undefined && (isNaN(weight) || weight < 0)) {
+      return res.status(400).json({ error: "Invalid weight" });
+    }
+    if (gender && !["male", "female", "other", "unknown"].includes(gender)) {
+      return res.status(400).json({ error: "Invalid gender" });
+    }
 
-    await db.query(
-      `update app.users
-       set display_name = $1
-       where id = $2`,
-      [displayName ?? null, userId]
+    const result = await db.query(
+      `UPDATE app.users
+       SET display_name = $1,
+           gender = $2,
+           height = $3,
+           weight = $4,
+           updated_at = now()
+       WHERE id = $5
+       RETURNING id, email, display_name, gender, height, weight, created_at, updated_at, last_login`,
+      [displayName ?? null, gender ?? null, height ?? null, weight ?? null, userId]
     );
 
-    res.json({ message: "Display name updated" });
+    res.json(result.rows[0]);
   } catch (e) {
     next(e);
   }
@@ -134,6 +154,48 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
     next(e);
   }
 });
+
+//Add here new endpoint for height,weight, gender
+settingsRouter.put("/profile", authRequired, async (req, res, next) => {
+  try {
+    const userId = (req as any).userId;
+    const { gender, height, weight } = req.body;
+
+    if (
+      gender !== null &&
+      gender !== undefined &&
+      !["male", "female", "other", "unknown"].includes(gender)
+    ) {
+      return res.status(400).json({ error: "Invalid gender" });
+    }
+
+    if (height !== null && height !== undefined && typeof height !== "number") {
+      return res.status(400).json({ error: "Invalid height" });
+    }
+
+    if (weight !== null && weight !== undefined && typeof weight !== "number") {
+      return res.status(400).json({ error: "Invalid weight" });
+    }
+
+    await db.query(
+      `
+      update app.users
+      set
+        gender = $1,
+        height = $2,
+        weight = $3,
+        updated_at = now()
+      where id = $4
+      `,
+      [gender ?? null, height ?? null, weight ?? null, userId]
+    );
+
+    res.json({ message: "Profile updated" });
+  } catch (e) {
+    next(e);
+  }
+});
+
 
 settingsRouter.delete("/delete-account", authRequired, async (req, res, next) => {
   try {
