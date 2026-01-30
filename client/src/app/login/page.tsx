@@ -37,24 +37,30 @@ export default function LoginPage() {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json();
-
       // Handle successful response
       if (res.ok) {
         if (endpoint === "login") {
-          // Already registered → go straight to homepage
-          router.push("/");
+          // Fetch /me to confirm session is set
+          const meRes = await fetch(`${apiUrl}/api/v1/me`, {
+            method: "GET",
+            credentials: "include", // very important!
+          });
+
+          if (meRes.ok) {
+            router.push("/"); // Only redirect if /me confirms login
+          } else {
+            alert("Login failed: session not established");
+          }
         } else {
-          // New user → go to choose-service page
+          // Registration flow
           setShowRegister(false);
           setShowLogin(false);
           router.push("/choose-service");
         }
-      } else {
-        alert(data.error || "Something went wrong");
       }
-    } catch {
-      alert("Error connecting to server");
+    } catch (error) {
+      console.error("Authentication error:", error);
+      alert("An error occurred. Please try again.");
     }
   }
 
