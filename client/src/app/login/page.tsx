@@ -13,8 +13,7 @@ export default function LoginPage() {
   // Next.js router for client-side navigation
   const router = useRouter();
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
   //Handles form submission for both login and registration flows
   async function handleSubmit(
@@ -93,15 +92,15 @@ export default function LoginPage() {
             }
           />
 
-          {/* Password recovery link
-         <div className="text-center mt-3">
+          {/* Password recovery link*/}
+          <div className="text-center mt-3">
             <a
               href="/forgot-password"
               className="text-sm text-[#c3dafe]/80 underline"
             >
               Forgot password?
             </a>
-          </div>*/}
+          </div>
         </Modal>
       )}
 
