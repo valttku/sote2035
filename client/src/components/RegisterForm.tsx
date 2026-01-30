@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { useState, useRef, useMemo } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import DarkModeToggle from "./DarkModeToggle"; // import your client toggle
@@ -6,7 +6,11 @@ import DarkModeToggle from "./DarkModeToggle"; // import your client toggle
 export default function RegisterForm({
   onSubmit,
 }: {
-  onSubmit: (email: string, password: string, displayName: string | null) => void;
+  onSubmit: (
+    email: string,
+    password: string,
+    displayName: string | null,
+  ) => void;
 }) {
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -31,8 +35,9 @@ export default function RegisterForm({
   ];
 
   const strengthScore = useMemo(
-    () => PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(password)).length,
-    [password, PASSWORD_REQUIREMENTS] // add dependency to fix the warning
+    () =>
+      PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(password)).length,
+    [password, PASSWORD_REQUIREMENTS], // add dependency to fix the warning
   );
 
   const getStrengthColor = (score: number) => {
@@ -56,7 +61,9 @@ export default function RegisterForm({
       return false;
     }
 
-    const failedReqs = PASSWORD_REQUIREMENTS.filter((req) => !req.regex.test(password));
+    const failedReqs = PASSWORD_REQUIREMENTS.filter(
+      (req) => !req.regex.test(password),
+    );
     if (failedReqs.length > 0) {
       alert("Password is too weak");
       passwordRef.current?.focus();
@@ -131,7 +138,13 @@ export default function RegisterForm({
         </div>
 
         {/* Password strength bar */}
-        <div className="progress-bar" role="progressbar" aria-valuenow={strengthScore} aria-valuemin={0} aria-valuemax={5}>
+        <div
+          className="progress-bar"
+          role="progressbar"
+          aria-valuenow={strengthScore}
+          aria-valuemin={0}
+          aria-valuemax={5}
+        >
           <div
             className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500 ease-out`}
             style={{ width: `${(strengthScore / 5) * 100}%` }}
@@ -177,7 +190,11 @@ export default function RegisterForm({
           </button>
         </div>
 
-        <button type="submit" disabled={loading} className="button-style-blue w-full mt-2 disabled:opacity-50">
+        <button
+          type="submit"
+          disabled={loading}
+          className="button-style-blue w-full mt-2 disabled:opacity-50"
+        >
           {loading ? "Loading..." : "Register"}
         </button>
       </form>
