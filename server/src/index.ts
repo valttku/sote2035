@@ -46,8 +46,6 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-
-
 // health and status check
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.get("/api/v1/status", (_req, res) => res.json({ api: "v1", ok: true }));
