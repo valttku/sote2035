@@ -9,6 +9,9 @@ type SettingsData = {
   id: number;
   email: string;
   display_name: string | null;
+  gender: string | null;  // added
+  height: number | null;  // added
+  weight: number | null;  // added
   created_at: string;
   updated_at: string;
   last_login: string | null;
@@ -61,6 +64,13 @@ export default function SettingsClient() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
+
+
+
+  // At the top, with other useState declarations
+ const [gender, setGender] = useState<string | null>(null);
+const [height, setHeight] = useState<number | null>(null);
+const [weight, setWeight] = useState<number | null>(null);
   // Calculate strength score
   const strengthScore = useMemo(() => {
     return PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(newPassword))
@@ -102,26 +112,32 @@ export default function SettingsClient() {
     const json = await res.json();
     if (res.ok) setGarminStatus(json);
   }
+ 
+  
+  /* ===================== LOAD SETTINGS ===================== */
 
   useEffect(() => {
     async function loadSettings() {
       try {
-        const res = await fetch(`/api/v1/settings`, {
+        const res = await fetch("/api/v1/settings", {
           credentials: "include",
         });
 
-        const json = await res.json();
-
         if (!res.ok) {
+          const json = await res.json().catch(() => ({}));
           setError(json.error || "Failed to load settings");
           return;
         }
 
+        const json: SettingsData = await res.json();
+
         setData(json);
         setDisplayName(json.display_name ?? "");
-
-        await loadPolarStatus();
-      } catch {
+        setGender(json.gender);
+        setHeight(json.height);
+        setWeight(json.weight);
+      } catch (e) {
+        console.error(e);
         setError("Failed to connect to server");
       }
     }
@@ -132,11 +148,11 @@ export default function SettingsClient() {
   async function saveProfile() {
     setSavingProfile(true);
     try {
-      const res = await fetch(`/api/v1/settings/display-name`, {
+      const res = await fetch(`/api/v1/settings/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ displayName }),
+        body: JSON.stringify({ displayName,gender,height,weight }),
       });
 
       const json = await res.json();
@@ -146,18 +162,25 @@ export default function SettingsClient() {
         return;
       }
 
+      
+    // Update local state with returned values
       if (data) {
-        setData({ ...data, display_name: displayName || null });
+        setData({ ...data, display_name: displayName ,
+          gender: json.gender ?? null,
+          height: json.height ?? null,
+          weight: json.weight ?? null, 
+        });
       }
 
       setShowEditProfile(false);
-      router.refresh();
-    } catch {
-      alert("Failed to connect to server");
-    } finally {
-      setSavingProfile(false);
-    }
+    router.refresh();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to connect to server");
+  } finally {
+    setSavingProfile(false);
   }
+}
 
   async function changePassword() {
     if (!oldPassword || !newPassword) {
@@ -311,6 +334,13 @@ export default function SettingsClient() {
             </button>
           </div>
 
+          {/* <-- ADD THIS BLOCK HERE --> */}
+      <div className="flex flex-col sm:flex-row sm:justify-between mt-3 gap-3">
+        <p>GENDER: {data.gender ?? "(not set)"}</p>
+        <p>HEIGHT: {data.height ?? "(not set)"} cm</p>
+        <p>WEIGHT: {data.weight ?? "(not set)"} kg</p>
+      </div>
+
           <div className="flex flex-col sm:flex-row sm:justify-between mt-3 gap-3">
             <p>USERNAME: {data.display_name ?? "(not set)"}</p>
             <button
@@ -382,37 +412,66 @@ export default function SettingsClient() {
         </section>
 
         {/* EDIT PROFILE MODAL */}
-        {showEditProfile && (
-          <Modal onClose={() => setShowEditProfile(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">
-              Change display name
-            </h2>
+{showEditProfile && (
 
-            <input
-              className="block w-full"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Display name"
-            />
+  <Modal onClose={() => setShowEditProfile(false)}>
+  <h2 className="text-lg font-bold mb-4 text-center">Edit Profile</h2>
 
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                onClick={saveProfile}
-                disabled={savingProfile}
-                className="button-style-blue w-full disabled:opacity-50"
-              >
-                {savingProfile ? "Saving..." : "Save"}
-              </button>
+  <input
+    
+    className="block w-full mb-2"
+    value={displayName}
+    onChange={(e) => setDisplayName(e.target.value)}
+    placeholder="Display name"
+  />
 
-              <button
-                onClick={() => setShowEditProfile(false)}
-                className="cancel-button-style w-full"
-              >
-                Cancel
-              </button>
-            </div>
-          </Modal>
-        )}
+  <select
+    className="block w-full mb-2"
+    value={gender ?? ""}
+    onChange={(e) => setGender(e.target.value)}
+  >
+    <option value="">Select Gender</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="other">Other</option>
+    <option value="unknown">Unknown</option>
+  </select>
+
+  <input
+    type="number"
+    className="block w-full mb-2"
+    value={height ?? ""}
+    onChange={(e) => setHeight(Number(e.target.value ? Number(e.target.value) : null))}
+    placeholder="Height (cm)"
+  />
+
+  <input
+    type="number"
+    className="block w-full mb-2"
+    value={weight ?? ""}
+    onChange={(e) => setWeight(Number(e.target.value ? Number(e.target.value) : null ))}
+    placeholder="Weight (kg)"
+  />
+
+  <div className="flex flex-col sm:flex-row gap-2">
+    <button
+      onClick={saveProfile}
+      disabled={savingProfile}
+      className="button-style-blue w-full disabled:opacity-50"
+    >
+      {savingProfile ? "Saving..." : "Save"}
+    </button>
+    <button
+      onClick={() => setShowEditProfile(false)}
+      className="cancel-button-style w-full"
+    >
+      Cancel
+    </button>
+  </div>
+</Modal>
+
+)}
+
 
         {/* CHANGE PASSWORD MODAL */}
         {showChangePassword && (

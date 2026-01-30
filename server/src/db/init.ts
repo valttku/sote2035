@@ -11,38 +11,59 @@ export async function ensureSchema() {
     create extension if not exists pgcrypto;
   `);
 
-  // create users table (accounts)
-  await db.query(`
-    create table if not exists app.users (
-      id integer primary key generated always as identity,
-      email varchar(255) unique not null,
-      password varchar(255) not null,
-      display_name varchar(100),
-      active_provider varchar(50), -- 'polar' | 'garmin' | null,
+  
+    // create users table (accounts)
+await db.query(`
+  do $$
+  begin
+    if not exists (
+      select 1 from pg_type where typname = 'gender_enum'
+    ) then
+      create type app.gender_enum as enum ('male', 'female', 'other', 'unknown');
+    end if;
+  end$$;
 
-      created_at timestamptz not null default now(),
-      updated_at timestamptz not null default now(),
-      last_login timestamptz
-    );
-  `);
+   -- create users table
+  create table if not exists app.users (
+    id integer primary key generated always as identity,
+    email varchar(255) unique not null,
+    password varchar(255) not null,
+    display_name varchar(100),
+    active_provider varchar(50),
 
-  // automatically update users.updated_at on every update
-  await db.query(`
-    create or replace function app.update_updated_at_column()
-    returns trigger as $$
-    begin
-      new.updated_at = now();
-      return new;
-    end;
-    $$ language plpgsql;
+    gender app.gender_enum,
+    height double precision,
+    weight double precision,
+   
 
-    drop trigger if exists update_users_updated_at on app.users;
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    last_login timestamptz
+  );
 
-    create trigger update_users_updated_at
-    before update on app.users
-    for each row
-    execute function app.update_updated_at_column();
-  `);
+
+`);
+
+ // automatically update users.updated_at on every update
+await db.query(`
+  -- automatically update users.updated_at on every update
+  create or replace function app.update_updated_at_column()
+  returns trigger as $$
+  begin
+    new.updated_at = now();
+    return new;
+  end;
+  $$ language plpgsql;
+
+  drop trigger if exists update_users_updated_at on app.users;
+
+  create trigger update_users_updated_at
+  before update on app.users
+  for each row
+  execute function app.update_updated_at_column();
+`);
+
+
 
   // create sessions table (cookie-based login sessions)
   await db.query(`
