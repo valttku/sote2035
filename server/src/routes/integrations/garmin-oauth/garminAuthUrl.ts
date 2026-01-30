@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { generateCodeVerifier, generateCodeChallenge } from "./pkce";
-import { saveOAuthState } from "./stateStore";
+import { generateCodeVerifier, generateCodeChallenge } from "./pkce.js";
+import { saveOAuthState } from "./stateStore.js";
 
 const GARMIN_AUTH_URL = "https://connect.garmin.com/oauth2Confirm";
 

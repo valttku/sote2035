@@ -35,6 +35,9 @@ const PASSWORD_REQUIREMENTS = [
 ] as const;
 
 export default function SettingsClient() {
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,7 +99,7 @@ const [weight, setWeight] = useState<number | null>(null);
   const router = useRouter();
 
   async function loadPolarStatus() {
-    const res = await fetch(`/api/v1/integrations/polar/status`, {
+    const res = await fetch(`${apiUrl}/api/v1/integrations/polar/status`, {
       credentials: "include",
     });
 
@@ -105,7 +108,7 @@ const [weight, setWeight] = useState<number | null>(null);
   }
 
   async function loadGarminStatus() {
-    const res = await fetch(`/api/v1/integrations/garmin/status`, {
+    const res = await fetch(`${apiUrl}/api/v1/integrations/garmin/status`, {
       credentials: "include",
     });
 
@@ -199,7 +202,7 @@ const [weight, setWeight] = useState<number | null>(null);
 
     setChangingPassword(true);
     try {
-      const res = await fetch(`/api/v1/settings/password`, {
+      const res = await fetch(`${apiUrl}/api/v1/settings/password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -229,17 +232,20 @@ const [weight, setWeight] = useState<number | null>(null);
 
   function linkGarmin() {
     // This endpoint redirects to Garmin OAuth
-    window.location.href = `/api/v1/integrations/garmin/connect`;
+    window.location.href = `${apiUrl}/api/v1/integrations/garmin/connect`;
   }
 
   async function unlinkGarmin() {
     if (!confirm("Unlink Garmin from your account?")) return;
     setGarminBusy(true);
     try {
-      const res = await fetch(`/api/v1/integrations/garmin/unlink`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/integrations/garmin/unlink`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
 
       const json = await res.json();
 
@@ -259,7 +265,7 @@ const [weight, setWeight] = useState<number | null>(null);
 
   function linkPolar() {
     // This endpoint redirects to Polar Flow OAuth
-    window.location.href = `/api/v1/integrations/polar/connect`;
+    window.location.href = `${apiUrl}/api/v1/integrations/polar/connect`;
   }
 
   async function unlinkPolar() {
@@ -267,7 +273,7 @@ const [weight, setWeight] = useState<number | null>(null);
 
     setPolarBusy(true);
     try {
-      const res = await fetch(`/api/v1/integrations/polar/unlink`, {
+      const res = await fetch(`${apiUrl}/api/v1/integrations/polar/unlink`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -294,7 +300,7 @@ const [weight, setWeight] = useState<number | null>(null);
     }
 
     try {
-      const res = await fetch(`/api/v1/settings/delete-account`, {
+      const res = await fetch(`${apiUrl}/api/v1/settings/delete-account`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -405,7 +411,7 @@ const [weight, setWeight] = useState<number | null>(null);
 
           <button
             onClick={deleteAccount}
-            className="bg-[#f2345d] text-white px-4 py-2 rounded w-full hover:bg-[#e30f3d]"
+            className="cancel-button-style cancel-button-hover w-full"
           >
             PERMANENTLY DELETE ACCOUNT
           </button>
@@ -565,7 +571,7 @@ const [weight, setWeight] = useState<number | null>(null);
 
               <button
                 onClick={() => setShowChangePassword(false)}
-                className="cancel-button-style w-full"
+                className="cancel-button-style w-full disabled:opacity-50"
               >
                 Cancel
               </button>

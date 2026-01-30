@@ -75,6 +75,27 @@ await db.query(`
     );
   `);
 
+  // clean up duplicate sessions (keep newest), then enforce one session per user
+  await db.query(`
+    with ranked as (
+      select id, user_id,
+            row_number() over (
+              partition by user_id
+              order by expires_at desc, created_at desc, id desc
+            ) as rn
+      from app.sessions
+    )
+    delete from app.sessions s
+    using ranked r
+    where s.id = r.id
+      and r.rn > 1;
+  `);
+
+  await db.query(`
+    create unique index if not exists ux_sessions_user_id
+    on app.sessions(user_id);
+  `);
+
   // create password reset tokens table (forgot/reset password flow)
   await db.query(`
     create table if not exists app.password_reset_tokens (

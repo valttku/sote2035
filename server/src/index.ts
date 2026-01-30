@@ -2,6 +2,7 @@ import { env } from "./config/env.js";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
 
 import { ensureSchema } from "./db/init.js";
 import { dbOk } from "./db/healthCheck.js";
@@ -22,9 +23,20 @@ import { errorHandler } from "./middleware/error.js";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://sote2035-client.onrender.com",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );

@@ -6,11 +6,14 @@ import { useRouter } from "next/navigation";
 export default function ChooseServicePage() {
   const router = useRouter();
 
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
   async function selectService(provider: string) {
     try {
       if (provider === "polar") {
         // Go straight to Polar OAuth
-        window.location.href = "/api/v1/integrations/polar/connect";
+        window.location.href = `${apiUrl}/api/v1/integrations/polar/connect`;
       } else if (provider === "skip") {
         router.push("/");
       } else {

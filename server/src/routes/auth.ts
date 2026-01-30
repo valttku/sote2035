@@ -1,7 +1,8 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { transporter } from "../nodemailer";
+import { transporter } from "../nodemailer.js";
+
 import {
   createUser,
   findUserByEmail,
@@ -11,11 +12,10 @@ import { db } from "../db/db.js";
 
 export const authRouter = Router();
 
-// register
+// --- REGISTER ---
 authRouter.post("/register", async (req, res, next) => {
   try {
     const { email, password, displayName } = req.body;
-
     if (!email || !password)
       return res.status(400).json({ error: "Missing fields" });
 
@@ -23,30 +23,34 @@ authRouter.post("/register", async (req, res, next) => {
     if (existing) return res.status(409).json({ error: "User already exists" });
 
     const hash = await bcrypt.hash(password, 10);
-
     const user = await createUser(email, hash, displayName ?? null);
 
-    // --- NEW SESSION CREATION ---
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    // Create session valid for 7 days (one session per user)
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const newSessionId = crypto.randomUUID();
     const result = await db.query(
-      `INSERT INTO app.sessions (user_id, expires_at)
-       VALUES ($1, $2)
+      `INSERT INTO app.sessions (id, user_id, expires_at)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id)
+       DO UPDATE SET id = EXCLUDED.id,
+                     expires_at = EXCLUDED.expires_at,
+                     created_at = now()
        RETURNING id`,
-      [user.id, expires],
+      [newSessionId, user.id, expires],
     );
 
     const sessionId = result.rows[0].id;
 
+    const isProd = process.env.NODE_ENV === "production";
+
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: false, // true in production
-      sameSite: "lax",
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
-      domain: "localhost",
       expires,
     });
 
-    // respond with user info
     res.status(201).json({
       id: user.id,
       email: user.email,
@@ -58,7 +62,7 @@ authRouter.post("/register", async (req, res, next) => {
   }
 });
 
-// login
+// --- LOGIN ---
 authRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -71,24 +75,29 @@ authRouter.post("/login", async (req, res, next) => {
 
     await updateLastLogin(user.id);
 
-    // create session valid for 7 days
+    // Create session valid for 7 days (one session per user)
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const newSessionId = crypto.randomUUID();
     const result = await db.query(
-      `insert into app.sessions (user_id, expires_at)
-       values ($1, $2)
-       returning id`,
-      [user.id, expires],
+      `INSERT INTO app.sessions (id, user_id, expires_at)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id)
+       DO UPDATE SET id = EXCLUDED.id,
+                     expires_at = EXCLUDED.expires_at,
+                     created_at = now()
+       RETURNING id`,
+      [newSessionId, user.id, expires],
     );
 
     const sessionId = result.rows[0].id;
 
-    // set HTTP-only cookie
+    const isProd = process.env.NODE_ENV === "production";
+
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: false, // true in production with HTTPS
-      sameSite: "lax",
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
-      domain: "localhost",
       expires,
     });
 
@@ -102,26 +111,22 @@ authRouter.post("/login", async (req, res, next) => {
   }
 });
 
-// logout
+// --- LOGOUT ---
 authRouter.post("/logout", async (req, res, next) => {
   try {
     const sessionId = req.cookies?.session;
 
     if (sessionId) {
-      await db.query(
-        `delete from app.sessions
-         where id = $1`,
-        [sessionId],
-      );
+      await db.query(`DELETE FROM app.sessions WHERE id = $1`, [sessionId]);
     }
 
-    // clearing cookie
+    const isProd = process.env.NODE_ENV === "production";
+
     res.clearCookie("session", {
       httpOnly: true,
-      secure: false, // set to true in production with HTTPS
-      sameSite: "lax",
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
-      domain: "localhost",
     });
 
     res.json({ message: "Logged out" });
