@@ -7,10 +7,10 @@ const nextConfig = {
   async rewrites() {
     if (process.env.NODE_ENV === "production") {
       // Forward /api/... requests to your backend in production
-      return [
+      rewrites: async () => [
         {
-          source: "/api/:path*",
-          destination: "https://sote2035-server.onrender.com/api/:path*",
+          source: "/api/v1/:path*",
+          destination: "https://sote2035-server.onrender.com/api/v1/:path*",
         },
       ];
     }
