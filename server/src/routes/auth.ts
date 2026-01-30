@@ -63,8 +63,8 @@ authRouter.post("/register", async (req, res, next) => {
 
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: true, // keep true for HTTPS
-      sameSite: "lax", // first-party via proxy, no need for "None"
+      secure: true,
+      sameSite: "none",
       path: "/",
       expires,
     });
@@ -110,8 +110,8 @@ authRouter.post("/login", async (req, res, next) => {
 
     res.cookie("session", sessionId, {
       httpOnly: true,
-      secure: true, // keep true for HTTPS
-      sameSite: "lax", // first-party via proxy, no need for "None"
+      secure: true,
+      sameSite: "none",
       path: "/",
       expires,
     });
@@ -138,7 +138,7 @@ authRouter.post("/logout", async (req, res, next) => {
     res.clearCookie("session", {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "none",
       path: "/",
     });
 
