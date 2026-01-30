@@ -75,14 +75,17 @@ calendarRouter.post("/activities", authRequired, async (req, res, next) => {
 
     // Insert as activity_daily entry for modal compatibility
     const result = await db.query(
-      `
-      INSERT INTO app.health_stat_entries (user_id, day_date, kind, source, data)
-      VALUES ($1, $2, 'activity_daily', 'manual', $3)
-      RETURNING *
-      `,
-      [userId, date, { title, type, duration, calories, steps, notes }]
-    );
-
+  `
+  INSERT INTO app.health_stat_entries (user_id, day_date, kind, source, data)
+  VALUES ($1, $2::date, 'activity_daily', 'manual', $3)
+  ON CONFLICT (user_id, day_date, kind)
+  DO UPDATE SET
+    data = EXCLUDED.data,
+    updated_at = now()
+  RETURNING *
+  `,
+  [userId, date, { title, type, duration, calories, steps, notes }]
+);
     res.json({ success: true, entry: result.rows[0] });
   } catch (err) {
     next(err);
