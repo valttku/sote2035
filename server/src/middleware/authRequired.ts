@@ -27,6 +27,7 @@ export async function authRequired(req: Request, res: Response, next: NextFuncti
 
     next();
   } catch (e) {
-    next(e);
+    console.error("authRequired error:", e);
+    return res.status(500).json({ error: "Authentication failed" });
   }
 }

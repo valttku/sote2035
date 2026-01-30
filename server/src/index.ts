@@ -20,6 +20,7 @@ import { garminRouter } from "./routes/integrations/garmin.js";
 
 import { errorHandler } from "./middleware/error.js";
 
+
 const app = express();
 
 app.set("trust proxy", 1); 
@@ -44,6 +45,8 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
+
 
 // health and status check
 app.get("/health", (_req, res) => res.json({ ok: true }));
