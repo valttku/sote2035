@@ -12,7 +12,6 @@ export async function exchangeGarminCodeForToken(
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
-    client_id: process.env.GARMIN_CLIENT_ID!,
     redirect_uri: process.env.GARMIN_REDIRECT_URI!,
     code,
     code_verifier: verifier,
@@ -33,12 +32,8 @@ export async function exchangeGarminCodeForToken(
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error(
-        "Garmin token exchange failed:",
-        response.status,
-        errorData,
-      );
+      const text = await response.text();
+      console.error("Garmin token exchange failed:", response.status, text);
       throw new Error(`Token exchange failed: ${response.status}`);
     }
 

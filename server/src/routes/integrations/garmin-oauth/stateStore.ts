@@ -6,25 +6,44 @@ export async function saveOAuthState(
   userId: number,
 ) {
   const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-  await db.query(
-    `INSERT INTO app.oauth_states (state, user_id, verifier, expires_at)
-     VALUES ($1, $2, $3, $4)`,
-    [state, userId, verifier, expires],
-  );
+  try {
+    await db.query(
+      `INSERT INTO app.oauth_states (state, user_id, verifier, expires_at, "user")
+       VALUES ($1, $2, $3, $4, $5)`,
+      [state, userId, verifier, expires, null], // or userId if you want
+    );
+    console.log("OAuth state saved:", { state, userId, expires });
+  } catch (err) {
+    console.error("Failed to save OAuth state:", err);
+    throw err;
+  }
 }
 
-export async function consumeOAuthState(state: string): Promise<string | null> {
-  const result = await db.query(
-    `DELETE FROM app.oauth_states
-     WHERE state = $1
-     RETURNING verifier, expires_at`,
-    [state],
-  );
+export async function consumeOAuthState(state: string): Promise<{
+  verifier: string;
+  userId: number;
+} | null> {
+  try {
+    const result = await db.query(
+      `
+      DELETE FROM app.oauth_states
+      WHERE state = $1
+      RETURNING verifier, user_id, expires_at
+      `,
+      [state],
+    );
 
-  if (result.rowCount === 0) return null;
+    console.log("consumeOAuthState result:", result.rows);
 
-  const { verifier, expires_at } = result.rows[0];
-  if (new Date() > expires_at) return null;
+    if (result.rowCount === 0) return null;
 
-  return verifier;
+    const { verifier, user_id, expires_at } = result.rows[0];
+
+    if (new Date() > expires_at) return null;
+
+    return { verifier, userId: user_id };
+  } catch (err) {
+    console.error("consumeOAuthState error:", err);
+    throw err;
+  }
 }

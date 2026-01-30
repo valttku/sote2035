@@ -27,62 +27,38 @@ garminRouter.get("/callback", async (req, res) => {
 
   try {
     // Consume the saved state to get userId and PKCE verifier
-    const verifier = await consumeOAuthState(state);
-    if (!verifier) {
+    const stateData = await consumeOAuthState(state);
+    if (!stateData) {
       console.error("Invalid or expired state:", state);
       return res.status(400).json({ error: "Invalid or expired state" });
     }
 
-    console.log("Exchanging Garmin code for token...");
-    console.log("code:", code);
-    console.log("verifier:", verifier);
-    console.log("client_id:", process.env.GARMIN_CLIENT_ID);
-    console.log("redirect_uri:", process.env.GARMIN_REDIRECT_URI);
+    const { verifier, userId } = stateData;
 
     // Exchange code for token
     const token = await exchangeGarminCodeForToken(code, verifier);
+
     console.log("Garmin token response:", token);
-
-    // Save token in DB
-    // Get userId from your own OAuth state table (this assumes you save it in consumeOAuthState)
-    const st = await db.query(
-      `SELECT user_id, expires_at FROM app.oauth_states WHERE state = $1`,
-      [state],
-    );
-
-    if (st.rowCount === 0) {
-      console.error("State not found in DB:", state);
-      return res.status(400).json({ error: "Invalid state" });
-    }
-
-    const { user_id, expires_at } = st.rows[0];
-    if (new Date(expires_at).getTime() < Date.now()) {
-      await db.query(`DELETE FROM app.oauth_states WHERE state = $1`, [state]);
-      console.error("State expired:", state);
-      return res.status(400).json({ error: "Expired state" });
-    }
-
-    await db.query(`DELETE FROM app.oauth_states WHERE state = $1`, [state]);
 
     // 4Save user integration
     await db.query("BEGIN");
 
     await db.query(
       `
-      INSERT INTO app.user_integrations
-        (user_id, provider, provider_user_id, access_token, refresh_token, token_expires_at)
-      VALUES
-        ($1, 'garmin', $2, $3, $4, $5)
-      ON CONFLICT (user_id, provider)
-      DO UPDATE SET
-        access_token = excluded.access_token,
-        refresh_token = excluded.refresh_token,
-        token_expires_at = excluded.token_expires_at,
-        updated_at = NOW()
-      `,
+  INSERT INTO app.user_integrations
+    (user_id, provider, provider_user_id, access_token, refresh_token, token_expires_at)
+  VALUES
+    ($1, 'garmin', $2, $3, $4, $5)
+  ON CONFLICT (user_id, provider)
+  DO UPDATE SET
+    access_token = excluded.access_token,
+    refresh_token = excluded.refresh_token,
+    token_expires_at = excluded.token_expires_at,
+    updated_at = NOW()
+  `,
       [
-        user_id,
-        token.user_id ?? null, // Garmin may return user ID here
+        userId,
+        token.user_id ?? null,
         token.access_token,
         token.refresh_token ?? null,
         token.expires_in
@@ -93,12 +69,12 @@ garminRouter.get("/callback", async (req, res) => {
 
     await db.query(
       `UPDATE app.users SET active_provider = 'garmin' WHERE id = $1`,
-      [user_id],
+      [userId],
     );
 
     await db.query("COMMIT");
 
-    console.log(`Garmin account linked for user ${user_id}`);
+    console.log(`Garmin account linked for user ${userId}`);
     res.redirect(`${process.env.APP_BASE_URL}/`); // Or return JSON if preferred
   } catch (err: any) {
     await db.query("ROLLBACK").catch(() => {});
