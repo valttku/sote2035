@@ -5,16 +5,17 @@ const nextConfig = {
   },
 
   async rewrites() {
-    // Frontend calls `NEXT_PUBLIC_API_URL` directly
+    // Use the environment variable if defined, otherwise default to your deployed server
     const apiBase =
       process.env.NODE_ENV === "production"
-        ? process.env.NEXT_PUBLIC_API_URL // your deployed backend
-        : "http://localhost:4000"; // local backend
+        ? process.env.NEXT_PUBLIC_API_URL ||
+          "https://sote2035-server.onrender.com"
+        : "http://localhost:4000";
 
     return [
       {
-        source: "/api/:path*", // Frontend calls `/api/v1/...`
-        destination: `${apiBase}/:path*`, // rewrite to backend, remove extra `/api`
+        source: "/api/:path*",
+        destination: `${apiBase}/:path*`, // must be absolute URL
       },
     ];
   },
