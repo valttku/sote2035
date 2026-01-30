@@ -43,7 +43,6 @@ async function deregisterFromPolar(userId: number) {
 }
 
 //GET /api/v1/settings
-
 settingsRouter.get("/", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
