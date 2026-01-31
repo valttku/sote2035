@@ -168,12 +168,12 @@ garminRouter.get("/pull", async (req, res) => {
 
     // 2. Define time range (last 1 year)
     const now = Math.floor(Date.now() / 1000);
-    const oneYearAgo = now - 60 * 60 * 24 * 365;
+    const sevenDaysAgo = now - 60 * 60 * 24 * 7;;
 
     // 3. Call Garmin BACKFILL endpoint (OAuth required)
     const response = await fetch(
       `https://apis.garmin.com/wellness-api/rest/backfill/userMetrics` +
-        `?summaryStartTimeInSeconds=${oneYearAgo}` +
+        `?summaryStartTimeInSeconds=${sevenDaysAgo}` +
         `&summaryEndTimeInSeconds=${now}`,
       {
         headers: {
