@@ -149,126 +149,53 @@ garminRouter.get("/test-profile", async (req, res) => {
   }
 });
 
-// GET /api/v1/integrations/garmin/pull-dailies for user 7
-garminRouter.get("/pull-dailies", async (req, res) => {
-  try {
-    // 1. Get Garmin access token for user 7
-    const r = await db.query(
-      `SELECT access_token
-       FROM app.user_integrations
-       WHERE provider = 'garmin' AND user_id = $1`,
-      [7],
-    );
-
-    if (r.rowCount === 0) {
-      return res.status(400).json({ error: "No Garmin access token found" });
-    }
-
-    const accessToken = r.rows[0].access_token;
-
-    // 2. Define time range
-    const days = 1;
-    const now = Math.floor(Date.now() / 1000);
-
-    // Start time: N days ago, rounded down to UTC midnight
-    const startTime = Math.floor(Date.now() / 1000 - days * 24 * 60 * 60);
-
-    // 3. Call Garmin daily backfill endpoint
-    const response = await fetch(
-      `https://apis.garmin.com/wellness-api/rest/backfill/dailies` +
-        `?summaryStartTimeInSeconds=${startTime}` +
-        `&summaryEndTimeInSeconds=${now}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: "application/json",
-        },
-      },
-    );
-
-    const text = await response.text();
-    console.log("Garmin backfill dailies raw response:", text);
-
-    if (!text) {
-      console.warn("No daily metrics returned.");
-      return res.json({ ok: true, metricsCount: 0, data: [] });
-    }
-
-    let dailyData;
-    try {
-      dailyData = JSON.parse(text);
-    } catch (err) {
-      console.error("Failed to parse Garmin daily backfill:", err, text);
-      return res
-        .status(500)
-        .json({ error: "Invalid JSON from Garmin", body: text });
-    }
-
-    // 4. Log each ClientDaily for Render
-    for (const day of dailyData.dailyMetrics ?? []) {
-      console.log("ClientDaily:", day);
-      // Here you can insert/update into your DB
-      // await db.query(`INSERT INTO app.user_daily_metrics (...) VALUES (...) ON CONFLICT ...`, [...]);
-    }
-
-    // 5. Respond to client
-    res.json({
-      ok: true,
-      metricsCount: dailyData.dailyMetrics?.length ?? 0,
-      data: dailyData,
-    });
-  } catch (err: any) {
-    console.error("Garmin pull dailies failed:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// GET /api/v1/integrations/garmin/pull-sleep for user 7
-garminRouter.get("/pull-sleep", async (req, res) => {
+// GET /api/v1/integrations/garmin/user-metrics
+// Accepts a pull token manually via query ?token=XXXX
+garminRouter.get("/user-metrics", async (req, res) => {
   try {
     const r = await db.query(
       `SELECT access_token FROM app.user_integrations WHERE provider='garmin' AND user_id=$1`,
       [7],
     );
 
-    if (r.rowCount === 0)
-      return res.status(400).json({ error: "No Garmin access token found" });
-    const accessToken = r.rows[0].access_token;
+    const pullToken = "CPT1769956354.hWmX8hdTEWs";
+    if (!pullToken) {
+      return res.status(400).json({ error: "Pull token is required" });
+    }
 
     const now = Math.floor(Date.now() / 1000);
-    const oneDayAgo = now - 60 * 60 * 24 * 1;
+    const oneDayAgo = now - 24 * 60 * 60; // last 24 hours
 
     const response = await fetch(
-      `https://apis.garmin.com/wellness-api/rest/backfill/sleeps?summaryStartTimeInSeconds=${oneDayAgo}&summaryEndTimeInSeconds=${now}`,
+      `https://apis.garmin.com/wellness-api/rest/userMetrics?token=${pullToken}` +
+        `&uploadStartTimeInSeconds=${oneDayAgo}&uploadEndTimeInSeconds=${now}`,
       {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           Accept: "application/json",
+          Authorization: `Bearer ${r.rows[0].access_token}`, // optional, Garmin may ignore
         },
       },
     );
 
     const text = await response.text();
-    console.log("Raw Garmin sleeps response:", text);
+    console.log("Garmin /userMetrics raw response:", text);
 
-    let data = null;
-    if (text) {
-      try {
-        data = JSON.parse(text);
-        console.log("Parsed sleep metrics:", data);
-      } catch (err) {
-        console.error("Failed to parse JSON:", err, text);
-        return res
-          .status(500)
-          .json({ error: "Invalid JSON from Garmin", body: text });
-      }
-    } else {
-      console.log("No sleep metrics returned for this range.");
+    let metricsData;
+    try {
+      metricsData = text ? JSON.parse(text) : null;
+    } catch (err) {
+      console.error("Failed to parse /userMetrics response:", err, text);
+      return res
+        .status(500)
+        .json({ error: "Invalid JSON from Garmin", body: text });
     }
 
-    res.json({ ok: true, data });
+    res.json({
+      ok: true,
+      data: metricsData,
+    });
   } catch (err: any) {
-    console.error("Garmin pull sleep failed:", err);
+    console.error("Garmin /userMetrics manual pull failed:", err);
     res.status(500).json({ error: err.message });
   }
 });
