@@ -17,13 +17,13 @@ import { openAIRouter } from "./routes/openAI.js";
 
 import { polarRouter } from "./routes/integrations/polar.js";
 import { garminRouter } from "./routes/integrations/garmin.js";
+import { garminWebhookRouter } from "./routes/integrations/garminWebhook.js";
 
 import { errorHandler } from "./middleware/error.js";
 
-
 const app = express();
 
-app.set("trust proxy", 1); 
+app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -71,6 +71,7 @@ app.use("/api/v1/openai", openAIRouter);
 // providers (polar, garmin etc.)
 app.use("/api/v1/integrations/polar", polarRouter);
 app.use("/api/v1/integrations/garmin", garminRouter);
+app.use("/api/v1/integrations/garmin/webhook", garminWebhookRouter);
 
 // global error handler
 app.use(errorHandler);
