@@ -17,6 +17,7 @@ import { openAIRouter } from "./routes/openAI.js";
 
 import { polarRouter } from "./routes/integrations/polar.js";
 import { garminRouter } from "./routes/integrations/garmin.js";
+import { garminWebhookRouter } from "./routes/integrations/garminWebhook.js";
 
 import { errorHandler } from "./middleware/error.js";
 
@@ -67,6 +68,7 @@ app.use("/api/v1/settings", settingsRouter);
 app.use("/api/v1/me", meRouter);
 app.use("/api/v1/digitalTwin", digitalTwinRouter);
 app.use("/api/v1/openai", openAIRouter);
+app.use("/api/v1/integrations/garmin/webhook", garminWebhookRouter);
 
 // providers (polar, garmin etc.)
 app.use("/api/v1/integrations/polar", polarRouter);
