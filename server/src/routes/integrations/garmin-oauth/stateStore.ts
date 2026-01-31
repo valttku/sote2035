@@ -6,17 +6,12 @@ export async function saveOAuthState(
   userId: number,
 ) {
   const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-  try {
-    await db.query(
-      `INSERT INTO app.oauth_states (state, user_id, verifier, expires_at, "user")
-       VALUES ($1, $2, $3, $4, $5)`,
-      [state, userId, verifier, expires, null], // or userId if you want
-    );
-    console.log("OAuth state saved:", { state, userId, expires });
-  } catch (err) {
-    console.error("Failed to save OAuth state:", err);
-    throw err;
-  }
+  await db.query(
+    `INSERT INTO app.oauth_states (state, user_id, expires_at, verifier)
+     VALUES ($1, $2, $3, $4)`,
+    [state, userId, expires, verifier],
+  );
+  console.log("OAuth state saved:", { state, userId, expires, verifier });
 }
 
 export async function consumeOAuthState(state: string): Promise<{

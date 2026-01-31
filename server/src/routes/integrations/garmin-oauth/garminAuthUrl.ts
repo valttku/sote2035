@@ -4,12 +4,12 @@ import { saveOAuthState } from "./stateStore.js";
 
 const GARMIN_AUTH_URL = "https://connect.garmin.com/oauth2Confirm";
 
-export function buildGarminAuthUrl(userId: number) {
+export async function buildGarminAuthUrl(userId: number) {
   const state = randomUUID();
   const verifier = generateCodeVerifier();
   const challenge = generateCodeChallenge(verifier);
 
-  saveOAuthState(state, verifier, userId); // save to DB
+  await saveOAuthState(state, verifier, userId);
 
   const params = new URLSearchParams({
     client_id: process.env.GARMIN_CLIENT_ID!,

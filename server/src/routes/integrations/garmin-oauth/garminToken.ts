@@ -1,47 +1,60 @@
-const GARMIN_TOKEN_URL = "https://apis.garmin.com/oauth2/token";
+const GARMIN_TOKEN_URL =
+  "https://diauth.garmin.com/di-oauth2-service/oauth/token";
 
 export async function exchangeGarminCodeForToken(
   code: string,
   verifier: string,
 ) {
-  console.log("Exchanging Garmin code for token...");
-  console.log("code:", code);
-  console.log("verifier:", verifier);
-  console.log("client_id:", process.env.GARMIN_CLIENT_ID);
-  console.log("redirect_uri:", process.env.GARMIN_REDIRECT_URI);
+  const clientId = process.env.GARMIN_CLIENT_ID;
+  const clientSecret = process.env.GARMIN_CLIENT_SECRET;
+  const redirectUri = process.env.GARMIN_REDIRECT_URI;
+  if (!clientId || !clientSecret || !redirectUri) {
+    throw new Error(
+      "GARMIN_CLIENT_ID, GARMIN_CLIENT_SECRET and GARMIN_REDIRECT_URI must be set",
+    );
+  }
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
-    redirect_uri: process.env.GARMIN_REDIRECT_URI!,
     code,
     code_verifier: verifier,
+    redirect_uri: redirectUri,
+    client_id: clientId,
+    client_secret: clientSecret,
   });
 
-  const basic = Buffer.from(
-    `${process.env.GARMIN_CLIENT_ID}:${process.env.GARMIN_CLIENT_SECRET}`,
-  ).toString("base64");
+  const response = await fetch(GARMIN_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
+    body: body.toString(),
+  });
 
-  try {
-    const response = await fetch(GARMIN_TOKEN_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Basic ${basic}`,
-      },
-      body: body.toString(),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Garmin token exchange failed:", response.status, text);
-      throw new Error(`Token exchange failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("Garmin token response:", data);
-    return data;
-  } catch (err) {
-    console.error("Error exchanging Garmin code for token:", err);
-    throw err;
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Garmin token exchange failed:", response.status, text);
+    throw new Error(`Token exchange failed: ${response.status} - ${text}`);
   }
+
+  const data = await response.json();
+  return data;
+}
+
+export async function fetchGarminUserProfile(accessToken: string) {
+  const response = await fetch(
+    "https://apis.garmin.com/wellness-api/rest/user/id",
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to fetch Garmin user profile: ${text}`);
+  }
+
+  const data = await response.json();
+  return data; // contains Garmin userId
 }

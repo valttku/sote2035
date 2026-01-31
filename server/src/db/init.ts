@@ -11,9 +11,8 @@ export async function ensureSchema() {
     create extension if not exists pgcrypto;
   `);
 
-  
-    // create users table (accounts)
-await db.query(`
+  // create users table (accounts)
+  await db.query(`
   do $$
   begin
     if not exists (
@@ -44,8 +43,8 @@ await db.query(`
 
 `);
 
- // automatically update users.updated_at on every update
-await db.query(`
+  // automatically update users.updated_at on every update
+  await db.query(`
   -- automatically update users.updated_at on every update
   create or replace function app.update_updated_at_column()
   returns trigger as $$
@@ -62,8 +61,6 @@ await db.query(`
   for each row
   execute function app.update_updated_at_column();
 `);
-
-
 
   // create sessions table (cookie-based login sessions)
   await db.query(`
@@ -303,14 +300,22 @@ execute function app.ensure_health_day_exists_for_activity();
   `);
 
   // OAuth state storage for integrations (CSRF protection)
+  // verifier is required for PKCE (e.g. Garmin); Polar does not use it
   await db.query(`
     create table if not exists app.oauth_states (
       state uuid primary key,
       user_id integer not null references app.users(id) on delete cascade,
-      expires_at timestamptz not null
+      expires_at timestamptz not null,
+      verifier text
     );
 
     create index if not exists idx_oauth_states_expires_at
       on app.oauth_states (expires_at);
+  `);
+
+  // Add verifier column if table already existed without it (e.g. before Garmin PKCE)
+  await db.query(`
+    alter table app.oauth_states
+    add column if not exists verifier text;
   `);
 }
