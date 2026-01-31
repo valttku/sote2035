@@ -21,10 +21,9 @@ import { garminWebhookRouter } from "./routes/integrations/garminWebhook.js";
 
 import { errorHandler } from "./middleware/error.js";
 
-
 const app = express();
 
-app.set("trust proxy", 1); 
+app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -68,11 +67,11 @@ app.use("/api/v1/settings", settingsRouter);
 app.use("/api/v1/me", meRouter);
 app.use("/api/v1/digitalTwin", digitalTwinRouter);
 app.use("/api/v1/openai", openAIRouter);
-app.use("/api/v1/integrations/garmin/webhook", garminWebhookRouter);
 
 // providers (polar, garmin etc.)
 app.use("/api/v1/integrations/polar", polarRouter);
 app.use("/api/v1/integrations/garmin", garminRouter);
+app.use("/api/v1/integrations/garmin/webhook", garminWebhookRouter);
 
 // global error handler
 app.use(errorHandler);
