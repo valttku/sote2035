@@ -1,126 +1,160 @@
 import { db } from "./db.js";
-// THIS FILE WILL CONTAIN DB QUERIES RELATED TO health_metrics_daily table
+// This file contains database queries for the health_metrics_daily table
 
-
-type ActivityRow = {
+// representing daily health metrics for users from various sources
+export type HealthMetricRow = {
   user_id: number;
   day_date: string;
-  source: string;
-  start_time: Date;
-  end_time: Date;
-  duration_seconds: number;
-  distance_meters: number;
-  calories: number;
-  steps: number;
-  heart_rate_zones: Record<string, any>;
-  inactive_seconds: number;
+  source: "garmin" | "polar";
+  metric: string;
+  value_number?: number | null;
+  value_json?: Record<string, any> | null;
+  unit?: string | null;
 };
 
-export async function upsertUserActivities(rows: ActivityRow[]) {
+// maps Garmin user metrics object to HealthMetricRow array
+export function mapUserMetricsToRows(
+  user_id: number,
+  m: any,
+): HealthMetricRow[] {
+  const rows: HealthMetricRow[] = [];
+  const day_date = m.calendarDate;
+  const source = "garmin";
+
+  const metricMap: Record<string, { metric: string; unit?: string }> = {
+    vo2Max: { metric: "vo2_max", unit: "ml/kg/min" },
+    vo2MaxCycling: { metric: "vo2_max_cycling", unit: "ml/kg/min" },
+    fitnessAge: { metric: "fitness_age", unit: "years" },
+    enhanced: { metric: "metrics_enhanced" },
+  };
+
+  for (const [key, value] of Object.entries(metricMap)) {
+    if (m[key] === null || m[key] === undefined) continue;
+
+    const row: HealthMetricRow = {
+      user_id,
+      day_date,
+      source,
+      metric: value.metric,
+    };
+
+    if (typeof m[key] === "number") {
+      row.value_number = m[key] as number;
+    } else if (typeof m[key] === "boolean" || typeof m[key] === "object") {
+      row.value_json = { value: m[key] };
+    }
+
+    if (value.unit) row.unit = value.unit;
+
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+// inserts or updates health metrics in the health_metrics_daily table
+export async function upsertHealthMetrics(rows: HealthMetricRow[]) {
   if (!rows.length) return;
 
   const values: any[] = [];
   const placeholders: string[] = [];
 
   rows.forEach((r, i) => {
+    const base = i * 7;
     placeholders.push(
-      `($${i * 11 + 1}, $${i * 11 + 2}, $${i * 11 + 3}, $${i * 11 + 4}, $${i * 11 + 5}, $${i * 11 + 6}, $${i * 11 + 7}, $${i * 11 + 8}, $${i * 11 + 9}, $${i * 11 + 10}, $${i * 11 + 11})`
+      `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7})`,
     );
+
     values.push(
       r.user_id,
       r.day_date,
       r.source,
-      r.start_time,
-      r.end_time,
-      r.duration_seconds,
-      r.distance_meters,
-      r.calories,
-      r.steps,
-      JSON.stringify(r.heart_rate_zones),
-      r.inactive_seconds
+      r.metric,
+      r.value_number ?? null,
+      r.value_json ? JSON.stringify(r.value_json) : null,
+      r.unit ?? null,
     );
   });
 
   const query = `
-    INSERT INTO app.user_activities
-      (user_id, day_date, source, start_time, end_time, duration_seconds, distance_meters, calories, steps, heart_rate_zones, inactive_seconds)
+    INSERT INTO app.health_metrics_daily
+      (user_id, day_date, source, metric, value_number, value_json, unit)
     VALUES ${placeholders.join(", ")}
-    ON CONFLICT (user_id, day_date, source, start_time)
+    ON CONFLICT (user_id, day_date, source, metric)
     DO UPDATE SET
-      end_time = excluded.end_time,
-      duration_seconds = excluded.duration_seconds,
-      distance_meters = excluded.distance_meters,
-      calories = excluded.calories,
-      steps = excluded.steps,
-      heart_rate_zones = excluded.heart_rate_zones,
-      inactive_seconds = excluded.inactive_seconds
+      value_number = EXCLUDED.value_number,
+      value_json   = EXCLUDED.value_json,
+      unit         = EXCLUDED.unit,
+      created_at   = now()
   `;
 
   await db.query(query, values);
 }
 
-
-/*retrieves health metrics for a given user and date
-from the health_metrics_daily table in the database
-Returns a map of metric -> value (number or JSON)*/
-export async function getHealthMetrics(
-  user_id: number,
-  day_date: string,
-): Promise<Record<string, number | Record<string, any>>> {
+// fetches health metrics for a given user and date
+export async function getHealthMetrics(user_id: number, day_date: string) {
   const result = await db.query(
     `
-  SELECT metric, value_number, value_json
-  FROM app.health_metrics_daily
-  WHERE user_id = $1 AND day_date = $2
-  `,
+    SELECT metric, value_number, value_json, unit
+    FROM app.health_metrics_daily
+    WHERE user_id = $1 AND day_date = $2
+    `,
     [user_id, day_date],
   );
 
   const metrics: Record<string, any> = {};
+
   for (const row of result.rows) {
-    metrics[row.metric] = row.value_number ?? row.value_json;
+    metrics[row.metric] = {
+      value: row.value_number ?? row.value_json,
+      unit: row.unit,
+    };
   }
 
   return metrics;
 }
 
-/*retrieves health metrics for a given user over a date range
-from the health_metrics_daily table in the database*/
+// fetches health metrics for a given user over a date range
 export async function getHealthMetricsRange(
   user_id: number,
   start_date: string,
   end_date: string,
-): Promise<
-  Record<
-    string,
-    Array<{ day_date: string; value: number | Record<string, any> }>
-  >
-> {
+) {
   const result = await db.query(
     `
-  SELECT day_date, metric, value_number, value_json
-  FROM app.health_metrics_daily
-  WHERE user_id = $1 AND day_date BETWEEN $2 AND $3
-  ORDER BY day_date ASC
-  `,
+    SELECT day_date, metric, value_number, value_json, unit
+    FROM app.health_metrics_daily
+    WHERE user_id = $1 AND day_date BETWEEN $2 AND $3
+    ORDER BY day_date ASC
+    `,
     [user_id, start_date, end_date],
   );
 
   const metrics: Record<string, any[]> = {};
+
   for (const row of result.rows) {
     if (!metrics[row.metric]) metrics[row.metric] = [];
+
     metrics[row.metric].push({
       day_date: row.day_date,
       value: row.value_number ?? row.value_json,
+      unit: row.unit,
     });
   }
 
   return metrics;
 }
 
-/* delete health metrics if a user inlinks their Poalr or Garminaccount*/
-export async function deleteHealthMetrics(
+// deletes health metrics for a given user and source
+export async function deleteHealthMetricsForSource(
   user_id: number,
-  day_date: string,
-  source?: string,
-) {}
+  source: "garmin" | "polar",
+) {
+  await db.query(
+    `
+    DELETE FROM app.health_metrics_daily
+    WHERE user_id = $1 AND source = $2
+    `,
+    [user_id, source],
+  );
+}
