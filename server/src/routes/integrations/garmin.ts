@@ -149,7 +149,7 @@ garminRouter.get("/test-profile", async (req, res) => {
   }
 });
 
-// GET /api/v1/integrations/garmin/pull-dailies
+// GET /api/v1/integrations/garmin/pull-dailies for user 7
 garminRouter.get("/pull-dailies", async (req, res) => {
   try {
     // 1. Get Garmin access token for user 7
@@ -219,6 +219,56 @@ garminRouter.get("/pull-dailies", async (req, res) => {
     });
   } catch (err: any) {
     console.error("Garmin pull dailies failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/v1/integrations/garmin/pull-sleep for user 7
+garminRouter.get("/pull-sleep", async (req, res) => {
+  try {
+    const r = await db.query(
+      `SELECT access_token FROM app.user_integrations WHERE provider='garmin' AND user_id=$1`,
+      [7],
+    );
+
+    if (r.rowCount === 0)
+      return res.status(400).json({ error: "No Garmin access token found" });
+    const accessToken = r.rows[0].access_token;
+
+    const now = Math.floor(Date.now() / 1000);
+    const oneDayAgo = now - 60 * 60 * 24 * 1;
+
+    const response = await fetch(
+      `https://apis.garmin.com/wellness-api/rest/backfill/sleeps?summaryStartTimeInSeconds=${oneDayAgo}&summaryEndTimeInSeconds=${now}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      },
+    );
+
+    const text = await response.text();
+    console.log("Raw Garmin sleeps response:", text);
+
+    let data = null;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+        console.log("Parsed sleep metrics:", data);
+      } catch (err) {
+        console.error("Failed to parse JSON:", err, text);
+        return res
+          .status(500)
+          .json({ error: "Invalid JSON from Garmin", body: text });
+      }
+    } else {
+      console.log("No sleep metrics returned for this range.");
+    }
+
+    res.json({ ok: true, data });
+  } catch (err: any) {
+    console.error("Garmin pull sleep failed:", err);
     res.status(500).json({ error: err.message });
   }
 });
