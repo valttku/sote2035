@@ -149,14 +149,14 @@ garminRouter.get("/test-profile", async (req, res) => {
   }
 });
 
-// GET /api/v1/integrations/garmin/pull
-garminRouter.get("/pull", async (req, res) => {
+// GET /api/v1/integrations/garmin/pull-dailies
+garminRouter.get("/pull-dailies", async (req, res) => {
   try {
-    // 1. Get a Garmin access token from DB (pick one user for now)
+    // 1. Get Garmin access token for user 7
     const r = await db.query(
       `SELECT access_token
-   FROM app.user_integrations
-   WHERE provider = 'garmin' AND user_id = $1`,
+       FROM app.user_integrations
+       WHERE provider = 'garmin' AND user_id = $1`,
       [7],
     );
 
@@ -166,13 +166,13 @@ garminRouter.get("/pull", async (req, res) => {
 
     const accessToken = r.rows[0].access_token;
 
-    // 2. Define time range (last 1 year)
+    // 2. Define time range — last 7 days
     const now = Math.floor(Date.now() / 1000);
     const sevenDaysAgo = now - 60 * 60 * 24 * 7;
 
-    // 3. Call Garmin BACKFILL endpoint (OAuth required)
+    // 3. Call Garmin daily backfill endpoint
     const response = await fetch(
-      `https://apis.garmin.com/wellness-api/rest/backfill/userMetrics` +
+      `https://apis.garmin.com/wellness-api/rest/backfill/dailies` +
         `?summaryStartTimeInSeconds=${sevenDaysAgo}` +
         `&summaryEndTimeInSeconds=${now}`,
       {
@@ -183,29 +183,39 @@ garminRouter.get("/pull", async (req, res) => {
       },
     );
 
-    // 4. Log EVERYTHING so it appears in Render
     const text = await response.text();
-    console.log("Garmin backfill raw response:", text);
+    console.log("Garmin backfill dailies raw response:", text);
 
     if (!text) {
-      console.warn("No data returned from Garmin backfill.");
+      console.warn("No daily metrics returned.");
       return res.json({ ok: true, metricsCount: 0, data: [] });
     }
 
-    let data;
+    let dailyData;
     try {
-      data = JSON.parse(text);
+      dailyData = JSON.parse(text);
     } catch (err) {
-      console.error("Failed to parse Garmin response as JSON:", err, text);
+      console.error("Failed to parse Garmin daily backfill:", err, text);
       return res
         .status(500)
         .json({ error: "Invalid JSON from Garmin", body: text });
     }
 
-    console.log("Garmin backfill parsed JSON:", data);
-    res.json({ ok: true, metricsCount: data.userMetrics?.length ?? 0, data });
+    // 4. Log each ClientDaily for Render
+    for (const day of dailyData.dailyMetrics ?? []) {
+      console.log("ClientDaily:", day);
+      // Here you can insert/update into your DB
+      // await db.query(`INSERT INTO app.user_daily_metrics (...) VALUES (...) ON CONFLICT ...`, [...]);
+    }
+
+    // 5. Respond to client
+    res.json({
+      ok: true,
+      metricsCount: dailyData.dailyMetrics?.length ?? 0,
+      data: dailyData,
+    });
   } catch (err: any) {
-    console.error("Garmin pull failed:", err);
+    console.error("Garmin pull dailies failed:", err);
     res.status(500).json({ error: err.message });
   }
 });
