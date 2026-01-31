@@ -150,7 +150,7 @@ garminRouter.get("/test-profile", async (req, res) => {
 });
 
 // GET /api/v1/integrations/garmin/user-metrics
-// Accepts a pull token manually via query ?token=XXXX
+// Get user metrics from Garmin API (manual pull for testing)
 garminRouter.get("/user-metrics", async (req, res) => {
   try {
     const r = await db.query(
