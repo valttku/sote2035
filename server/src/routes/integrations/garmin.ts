@@ -149,4 +149,66 @@ garminRouter.get("/test-profile", async (req, res) => {
   }
 });
 
+// GET /api/v1/integrations/garmin/pull
+garminRouter.get("/pull", async (req, res) => {
+  try {
+    // 1. Get a Garmin access token from DB (pick one user for now)
+    const r = await db.query(
+      `SELECT access_token
+       FROM app.user_integrations
+       WHERE provider = 'garmin'
+       LIMIT 1`[7],
+    );
+
+    if (r.rowCount === 0) {
+      return res.status(400).json({ error: "No Garmin access token found" });
+    }
+
+    const accessToken = r.rows[0].access_token;
+
+    // 2. Define time range (last 1 year)
+    const now = Math.floor(Date.now() / 1000);
+    const oneYearAgo = now - 60 * 60 * 24 * 365;
+
+    // 3. Call Garmin BACKFILL endpoint (OAuth required)
+    const response = await fetch(
+      `https://apis.garmin.com/wellness-api/rest/backfill/userMetrics` +
+        `?summaryStartTimeInSeconds=${oneYearAgo}` +
+        `&summaryEndTimeInSeconds=${now}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      },
+    );
+
+    const text = await response.text();
+
+    // 4. Log EVERYTHING so it appears in Render
+    console.log("Garmin backfill status:", response.status);
+    console.log("Garmin backfill raw response:", text);
+
+    if (!response.ok) {
+      return res
+        .status(response.status)
+        .json({ error: "Garmin API error", body: text });
+    }
+
+    const data = JSON.parse(text);
+
+    console.log("Garmin backfill parsed JSON:", data);
+
+    // 5. Respond to browser
+    res.json({
+      ok: true,
+      metricsCount: data.userMetrics?.length ?? 0,
+      data,
+    });
+  } catch (err: any) {
+    console.error("Garmin pull failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default garminRouter;
