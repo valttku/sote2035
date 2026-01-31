@@ -168,7 +168,7 @@ garminRouter.get("/pull", async (req, res) => {
 
     // 2. Define time range (last 1 year)
     const now = Math.floor(Date.now() / 1000);
-    const sevenDaysAgo = now - 60 * 60 * 24 * 7;;
+    const sevenDaysAgo = now - 60 * 60 * 24 * 7;
 
     // 3. Call Garmin BACKFILL endpoint (OAuth required)
     const response = await fetch(
@@ -183,28 +183,27 @@ garminRouter.get("/pull", async (req, res) => {
       },
     );
 
-    const text = await response.text();
-
     // 4. Log EVERYTHING so it appears in Render
-    console.log("Garmin backfill status:", response.status);
+    const text = await response.text();
     console.log("Garmin backfill raw response:", text);
 
-    if (!response.ok) {
-      return res
-        .status(response.status)
-        .json({ error: "Garmin API error", body: text });
+    if (!text) {
+      console.warn("No data returned from Garmin backfill.");
+      return res.json({ ok: true, metricsCount: 0, data: [] });
     }
 
-    const data = JSON.parse(text);
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      console.error("Failed to parse Garmin response as JSON:", err, text);
+      return res
+        .status(500)
+        .json({ error: "Invalid JSON from Garmin", body: text });
+    }
 
     console.log("Garmin backfill parsed JSON:", data);
-
-    // 5. Respond to browser
-    res.json({
-      ok: true,
-      metricsCount: data.userMetrics?.length ?? 0,
-      data,
-    });
+    res.json({ ok: true, metricsCount: data.userMetrics?.length ?? 0, data });
   } catch (err: any) {
     console.error("Garmin pull failed:", err);
     res.status(500).json({ error: err.message });
