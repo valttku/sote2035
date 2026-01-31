@@ -166,14 +166,17 @@ garminRouter.get("/pull-dailies", async (req, res) => {
 
     const accessToken = r.rows[0].access_token;
 
-    // 2. Define time range — last 7 days
+    // 2. Define time range
+    const days = 1;
     const now = Math.floor(Date.now() / 1000);
-    const sevenDaysAgo = now - 60 * 60 * 24 * 7;
+
+    // Start time: N days ago, rounded down to UTC midnight
+    const startTime = Math.floor(Date.now() / 1000 - days * 24 * 60 * 60);
 
     // 3. Call Garmin daily backfill endpoint
     const response = await fetch(
       `https://apis.garmin.com/wellness-api/rest/backfill/dailies` +
-        `?summaryStartTimeInSeconds=${sevenDaysAgo}` +
+        `?summaryStartTimeInSeconds=${startTime}` +
         `&summaryEndTimeInSeconds=${now}`,
       {
         headers: {
