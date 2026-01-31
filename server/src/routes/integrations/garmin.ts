@@ -23,7 +23,11 @@ garminRouter.get("/status", authRequired, async (req, res, next) => {
     if (r.rowCount === 0) {
       return res.json({ linked: false });
     }
-    const row = r.rows[0] as { provider_user_id: string | null; created_at: string; updated_at: string };
+    const row = r.rows[0] as {
+      provider_user_id: string | null;
+      created_at: string;
+      updated_at: string;
+    };
     return res.json({
       linked: true,
       provider_user_id: row.provider_user_id,
@@ -107,7 +111,7 @@ garminRouter.get("/callback", async (req, res) => {
     );
     await db.query("COMMIT");
 
-    res.redirect(`${process.env.APP_BASE_URL || "/"}/`);
+    res.redirect(`${process.env.GARMIN_REDIRECT_AFTER_LINK || "/"}/`);
   } catch (err: any) {
     await db.query("ROLLBACK").catch(() => {});
     console.error("Garmin callback error:", err.message || err);
