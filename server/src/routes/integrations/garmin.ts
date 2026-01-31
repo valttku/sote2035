@@ -10,30 +10,53 @@ export const garminRouter = express.Router();
 
 // Router for Garmin integration, doesn't work with localhost due to Garmin restrictions
 
-// Allowed origins for return_to (avoid open redirect): APP_BASE_URL origin or localhost
-function isAllowedReturnTo(returnTo: string): boolean {
+// GET /api/v1/integrations/garmin/status
+garminRouter.get("/status", authRequired, async (req, res, next) => {
   try {
-    const u = new URL(returnTo);
-    const appBase = process.env.APP_BASE_URL;
-    if (appBase) {
-      const appOrigin = new URL(appBase).origin;
-      if (u.origin === appOrigin) return true;
+    const userId = (req as any).userId as number;
+    const r = await db.query(
+      `SELECT provider_user_id, created_at, updated_at
+       FROM app.user_integrations
+       WHERE user_id = $1 AND provider = 'garmin'`,
+      [userId],
+    );
+    if (r.rowCount === 0) {
+      return res.json({ linked: false });
     }
-    if (u.hostname === "localhost" && (u.protocol === "http:" || u.protocol === "https:"))
-      return true;
-    return false;
-  } catch {
-    return false;
+    const row = r.rows[0] as { provider_user_id: string | null; created_at: string; updated_at: string };
+    return res.json({
+      linked: true,
+      provider_user_id: row.provider_user_id,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    });
+  } catch (e) {
+    next(e);
   }
-}
+});
 
-// GET /api/v1/integrations/garmin/connect?return_to=...
+// DELETE /api/v1/integrations/garmin/unlink
+garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
+  try {
+    const userId = (req as any).userId as number;
+    await db.query(
+      `DELETE FROM app.user_integrations WHERE user_id = $1 AND provider = 'garmin'`,
+      [userId],
+    );
+    await db.query(
+      `UPDATE app.users SET active_provider = NULL WHERE id = $1 AND active_provider = 'garmin'`,
+      [userId],
+    );
+    res.json({ message: "Unlinked" });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// GET /api/v1/integrations/garmin/connect
 garminRouter.get("/connect", authRequired, async (req, res) => {
   const userId = (req as any).userId as number;
-  const returnToRaw = typeof req.query.return_to === "string" ? req.query.return_to : undefined;
-  const returnTo =
-    returnToRaw && isAllowedReturnTo(returnToRaw) ? returnToRaw : undefined;
-  const url = await buildGarminAuthUrl(userId, returnTo);
+  const url = await buildGarminAuthUrl(userId);
   res.redirect(url);
 });
 
@@ -49,7 +72,7 @@ garminRouter.get("/callback", async (req, res) => {
     if (!stateData)
       return res.status(400).json({ error: "Invalid/expired state" });
 
-    const { verifier, userId, returnTo } = stateData;
+    const { verifier, userId } = stateData;
     const token = await exchangeGarminCodeForToken(code, verifier);
 
     // fetch Garmin user profile for Garmin user ID
@@ -84,19 +107,7 @@ garminRouter.get("/callback", async (req, res) => {
     );
     await db.query("COMMIT");
 
-    // Redirect after link: GARMIN_REDIRECT_AFTER_LINK if set (e.g. http://localhost:3000), else return_to, else APP_BASE_URL (same as Polar)
-    const override = process.env.GARMIN_REDIRECT_AFTER_LINK;
-    let redirectUrl: string;
-    if (override && isAllowedReturnTo(override)) {
-      redirectUrl = override.replace(/\/$/, "") || override;
-    } else if (returnTo && isAllowedReturnTo(returnTo)) {
-      redirectUrl = returnTo;
-    } else {
-      redirectUrl = process.env.APP_BASE_URL
-        ? `${process.env.APP_BASE_URL.replace(/\/$/, "")}/`
-        : "/";
-    }
-    res.redirect(redirectUrl);
+    res.redirect(`${process.env.APP_BASE_URL || "/"}/`);
   } catch (err: any) {
     await db.query("ROLLBACK").catch(() => {});
     console.error("Garmin callback error:", err.message || err);

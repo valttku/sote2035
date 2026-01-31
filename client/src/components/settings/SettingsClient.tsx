@@ -140,6 +140,8 @@ export default function SettingsClient() {
     }
 
     loadSettings();
+    loadPolarStatus();
+    loadGarminStatus();
   }, []);
 
   async function saveProfile() {
@@ -226,35 +228,18 @@ export default function SettingsClient() {
   }
 
   function linkGarmin() {
-    // Garmin callback must hit the deployed backend (no localhost). Use the same
-    // backend for /connect so state is saved there. When on localhost we use
-    // the deployed backend for /connect; return_to will send user back to localhost/settings.
-    const isLocalhost =
-      typeof window !== "undefined" &&
-      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-    const garminBase =
-      process.env.NEXT_PUBLIC_GARMIN_CONNECT_URL ||
-      (isLocalhost ? "https://sote2035-server.onrender.com" : null) ||
-      apiUrl;
-    const returnTo =
-      typeof window !== "undefined"
-        ? encodeURIComponent(window.location.origin + "/settings")
-        : "";
-    const url = `${garminBase}/api/v1/integrations/garmin/connect${returnTo ? `?return_to=${returnTo}` : ""}`;
-    window.location.href = url;
+    // Same as Polar: redirect to backend /connect (use deployed frontend + backend for Garmin linking to work)
+    window.location.href = `${apiUrl}/api/v1/integrations/garmin/connect`;
   }
 
   async function unlinkGarmin() {
     if (!confirm("Unlink Garmin from your account?")) return;
     setGarminBusy(true);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/integrations/garmin/unlink`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const res = await fetch(`${apiUrl}/api/v1/integrations/garmin/unlink`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       const json = await res.json();
 
