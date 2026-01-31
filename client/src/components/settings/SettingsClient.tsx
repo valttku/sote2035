@@ -140,6 +140,8 @@ export default function SettingsClient() {
     }
 
     loadSettings();
+    loadPolarStatus();
+    loadGarminStatus();
   }, []);
 
   async function saveProfile() {
@@ -226,7 +228,7 @@ export default function SettingsClient() {
   }
 
   function linkGarmin() {
-    // This endpoint redirects to Garmin OAuth
+    // Same as Polar: redirect to backend /connect (use deployed frontend + backend for Garmin linking to work)
     window.location.href = `${apiUrl}/api/v1/integrations/garmin/connect`;
   }
 
@@ -234,13 +236,10 @@ export default function SettingsClient() {
     if (!confirm("Unlink Garmin from your account?")) return;
     setGarminBusy(true);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/integrations/garmin/unlink`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const res = await fetch(`${apiUrl}/api/v1/integrations/garmin/unlink`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       const json = await res.json();
 
