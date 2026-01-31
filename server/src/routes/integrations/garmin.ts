@@ -155,9 +155,9 @@ garminRouter.get("/pull", async (req, res) => {
     // 1. Get a Garmin access token from DB (pick one user for now)
     const r = await db.query(
       `SELECT access_token
-       FROM app.user_integrations
-       WHERE provider = 'garmin'
-       LIMIT 1`[7],
+   FROM app.user_integrations
+   WHERE provider = 'garmin' AND user_id = $1`,
+      [7],
     );
 
     if (r.rowCount === 0) {
