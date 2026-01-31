@@ -301,12 +301,14 @@ execute function app.ensure_health_day_exists_for_activity();
 
   // OAuth state storage for integrations (CSRF protection)
   // verifier is required for PKCE (e.g. Garmin); Polar does not use it
+  // return_to is optional redirect URL after callback (e.g. localhost/settings)
   await db.query(`
     create table if not exists app.oauth_states (
       state uuid primary key,
       user_id integer not null references app.users(id) on delete cascade,
       expires_at timestamptz not null,
-      verifier text
+      verifier text,
+      return_to text
     );
 
     create index if not exists idx_oauth_states_expires_at
@@ -317,5 +319,11 @@ execute function app.ensure_health_day_exists_for_activity();
   await db.query(`
     alter table app.oauth_states
     add column if not exists verifier text;
+  `);
+
+  // Optional return URL after OAuth callback (e.g. localhost/settings when testing from localhost)
+  await db.query(`
+    alter table app.oauth_states
+    add column if not exists return_to text;
   `);
 }

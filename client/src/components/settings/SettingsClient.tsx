@@ -226,8 +226,22 @@ export default function SettingsClient() {
   }
 
   function linkGarmin() {
-    // This endpoint redirects to Garmin OAuth
-    window.location.href = `${apiUrl}/api/v1/integrations/garmin/connect`;
+    // Garmin callback must hit the deployed backend (no localhost). Use the same
+    // backend for /connect so state is saved there. When on localhost we use
+    // the deployed backend for /connect; return_to will send user back to localhost/settings.
+    const isLocalhost =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    const garminBase =
+      process.env.NEXT_PUBLIC_GARMIN_CONNECT_URL ||
+      (isLocalhost ? "https://sote2035-server.onrender.com" : null) ||
+      apiUrl;
+    const returnTo =
+      typeof window !== "undefined"
+        ? encodeURIComponent(window.location.origin + "/settings")
+        : "";
+    const url = `${garminBase}/api/v1/integrations/garmin/connect${returnTo ? `?return_to=${returnTo}` : ""}`;
+    window.location.href = url;
   }
 
   async function unlinkGarmin() {

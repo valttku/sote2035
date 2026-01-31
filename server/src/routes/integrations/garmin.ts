@@ -10,10 +10,30 @@ export const garminRouter = express.Router();
 
 // Router for Garmin integration, doesn't work with localhost due to Garmin restrictions
 
-// GET /api/v1/integrations/garmin/connect
+// Allowed origins for return_to (avoid open redirect): APP_BASE_URL origin or localhost
+function isAllowedReturnTo(returnTo: string): boolean {
+  try {
+    const u = new URL(returnTo);
+    const appBase = process.env.APP_BASE_URL;
+    if (appBase) {
+      const appOrigin = new URL(appBase).origin;
+      if (u.origin === appOrigin) return true;
+    }
+    if (u.hostname === "localhost" && (u.protocol === "http:" || u.protocol === "https:"))
+      return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// GET /api/v1/integrations/garmin/connect?return_to=...
 garminRouter.get("/connect", authRequired, async (req, res) => {
   const userId = (req as any).userId as number;
-  const url = await buildGarminAuthUrl(userId);
+  const returnToRaw = typeof req.query.return_to === "string" ? req.query.return_to : undefined;
+  const returnTo =
+    returnToRaw && isAllowedReturnTo(returnToRaw) ? returnToRaw : undefined;
+  const url = await buildGarminAuthUrl(userId, returnTo);
   res.redirect(url);
 });
 
@@ -29,7 +49,7 @@ garminRouter.get("/callback", async (req, res) => {
     if (!stateData)
       return res.status(400).json({ error: "Invalid/expired state" });
 
-    const { verifier, userId } = stateData;
+    const { verifier, userId, returnTo } = stateData;
     const token = await exchangeGarminCodeForToken(code, verifier);
 
     // fetch Garmin user profile for Garmin user ID
@@ -64,7 +84,19 @@ garminRouter.get("/callback", async (req, res) => {
     );
     await db.query("COMMIT");
 
-    res.redirect(`${process.env.APP_BASE_URL}/`);
+    // Redirect after link: GARMIN_REDIRECT_AFTER_LINK if set (e.g. http://localhost:3000), else return_to, else APP_BASE_URL (same as Polar)
+    const override = process.env.GARMIN_REDIRECT_AFTER_LINK;
+    let redirectUrl: string;
+    if (override && isAllowedReturnTo(override)) {
+      redirectUrl = override.replace(/\/$/, "") || override;
+    } else if (returnTo && isAllowedReturnTo(returnTo)) {
+      redirectUrl = returnTo;
+    } else {
+      redirectUrl = process.env.APP_BASE_URL
+        ? `${process.env.APP_BASE_URL.replace(/\/$/, "")}/`
+        : "/";
+    }
+    res.redirect(redirectUrl);
   } catch (err: any) {
     await db.query("ROLLBACK").catch(() => {});
     console.error("Garmin callback error:", err.message || err);
