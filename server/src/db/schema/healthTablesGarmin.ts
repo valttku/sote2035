@@ -163,6 +163,63 @@ export async function createHealthTables() {
   execute function app.update_updated_at_column();
 `);
 
+  // Add this after user_dailies_garmin table
+
+  // create user_hrv_garmin table
+  await db.query(`
+  create table if not exists app.user_hrv_garmin (
+    id uuid primary key default gen_random_uuid(),
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    summary_id varchar(100),
+    
+    last_night_avg integer,
+    last_night_5min_high integer,
+    start_time_offset_in_seconds integer,
+    duration_in_seconds integer,
+    start_time_in_seconds bigint,
+    hrv_values jsonb,  -- {300: 32, 600: 24, ...}
+    
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    
+    unique (user_id, day_date)
+  );
+
+  create index if not exists idx_user_hrv_garmin_user_day
+    on app.user_hrv_garmin (user_id, day_date);
+`);
+
+  // Trigger for user_hrv_garmin
+  await db.query(`
+    create or replace function app.ensure_health_day_exists_for_hrv()
+    returns trigger as $$
+    begin
+      insert into app.health_days (user_id, day_date)
+      values (new.user_id, new.day_date)
+      on conflict (user_id, day_date) do nothing;
+      return new;
+    end;
+    $$ language plpgsql;
+
+    drop trigger if exists trg_ensure_health_day_for_hrv on app.user_hrv_garmin;
+
+    create trigger trg_ensure_health_day_for_hrv
+    after insert or update on app.user_hrv_garmin
+    for each row
+    execute function app.ensure_health_day_exists_for_hrv();
+  `);
+
+  // Update trigger for updated_at
+  await db.query(`
+  drop trigger if exists update_user_hrv_garmin_updated_at on app.user_hrv_garmin;
+
+  create trigger update_user_hrv_garmin_updated_at
+  before update on app.user_hrv_garmin
+  for each row
+  execute function app.update_updated_at_column();
+`);
+
   // create health_stat_entries table (will be deleted later)
   await db.query(`
   create table if not exists app.health_stat_entries (
