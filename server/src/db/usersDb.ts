@@ -33,7 +33,7 @@ export async function createUser(
       display_name,
       gender,
       height,
-      weight, 
+      weight
     )
     VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *`, //  returns all columns

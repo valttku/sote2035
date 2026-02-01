@@ -3,7 +3,7 @@ import { db } from "../../db/db.js";
 import {
   upsertUserMetrics,
   mapUserMetricsToRows,
-} from "../../db/userMetricsDb";
+} from "../../db/userMetricsDb.js";
 import { mapDailiesToRows, upsertDailies } from "../../db/userDailiesDb.js";
 
 // Router for Garmin webhooks
