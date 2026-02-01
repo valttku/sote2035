@@ -1,7 +1,6 @@
 "use client";
 import { useState, useRef, useMemo } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import DarkModeToggle from "./DarkModeToggle"; // import your client toggle
 
 export default function RegisterForm({
   onSubmit,

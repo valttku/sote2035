@@ -6,6 +6,8 @@ import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
 
+// Router for Garmin integration endpoints
+
 export const garminRouter = express.Router();
 
 // GET /api/v1/integrations/garmin/status
@@ -146,57 +148,6 @@ garminRouter.get("/test-profile", async (req, res) => {
   } catch (err: any) {
     console.error("Test route error:", err);
     res.status(500).send(`Server error: ${err.message}`);
-  }
-});
-
-// GET /api/v1/integrations/garmin/user-metrics
-// Get user metrics from Garmin API (manual pull for testing)
-garminRouter.get("/user-metrics", async (req, res) => {
-  try {
-    const r = await db.query(
-      `SELECT access_token FROM app.user_integrations WHERE provider='garmin' AND user_id=$1`,
-      [7],
-    );
-
-    const pullToken = "CPT1769956354.hWmX8hdTEWs";
-    if (!pullToken) {
-      return res.status(400).json({ error: "Pull token is required" });
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const oneDayAgo = now - 24 * 60 * 60; // last 24 hours
-
-    const response = await fetch(
-      `https://apis.garmin.com/wellness-api/rest/userMetrics?token=${pullToken}` +
-        `&uploadStartTimeInSeconds=${oneDayAgo}&uploadEndTimeInSeconds=${now}`,
-      {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${r.rows[0].access_token}`, // optional, Garmin may ignore
-        },
-      },
-    );
-
-    const text = await response.text();
-    console.log("Garmin /userMetrics raw response:", text);
-
-    let metricsData;
-    try {
-      metricsData = text ? JSON.parse(text) : null;
-    } catch (err) {
-      console.error("Failed to parse /userMetrics response:", err, text);
-      return res
-        .status(500)
-        .json({ error: "Invalid JSON from Garmin", body: text });
-    }
-
-    res.json({
-      ok: true,
-      data: metricsData,
-    });
-  } catch (err: any) {
-    console.error("Garmin /userMetrics manual pull failed:", err);
-    res.status(500).json({ error: err.message });
   }
 });
 

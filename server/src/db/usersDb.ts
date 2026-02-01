@@ -1,6 +1,6 @@
-import { db } from "../db.js";
+import { db } from "./db.js";
 
-//add here 
+//add here
 export type Gender = "male" | "female" | "other" | "unknown";
 
 //User type
@@ -9,14 +9,9 @@ export type User = {
   email: string;
   password: string;
   display_name: string | null;
-
-  //Added here gender,height and weight
- 
   height: number | null;
   weight: number | null;
-  gender: Gender | null,
-  
-
+  gender: Gender | null;
   created_at: string;
   updated_at: string;
   last_login: string | null;
@@ -30,7 +25,6 @@ export async function createUser(
   gender: Gender | null,
   height: number | null,
   weight: number | null,
-  
 ): Promise<User> {
   const { rows } = await db.query<User>(
     `INSERT INTO app.users (
@@ -39,15 +33,14 @@ export async function createUser(
       display_name,
       gender,
       height,
-      weight,
-      
+      weight
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *`, //  returns all columns
-    [email, password, displayName, gender, height, weight]
+    [email, password, displayName, gender, height, weight],
   );
-  return rows[0]
-};
+  return rows[0];
+}
 
 // return all users
 export async function listUsers(): Promise<User[]> {
@@ -57,25 +50,22 @@ export async function listUsers(): Promise<User[]> {
     gender,height, weight, created_at, updated_at, last_login
     
      from app.users
-     order by id asc`
+     order by id asc`,
   );
   return rows;
 }
 
 // find one user by email
 
-
 export async function findUserByEmail(email: string): Promise<User | null> {
   const { rows } = await db.query<User>(
     `select id, email, password, gender, height, weight, display_name, created_at, updated_at, last_login
      from app.users
      where email = $1`,
-    [email]
+    [email],
   );
   return rows[0] ?? null;
 }
-
-
 
 // update last_login timestamp
 export async function updateLastLogin(id: number): Promise<void> {
@@ -83,7 +73,7 @@ export async function updateLastLogin(id: number): Promise<void> {
     `update app.users
      set last_login = now()
      where id = $1`,
-    [id]
+    [id],
   );
 }
 
@@ -97,7 +87,7 @@ export async function deleteSession(sessionId: string): Promise<void> {
   await db.query(
     `delete from app.sessions
      where id = $1`,
-    [sessionId]
+    [sessionId],
   );
 }
 
@@ -118,7 +108,7 @@ export async function getUserById(userId: number) {
     FROM app.users
     WHERE id = $1
     `,
-    [userId]
+    [userId],
   );
 
   return result.rows[0];
@@ -131,7 +121,7 @@ export async function updateUserProfile(
     gender?: string | null;
     height?: number | null;
     weight?: number | null;
-  }
+  },
 ) {
   await db.query(
     `
@@ -150,6 +140,6 @@ export async function updateUserProfile(
       data.gender ?? null,
       data.height ?? null,
       data.weight ?? null,
-    ]
+    ],
   );
 }

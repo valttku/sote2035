@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getHealthData } from "../db/userHealthStats.js";
+import { getHealthData } from "../db/healthStatsDb.js";
 import { authRequired } from "../middleware/authRequired.js";
 
 export const digitalTwinRouter = Router();
