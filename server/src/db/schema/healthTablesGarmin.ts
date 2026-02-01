@@ -29,25 +29,6 @@ export async function createHealthTables() {
   execute function app.update_health_days_updated_at();
 `);
 
-  // Garmin user metrics table
-  await db.query(`
-    create table if not exists app.user_metrics_garmin (
-      id uuid primary key default gen_random_uuid(),
-      user_id integer not null references app.users(id) on delete cascade,
-      day_date date not null,
-      summary_id varchar(100),
-      vo2_max double precision,
-      vo2_max_cycling double precision,
-      fitness_age integer,
-      enhanced boolean,
-      created_at timestamptz not null default now(),
-      unique (user_id, day_date, summary_id)
-    );
-
-    create index if not exists idx_user_metrics_garmin_user_day
-      on app.user_metrics_garmin (user_id, day_date);
-  `);
-
   // Trigger for user_metrics_garmin (ensure health_days entry exists)
   await db.query(`
     create or replace function app.ensure_health_day_exists_for_garmin_metrics()
