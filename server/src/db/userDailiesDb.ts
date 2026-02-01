@@ -39,7 +39,7 @@ export type DailiesRow = {
   start_time_offset_in_seconds?: number | null;
 };
 
-export function mapDailiesToRows(user_id: number, d: any): DailiesRow[] {
+export function mapGarminDailiesToRows(user_id: number, d: any): DailiesRow[] {
   return [
     {
       user_id,

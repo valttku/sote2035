@@ -2,9 +2,12 @@ import express from "express";
 import { db } from "../../db/db.js";
 import {
   upsertUserMetrics,
-  mapUserMetricsToRows,
+  mapGarminUserMetricsToRows,
 } from "../../db/userMetricsDb.js";
-import { mapDailiesToRows, upsertDailies } from "../../db/userDailiesDb.js";
+import {
+  mapGarminDailiesToRows,
+  upsertDailies,
+} from "../../db/userDailiesDb.js";
 
 // Router for Garmin webhooks
 
@@ -17,7 +20,9 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
   console.log("Payload:", JSON.stringify(req.body, null, 2));
 
   try {
-    const payload = Array.isArray(req.body) ? req.body : [req.body];
+    // Handle array wrapped by summary type
+    const payload =
+      req.body.userMetrics || (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {
       const providerUserId = item.userId;
@@ -41,7 +46,7 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
       }
 
       const user_id = r.rows[0].user_id;
-      const rows = mapUserMetricsToRows(user_id, item);
+      const rows = mapGarminUserMetricsToRows(user_id, item);
       console.log("Mapped rows:", rows);
 
       if (rows.length) {
@@ -64,7 +69,9 @@ garminWebhookRouter.post("/dailies", async (req, res) => {
   console.log("Payload:", JSON.stringify(req.body, null, 2));
 
   try {
-    const payload = Array.isArray(req.body) ? req.body : [req.body];
+    // Handle array wrapped by summary type
+    const payload =
+      req.body.dailies || (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {
       const providerUserId = item.userId;
@@ -88,7 +95,7 @@ garminWebhookRouter.post("/dailies", async (req, res) => {
       }
 
       const user_id = r.rows[0].user_id;
-      const rows = mapDailiesToRows(user_id, item);
+      const rows = mapGarminDailiesToRows(user_id, item);
       console.log("Mapped rows:", rows);
 
       if (rows.length) {

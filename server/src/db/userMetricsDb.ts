@@ -12,7 +12,7 @@ export type userMetricRow = {
 };
 
 // maps Garmin user metrics object to userMetricRow array
-export function mapUserMetricsToRows(
+export function mapGarminUserMetricsToRows(
   user_id: number,
   m: any,
 ): userMetricRow[] {
