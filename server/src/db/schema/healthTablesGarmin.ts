@@ -129,9 +129,6 @@ export async function createHealthTables() {
 
   create index if not exists idx_user_dailies_garmin_user_day
     on app.user_dailies_garmin (user_id, day_date);
-
-  create index if not exists idx_user_dailies_source
-    on app.user_dailies_garmin (source);
 `);
 
   // Trigger for user_dailies_garmin (ensure health_days entry exists)
@@ -155,10 +152,12 @@ export async function createHealthTables() {
   `);
 
   // automatically update user_dailies.updated_at on every update
+
   await db.query(`
+  drop trigger if exists update_user_dailies_updated_at on app.user_dailies_garmin;
   drop trigger if exists update_user_dailies_garmin_updated_at on app.user_dailies_garmin;
 
-  create trigger update_user_dailies_updated_at
+  create trigger update_user_dailies_garmin_updated_at
   before update on app.user_dailies_garmin
   for each row
   execute function app.update_updated_at_column();
