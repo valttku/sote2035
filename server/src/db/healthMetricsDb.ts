@@ -37,11 +37,23 @@ export function mapUserMetricsToRows(
     }));
 }
 
-
 // inserts or updates health metrics in the health_metrics_daily table
 export async function upsertHealthMetrics(rows: HealthMetricRow[]) {
   if (!rows.length) return;
 
+  // 1. Ensure health_days records exist
+  const dates = [...new Set(rows.map((r) => r.day_date))];
+  for (const date of dates) {
+    const userId = rows.find((r) => r.day_date === date)!.user_id;
+    await db.query(
+      `INSERT INTO app.health_days (user_id, day_date)
+       VALUES ($1, $2)
+       ON CONFLICT DO NOTHING`,
+      [userId, date],
+    );
+  }
+
+  // 2. Insert metrics
   const values: any[] = [];
   const placeholders: string[] = [];
 
@@ -75,29 +87,6 @@ export async function upsertHealthMetrics(rows: HealthMetricRow[]) {
   `;
 
   await db.query(query, values);
-}
-
-// fetches health metrics for a given user and date
-export async function getHealthMetrics(user_id: number, day_date: string) {
-  const result = await db.query(
-    `
-    SELECT metric, value_number, value_json, unit
-    FROM app.health_metrics_daily
-    WHERE user_id = $1 AND day_date = $2
-    `,
-    [user_id, day_date],
-  );
-
-  const metrics: Record<string, any> = {};
-
-  for (const row of result.rows) {
-    metrics[row.metric] = {
-      value: row.value_number ?? row.value_json,
-      unit: row.unit,
-    };
-  }
-
-  return metrics;
 }
 
 // fetches health metrics for a given user over a date range
