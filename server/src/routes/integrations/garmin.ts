@@ -5,10 +5,8 @@ import { exchangeGarminCodeForToken } from "./garmin-oauth/garminToken.js";
 import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
-import {
-  upsertHealthMetrics,
-  mapUserMetricsToRows,
-} from "../../db/userHealthMetrics.js";
+
+// Router for Garmin integration endpoints
 
 export const garminRouter = express.Router();
 
@@ -150,102 +148,6 @@ garminRouter.get("/test-profile", async (req, res) => {
   } catch (err: any) {
     console.error("Test route error:", err);
     res.status(500).send(`Server error: ${err.message}`);
-  }
-});
-
-// GET /api/v1/integrations/garmin/user-metrics
-// Get user metrics from Garmin API (manual pull for testing)
-garminRouter.get("/user-metrics", async (req, res) => {
-  try {
-    const r = await db.query(
-      `SELECT access_token FROM app.user_integrations WHERE provider='garmin' AND user_id=$1`,
-      [7],
-    );
-
-    const pullToken = "CPT1769956354.hWmX8hdTEWs";
-    if (!pullToken) {
-      return res.status(400).json({ error: "Pull token is required" });
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const oneDayAgo = now - 24 * 60 * 60; // last 24 hours
-
-    const response = await fetch(
-      `https://apis.garmin.com/wellness-api/rest/userMetrics?token=${pullToken}` +
-        `&uploadStartTimeInSeconds=${oneDayAgo}&uploadEndTimeInSeconds=${now}`,
-      {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${r.rows[0].access_token}`, // optional, Garmin may ignore
-        },
-      },
-    );
-
-    const text = await response.text();
-    console.log("Garmin /userMetrics raw response:", text);
-
-    let metricsData;
-    try {
-      metricsData = text ? JSON.parse(text) : null;
-    } catch (err) {
-      console.error("Failed to parse /userMetrics response:", err, text);
-      return res
-        .status(500)
-        .json({ error: "Invalid JSON from Garmin", body: text });
-    }
-
-    res.json({
-      ok: true,
-      data: metricsData,
-    });
-  } catch (err: any) {
-    console.error("Garmin /userMetrics manual pull failed:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST /api/v1/integrations/garmin/webhook/user-metrics
-// Garmin webhook for user metrics
-garminRouter.post("/webhook/user-metrics", async (req, res) => {
-  try {
-    const payload = Array.isArray(req.body) ? req.body : [req.body];
-
-    for (const item of payload) {
-      const garminUserId = item.userId;
-      if (!garminUserId) continue;
-
-      // 1. Map Garmin user → internal user
-      const r = await db.query(
-        `
-        SELECT user_id
-        FROM app.user_integrations
-        WHERE provider = 'garmin' AND garmin_user_id = $1
-        `,
-        [garminUserId],
-      );
-
-      if (r.rowCount === 0) {
-        console.warn("Garmin user not linked:", garminUserId);
-        continue; // IMPORTANT: do not throw
-      }
-
-      const user_id = r.rows[0].user_id;
-
-      // 2. Convert to health_metrics_daily rows
-      const rows = mapUserMetricsToRows(user_id, item);
-
-      // 3. Upsert
-      if (rows.length) {
-        await upsertHealthMetrics(rows);
-      }
-    }
-
-    // Garmin expects 200 always
-    res.sendStatus(200);
-  } catch (err) {
-    console.error("Garmin user-metrics webhook failed:", err);
-    // Still return 200 to avoid retries storm
-    res.sendStatus(200);
   }
 });
 
