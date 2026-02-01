@@ -1,9 +1,8 @@
 import { db } from "./db.js";
 
-export type DailiesRow = {
+export type GarminDailiesRow = {
   user_id: number;
   day_date: string;
-  source: "garmin" | "polar";
   summary_id?: string | null;
   activity_type?: string | null;
   active_kilocalories?: number | null;
@@ -39,12 +38,11 @@ export type DailiesRow = {
   start_time_offset_in_seconds?: number | null;
 };
 
-export function mapGarminDailiesToRows(user_id: number, d: any): DailiesRow[] {
+export function mapGarminDailiesToRows(user_id: number, d: any): GarminDailiesRow[] {
   return [
     {
       user_id,
       day_date: d.calendarDate,
-      source: "garmin",
       summary_id: d.summaryId ?? null,
       activity_type: d.activityType ?? null,
       active_kilocalories: d.activeKilocalories ?? null,
@@ -82,7 +80,7 @@ export function mapGarminDailiesToRows(user_id: number, d: any): DailiesRow[] {
   ];
 }
 
-export async function upsertDailies(rows: DailiesRow[]) {
+export async function upsertGarminDailies(rows: GarminDailiesRow[]) {
   if (!rows.length) return;
 
   // 1. Ensure health_days records exist
@@ -99,7 +97,7 @@ export async function upsertDailies(rows: DailiesRow[]) {
 
   // 2. Insert dailies
   const columns = [
-    "user_id", "day_date", "source", "summary_id", "activity_type",
+    "user_id", "day_date", "summary_id", "activity_type",
     "active_kilocalories", "bmr_kilocalories", "steps", "pushes",
     "distance_in_meters", "push_distance_in_meters", "duration_in_seconds",
     "active_time_in_seconds", "floors_climbed", "min_heart_rate",
@@ -122,7 +120,7 @@ export async function upsertDailies(rows: DailiesRow[]) {
     placeholders.push(`(${placeholderList})`);
 
     values.push(
-      r.user_id, r.day_date, r.source, r.summary_id ?? null,
+      r.user_id, r.day_date, r.summary_id ?? null,
       r.activity_type ?? null, r.active_kilocalories ?? null,
       r.bmr_kilocalories ?? null, r.steps ?? null, r.pushes ?? null,
       r.distance_in_meters ?? null, r.push_distance_in_meters ?? null,
@@ -146,9 +144,9 @@ export async function upsertDailies(rows: DailiesRow[]) {
   });
 
   const query = `
-    INSERT INTO app.user_dailies (${columns.join(", ")})
+    INSERT INTO app.user_dailies_garmin (${columns.join(", ")})
     VALUES ${placeholders.join(", ")}
-    ON CONFLICT (user_id, day_date, source)
+    ON CONFLICT (user_id, day_date)
     DO UPDATE SET
       summary_id = EXCLUDED.summary_id,
       activity_type = EXCLUDED.activity_type,

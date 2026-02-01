@@ -1,6 +1,6 @@
 import { db } from "./db.js";
-import { createHealthTables } from "./schema/health.js";
-import { createActivitiesTables } from "./schema/activities.js";
+import { createHealthTables } from "./schema/healthTablesGarmin.js";
+import { createActivitiesTables } from "./schema/activitiesTablesGarmin.js";
 
 export async function ensureSchema() {
   await createHealthTables();

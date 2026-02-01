@@ -1,13 +1,13 @@
 import express from "express";
 import { db } from "../../db/db.js";
 import {
-  upsertUserMetrics,
+  upsertGarminUserMetrics,
   mapGarminUserMetricsToRows,
-} from "../../db/userMetricsDb.js";
+} from "../../db/userMetricsGarmin.js";
 import {
-  mapGarminDailiesToRows,
-  upsertDailies,
-} from "../../db/userDailiesDb.js";
+  upsertGarminDailies,
+  mapGarminDailiesToRows
+} from "../../db/userDailiesGarmin.js";
 
 // Router for Garmin webhooks
 
@@ -46,13 +46,9 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
       }
 
       const user_id = r.rows[0].user_id;
-      const rows = mapGarminUserMetricsToRows(user_id, item);
-      console.log("Mapped rows:", rows);
-
-      if (rows.length) {
-        await upsertUserMetrics(rows);
-        console.log("Inserted", rows.length, "metrics");
-      }
+      const row = mapGarminUserMetricsToRows(user_id, item);
+      console.log("Mapped row:", row);
+      await upsertGarminUserMetrics(row);
     }
 
     res.sendStatus(200);
@@ -96,10 +92,10 @@ garminWebhookRouter.post("/dailies", async (req, res) => {
 
       const user_id = r.rows[0].user_id;
       const rows = mapGarminDailiesToRows(user_id, item);
-      console.log("Mapped rows:", rows);
+      console.log("Mapped row:", rows);
 
       if (rows.length) {
-        await upsertDailies(rows);
+        await upsertGarminDailies(rows);
         console.log("Inserted dailies data");
       }
     }

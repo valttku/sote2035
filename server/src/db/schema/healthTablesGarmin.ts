@@ -29,57 +29,51 @@ export async function createHealthTables() {
   execute function app.update_health_days_updated_at();
 `);
 
-  // create user_metrics table.
+  // Garmin user metrics table
   await db.query(`
-  create table if not exists app.user_metrics (
+    create table if not exists app.user_metrics_garmin (
+      id uuid primary key default gen_random_uuid(),
+      user_id integer not null references app.users(id) on delete cascade,
+      day_date date not null,
+      summary_id varchar(100),
+      vo2_max double precision,
+      vo2_max_cycling double precision,
+      fitness_age integer,
+      enhanced boolean,
+      created_at timestamptz not null default now(),
+      unique (user_id, day_date, summary_id)
+    );
+
+    create index if not exists idx_user_metrics_garmin_user_day
+      on app.user_metrics_garmin (user_id, day_date);
+  `);
+
+  // Trigger for user_metrics_garmin (ensure health_days entry exists)
+  await db.query(`
+    create or replace function app.ensure_health_day_exists_for_garmin_metrics()
+    returns trigger as $$
+    begin
+      insert into app.health_days (user_id, day_date)
+      values (new.user_id, new.day_date)
+      on conflict (user_id, day_date) do nothing;
+      return new;
+    end;
+    $$ language plpgsql;
+
+    drop trigger if exists trg_ensure_health_day_for_garmin_metrics on app.user_metrics_garmin;
+
+    create trigger trg_ensure_health_day_for_garmin_metrics
+    after insert or update on app.user_metrics_garmin
+    for each row
+    execute function app.ensure_health_day_exists_for_garmin_metrics();
+  `);
+
+  // create user_dailies_garmin table
+  await db.query(`
+  create table if not exists app.user_dailies_garmin (
     id uuid primary key default gen_random_uuid(),
     user_id integer not null references app.users(id) on delete cascade,
     day_date date not null,
-    source varchar(32) not null,   -- 'garmin', 'polar'
-    metric varchar(64) not null,   -- 'resting_hr', 'steps', etc
-    value_number double precision,
-    value_json jsonb,
-    unit varchar(32),
-    created_at timestamptz not null default now(),
-    unique (user_id, day_date, source, metric)
-  );
-
-  create index if not exists idx_user_metrics_user_day
-    on app.user_metrics (user_id, day_date);
-
-  create index if not exists idx_user_metrics__user_metric
-    on app.user_metrics (user_id, metric);
-`);
-
-  // ensure health_days entry exists when inserting/updating user_metrics
-  await db.query(`
-  create or replace function app.ensure_health_day_exists_for_metrics()
-  returns trigger as $$
-  begin
-    insert into app.health_days (user_id, day_date)
-    values (new.user_id, new.day_date)
-    on conflict (user_id, day_date) do nothing;
-    return new;
-  end;
-  $$ language plpgsql;
-
-  drop trigger if exists trg_ensure_health_day_exists_on_metrics on app.user_metrics;
-
-  create trigger trg_ensure_health_day_exists_on_metrics
-  after insert or update on app.user_metrics
-  for each row
-  execute function app.ensure_health_day_exists_for_metrics();
-`);
-
-  // ...existing code...
-
-  // create user_dailies table (daily summary from Garmin/Polar)
-  await db.query(`
-  create table if not exists app.user_dailies (
-    id uuid primary key default gen_random_uuid(),
-    user_id integer not null references app.users(id) on delete cascade,
-    day_date date not null,
-    source varchar(32) not null,   -- 'garmin', 'polar'
     summary_id varchar(100),       -- provider's summary ID
 
     activity_type varchar(50),
@@ -130,42 +124,42 @@ export async function createHealthTables() {
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     
-    unique (user_id, day_date, source)
+    unique (user_id, day_date)
   );
 
-  create index if not exists idx_user_dailies_user_day
-    on app.user_dailies (user_id, day_date);
+  create index if not exists idx_user_dailies_garmin_user_day
+    on app.user_dailies_garmin (user_id, day_date);
 
   create index if not exists idx_user_dailies_source
-    on app.user_dailies (source);
+    on app.user_dailies_garmin (source);
 `);
 
-  // ensure health_days entry exists when inserting into user_dailies
+  // Trigger for user_dailies_garmin (ensure health_days entry exists)
   await db.query(`
-  create or replace function app.ensure_health_day_exists_for_dailies()
-  returns trigger as $$
-  begin
-    insert into app.health_days (user_id, day_date)
-    values (new.user_id, new.day_date)
-    on conflict (user_id, day_date) do nothing;
-    return new;
-  end;
-  $$ language plpgsql;
+    create or replace function app.ensure_health_day_exists_for_dailies()
+    returns trigger as $$
+    begin
+      insert into app.health_days (user_id, day_date)
+      values (new.user_id, new.day_date)
+      on conflict (user_id, day_date) do nothing;
+      return new;
+    end;
+    $$ language plpgsql;
 
-  drop trigger if exists trg_ensure_health_day_exists_on_dailies on app.user_dailies;
+    drop trigger if exists trg_ensure_health_day_for_dailies on app.user_dailies_garmin;
 
-  create trigger trg_ensure_health_day_exists_on_dailies
-  after insert or update on app.user_dailies
-  for each row
-  execute function app.ensure_health_day_exists_for_dailies();
-`);
+    create trigger trg_ensure_health_day_for_dailies
+    after insert or update on app.user_dailies_garmin
+    for each row
+    execute function app.ensure_health_day_exists_for_dailies();
+  `);
 
   // automatically update user_dailies.updated_at on every update
   await db.query(`
-  drop trigger if exists update_user_dailies_updated_at on app.user_dailies;
+  drop trigger if exists update_user_dailies_garmin_updated_at on app.user_dailies_garmin;
 
   create trigger update_user_dailies_updated_at
-  before update on app.user_dailies
+  before update on app.user_dailies_garmin
   for each row
   execute function app.update_updated_at_column();
 `);
