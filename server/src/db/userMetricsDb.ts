@@ -1,7 +1,7 @@
 import { db } from "./db.js";
 
 // representing user metrics for users from various sources
-export type UserMetricRow = {
+export type userMetricRow = {
   user_id: number;
   day_date: string;
   source: "garmin" | "polar";
@@ -11,11 +11,11 @@ export type UserMetricRow = {
   unit?: string | null;
 };
 
-// maps Garmin user metrics object to UserMetricRow array
+// maps Garmin user metrics object to userMetricRow array
 export function mapUserMetricsToRows(
   user_id: number,
   m: any,
-): UserMetricRow[] {
+): userMetricRow[] {
   const metricMap: Record<string, { metric: string; unit?: string }> = {
     vo2Max: { metric: "vo2_max", unit: "ml/kg/min" },
     vo2MaxCycling: { metric: "vo2_max_cycling", unit: "ml/kg/min" },
@@ -36,8 +36,8 @@ export function mapUserMetricsToRows(
     }));
 }
 
-// inserts or updates user metrics in the health_metrics table
-export async function upsertUserMetrics(rows: UserMetricRow[]) {
+// inserts or updates user metrics in the user_metrics table
+export async function upsertUserMetrics(rows: userMetricRow[]) {
   if (!rows.length) return;
 
   // 1. Ensure health_days records exist
@@ -74,7 +74,7 @@ export async function upsertUserMetrics(rows: UserMetricRow[]) {
   });
 
   const query = `
-    INSERT INTO app.health_metrics
+    INSERT INTO app.user_metrics
       (user_id, day_date, source, metric, value_number, value_json, unit)
     VALUES ${placeholders.join(", ")}
     ON CONFLICT (user_id, day_date, source, metric)
@@ -88,7 +88,7 @@ export async function upsertUserMetrics(rows: UserMetricRow[]) {
   await db.query(query, values);
 }
 
-// fetches health metrics for a given user over a date range
+// fetches user metrics for a given user over a date range
 export async function getUserMetricsRange(
   user_id: number,
   start_date: string,
@@ -97,7 +97,7 @@ export async function getUserMetricsRange(
   const result = await db.query(
     `
     SELECT day_date, metric, value_number, value_json, unit
-    FROM app.health_metrics
+    FROM app.user_metrics
     WHERE user_id = $1 AND day_date BETWEEN $2 AND $3
     ORDER BY day_date ASC
     `,
@@ -126,7 +126,7 @@ export async function deleteUserMetricsForSource(
 ) {
   await db.query(
     `
-    DELETE FROM app.health_metrics
+    DELETE FROM app.user_metrics
     WHERE user_id = $1 AND source = $2
     `,
     [user_id, source],
