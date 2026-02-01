@@ -1,9 +1,9 @@
 import express from "express";
 import { db } from "../../db/db.js";
 import {
-  upsertHealthMetrics,
+  upsertUserMetrics,
   mapUserMetricsToRows,
-} from "../../db/healthMetricsDb.js";
+} from "../../db/userMetricsDb.js";
 
 export const garminWebhookRouter = express.Router();
 
@@ -42,7 +42,7 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
       console.log("Mapped rows:", rows);
 
       if (rows.length) {
-        await upsertHealthMetrics(rows);
+        await upsertUserMetrics(rows);
         console.log("Inserted", rows.length, "metrics");
       }
     }

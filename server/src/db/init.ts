@@ -128,9 +128,9 @@ export async function ensureSchema() {
   execute function app.update_health_days_updated_at();
 `);
 
-  // create daily_health_metrics table. THIS IS WILL REPLACE health_stat_entries table LATER
+  // create health_metrics table.
   await db.query(`
-  create table if not exists app.health_metrics_daily (
+  create table if not exists app.health_metrics (
     id uuid primary key default gen_random_uuid(),
     user_id integer not null references app.users(id) on delete cascade,
     day_date date not null,
@@ -143,14 +143,14 @@ export async function ensureSchema() {
     unique (user_id, day_date, source, metric)
   );
 
-  create index if not exists idx_health_metrics_daily_user_day
-    on app.health_metrics_daily (user_id, day_date);
+  create index if not exists idx_health_metrics_user_day
+    on app.health_metrics (user_id, day_date);
 
-  create index if not exists idx_health_metrics_daily_user_metric
-    on app.health_metrics_daily (user_id, metric);
+  create index if not exists idx_health_metrics__user_metric
+    on app.health_metrics (user_id, metric);
 `);
 
-  // ensure health_days entry exists when inserting/updating health_metrics_daily
+  // ensure health_days entry exists when inserting/updating health_metrics
   await db.query(`
   create or replace function app.ensure_health_day_exists_for_metrics()
   returns trigger as $$
@@ -162,10 +162,10 @@ export async function ensureSchema() {
   end;
   $$ language plpgsql;
 
-  drop trigger if exists trg_ensure_health_day_exists_on_metrics on app.health_metrics_daily;
+  drop trigger if exists trg_ensure_health_day_exists_on_metrics on app.health_metrics;
 
   create trigger trg_ensure_health_day_exists_on_metrics
-  after insert or update on app.health_metrics_daily
+  after insert or update on app.health_metrics
   for each row
   execute function app.ensure_health_day_exists_for_metrics();
 `);

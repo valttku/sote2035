@@ -1,8 +1,7 @@
 import { db } from "./db.js";
-// This file contains database queries for the health_metrics_daily table
 
-// representing daily health metrics for users from various sources
-export type HealthMetricRow = {
+// representing user metrics for users from various sources
+export type UserMetricRow = {
   user_id: number;
   day_date: string;
   source: "garmin" | "polar";
@@ -12,11 +11,11 @@ export type HealthMetricRow = {
   unit?: string | null;
 };
 
-// maps Garmin user metrics object to HealthMetricRow array
+// maps Garmin user metrics object to UserMetricRow array
 export function mapUserMetricsToRows(
   user_id: number,
   m: any,
-): HealthMetricRow[] {
+): UserMetricRow[] {
   const metricMap: Record<string, { metric: string; unit?: string }> = {
     vo2Max: { metric: "vo2_max", unit: "ml/kg/min" },
     vo2MaxCycling: { metric: "vo2_max_cycling", unit: "ml/kg/min" },
@@ -37,8 +36,8 @@ export function mapUserMetricsToRows(
     }));
 }
 
-// inserts or updates health metrics in the health_metrics_daily table
-export async function upsertHealthMetrics(rows: HealthMetricRow[]) {
+// inserts or updates user metrics in the health_metrics table
+export async function upsertUserMetrics(rows: UserMetricRow[]) {
   if (!rows.length) return;
 
   // 1. Ensure health_days records exist
@@ -75,7 +74,7 @@ export async function upsertHealthMetrics(rows: HealthMetricRow[]) {
   });
 
   const query = `
-    INSERT INTO app.health_metrics_daily
+    INSERT INTO app.health_metrics
       (user_id, day_date, source, metric, value_number, value_json, unit)
     VALUES ${placeholders.join(", ")}
     ON CONFLICT (user_id, day_date, source, metric)
@@ -90,7 +89,7 @@ export async function upsertHealthMetrics(rows: HealthMetricRow[]) {
 }
 
 // fetches health metrics for a given user over a date range
-export async function getHealthMetricsRange(
+export async function getUserMetricsRange(
   user_id: number,
   start_date: string,
   end_date: string,
@@ -98,7 +97,7 @@ export async function getHealthMetricsRange(
   const result = await db.query(
     `
     SELECT day_date, metric, value_number, value_json, unit
-    FROM app.health_metrics_daily
+    FROM app.health_metrics
     WHERE user_id = $1 AND day_date BETWEEN $2 AND $3
     ORDER BY day_date ASC
     `,
@@ -120,14 +119,14 @@ export async function getHealthMetricsRange(
   return metrics;
 }
 
-// deletes health metrics for a given user and source
-export async function deleteHealthMetricsForSource(
+// deletes user metrics for a given user and source
+export async function deleteUserMetricsForSource(
   user_id: number,
   source: "garmin" | "polar",
 ) {
   await db.query(
     `
-    DELETE FROM app.health_metrics_daily
+    DELETE FROM app.health_metrics
     WHERE user_id = $1 AND source = $2
     `,
     [user_id, source],
