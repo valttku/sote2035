@@ -17,10 +17,6 @@ export function mapUserMetricsToRows(
   user_id: number,
   m: any,
 ): HealthMetricRow[] {
-  const rows: HealthMetricRow[] = [];
-  const day_date = m.calendarDate;
-  const source = "garmin";
-
   const metricMap: Record<string, { metric: string; unit?: string }> = {
     vo2Max: { metric: "vo2_max", unit: "ml/kg/min" },
     vo2MaxCycling: { metric: "vo2_max_cycling", unit: "ml/kg/min" },
@@ -28,29 +24,19 @@ export function mapUserMetricsToRows(
     enhanced: { metric: "metrics_enhanced" },
   };
 
-  for (const [key, value] of Object.entries(metricMap)) {
-    if (m[key] === null || m[key] === undefined) continue;
-
-    const row: HealthMetricRow = {
+  return Object.entries(metricMap)
+    .filter(([key]) => m[key] != null)
+    .map(([key, { metric, unit }]) => ({
       user_id,
-      day_date,
-      source,
-      metric: value.metric,
-    };
-
-    if (typeof m[key] === "number") {
-      row.value_number = m[key] as number;
-    } else if (typeof m[key] === "boolean" || typeof m[key] === "object") {
-      row.value_json = { value: m[key] };
-    }
-
-    if (value.unit) row.unit = value.unit;
-
-    rows.push(row);
-  }
-
-  return rows;
+      day_date: m.calendarDate,
+      source: "garmin" as const,
+      metric,
+      value_number: typeof m[key] === "number" ? m[key] : null,
+      value_json: typeof m[key] !== "number" ? { value: m[key] } : null,
+      unit: unit ?? null,
+    }));
 }
+
 
 // inserts or updates health metrics in the health_metrics_daily table
 export async function upsertHealthMetrics(rows: HealthMetricRow[]) {

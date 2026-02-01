@@ -14,22 +14,22 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
     const payload = Array.isArray(req.body) ? req.body : [req.body];
 
     for (const item of payload) {
-      const garminUserId = item.userId;
-      if (!garminUserId) continue;
+      const providerUserId = item.userId;
+      if (!providerUserId) continue;
 
       // 1. Map Garmin user → internal user
       const r = await db.query(
         `
         SELECT user_id
         FROM app.user_integrations
-        WHERE provider = 'garmin' AND garmin_user_id = $1
+        WHERE provider = 'garmin' AND provider_user_id = $1
         `,
-        [garminUserId],
+        [providerUserId],
       );
 
       if (r.rowCount === 0) {
-        console.warn("Garmin user not linked:", garminUserId);
-        continue; // IMPORTANT: do not throw
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
       }
 
       const user_id = r.rows[0].user_id;
