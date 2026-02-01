@@ -23,13 +23,9 @@ export function mapGarminUserMetricsToRows(user_id: number, m: any): GarminUserM
 }
 
 export async function upsertGarminUserMetrics(row: GarminUserMetricRow) {
-  await db.query(
-    `INSERT INTO app.health_days (user_id, day_date)
-     VALUES ($1, $2)
-     ON CONFLICT DO NOTHING`,
-    [row.user_id, row.day_date],
-  );
-
+  if (!row) return;
+  
+  // Insert or update user metrics
   await db.query(
     `INSERT INTO app.user_metrics_garmin
        (user_id, day_date, summary_id, vo2_max, vo2_max_cycling, fitness_age, enhanced)
