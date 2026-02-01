@@ -73,7 +73,7 @@ app.use("/api/v1/integrations/polar", polarRouter);
 app.use("/api/v1/integrations/garmin", garminRouter);
 
 // webhooks for providers
-app.use("/api/v1/integrations/webhooks/garmin", garminWebhookRouter);
+app.use("/api/v1/webhooks/garmin", garminWebhookRouter);
 
 // global error handler
 app.use(errorHandler);
