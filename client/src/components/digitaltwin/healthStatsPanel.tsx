@@ -39,7 +39,7 @@ export default function HealthClient({ selected, onClose }: Props) {
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
         const res = await fetch(
-          `${apiUrl}/api/v1/digitalTwin?date=${date}&part=${selected}`,
+          `/api/v1/digitalTwin?date=${date}&part=${selected}`,
           { credentials: "include" },
         );
 

@@ -13,10 +13,10 @@ export default function ChooseServicePage() {
     try {
       if (provider === "polar") {
         // Go straight to Polar OAuth
-        window.location.href = `${apiUrl}/api/v1/integrations/polar/connect`;
+        window.location.href = `/api/v1/integrations/polar/connect`;
       } else if (provider === "garmin") {
         // Go straight to Garmin OAuth
-        window.location.href = `${apiUrl}/api/v1/integrations/garmin/connect`;
+        window.location.href = `/api/v1/integrations/garmin/connect`;
       } else if (provider === "skip") {
         router.push("/");
       } else {

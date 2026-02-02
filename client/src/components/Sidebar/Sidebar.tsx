@@ -11,7 +11,7 @@ export default function Sidebar() {
     async function fetchUser() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
-      const res = await fetch(`${apiUrl}/api/v1/me`, {
+      const res = await fetch(`/api/v1/me`, {
         credentials: "include",
       });
 

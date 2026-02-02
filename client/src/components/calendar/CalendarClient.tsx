@@ -68,7 +68,7 @@ export default function CalendarClient() {
 
       try {
         const res = await fetch(
-          `${apiUrl}/api/v1/calendar/month?year=${year}&month=${month}`,
+          `/api/v1/calendar/month?year=${year}&month=${month}`,
           { credentials: "include" },
         );
 
@@ -112,7 +112,7 @@ export default function CalendarClient() {
   setError(null);
   try {
     const res = await fetch(
-      `${apiUrl}/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
       { credentials: "include" }
     );
     const json: unknown = await res.json();
