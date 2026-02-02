@@ -5,10 +5,14 @@ const nextConfig = {
   },
 
   async rewrites() {
+    const isProduction = process.env.NODE_ENV === "production";
+
     return [
       {
         source: "/api/:path*",
-        destination: "https://sote2035-server.onrender.com/api/:path*",
+        destination: isProduction
+          ? "https://sote2035-server.onrender.com/api/:path*" // deployed server
+          : "http://localhost:4000/api/:path*", // local server
       },
     ];
   },
