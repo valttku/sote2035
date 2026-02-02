@@ -150,6 +150,36 @@ export async function ensureSchema() {
       on app.oauth_states (expires_at);
   `);
 
+  // Cleanup integration data when a user integration is deleted
+  await db.query(`
+  create or replace function app.cleanup_integration_data()
+  returns trigger as $$
+  begin
+    -- Delete health data for this provider
+    delete from app.user_dailies_garmin
+    where user_id = old.user_id
+      and day_date >= (old.created_at::date);
+    
+    delete from app.user_metrics_garmin
+    where user_id = old.user_id
+      and day_date >= (old.created_at::date);
+
+      delete from app.user_hrv_garmin
+    where user_id = old.user_id
+      and day_date >= (old.created_at::date);
+    
+    return old;
+  end;
+  $$ language plpgsql;
+
+  drop trigger if exists trg_cleanup_integration_data on app.user_integrations;
+
+  create trigger trg_cleanup_integration_data
+  after delete on app.user_integrations
+  for each row
+  execute function app.cleanup_integration_data();
+`);
+
   // Add verifier column if table already existed without it (e.g. before Garmin PKCE)
   await db.query(`
     alter table app.oauth_states
