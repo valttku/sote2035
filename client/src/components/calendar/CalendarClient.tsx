@@ -58,9 +58,6 @@ export default function CalendarClient() {
   const [dayStats, setDayStats] = useState<DayStatsResponse | null>(null);
   const [loadingDay, setLoadingDay] = useState(false);
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
   // Fetch days with data for the current month
   useEffect(() => {
     async function loadMonth() {
@@ -328,7 +325,7 @@ export default function CalendarClient() {
                     const notes = formData.get("notes") as string;
 
                     try {
-                      await fetch(`${apiUrl}/api/v1/calendar/activities`, {
+                      await fetch(`/api/v1/calendar/activities`, {
                         method: "POST",
                         credentials: "include",
                         headers: { "Content-Type": "application/json" },

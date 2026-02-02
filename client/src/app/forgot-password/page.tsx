@@ -10,9 +10,6 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
   //Handles form submission to send password reset email
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
