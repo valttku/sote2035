@@ -41,7 +41,7 @@ export default function LoginPage() {
       if (res.ok) {
         if (endpoint === "login") {
           // Fetch /me to confirm session is set
-          const meRes = await fetch(`${apiUrl}/api/v1/me`, {
+          const meRes = await fetch(`/api/v1/me`, {
             method: "GET",
             credentials: "include", // very important!
           });
