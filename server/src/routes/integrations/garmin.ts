@@ -111,7 +111,11 @@ garminRouter.get("/callback", async (req, res) => {
     );
     await db.query("COMMIT");
 
-    res.redirect(`${process.env.APP_BASE_URL}`);
+    // determine redirect URL
+    const redirectUrl =
+      process.env.NODE_ENV === "production"
+        ? process.env.APP_BASE_URL // deployed frontend URL
+        : "http://localhost:3000"; // local frontend URL
   } catch (err: any) {
     await db.query("ROLLBACK").catch(() => {});
     console.error("Garmin callback error:", err.message || err);
