@@ -3,20 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import Modal from "../Modal";
 import HealthStatsList from "../calendar/HealthStatsList";
 import AddActivityForm from "../calendar/AddActivityForm";
-
-// Type definitions for API responses
-type DayStatsEntry = {
-  id: string;
-  kind: string;
-  source: string | null;
-  data: unknown;
-  created_at: string;
-};
-
-type DayStatsResponse = {
-  date: string;
-  entries: DayStatsEntry[];
-};
+import ActivitiesList from "../calendar/ActivitiesList";
+import type {
+  ActivitiesResponse,
+  HealthStatsResponse,
+} from "../calendar/types";
 
 type MonthDaysResponse = string[]; // ["YYYY-MM-DD", ...]
 
@@ -43,8 +34,9 @@ function getDaysOfWeek() {
 export default function CalendarClient() {
   // Current date (memoized)
   const now = useMemo(() => new Date(), []);
-  const [daysWithActivity, setDaysWithActivity] = useState<Set<string>>(new Set());
-
+  const [daysWithActivity, setDaysWithActivity] = useState<Set<string>>(
+    new Set(),
+  );
 
   // Calendar state
   const [year, setYear] = useState(now.getFullYear());
@@ -54,9 +46,12 @@ export default function CalendarClient() {
   const [daysWithData, setDaysWithData] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
-  // Modal and health stats state
+  // Modal and day details state
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [dayStats, setDayStats] = useState<DayStatsResponse | null>(null);
+  const [healthStats, setHealthStats] = useState<HealthStatsResponse | null>(
+    null,
+  );
+  const [activities, setActivities] = useState<ActivitiesResponse | null>(null);
   const [loadingDay, setLoadingDay] = useState(false);
 
   // Fetch days with data for the current month
@@ -99,54 +94,98 @@ export default function CalendarClient() {
   // Open day details modal
   function openDay(date: string) {
     setSelectedDate(date);
-    setDayStats(null);
+    setHealthStats(null);
+    setActivities(null);
     setError(null);
     setLoadingDay(false);
   }
 
   // Fetch health stats for a specific date
- async function loadHealthStats(date: string) {
-  setLoadingDay(true);
-  setError(null);
-  try {
-    const res = await fetch(
-      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
-      { credentials: "include" }
-    );
-    const json: unknown = await res.json();
-    if (!res.ok) {
-      setError("Failed to load health stats");
-      setDayStats(null);
-      return;
-    }
-
-    // Validate response structure
-    if (
-      typeof json === "object" &&
-      json !== null &&
-      "date" in json &&
-      "entries" in json &&
-      Array.isArray((json as { entries: unknown }).entries)
-    ) {
-      const stats = json as DayStatsResponse;
-      setDayStats(stats);
-
-      // mark day as having activity if any entry is activity_daily
-      if (stats.entries.some((e) => e.kind === "activity_daily")) {
-        setDaysWithActivity((prev) => new Set(prev).add(date));
+  async function loadHealthStats(date: string) {
+    setLoadingDay(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+        { credentials: "include" },
+      );
+      const json: unknown = await res.json();
+      if (!res.ok) {
+        setError("Failed to load health stats");
+        setHealthStats(null);
+        return;
       }
+
+      // Validate response structure
+      if (
+        typeof json === "object" &&
+        json !== null &&
+        "date" in json &&
+        "entries" in json &&
+        Array.isArray((json as { entries: unknown }).entries)
+      ) {
+        const stats = json as HealthStatsResponse;
+        setHealthStats(stats);
+
+        // mark day as having activity if any entry is activity_daily
+        //if (stats.entries.some((e) => e.kind === "activity_daily")) {
+        //  setDaysWithActivity((prev) => new Set(prev).add(date));
+        //}
+      }
+    } catch {
+      setError("Failed to connect to server");
+      setHealthStats(null);
+      setActivities(null);
+    } finally {
+      setLoadingDay(false);
     }
-  } catch {
-    setError("Failed to connect to server");
-    setDayStats(null);
-  } finally {
+  }
+
+  // Fetch activities for a specific date
+  async function loadActivities(date: string) {
+    setLoadingDay(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/v1/calendar/activities?date=${encodeURIComponent(date)}`,
+        { credentials: "include" },
+      );
+      const json: unknown = await res.json();
+      if (!res.ok) {
+        setError("Failed to load activities");
+        setActivities(null);
+        return;
+      }
+
+      // Validate response structure
+      if (
+        typeof json === "object" &&
+        json !== null &&
+        "date" in json &&
+        "entries" in json &&
+        Array.isArray((json as { entries: unknown }).entries)
+      ) {
+        const acts = json as ActivitiesResponse;
+        setActivities(acts);
+      }
+    } catch {
+      setError("Failed to connect to server");
+      setActivities(null);
+    } finally {
+      setLoadingDay(false);
+    }
+  }
+
+  // Close health stats
+  function closeHealthStats() {
+    setHealthStats(null);
+    setError(null);
     setLoadingDay(false);
   }
-}
 
-  // Close health stats display
-  function closeHealthStats() {
-    setDayStats(null);
+  // Close activities
+  function closeActivities() {
+    setActivities(null);
     setError(null);
     setLoadingDay(false);
   }
@@ -154,13 +193,15 @@ export default function CalendarClient() {
   // Close day details modal
   function closeModal() {
     setSelectedDate(null);
-    setDayStats(null);
+    setHealthStats(null);
+    setActivities(null);
     setLoadingDay(false);
   }
 
   // Navigate to previous month
   function prevMonth() {
-    setDayStats(null);
+    setHealthStats(null);
+    setActivities(null);
     setSelectedDate(null);
 
     if (month === 1) {
@@ -173,7 +214,7 @@ export default function CalendarClient() {
 
   // Navigate to next month
   function nextMonth() {
-    setDayStats(null);
+    setHealthStats(null);
     setSelectedDate(null);
 
     if (month === 12) {
@@ -247,7 +288,7 @@ export default function CalendarClient() {
             const day = i + 1;
             const date = toYmd(year, month, day);
             const hasData = daysWithData.has(date);
-            const hasActivity: boolean = daysWithActivity.has(date); 
+            const hasActivity: boolean = daysWithActivity.has(date);
 
             return (
               <button
@@ -259,10 +300,10 @@ export default function CalendarClient() {
                 <div className="flex items-center justify-center gap-2">
                   <span className="leading-none">{day}</span>
 
-                {/* --- ADDED: Green dot for activity --- */}
+                  {/* --- ADDED: Green dot for activity --- */}
                   {hasActivity && (
                     <span className="w-2 h-2 bg-green-500 rounded-full block"></span>
-                  )}  
+                  )}
                 </div>
               </button>
             );
@@ -272,24 +313,45 @@ export default function CalendarClient() {
         {/* Day details modal */}
         {selectedDate && (
           <Modal onClose={closeModal}>
-            <h2 className="text-2xl font-bold mb-2 text-center">{selectedDate}</h2>
+            <h2 className="text-2xl font-bold mb-2 text-center">
+              {new Date(selectedDate + "T00:00:00").toLocaleDateString(
+                "en-US",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                },
+              )}
+            </h2>
 
             {/* Error message inside modal */}
             {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
 
-            {/* Loading, loaded, or empty state */}
+            {/* show and close health stats */}
             {loadingDay ? (
               <button
                 type="button"
-                className="button-style-blue w-full mb-3 disabled:opacity-50"
+                className="button-style-blue w-full mt-4 disabled:opacity-50"
                 disabled
               >
                 Loading...
               </button>
-            ) : dayStats ? (
+            ) : healthStats ? (
               <div className="space-y-2">
-                <p className="text-sm">Entries: {dayStats.entries.length}</p>
-                <HealthStatsList entries={dayStats.entries} />
+                <p className="text-sm">
+                  Entries:{" "}
+                  {
+                    healthStats.entries.filter(
+                      (e) => e.kind !== "manual_activity",
+                    ).length
+                  }
+                </p>
+                <HealthStatsList
+                  entries={healthStats.entries.filter(
+                    (e) => e.kind !== "manual_activity",
+                  )}
+                />
                 <button
                   onClick={closeHealthStats}
                   className="cancel-button-style w-full mt-4"
@@ -300,7 +362,7 @@ export default function CalendarClient() {
             ) : (
               <button
                 type="button"
-                className="button-style-blue w-full mb-3"
+                className="button-style-blue w-full mt-4"
                 onClick={() => loadHealthStats(selectedDate)}
                 disabled={loadingDay}
               >
@@ -308,14 +370,48 @@ export default function CalendarClient() {
               </button>
             )}
 
+            {/* Show and close activities*/}
+            {loadingDay ? (
+              <button
+                type="button"
+                className="button-style-blue w-full mt-4 disabled:opacity-50"
+                disabled
+              >
+                Loading...
+              </button>
+            ) : activities ? (
+              <div className="space-y-2">
+                <p className="text-sm">Entries: {activities.entries.length}</p>
+
+                <ActivitiesList entries={activities.entries} />
+                <button
+                  onClick={closeActivities}
+                  className="cancel-button-style w-full mt-4"
+                >
+                  Close Activities
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="button-style-blue w-full mt-4"
+                onClick={() => loadActivities(selectedDate)}
+                disabled={loadingDay}
+              >
+                Activities
+              </button>
+            )}
+
             {/* Add Activity Form */}
             {!loadingDay && (
               <AddActivityForm
                 selectedDate={selectedDate}
-                onActivityAdded={() => loadHealthStats(selectedDate)}
+                onActivityAdded={() => {
+                  loadHealthStats(selectedDate);
+                  loadActivities(selectedDate);
+                }}
               />
             )}
-
           </Modal>
         )}
       </div>

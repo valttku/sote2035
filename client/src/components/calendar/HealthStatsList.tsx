@@ -1,31 +1,25 @@
 "use client";
 
-type DayStatsEntry = {
-  id: string;
-  kind: string;
-  source: string | null;
-  data: unknown;
-  created_at: string;
-};
+import type { HealthStatsEntry } from "./types";
 
 function labelForKind(kind: string) {
   switch (kind) {
     case "heart_daily":
       return "Heart";
     case "sleep_daily":
-      return "Brain (Sleep)";
+      return "Brain";
     case "stress_daily":
-      return "Brain (Stress)";
+      return "Brain";
     case "activity_daily":
-      return "Legs (Activity)";
+      return "Legs";
     case "manual_activity":
       return "Manual Activity";
     case "resp_daily":
-      return "Lungs (Respiration)";
+      return "Lungs";
     case "skin_temp_daily":
-      return "Lungs (Skin Temp)";
+      return "Lungs";
     case "spo2_daily":
-      return "Lungs (SpO₂)";
+      return "Lungs";
     default:
       return kind;
   }
@@ -42,12 +36,10 @@ function prettyValue(v: unknown) {
   return JSON.stringify(v);
 }
 
-
-
 export default function HealthStatsList({
   entries,
 }: {
-  entries: DayStatsEntry[];
+  entries: HealthStatsEntry[];
 }) {
   if (entries.length === 0) {
     return <p className="text-sm opacity-80">No health stats for this day.</p>;
@@ -58,12 +50,8 @@ export default function HealthStatsList({
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">{labelForKind(e.kind)}</h3>
+            <h3 className="text-2xl font-semibold">{labelForKind(e.kind)}</h3>
             <span className="text-xs opacity-70">{e.source ?? "unknown"}</span>
-          </div>
-
-          <div className="text-xs opacity-70 mb-2">
-            {new Date(e.created_at).toLocaleString()}
           </div>
 
           <div className="text-sm space-y-1">
