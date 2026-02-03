@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 
-type AddActivityFormProps = {
+type ManualActivityFormProps = {
   selectedDate: string;
   onActivityAdded: () => void;
 };
 
-export default function AddActivityForm({
+export default function ManualActivityForm({
   selectedDate,
   onActivityAdded,
-}: AddActivityFormProps) {
+}: ManualActivityFormProps) {
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="mt-4 pt-4">
+    <div className="mt-4">
       {!showForm ? (
         <button
           type="button"
@@ -59,13 +59,6 @@ export default function AddActivityForm({
             }}
             className="space-y-2"
           >
-            <input
-              type="text"
-              name="title"
-              placeholder="Activity Title"
-              required
-              className="w-full border rounded p-1"
-            />
             <input
               type="text"
               name="type"

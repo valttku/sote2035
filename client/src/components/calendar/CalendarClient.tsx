@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Modal from "../Modal";
 import HealthStatsList from "../calendar/HealthStatsList";
-import AddActivityForm from "../calendar/AddActivityForm";
+import ManualActivityForm from "./ActivityForm";
 import ActivitiesList from "../calendar/ActivitiesList";
 import type {
   ActivitiesResponse,
@@ -34,9 +34,6 @@ function getDaysOfWeek() {
 export default function CalendarClient() {
   // Current date (memoized)
   const now = useMemo(() => new Date(), []);
-  const [daysWithActivity, setDaysWithActivity] = useState<Set<string>>(
-    new Set(),
-  );
 
   // Calendar state
   const [year, setYear] = useState(now.getFullYear());
@@ -45,14 +42,13 @@ export default function CalendarClient() {
   // Days with health data for the current month
   const [daysWithData, setDaysWithData] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const [loadingDay, setLoadingDay] = useState(false);
 
   // Modal and day details state
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [healthStats, setHealthStats] = useState<HealthStatsResponse | null>(
-    null,
-  );
+  const [healthStats, setHealthStats] = useState<HealthStatsResponse | null>(null);
   const [activities, setActivities] = useState<ActivitiesResponse | null>(null);
-  const [loadingDay, setLoadingDay] = useState(false);
+  const [manualActivities, setManualActivities] = useState<HealthStatsResponse | null>(null);
 
   // Fetch days with data for the current month
   useEffect(() => {
@@ -81,6 +77,7 @@ export default function CalendarClient() {
           ? (json.map((d) => String(d)) as MonthDaysResponse)
           : [];
 
+      // Mark days with data
         setDaysWithData(new Set(days));
       } catch {
         setError("Failed to connect to server");
@@ -96,6 +93,7 @@ export default function CalendarClient() {
     setSelectedDate(date);
     setHealthStats(null);
     setActivities(null);
+    setManualActivities(null);
     setError(null);
     setLoadingDay(false);
   }
@@ -126,11 +124,6 @@ export default function CalendarClient() {
       ) {
         const stats = json as HealthStatsResponse;
         setHealthStats(stats);
-
-        // mark day as having activity if any entry is activity_daily
-        //if (stats.entries.some((e) => e.kind === "activity_daily")) {
-        //  setDaysWithActivity((prev) => new Set(prev).add(date));
-        //}
       }
     } catch {
       setError("Failed to connect to server");
@@ -176,6 +169,47 @@ export default function CalendarClient() {
     }
   }
 
+  // Fetch manual activities for a specific date
+  async function loadManualActivities(date: string) {
+    setLoadingDay(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+        { credentials: "include" },
+      );
+      const json: unknown = await res.json();
+      if (!res.ok) {
+        setError("Failed to load manually added activities");
+        setManualActivities(null);
+        return;
+      }
+
+      // Validate and filter for manual_activity only
+      if (
+        typeof json === "object" &&
+        json !== null &&
+        "date" in json &&
+        "entries" in json &&
+        Array.isArray((json as { entries: unknown }).entries)
+      ) {
+        const stats = json as HealthStatsResponse;
+        const manualEntries = stats.entries.filter(
+          (e) => e.kind === "manual_activity"
+        );
+        setManualActivities({
+          date: stats.date,
+          entries: manualEntries,
+        });
+      }
+    } catch {
+      setError("Failed to connect to server");
+      setManualActivities(null);
+    } finally {
+      setLoadingDay(false);
+    }
+  }
+
   // Close health stats
   function closeHealthStats() {
     setHealthStats(null);
@@ -190,11 +224,39 @@ export default function CalendarClient() {
     setLoadingDay(false);
   }
 
+  // Close manual activities display
+  function closeManualActivities() {
+    setManualActivities(null);
+    setError(null);
+    setLoadingDay(false);
+  }
+
+  // Delete a manual activity
+  async function deleteManualActivity(id: string) {
+    try {
+      const res = await fetch(`/api/v1/calendar/manual-activities/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        setError("Failed to delete manual activity");
+        return;
+      }
+      // Reload manual activities after deletion
+      if (selectedDate) {
+        loadManualActivities(selectedDate);
+      }
+    } catch {
+      setError("Failed to delete manual activity");
+    }
+  }
+
   // Close day details modal
   function closeModal() {
     setSelectedDate(null);
     setHealthStats(null);
     setActivities(null);
+    setManualActivities(null);
     setLoadingDay(false);
   }
 
@@ -202,6 +264,7 @@ export default function CalendarClient() {
   function prevMonth() {
     setHealthStats(null);
     setActivities(null);
+    setManualActivities(null);
     setSelectedDate(null);
 
     if (month === 1) {
@@ -215,6 +278,8 @@ export default function CalendarClient() {
   // Navigate to next month
   function nextMonth() {
     setHealthStats(null);
+    setActivities(null);
+    setManualActivities(null);
     setSelectedDate(null);
 
     if (month === 12) {
@@ -288,7 +353,6 @@ export default function CalendarClient() {
             const day = i + 1;
             const date = toYmd(year, month, day);
             const hasData = daysWithData.has(date);
-            const hasActivity: boolean = daysWithActivity.has(date);
 
             return (
               <button
@@ -300,9 +364,9 @@ export default function CalendarClient() {
                 <div className="flex items-center justify-center gap-2">
                   <span className="leading-none">{day}</span>
 
-                  {/* --- ADDED: Green dot for activity --- */}
-                  {hasActivity && (
-                    <span className="w-2 h-2 bg-green-500 rounded-full block"></span>
+                  {/* --- Show dot if there is data for the day --- */}
+                  {hasData && (
+                    <span className="w-2 h-2 bg-[#1d9dad] rounded-full block"></span>
                   )}
                 </div>
               </button>
@@ -313,7 +377,8 @@ export default function CalendarClient() {
         {/* Day details modal */}
         {selectedDate && (
           <Modal onClose={closeModal}>
-            <h2 className="text-2xl font-bold mb-2 text-center">
+            {/* Selected date header */}
+            <h2 className="text-2xl mb-2 text-center">
               {new Date(selectedDate + "T00:00:00").toLocaleDateString(
                 "en-US",
                 {
@@ -328,90 +393,99 @@ export default function CalendarClient() {
             {/* Error message inside modal */}
             {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
 
-            {/* show and close health stats */}
-            {loadingDay ? (
-              <button
-                type="button"
-                className="button-style-blue w-full mt-4 disabled:opacity-50"
-                disabled
-              >
-                Loading...
-              </button>
-            ) : healthStats ? (
-              <div className="space-y-2">
-                <p className="text-sm">
-                  Entries:{" "}
-                  {
-                    healthStats.entries.filter(
+            <div className="space-y-4">
+              {/* Show and close health stats, filter out manual activities */}
+              {healthStats ? (
+                <div className="space-y-2">
+                  <button
+                    onClick={closeHealthStats}
+                    className="w-full text-left hover:opacity-70"
+                  >
+                    ▼ Health Stats (
+                    {
+                      healthStats.entries.filter(
+                        (e) => e.kind !== "manual_activity",
+                      ).length
+                    }
+                    )
+                  </button>
+                  <HealthStatsList
+                    entries={healthStats.entries.filter(
                       (e) => e.kind !== "manual_activity",
-                    ).length
-                  }
-                </p>
-                <HealthStatsList
-                  entries={healthStats.entries.filter(
-                    (e) => e.kind !== "manual_activity",
+                    )}
+                  />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="border-b pb-4 mb-4 w-full text-left"
+                  onClick={() => loadHealthStats(selectedDate)}
+                >
+                  ▶ Health Stats
+                </button>
+              )}
+
+              {/* Show and close activities*/}
+              {activities ? (
+                <div className="space-y-2">
+                  <button
+                    onClick={closeActivities}
+                    className="w-full text-left hover:opacity-70"
+                  >
+                    ▼ Activities ({activities.entries.length})
+                  </button>
+                  <ActivitiesList entries={activities.entries} />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="border-b pb-4 mb-4 w-full text-left"
+                  onClick={() => loadActivities(selectedDate)}
+                >
+                  ▶ Activities
+                </button>
+              )}
+
+              {/* Show and close manual activities*/}
+              {manualActivities ? (
+                <div className="space-y-2">
+                  <button
+                    onClick={closeManualActivities}
+                    className="w-full text-left hover:opacity-70"
+                  >
+                    ▼ Manually Added Activities (
+                    {manualActivities.entries.length})
+                  </button>
+                  {manualActivities.entries.length === 0 ? (
+                    <p className="text-sm opacity-80">
+                      No manually added activities for this day.
+                    </p>
+                  ) : (
+                    <HealthStatsList
+                      entries={manualActivities.entries}
+                      onDelete={deleteManualActivity}
+                    />
                   )}
-                />
+                </div>
+              ) : (
                 <button
-                  onClick={closeHealthStats}
-                  className="cancel-button-style w-full mt-4"
+                  type="button"
+                  className="border-b pb-4 mb-4 w-full text-left"
+                  onClick={() => loadManualActivities(selectedDate)}
                 >
-                  Close Health Stats
+                  ▶ Manually Added Activities
                 </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="button-style-blue w-full mt-4"
-                onClick={() => loadHealthStats(selectedDate)}
-                disabled={loadingDay}
-              >
-                Health Stats
-              </button>
-            )}
-
-            {/* Show and close activities*/}
-            {loadingDay ? (
-              <button
-                type="button"
-                className="button-style-blue w-full mt-4 disabled:opacity-50"
-                disabled
-              >
-                Loading...
-              </button>
-            ) : activities ? (
-              <div className="space-y-2">
-                <p className="text-sm">Entries: {activities.entries.length}</p>
-
-                <ActivitiesList entries={activities.entries} />
-                <button
-                  onClick={closeActivities}
-                  className="cancel-button-style w-full mt-4"
-                >
-                  Close Activities
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="button-style-blue w-full mt-4"
-                onClick={() => loadActivities(selectedDate)}
-                disabled={loadingDay}
-              >
-                Activities
-              </button>
-            )}
+              )}
+            </div>
 
             {/* Add Activity Form */}
-            {!loadingDay && (
-              <AddActivityForm
-                selectedDate={selectedDate}
-                onActivityAdded={() => {
-                  loadHealthStats(selectedDate);
-                  loadActivities(selectedDate);
-                }}
-              />
-            )}
+            <ManualActivityForm
+              selectedDate={selectedDate}
+              onActivityAdded={() => {
+                loadHealthStats(selectedDate);
+                loadManualActivities(selectedDate);
+              }}
+            />
           </Modal>
         )}
       </div>

@@ -25,9 +25,10 @@ calendarRouter.get("/month", authRequired, async (req, res, next) => {
     const start = new Date(Date.UTC(year, month - 1, 1));
     const end = new Date(Date.UTC(year, month, 1));
 
+    // Query health_days for this user and month
     const result = await db.query(
       `
-      select day_date
+      select to_char(day_date, 'YYYY-MM-DD') as day_date
       from app.health_days
       where user_id = $1
         and day_date >= $2::date
@@ -37,13 +38,13 @@ calendarRouter.get("/month", authRequired, async (req, res, next) => {
       [userId, start.toISOString(), end.toISOString()],
     );
 
-    res.json(result.rows.map((r) => String(r.day_date)));
+    res.json(result.rows.map((r) => r.day_date));
   } catch (e) {
     next(e);
   }
 });
 
-// Get garmin health stats entries for a given date and user
+// Get health stats entries for a given date and user
 // GET /api/v1/calendar/health-stats?date=YYYY-MM-DD
 calendarRouter.get("/health-stats", authRequired, async (req, res, next) => {
   try {
@@ -70,7 +71,7 @@ calendarRouter.get("/health-stats", authRequired, async (req, res, next) => {
   }
 });
 
-// Get garmin activities + manual activities for a given date and user
+// Get Garmin activities (and polar in future) for a given date and user
 // GET /api/v1/calendar/activities?date=YYYY-MM-DD
 calendarRouter.get("/activities", authRequired, async (req, res, next) => {
   try {
@@ -93,30 +94,10 @@ calendarRouter.get("/activities", authRequired, async (req, res, next) => {
       [userId, date],
     );
 
-    // Get manual activities
-    const manualActivities = await db.query(
-      `
-      select id, null::text as device_name, 
-             (data->>'title')::text as activity_name,
-             ((data->>'duration')::int * 60)::int as duration_in_seconds,
-             null::int as start_time_in_seconds,
-             null::int as start_time_offset_in_seconds,
-             null::int as average_heart_rate,
-             ((data->>'calories')::int)::int as active_kilocalories,
-             created_at, 'manual'::text as source_type
-      from app.health_stat_entries
-      where user_id = $1 and day_date = $2::date and kind = 'manual_activity'
-      `,
-      [userId, date],
-    );
-
     // Get polar activities (to be added)
 
     // Combine and sort by created_at
-    const allEntries = [
-      ...garminActivities.rows,
-      ...manualActivities.rows,
-    ].sort(
+    const allEntries = [...garminActivities.rows].sort(
       (a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
@@ -127,7 +108,7 @@ calendarRouter.get("/activities", authRequired, async (req, res, next) => {
   }
 });
 
-// Add a manual activity entry for a given date and user (adds activity to health_stat_entries)
+// Add a manual activity entry for a given date and user (adds manual_activity to health_stat_entries)
 // POST /api/v1/calendar/manual-activities
 calendarRouter.post(
   "/manual-activities",
@@ -135,7 +116,7 @@ calendarRouter.post(
   async (req, res, next) => {
     try {
       const userId = (req as any).userId as number;
-      const { date, title, type, duration, calories, steps} = req.body;
+      const { date, title, type, duration, calories, steps } = req.body;
 
       if (!date || !title)
         return res.status(400).json({ error: "Date and title required" });
@@ -147,10 +128,41 @@ calendarRouter.post(
       VALUES ($1, $2, 'manual_activity', 'manual', $3)
       RETURNING *
       `,
-        [userId, date, { title, type, duration, calories, steps}],
+        [userId, date, { title, type, duration, calories, steps }],
       );
 
       res.json({ success: true, entry: result.rows[0] });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Delete a manual activity entry from health_stat_entries by id
+// DELETE /api/v1/calendar/manual-activities/:id
+calendarRouter.delete(
+  "/manual-activities/:id",
+  authRequired,
+  async (req, res, next) => {
+    try {
+      const userId = (req as any).userId as number;
+      const entryId = req.params.id;
+
+      // Delete only manual_activity entries owned by this user
+      const result = await db.query(
+        `
+      DELETE FROM app.health_stat_entries
+      WHERE id = $1 and user_id = $2 and kind = 'manual_activity'
+      RETURNING *
+      `,
+        [entryId, userId],
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Manual activity not found" });
+      }
+
+      res.json({ success: true });
     } catch (err) {
       next(err);
     }

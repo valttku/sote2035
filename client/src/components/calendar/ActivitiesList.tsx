@@ -35,11 +35,11 @@ export default function ActivitiesList({
     return <p className="text-sm opacity-80">No activities for this day.</p>;
   }
   return (
-    <div className="space-y-3 overflow-y-auto">
+    <div className="space-y-3 overflow-y-auto max-h-96">
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-semibold">{e.activity_name}</h3>
+            <h3 className="font-semibold text-[#1d9dad]">{e.activity_name}</h3>
             <span className="text-xs opacity-70">
               {e.source_type === "manual" ? "Manually added activity" : (e.device_name)}
             </span>
