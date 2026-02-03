@@ -1,7 +1,6 @@
 import { db } from "./db.js";
 
-// THIS FILE CONTAINS DB QUERIES RELATED TO health_stat_entries table
-// WILL BE DELETED LATER WHEN health_metrics_daily TABLE IS FULLY IN USE
+// This file contains queries related to the health_stat_entries table
 
 export type HealthData = Record<string, string | number>;
 
@@ -13,9 +12,9 @@ export async function getHealthData(
 ): Promise<HealthData> {
   const kindByPart: Record<typeof part, string[]> = {
     heart: ["heart_daily"],
-    brain: ["sleep_daily"],
+    brain: ["sleep_daily", "stress_daily"],
     legs: ["activity_daily"],
-    lungs: ["resp_daily", "spo2_daily"],
+    lungs: ["resp_daily", "skin_temp_daily"],
   };
 
   const kinds = kindByPart[part];
@@ -41,6 +40,7 @@ export async function getHealthData(
       if (data.hr_avg != null) metrics["HR avg"] = data.hr_avg;
       if (data.hrv != null) metrics["HRV"] = data.hrv;
       if (data.rhr != null) metrics["Resting HR"] = data.rhr;
+      if (data.vo2_max != null) metrics["VO2 max"] = data.vo2_max;
     }
 
     if (row.kind === "sleep_daily") {
@@ -58,7 +58,19 @@ export async function getHealthData(
     if (row.kind === "resp_daily" && data.resp_rate != null) {
       metrics["Resp rate"] = data.resp_rate;
     }
+
+    if (row.kind === "stress_daily") {
+      if (data.avg_stress_level != null)
+        metrics["Avg stress"] = data.avg_stress_level;
+      if (data.max_stress_level != null)
+        metrics["Max stress"] = data.max_stress_level;
+    }
+
+    if (row.kind === "skin_temp_daily" && data.skin_temp != null) {
+      metrics["Skin temp (°C)"] = data.skin_temp;
+    }
   }
 
   return metrics;
 }
+

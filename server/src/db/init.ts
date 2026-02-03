@@ -172,52 +172,46 @@ export async function ensureSchema() {
   execute function app.update_health_days_updated_at();
 `);
 
-  // Cleanup users garmin data when a user integration is deleted
+  // create health_stat_entries table (will be deleted later)
   await db.query(`
-  create or replace function app.cleanup_integration_data()
+  create table if not exists app.health_stat_entries (
+    id uuid primary key default gen_random_uuid(),
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+
+    source varchar(50),         -- optional for now: 'garmin', 'polar'
+    kind varchar(80) not null,  -- free text for now
+    data jsonb not null,
+
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+  );
+
+  create index if not exists idx_health_stat_entries_user_day
+    on app.health_stat_entries (user_id, day_date);
+
+  create unique index if not exists ux_health_stat_entries_user_day_kind
+  on app.health_stat_entries (user_id, day_date, kind);
+`);
+
+  // ensure health_days entry exists when inserting into health_stat_entries
+  await db.query(`
+  create or replace function app.ensure_health_day_exists_for_stats()
   returns trigger as $$
   begin
-    -- Delete health data for this provider
-    delete from app.user_dailies_garmin
-    where user_id = old.user_id;
-    
-    delete from app.user_metrics_garmin
-    where user_id = old.user_id;
-
-    delete from app.user_hrv_garmin
-    where user_id = old.user_id;
-
-    delete from app.user_skin_temp_garmin
-    where user_id = old.user_id;
-
-    delete from app.user_sleep_garmin
-    where user_id = old.user_id;
-
-    delete from app.user_stress_garmin
-    where user_id = old.user_id;
-
-    delete from app.user_respiration_garmin
-    where user_id = old.user_id;
-
-    delete from app.user_body_comp_garmin
-    where user_id = old.user_id;
-
-    delete from app.user_activities_garmin
-    where user_id = old.user_id;
-
-    delete from app.user_move_iq_garmin
-    where user_id = old.user_id;
-    
-    return old;
+    insert into app.health_days (user_id, day_date)
+    values (new.user_id, new.day_date)
+    on conflict (user_id, day_date) do nothing;
+    return new;
   end;
   $$ language plpgsql;
 
-  drop trigger if exists trg_cleanup_integration_data on app.user_integrations;
+  drop trigger if exists trg_ensure_health_day_exists_on_stats on app.health_stat_entries;
 
-  create trigger trg_cleanup_integration_data
-  after delete on app.user_integrations
+  create trigger trg_ensure_health_day_exists_on_stats
+  after insert or update on app.health_stat_entries
   for each row
-  execute function app.cleanup_integration_data();
+  execute function app.ensure_health_day_exists_for_stats();
 `);
 
   // Add verifier column if table already existed without it (e.g. before Garmin PKCE)

@@ -1,15 +1,42 @@
 import express from "express";
 import { db } from "../../db/db.js";
-import { upsertGarminUserMetrics, mapGarminUserMetricsToRows} from "../../db/garmin/metrics.js";
-import { upsertGarminDailies, mapGarminDailiesToRows } from "../../db/garmin/dailies.js";
+import {
+  upsertGarminUserMetrics,
+  mapGarminUserMetricsToRows,
+} from "../../db/garmin/metrics.js";
+import {
+  upsertGarminDailies,
+  mapGarminDailiesToRows,
+} from "../../db/garmin/dailies.js";
 import { mapGarminHrvToRow, upsertGarminHrv } from "../../db/garmin/hrv.js";
-import { mapGarminSkinTempToRow, upsertGarminSkinTemp } from "../../db/garmin/skinTemp.js";
-import { mapGarminSleepToRow, upsertGarminSleep } from "../../db/garmin/sleep.js";
-import { mapGarminStressToRow, upsertGarminStress } from "../../db/garmin/stress.js";
-import { mapGarminRespirationToRow, upsertGarminRespiration } from "../../db/garmin/respiration.js";
-import { mapGarminBodyCompToRow, upsertGarminBodyComp } from "../../db/garmin/bodyComp.js";
-import { mapGarminActivityToRow, upsertGarminActivity } from "../../db/garmin/activities.js";
-import { mapGarminMoveIQToRow, upsertGarminMoveIQ } from "../../db/garmin/moveIQ.js";
+import {
+  mapGarminSkinTempToRow,
+  upsertGarminSkinTemp,
+} from "../../db/garmin/skinTemp.js";
+import {
+  mapGarminSleepToRow,
+  upsertGarminSleep,
+} from "../../db/garmin/sleep.js";
+import {
+  mapGarminStressToRow,
+  upsertGarminStress,
+} from "../../db/garmin/stress.js";
+import {
+  mapGarminRespirationToRow,
+  upsertGarminRespiration,
+} from "../../db/garmin/respiration.js";
+import {
+  mapGarminBodyCompToRow,
+  upsertGarminBodyComp,
+} from "../../db/garmin/bodyComp.js";
+import {
+  mapGarminActivityToRow,
+  upsertGarminActivity,
+} from "../../db/garmin/activities.js";
+import {
+  mapGarminMoveIQToRow,
+  upsertGarminMoveIQ,
+} from "../../db/garmin/moveIQ.js";
 
 // Router for Garmin webhooks
 
