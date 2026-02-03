@@ -14,10 +14,14 @@ function labelForKind(kind: string) {
       return "Heart";
     case "sleep_daily":
       return "Brain (Sleep)";
+    case "stress_daily":
+      return "Brain (Stress)";
     case "activity_daily":
       return "Legs (Activity)";
     case "resp_daily":
       return "Lungs (Respiration)";
+    case "skin_temp_daily":
+      return "Lungs (Skin Temp)";
     case "spo2_daily":
       return "Lungs (SpO₂)";
     default:
@@ -26,13 +30,21 @@ function labelForKind(kind: string) {
 }
 
 function prettyValue(v: unknown) {
-  if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
+  if (
+    typeof v === "string" ||
+    typeof v === "number" ||
+    typeof v === "boolean"
+  ) {
     return String(v);
   }
   return JSON.stringify(v);
 }
 
-export default function HealthStatsList({ entries }: { entries: DayStatsEntry[] }) {
+export default function HealthStatsList({
+  entries,
+}: {
+  entries: DayStatsEntry[];
+}) {
   if (entries.length === 0) {
     return <p className="text-sm opacity-80">No health stats for this day.</p>;
   }
@@ -52,12 +64,14 @@ export default function HealthStatsList({ entries }: { entries: DayStatsEntry[] 
 
           <div className="text-sm space-y-1">
             {typeof e.data === "object" && e.data !== null ? (
-              Object.entries(e.data as Record<string, unknown>).map(([k, v]) => (
-                <div key={k}>
-                  <span className="font-semibold">{k}: </span>
-                  {prettyValue(v)}
-                </div>
-              ))
+              Object.entries(e.data as Record<string, unknown>).map(
+                ([k, v]) => (
+                  <div key={k}>
+                    <span className="font-semibold">{k}: </span>
+                    {prettyValue(v)}
+                  </div>
+                ),
+              )
             ) : (
               <div>{prettyValue(e.data)}</div>
             )}
