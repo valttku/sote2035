@@ -13,8 +13,6 @@ export default function LoginPage() {
   // Next.js router for client-side navigation
   const router = useRouter();
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
   //Handles form submission for both login and registration flows
   async function handleSubmit(
     endpoint: "login" | "register",
@@ -30,7 +28,7 @@ export default function LoginPage() {
           : { email, password };
 
       // Call authentication API
-      const res = await fetch(`${apiUrl}/api/v1/auth/${endpoint}`, {
+      const res = await fetch(`/api/v1/auth/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // Enable cookie handling for session management
@@ -40,23 +38,15 @@ export default function LoginPage() {
       // Handle successful response
       if (res.ok) {
         if (endpoint === "login") {
-          // Fetch /me to confirm session is set
-          const meRes = await fetch(`${apiUrl}/api/v1/me`, {
-            method: "GET",
-            credentials: "include", // very important!
-          });
-
-          if (meRes.ok) {
-            router.push("/"); // Only redirect if /me confirms login
-          } else {
-            alert("Login failed: session not established");
-          }
+          router.push("/"); // Only redirect if /me confirms login
         } else {
-          // Registration flow
-          setShowRegister(false);
-          setShowLogin(false);
-          router.push("/choose-service");
+          alert("Login failed: session not established");
         }
+      } else {
+        // Registration flow
+        setShowRegister(false);
+        setShowLogin(false);
+        router.push("/choose-service");
       }
     } catch (error) {
       console.error("Authentication error:", error);

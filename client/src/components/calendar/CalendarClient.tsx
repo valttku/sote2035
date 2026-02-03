@@ -58,9 +58,6 @@ export default function CalendarClient() {
   const [dayStats, setDayStats] = useState<DayStatsResponse | null>(null);
   const [loadingDay, setLoadingDay] = useState(false);
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
   // Fetch days with data for the current month
   useEffect(() => {
     async function loadMonth() {
@@ -68,7 +65,7 @@ export default function CalendarClient() {
 
       try {
         const res = await fetch(
-          `${apiUrl}/api/v1/calendar/month?year=${year}&month=${month}`,
+          `/api/v1/calendar/month?year=${year}&month=${month}`,
           { credentials: "include" },
         );
 
@@ -112,7 +109,7 @@ export default function CalendarClient() {
   setError(null);
   try {
     const res = await fetch(
-      `${apiUrl}/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
       { credentials: "include" }
     );
     const json: unknown = await res.json();
@@ -328,7 +325,7 @@ export default function CalendarClient() {
                     const notes = formData.get("notes") as string;
 
                     try {
-                      await fetch(`${apiUrl}/api/v1/calendar/activities`, {
+                      await fetch(`/api/v1/calendar/activities`, {
                         method: "POST",
                         credentials: "include",
                         headers: { "Content-Type": "application/json" },

@@ -35,7 +35,6 @@ const PASSWORD_REQUIREMENTS = [
 ] as const;
 
 export default function SettingsClient() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +94,7 @@ export default function SettingsClient() {
   const router = useRouter();
 
   async function loadPolarStatus() {
-    const res = await fetch(`${apiUrl}/api/v1/integrations/polar/status`, {
+    const res = await fetch(`/api/v1/integrations/polar/status`, {
       credentials: "include",
     });
 
@@ -104,7 +103,7 @@ export default function SettingsClient() {
   }
 
   async function loadGarminStatus() {
-    const res = await fetch(`${apiUrl}/api/v1/integrations/garmin/status`, {
+    const res = await fetch(`/api/v1/integrations/garmin/status`, {
       credentials: "include",
     });
 
@@ -116,7 +115,7 @@ export default function SettingsClient() {
   useEffect(() => {
     async function loadSettings() {
       try {
-        const res = await fetch(`${apiUrl}/api/v1/settings`, {
+        const res = await fetch(`/api/v1/settings`, {
           credentials: "include",
         });
 
@@ -147,7 +146,7 @@ export default function SettingsClient() {
   async function saveProfile() {
     setSavingProfile(true);
     try {
-      const res = await fetch(`${apiUrl}/api/v1/settings/profile`, {
+      const res = await fetch(`/api/v1/settings/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -199,7 +198,7 @@ export default function SettingsClient() {
 
     setChangingPassword(true);
     try {
-      const res = await fetch(`${apiUrl}/api/v1/settings/password`, {
+      const res = await fetch(`/api/v1/settings/password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -229,14 +228,14 @@ export default function SettingsClient() {
 
   function linkGarmin() {
     // Same as Polar: redirect to backend /connect (use deployed frontend + backend for Garmin linking to work)
-    window.location.href = `${apiUrl}/api/v1/integrations/garmin/connect`;
+    window.location.href = `/api/v1/integrations/garmin/connect`;
   }
 
   async function unlinkGarmin() {
     if (!confirm("Unlink Garmin from your account?")) return;
     setGarminBusy(true);
     try {
-      const res = await fetch(`${apiUrl}/api/v1/integrations/garmin/unlink`, {
+      const res = await fetch(`/api/v1/integrations/garmin/unlink`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -259,7 +258,7 @@ export default function SettingsClient() {
 
   function linkPolar() {
     // This endpoint redirects to Polar Flow OAuth
-    window.location.href = `${apiUrl}/api/v1/integrations/polar/connect`;
+    window.location.href = `/api/v1/integrations/polar/connect`;
   }
 
   async function unlinkPolar() {
@@ -267,7 +266,7 @@ export default function SettingsClient() {
 
     setPolarBusy(true);
     try {
-      const res = await fetch(`${apiUrl}/api/v1/integrations/polar/unlink`, {
+      const res = await fetch(`/api/v1/integrations/polar/unlink`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -294,7 +293,7 @@ export default function SettingsClient() {
     }
 
     try {
-      const res = await fetch(`${apiUrl}/api/v1/settings/delete-account`, {
+      const res = await fetch(`/api/v1/settings/delete-account`, {
         method: "DELETE",
         credentials: "include",
       });

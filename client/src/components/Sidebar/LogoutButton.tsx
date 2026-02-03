@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 export default function LogoutButton() {
   const router = useRouter();
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
   async function handleLogout() {
-    await fetch(`${apiUrl}/api/v1/auth/logout`, {
+    await fetch(`/api/v1/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
