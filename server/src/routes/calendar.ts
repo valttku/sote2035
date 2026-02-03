@@ -7,7 +7,7 @@ export const calendarRouter = Router();
 
 // GET /api/v1/calendar/month?year=YYYY&month=MM
 // Returns only days that have actual activity_daily entries with data
-// server/src/routes/calendar.ts
+
 calendarRouter.get("/month", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId as number;
