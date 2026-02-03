@@ -18,6 +18,8 @@ function labelForKind(kind: string) {
       return "Brain (Stress)";
     case "activity_daily":
       return "Legs (Activity)";
+    case "manual_activity":
+      return "Manual Activity";
     case "resp_daily":
       return "Lungs (Respiration)";
     case "skin_temp_daily":
@@ -40,6 +42,8 @@ function prettyValue(v: unknown) {
   return JSON.stringify(v);
 }
 
+
+
 export default function HealthStatsList({
   entries,
 }: {
@@ -50,7 +54,7 @@ export default function HealthStatsList({
   }
 
   return (
-    <div className="space-y-3 h-96 overflow-y-auto">
+    <div className="space-y-3 overflow-y-auto">
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">

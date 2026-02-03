@@ -13,7 +13,12 @@ calendarRouter.get("/month", authRequired, async (req, res, next) => {
     const year = Number(req.query.year);
     const month = Number(req.query.month); // 1-12
 
-    if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
+    if (
+      !Number.isInteger(year) ||
+      !Number.isInteger(month) ||
+      month < 1 ||
+      month > 12
+    ) {
       return res.status(400).json({ error: "Invalid year/month" });
     }
 
@@ -29,10 +34,10 @@ calendarRouter.get("/month", authRequired, async (req, res, next) => {
         and day_date < $3::date
       order by day_date asc
       `,
-      [userId, start.toISOString(), end.toISOString()]
+      [userId, start.toISOString(), end.toISOString()],
     );
 
-    res.json(result.rows.map(r => String(r.day_date)));
+    res.json(result.rows.map((r) => String(r.day_date)));
   } catch (e) {
     next(e);
   }
@@ -56,7 +61,7 @@ calendarRouter.get("/health-stats", authRequired, async (req, res, next) => {
       where user_id = $1 and day_date = $2::date
       order by created_at asc
       `,
-      [userId, date]
+      [userId, date],
     );
 
     res.json({ date, entries: entries.rows });
@@ -71,16 +76,17 @@ calendarRouter.post("/activities", authRequired, async (req, res, next) => {
     const userId = (req as any).userId as number;
     const { date, title, type, duration, calories, steps, notes } = req.body;
 
-    if (!date || !title) return res.status(400).json({ error: "Date and title required" });
+    if (!date || !title)
+      return res.status(400).json({ error: "Date and title required" });
 
-    // Insert as activity_daily entry for modal compatibility
+    // Insert as manual_activity entry
     const result = await db.query(
       `
       INSERT INTO app.health_stat_entries (user_id, day_date, kind, source, data)
-      VALUES ($1, $2, 'activity_daily', 'manual', $3)
+      VALUES ($1, $2, 'manual_activity', 'manual', $3)
       RETURNING *
       `,
-      [userId, date, { title, type, duration, calories, steps, notes }]
+      [userId, date, { title, type, duration, calories, steps, notes }],
     );
 
     res.json({ success: true, entry: result.rows[0] });
@@ -88,4 +94,3 @@ calendarRouter.post("/activities", authRequired, async (req, res, next) => {
     next(err);
   }
 });
-
