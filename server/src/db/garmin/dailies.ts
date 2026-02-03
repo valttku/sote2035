@@ -1,4 +1,4 @@
-import { db } from "./db.js";
+import { db } from "../db.js";
 
 export type GarminDailiesRow = {
   user_id: number;
@@ -13,6 +13,8 @@ export type GarminDailiesRow = {
   push_distance_in_meters?: number | null;
   duration_in_seconds?: number | null;
   active_time_in_seconds?: number | null;
+  moderate_intensity_duration_in_seconds?: number | null;
+  vigorous_intensity_duration_in_seconds?: number | null;
   floors_climbed?: number | null;
   min_heart_rate?: number | null;
   max_heart_rate?: number | null;
@@ -36,6 +38,7 @@ export type GarminDailiesRow = {
   floors_climbed_goal?: number | null;
   start_time_in_seconds?: number | null;
   start_time_offset_in_seconds?: number | null;
+  source?: string | null;
 };
 
 export function mapGarminDailiesToRows(
@@ -56,6 +59,10 @@ export function mapGarminDailiesToRows(
       push_distance_in_meters: d.pushDistanceInMeters ?? null,
       duration_in_seconds: d.durationInSeconds ?? null,
       active_time_in_seconds: d.activeTimeInSeconds ?? null,
+      moderate_intensity_duration_in_seconds:
+        d.moderateIntensityDurationInSeconds ?? null,
+      vigorous_intensity_duration_in_seconds:
+        d.vigorousIntensityDurationInSeconds ?? null,
       floors_climbed: d.floorsClimbed ?? null,
       min_heart_rate: d.minHeartRateInBeatsPerMinute ?? null,
       max_heart_rate: d.maxHeartRateInBeatsPerMinute ?? null,
@@ -82,6 +89,7 @@ export function mapGarminDailiesToRows(
       floors_climbed_goal: d.floorsClimbedGoal ?? null,
       start_time_in_seconds: d.startTimeInSeconds ?? null,
       start_time_offset_in_seconds: d.startTimeOffsetInSeconds ?? null,
+      source: d.source ?? null,
     },
   ];
 }
@@ -103,6 +111,8 @@ export async function upsertGarminDailies(rows: GarminDailiesRow[]) {
     "push_distance_in_meters",
     "duration_in_seconds",
     "active_time_in_seconds",
+    "moderate_intensity_duration_in_seconds",
+    "vigorous_intensity_duration_in_seconds",
     "floors_climbed",
     "min_heart_rate",
     "max_heart_rate",
@@ -126,6 +136,7 @@ export async function upsertGarminDailies(rows: GarminDailiesRow[]) {
     "floors_climbed_goal",
     "start_time_in_seconds",
     "start_time_offset_in_seconds",
+    "source",
   ];
 
   const values: any[] = [];
@@ -151,6 +162,8 @@ export async function upsertGarminDailies(rows: GarminDailiesRow[]) {
       r.push_distance_in_meters ?? null,
       r.duration_in_seconds ?? null,
       r.active_time_in_seconds ?? null,
+      r.moderate_intensity_duration_in_seconds ?? null,
+      r.vigorous_intensity_duration_in_seconds ?? null,
       r.floors_climbed ?? null,
       r.min_heart_rate ?? null,
       r.max_heart_rate ?? null,
@@ -174,6 +187,7 @@ export async function upsertGarminDailies(rows: GarminDailiesRow[]) {
       r.floors_climbed_goal ?? null,
       r.start_time_in_seconds ?? null,
       r.start_time_offset_in_seconds ?? null,
+      r.source ?? null,
     );
   });
 
@@ -185,17 +199,49 @@ export async function upsertGarminDailies(rows: GarminDailiesRow[]) {
       summary_id = EXCLUDED.summary_id,
       activity_type = EXCLUDED.activity_type,
       active_kilocalories = EXCLUDED.active_kilocalories,
+      bmr_kilocalories = EXCLUDED.bmr_kilocalories,
       steps = EXCLUDED.steps,
+      pushes = EXCLUDED.pushes,
       distance_in_meters = EXCLUDED.distance_in_meters,
+      push_distance_in_meters = EXCLUDED.push_distance_in_meters,
+      duration_in_seconds = EXCLUDED.duration_in_seconds,
+      active_time_in_seconds = EXCLUDED.active_time_in_seconds,
+      moderate_intensity_duration_in_seconds =
+        EXCLUDED.moderate_intensity_duration_in_seconds,
+      vigorous_intensity_duration_in_seconds =
+        EXCLUDED.vigorous_intensity_duration_in_seconds,
+      floors_climbed = EXCLUDED.floors_climbed,
+      min_heart_rate = EXCLUDED.min_heart_rate,
+      max_heart_rate = EXCLUDED.max_heart_rate,
+      avg_heart_rate = EXCLUDED.avg_heart_rate,
+      resting_heart_rate = EXCLUDED.resting_heart_rate,
+      heart_rate_samples = EXCLUDED.heart_rate_samples,
       avg_stress_level = EXCLUDED.avg_stress_level,
+      max_stress_level = EXCLUDED.max_stress_level,
+      stress_duration_in_seconds = EXCLUDED.stress_duration_in_seconds,
+      rest_stress_duration_in_seconds = EXCLUDED.rest_stress_duration_in_seconds,
+      activity_stress_duration_in_seconds =
+        EXCLUDED.activity_stress_duration_in_seconds,
+      low_stress_duration_in_seconds = EXCLUDED.low_stress_duration_in_seconds,
+      medium_stress_duration_in_seconds =
+        EXCLUDED.medium_stress_duration_in_seconds,
+      high_stress_duration_in_seconds = EXCLUDED.high_stress_duration_in_seconds,
+      stress_qualifier = EXCLUDED.stress_qualifier,
       body_battery_charged = EXCLUDED.body_battery_charged,
+      body_battery_drained = EXCLUDED.body_battery_drained,
+      steps_goal = EXCLUDED.steps_goal,
+      pushes_goal = EXCLUDED.pushes_goal,
+      intensity_duration_goal_in_seconds =
+        EXCLUDED.intensity_duration_goal_in_seconds,
+      floors_climbed_goal = EXCLUDED.floors_climbed_goal,
+      start_time_in_seconds = EXCLUDED.start_time_in_seconds,
+      start_time_offset_in_seconds = EXCLUDED.start_time_offset_in_seconds,
+      source = EXCLUDED.source,
       updated_at = now()
   `;
 
   await db.query(query, values);
 }
-
-// ...existing code...
 
 export async function getGarminDailiesByUser(
   user_id: number,
@@ -215,6 +261,8 @@ export async function getGarminDailiesByUser(
        push_distance_in_meters,
        duration_in_seconds,
        active_time_in_seconds,
+      moderate_intensity_duration_in_seconds,
+      vigorous_intensity_duration_in_seconds,
        floors_climbed,
        min_heart_rate,
        max_heart_rate,
@@ -237,7 +285,8 @@ export async function getGarminDailiesByUser(
        intensity_duration_goal_in_seconds,
        floors_climbed_goal,
        start_time_in_seconds,
-       start_time_offset_in_seconds
+       start_time_offset_in_seconds,
+       source
      FROM app.user_dailies_garmin
      WHERE user_id = $1
      ORDER BY day_date DESC

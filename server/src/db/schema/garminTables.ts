@@ -2,31 +2,38 @@ import { db } from "../db.js";
 
 // This file contains DB schema initialization related to health data tables
 
-export async function createHealthTables() {
-  // --- create health_days table ---
+export async function createGarminTables() {
+  // create user_metrics_garmin table
   await db.query(`
-  create table if not exists app.health_days (
+  create table if not exists app.user_metrics_garmin (
+    id uuid primary key default gen_random_uuid(),
     user_id integer not null references app.users(id) on delete cascade,
     day_date date not null,
+    summary_id varchar(100),
+
+    vo2_max double precision,
+    vo2_max_cycling double precision,
+    fitness_age integer,
+    enhanced boolean,
+
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
-    primary key (user_id, day_date)
+
+    unique (user_id, day_date, summary_id)
   );
 
-  create or replace function app.update_health_days_updated_at()
-  returns trigger as $$
-  begin
-    new.updated_at = now();
-    return new;
-  end;
-  $$ language plpgsql;
+  create index if not exists idx_user_metrics_garmin_user_day
+    on app.user_metrics_garmin (user_id, day_date);
+`);
 
-  drop trigger if exists update_health_days_updated_at on app.health_days;
+  // automatically update user_metrics.updated_at on every update
+  await db.query(`
+  drop trigger if exists update_user_metrics_garmin_updated_at on app.user_metrics_garmin;
 
-  create trigger update_health_days_updated_at
-  before update on app.health_days
+  create trigger update_user_metrics_garmin_updated_at
+  before update on app.user_metrics_garmin
   for each row
-  execute function app.update_health_days_updated_at();
+  execute function app.update_updated_at_column();
 `);
 
   // Trigger for user_metrics_garmin (ensure health_days entry exists)
@@ -68,6 +75,8 @@ export async function createHealthTables() {
     push_distance_in_meters double precision,
     duration_in_seconds integer,
     active_time_in_seconds integer,
+    moderate_intensity_duration_in_seconds integer,
+    vigorous_intensity_duration_in_seconds integer,
     floors_climbed integer,
     
     -- heart rate
@@ -101,6 +110,7 @@ export async function createHealthTables() {
     -- timestamps
     start_time_in_seconds bigint,
     start_time_offset_in_seconds integer,
+    source varchar(50),
     
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -143,8 +153,6 @@ export async function createHealthTables() {
   for each row
   execute function app.update_updated_at_column();
 `);
-
-  // Add this after user_dailies_garmin table
 
   // create user_hrv_garmin table
   await db.query(`
@@ -200,6 +208,139 @@ export async function createHealthTables() {
   for each row
   execute function app.update_updated_at_column();
 `);
+
+  // create user_skin_temp_garmin table
+  await db.query(`
+  create table if not exists app.user_skin_temp_garmin (
+    id uuid primary key default gen_random_uuid(),
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    summary_id varchar(100),
+    
+    avg_deviation_celsius double precision,
+    duration_in_seconds integer,
+    start_time_in_seconds bigint,
+    start_time_offset_in_seconds integer,
+    
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    
+    unique (user_id, day_date)
+  );
+
+  create index if not exists idx_user_skin_temp_garmin_user_day
+    on app.user_skin_temp_garmin (user_id, day_date);
+`);
+
+  // automatically update user_skin_temp_garmin.updated_at on every update
+  await db.query(`
+  drop trigger if exists update_user_skin_temp_garmin_updated_at on app.user_skin_temp_garmin;
+
+  create trigger update_user_skin_temp_garmin_updated_at
+  before update on app.user_skin_temp_garmin
+  for each row
+  execute function app.update_updated_at_column();
+`);
+
+  // Update trigger for updated_at
+  await db.query(`
+  drop trigger if exists update_user_skin_temp_garmin_updated_at on app.user_skin_temp_garmin;
+
+  create trigger update_user_skin_temp_garmin_updated_at
+  before update on app.user_skin_temp_garmin
+  for each row
+  execute function app.update_updated_at_column();
+`);
+
+  // Trigger for user_skin_temp_garmin (ensure health_days entry exists)
+  await db.query(`
+    create or replace function app.ensure_health_day_exists_for_skin_temp()
+    returns trigger as $$
+    begin
+      insert into app.health_days (user_id, day_date)
+      values (new.user_id, new.day_date)
+      on conflict (user_id, day_date) do nothing;
+      return new;
+    end;
+    $$ language plpgsql;
+
+    drop trigger if exists trg_ensure_health_day_for_skin_temp on app.user_skin_temp_garmin;
+
+    create trigger trg_ensure_health_day_for_skin_temp
+    after insert or update on app.user_skin_temp_garmin
+    for each row
+    execute function app.ensure_health_day_exists_for_skin_temp();
+  `);
+
+  // create user_sleep_garmin table
+  await db.query(`
+  create table if not exists app.user_sleep_garmin (
+    id uuid primary key default gen_random_uuid(),
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    summary_id varchar(100),
+    
+    duration_in_seconds integer,
+    total_nap_duration_in_seconds integer,
+    start_time_in_seconds bigint,
+    start_time_offset_in_seconds integer,
+    unmeasurable_sleep_in_seconds integer,
+    deep_sleep_duration_in_seconds integer,
+    light_sleep_duration_in_seconds integer,
+    rem_sleep_in_seconds integer,
+    awake_duration_in_seconds integer,
+    
+    sleep_levels_map jsonb,  -- {deep: [{startTimeInSeconds, endTimeInSeconds}], light: [...], rem: [...]}
+    validation varchar(50),
+    time_offset_sleep_spo2 jsonb,  -- {0: 95, 60: 96, ...}
+    time_offset_sleep_respiration jsonb,  -- {60: 15.31, 120: 14.58, ...}
+    overall_sleep_score jsonb,  -- {value: 87, qualifierKey: "GOOD"}
+    sleep_scores jsonb,
+    naps jsonb,  -- array of nap objects
+    
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    
+    unique (user_id, day_date)
+  );
+
+  create index if not exists idx_user_sleep_garmin_user_day
+    on app.user_sleep_garmin (user_id, day_date);
+`);
+
+  // automatically update user_sleep_garmin.updated_at on every update
+  await db.query(`
+  drop trigger if exists update_user_sleep_garmin_updated_at on app.user_sleep_garmin;
+
+  create trigger update_user_sleep_garmin_updated_at
+  before update on app.user_sleep_garmin
+  for each row
+  execute function app.update_updated_at_column();
+`);
+
+  // Trigger for user_sleep_garmin (ensure health_days entry exists)
+  await db.query(`
+    create or replace function app.ensure_health_day_exists_for_sleep()
+    returns trigger as $$
+    begin
+      insert into app.health_days (user_id, day_date)
+      values (new.user_id, new.day_date)
+      on conflict (user_id, day_date) do nothing;
+      return new;
+    end;
+    $$ language plpgsql;
+
+    drop trigger if exists trg_ensure_health_day_for_sleep on app.user_sleep_garmin;
+
+    create trigger trg_ensure_health_day_for_sleep
+    after insert or update on app.user_sleep_garmin
+    for each row
+    execute function app.ensure_health_day_exists_for_sleep();
+  `);
+
+  // create activities table in the database
+  // automatically update activities.updated_at on every update
+  // ensure health_days entry exists when inserting into activities
 
   // create health_stat_entries table (will be deleted later)
   await db.query(`

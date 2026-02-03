@@ -1,10 +1,8 @@
 import { db } from "./db.js";
-import { createHealthTables } from "./schema/healthTablesGarmin.js";
-import { createActivitiesTables } from "./schema/activitiesTablesGarmin.js";
+import { createGarminTables } from "./schema/garminTables.js";
 
 export async function ensureSchema() {
-  await createHealthTables();
-  await createActivitiesTables();
+  await createGarminTables();
 
   // make sure the "app" schema exists
   await db.query(`
@@ -44,8 +42,6 @@ export async function ensureSchema() {
     updated_at timestamptz not null default now(),
     last_login timestamptz
   );
-
-
 `);
 
   // automatically update users.updated_at on every update
@@ -150,7 +146,33 @@ export async function ensureSchema() {
       on app.oauth_states (expires_at);
   `);
 
-  // Cleanup integration data when a user integration is deleted
+  // --- create health_days table ---
+  await db.query(`
+  create table if not exists app.health_days (
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    primary key (user_id, day_date)
+  );
+
+  create or replace function app.update_health_days_updated_at()
+  returns trigger as $$
+  begin
+    new.updated_at = now();
+    return new;
+  end;
+  $$ language plpgsql;
+
+  drop trigger if exists update_health_days_updated_at on app.health_days;
+
+  create trigger update_health_days_updated_at
+  before update on app.health_days
+  for each row
+  execute function app.update_health_days_updated_at();
+`);
+
+  // Cleanup users garmin data when a user integration is deleted
   await db.query(`
   create or replace function app.cleanup_integration_data()
   returns trigger as $$
@@ -158,15 +180,18 @@ export async function ensureSchema() {
     -- Delete health data for this provider
     delete from app.user_dailies_garmin
     where user_id = old.user_id
-      and day_date >= (old.created_at::date);
     
     delete from app.user_metrics_garmin
     where user_id = old.user_id
-      and day_date >= (old.created_at::date);
 
       delete from app.user_hrv_garmin
     where user_id = old.user_id
-      and day_date >= (old.created_at::date);
+
+      delete from app.user_skin_temp_garmin
+    where user_id = old.user_id
+
+      delete from app.user_sleep_garmin
+    where user_id = old.user_id
     
     return old;
   end;

@@ -1,4 +1,4 @@
-import { db } from "./db.js";
+import { db } from "../db.js";
 
 export type GarminHrvRow = {
   user_id: number;
