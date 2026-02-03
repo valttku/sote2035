@@ -14,7 +14,7 @@ export default function AddActivityForm({
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="mt-4 border-t pt-4">
+    <div className="mt-4 pt-4">
       {!showForm ? (
         <button
           type="button"
@@ -35,10 +35,9 @@ export default function AddActivityForm({
               const duration = Number(formData.get("duration") || 0);
               const calories = Number(formData.get("calories") || 0);
               const steps = Number(formData.get("steps") || 0);
-              const notes = formData.get("notes") as string;
 
               try {
-                await fetch(`/api/v1/calendar/activities`, {
+                await fetch(`/api/v1/calendar/manual-activities`, {
                   method: "POST",
                   credentials: "include",
                   headers: { "Content-Type": "application/json" },
@@ -49,7 +48,6 @@ export default function AddActivityForm({
                     duration,
                     calories,
                     steps,
-                    notes,
                   }),
                 });
                 onActivityAdded();
@@ -90,11 +88,6 @@ export default function AddActivityForm({
               type="number"
               name="steps"
               placeholder="Steps"
-              className="w-full border rounded p-1"
-            />
-            <textarea
-              name="notes"
-              placeholder="Notes"
               className="w-full border rounded p-1"
             />
             <div className="flex gap-2">

@@ -172,7 +172,7 @@ export async function ensureSchema() {
   execute function app.update_health_days_updated_at();
 `);
 
-  // create health_stat_entries table (will be deleted later)
+  // create health_stat_entries table
   await db.query(`
   create table if not exists app.health_stat_entries (
     id uuid primary key default gen_random_uuid(),
