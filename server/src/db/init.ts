@@ -2,8 +2,6 @@ import { db } from "./db.js";
 import { createGarminTables } from "./schema/garminTables.js";
 
 export async function ensureSchema() {
-  await createGarminTables();
-
   // make sure the "app" schema exists
   await db.query(`
     create schema if not exists app;
@@ -13,6 +11,8 @@ export async function ensureSchema() {
   await db.query(`
     create extension if not exists pgcrypto;
   `);
+
+  await createGarminTables();
 
   // create users table (accounts)
   await db.query(`
@@ -179,19 +179,19 @@ export async function ensureSchema() {
   begin
     -- Delete health data for this provider
     delete from app.user_dailies_garmin
-    where user_id = old.user_id
+    where user_id = old.user_id;
     
     delete from app.user_metrics_garmin
-    where user_id = old.user_id
+    where user_id = old.user_id;
 
-      delete from app.user_hrv_garmin
-    where user_id = old.user_id
+    delete from app.user_hrv_garmin
+    where user_id = old.user_id;
 
-      delete from app.user_skin_temp_garmin
-    where user_id = old.user_id
+    delete from app.user_skin_temp_garmin
+    where user_id = old.user_id;
 
-      delete from app.user_sleep_garmin
-    where user_id = old.user_id
+    delete from app.user_sleep_garmin
+    where user_id = old.user_id;
     
     return old;
   end;
