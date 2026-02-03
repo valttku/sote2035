@@ -12,14 +12,14 @@ function labelForKind(kind: string) {
       return "Brain";
     case "activity_daily":
       return "Legs";
-    case "manual_activity":
-      return "Manual Activity";
     case "resp_daily":
       return "Lungs";
     case "skin_temp_daily":
       return "Lungs";
     case "spo2_daily":
       return "Lungs";
+    case "manual_activity":
+      return "Manual Activity";
     default:
       return kind;
   }
@@ -38,20 +38,32 @@ function prettyValue(v: unknown) {
 
 export default function HealthStatsList({
   entries,
+  onDelete,
 }: {
   entries: HealthStatsEntry[];
+  onDelete?: (id: string) => Promise<void>;
 }) {
   if (entries.length === 0) {
     return <p className="text-sm opacity-80">No health stats for this day.</p>;
   }
 
   return (
-    <div className="space-y-3 overflow-y-auto">
+    <div className="space-y-3 overflow-y-auto max-h-96">
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-semibold">{labelForKind(e.kind)}</h3>
-            <span className="text-xs opacity-70">{e.source ?? "unknown"}</span>
+            <h3 className="font-semibold text-lg text-[#1d9dad]">{labelForKind(e.kind)}</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs opacity-70">{e.source ?? "unknown"}</span>
+              {e.kind === "manual_activity" && onDelete && (
+                <button
+                  onClick={() => onDelete(e.id)}
+                  className="text-xs text-red-500 hover:text-red-700"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="text-sm space-y-1">
