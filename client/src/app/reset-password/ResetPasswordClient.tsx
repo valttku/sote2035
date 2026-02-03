@@ -9,9 +9,6 @@ export default function ResetPasswordPage() {
   const token = params.get("token");
   const router = useRouter();
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-
   //const [passwordError ] = useState<string | null>(null);
   const [passwordError] = useState("");
 
@@ -83,7 +80,7 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${apiUrl}/api/v1/auth/reset-password`, {
+      const res = await fetch(`/api/v1/auth/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

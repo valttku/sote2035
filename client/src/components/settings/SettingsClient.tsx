@@ -9,9 +9,9 @@ type SettingsData = {
   id: number;
   email: string;
   display_name: string | null;
-  gender: string | null;  // added
-  height: number | null;  // added
-  weight: number | null;  // added
+  gender: string | null; // added
+  height: number | null; // added
+  weight: number | null; // added
   created_at: string;
   updated_at: string;
   last_login: string | null;
@@ -35,8 +35,6 @@ const PASSWORD_REQUIREMENTS = [
 ] as const;
 
 export default function SettingsClient() {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
   const [data, setData] = useState<SettingsData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,13 +65,10 @@ export default function SettingsClient() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
-
-
-
   // At the top, with other useState declarations
- const [gender, setGender] = useState<string | null>(null);
-const [height, setHeight] = useState<number | null>(null);
-const [weight, setWeight] = useState<number | null>(null);
+  const [gender, setGender] = useState<string | null>(null);
+  const [height, setHeight] = useState<number | null>(null);
+  const [weight, setWeight] = useState<number | null>(null);
   // Calculate strength score
   const strengthScore = useMemo(() => {
     return PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(newPassword))
@@ -99,7 +94,7 @@ const [weight, setWeight] = useState<number | null>(null);
   const router = useRouter();
 
   async function loadPolarStatus() {
-    const res = await fetch(`${apiUrl}/api/v1/integrations/polar/status`, {
+    const res = await fetch(`/api/v1/integrations/polar/status`, {
       credentials: "include",
     });
 
@@ -108,21 +103,19 @@ const [weight, setWeight] = useState<number | null>(null);
   }
 
   async function loadGarminStatus() {
-    const res = await fetch(`${apiUrl}/api/v1/integrations/garmin/status`, {
+    const res = await fetch(`/api/v1/integrations/garmin/status`, {
       credentials: "include",
     });
 
     const json = await res.json();
     if (res.ok) setGarminStatus(json);
   }
- 
-  
-  /* ===================== LOAD SETTINGS ===================== */
 
+  /* ===================== LOAD SETTINGS ===================== */
   useEffect(() => {
     async function loadSettings() {
       try {
-        const res = await fetch("/api/v1/settings", {
+        const res = await fetch(`/api/v1/settings`, {
           credentials: "include",
         });
 
@@ -146,6 +139,8 @@ const [weight, setWeight] = useState<number | null>(null);
     }
 
     loadSettings();
+    loadPolarStatus();
+    loadGarminStatus();
   }, []);
 
   async function saveProfile() {
@@ -155,7 +150,7 @@ const [weight, setWeight] = useState<number | null>(null);
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ displayName,gender,height,weight }),
+        body: JSON.stringify({ displayName, gender, height, weight }),
       });
 
       const json = await res.json();
@@ -165,25 +160,26 @@ const [weight, setWeight] = useState<number | null>(null);
         return;
       }
 
-      
-    // Update local state with returned values
+      // Update local state with returned values
       if (data) {
-        setData({ ...data, display_name: displayName ,
+        setData({
+          ...data,
+          display_name: displayName,
           gender: json.gender ?? null,
           height: json.height ?? null,
-          weight: json.weight ?? null, 
+          weight: json.weight ?? null,
         });
       }
 
       setShowEditProfile(false);
-    router.refresh();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to connect to server");
-  } finally {
-    setSavingProfile(false);
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to connect to server");
+    } finally {
+      setSavingProfile(false);
+    }
   }
-}
 
   async function changePassword() {
     if (!oldPassword || !newPassword) {
@@ -202,7 +198,7 @@ const [weight, setWeight] = useState<number | null>(null);
 
     setChangingPassword(true);
     try {
-      const res = await fetch(`${apiUrl}/api/v1/settings/password`, {
+      const res = await fetch(`/api/v1/settings/password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -231,21 +227,18 @@ const [weight, setWeight] = useState<number | null>(null);
   }
 
   function linkGarmin() {
-    // This endpoint redirects to Garmin OAuth
-    window.location.href = `${apiUrl}/api/v1/integrations/garmin/connect`;
+    // Same as Polar: redirect to backend /connect (use deployed frontend + backend for Garmin linking to work)
+    window.location.href = `/api/v1/integrations/garmin/connect`;
   }
 
   async function unlinkGarmin() {
     if (!confirm("Unlink Garmin from your account?")) return;
     setGarminBusy(true);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/integrations/garmin/unlink`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const res = await fetch(`/api/v1/integrations/garmin/unlink`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       const json = await res.json();
 
@@ -265,7 +258,7 @@ const [weight, setWeight] = useState<number | null>(null);
 
   function linkPolar() {
     // This endpoint redirects to Polar Flow OAuth
-    window.location.href = `${apiUrl}/api/v1/integrations/polar/connect`;
+    window.location.href = `/api/v1/integrations/polar/connect`;
   }
 
   async function unlinkPolar() {
@@ -273,7 +266,7 @@ const [weight, setWeight] = useState<number | null>(null);
 
     setPolarBusy(true);
     try {
-      const res = await fetch(`${apiUrl}/api/v1/integrations/polar/unlink`, {
+      const res = await fetch(`/api/v1/integrations/polar/unlink`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -300,7 +293,7 @@ const [weight, setWeight] = useState<number | null>(null);
     }
 
     try {
-      const res = await fetch(`${apiUrl}/api/v1/settings/delete-account`, {
+      const res = await fetch(`/api/v1/settings/delete-account`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -341,11 +334,11 @@ const [weight, setWeight] = useState<number | null>(null);
           </div>
 
           {/* <-- ADD THIS BLOCK HERE --> */}
-      <div className="flex flex-col sm:flex-row sm:justify-between mt-3 gap-3">
-        <p>GENDER: {data.gender ?? "(not set)"}</p>
-        <p>HEIGHT: {data.height ?? "(not set)"} cm</p>
-        <p>WEIGHT: {data.weight ?? "(not set)"} kg</p>
-      </div>
+          <div className="flex flex-col sm:flex-row sm:justify-between mt-3 gap-3">
+            <p>GENDER: {data.gender ?? "(not set)"}</p>
+            <p>HEIGHT: {data.height ?? "(not set)"} cm</p>
+            <p>WEIGHT: {data.weight ?? "(not set)"} kg</p>
+          </div>
 
           <div className="flex flex-col sm:flex-row sm:justify-between mt-3 gap-3">
             <p>USERNAME: {data.display_name ?? "(not set)"}</p>
@@ -418,66 +411,70 @@ const [weight, setWeight] = useState<number | null>(null);
         </section>
 
         {/* EDIT PROFILE MODAL */}
-{showEditProfile && (
+        {showEditProfile && (
+          <Modal onClose={() => setShowEditProfile(false)}>
+            <h2 className="text-lg font-bold mb-4 text-center">Edit Profile</h2>
 
-  <Modal onClose={() => setShowEditProfile(false)}>
-  <h2 className="text-lg font-bold mb-4 text-center">Edit Profile</h2>
+            <input
+              className="block w-full mb-2"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Display name"
+            />
 
-  <input
-    
-    className="block w-full mb-2"
-    value={displayName}
-    onChange={(e) => setDisplayName(e.target.value)}
-    placeholder="Display name"
-  />
+            <select
+              className="block w-full mb-2"
+              value={gender ?? ""}
+              onChange={(e) => setGender(e.target.value)}
+            >
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="unknown">Unknown</option>
+            </select>
 
-  <select
-    className="block w-full mb-2"
-    value={gender ?? ""}
-    onChange={(e) => setGender(e.target.value)}
-  >
-    <option value="">Select Gender</option>
-    <option value="male">Male</option>
-    <option value="female">Female</option>
-    <option value="other">Other</option>
-    <option value="unknown">Unknown</option>
-  </select>
+            <input
+              type="number"
+              className="block w-full mb-2"
+              value={height ?? ""}
+              onChange={(e) =>
+                setHeight(
+                  Number(e.target.value ? Number(e.target.value) : null),
+                )
+              }
+              placeholder="Height (cm)"
+            />
 
-  <input
-    type="number"
-    className="block w-full mb-2"
-    value={height ?? ""}
-    onChange={(e) => setHeight(Number(e.target.value ? Number(e.target.value) : null))}
-    placeholder="Height (cm)"
-  />
+            <input
+              type="number"
+              className="block w-full mb-2"
+              value={weight ?? ""}
+              onChange={(e) =>
+                setWeight(
+                  Number(e.target.value ? Number(e.target.value) : null),
+                )
+              }
+              placeholder="Weight (kg)"
+            />
 
-  <input
-    type="number"
-    className="block w-full mb-2"
-    value={weight ?? ""}
-    onChange={(e) => setWeight(Number(e.target.value ? Number(e.target.value) : null ))}
-    placeholder="Weight (kg)"
-  />
-
-  <div className="flex flex-col sm:flex-row gap-2">
-    <button
-      onClick={saveProfile}
-      disabled={savingProfile}
-      className="button-style-blue w-full disabled:opacity-50"
-    >
-      {savingProfile ? "Saving..." : "Save"}
-    </button>
-    <button
-      onClick={() => setShowEditProfile(false)}
-      className="cancel-button-style w-full"
-    >
-      Cancel
-    </button>
-  </div>
-</Modal>
-
-)}
-
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={saveProfile}
+                disabled={savingProfile}
+                className="button-style-blue w-full disabled:opacity-50"
+              >
+                {savingProfile ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={() => setShowEditProfile(false)}
+                className="cancel-button-style w-full"
+              >
+                Cancel
+              </button>
+            </div>
+          </Modal>
+        )}
 
         {/* CHANGE PASSWORD MODAL */}
         {showChangePassword && (

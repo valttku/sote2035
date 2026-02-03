@@ -33,6 +33,8 @@ export default function CalendarClient() {
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dayStats, setDayStats] = useState<DayStatsResponse | null>(null);
+
+ 
   const [loadingDay, setLoadingDay] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -141,9 +143,9 @@ const handleAddActivity = async (e: React.FormEvent<HTMLFormElement>) => {
     <div className="min-h-screen flex items-center justify-center">
       <div className="p-6 space-y-6 mx-auto w-full max-w-4xl rounded-2xl ui-component-styles">
         <h2 className="text-3xl">Calendar</h2>
-*/
+
         {/* Month navigation */}
-        /*<div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <button onClick={prevMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30">Prev</button>
           <div className="font-semibold">{year}-{pad2(month)}</div>
           <button onClick={nextMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30">Next</button>

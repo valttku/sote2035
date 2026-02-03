@@ -14,7 +14,12 @@ calendarRouter.get("/month", authRequired, async (req, res, next) => {
     const year = Number(req.query.year);
     const month = Number(req.query.month);
 
-    if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
+    if (
+      !Number.isInteger(year) ||
+      !Number.isInteger(month) ||
+      month < 1 ||
+      month > 12
+    ) {
       return res.status(400).json({ error: "Invalid year/month" });
     }
 
@@ -67,7 +72,7 @@ calendarRouter.get("/health-stats", authRequired, async (req, res, next) => {
       WHERE user_id = $1 AND day_date = $2::date
       ORDER BY created_at ASC
       `,
-      [userId, date]
+      [userId, date],
     );
 
     res.json({ date, entries: entries.rows || [] });
@@ -86,9 +91,70 @@ calendarRouter.get("/health-stats", authRequired, async (req, res, next) => {
 calendarRouter.post("/activities", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId as number;
-    const { date, title, type, duration, calories, steps, notes } = req.body;
+    const date = typeof req.query.date === "string" ? req.query.date : "";
 
-    if (!date || !title) return res.status(400).json({ error: "Date and title required" });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ error: "Invalid date. Use YYYY-MM-DD" });
+    }
+
+    // Get Garmin activities
+    const garminActivities = await db.query(
+      `
+      select id, device_name, activity_name, duration_in_seconds, 
+      start_time_in_seconds, start_time_offset_in_seconds,
+      average_heart_rate, active_kilocalories, steps, created_at, 'garmin'::text as source_type
+      from app.user_activities_garmin
+      where user_id = $1 and (to_timestamp(start_time_in_seconds) at time zone 'UTC')::date = $2::date
+      `,
+      [userId, date],
+    );
+
+    // Get manual activities
+    const manualActivities = await db.query(
+      `
+      select id, null::text as device_name, 
+             (data->>'title')::text as activity_name,
+             ((data->>'duration')::int * 60)::int as duration_in_seconds,
+             null::int as start_time_in_seconds,
+             null::int as start_time_offset_in_seconds,
+             null::int as average_heart_rate,
+             ((data->>'calories')::int)::int as active_kilocalories,
+             created_at, 'manual'::text as source_type
+      from app.health_stat_entries
+      where user_id = $1 and day_date = $2::date and kind = 'manual_activity'
+      `,
+      [userId, date],
+    );
+
+    // Get polar activities (to be added)
+
+    // Combine and sort by created_at
+    const allEntries = [
+      ...garminActivities.rows,
+      ...manualActivities.rows,
+    ].sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
+
+    res.json({ date, entries: allEntries });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Add a manual activity entry for a given date and user (adds activity to health_stat_entries)
+// POST /api/v1/calendar/manual-activities
+calendarRouter.post(
+  "/manual-activities",
+  authRequired,
+  async (req, res, next) => {
+    try {
+      const userId = (req as any).userId as number;
+      const { date, title, type, duration, calories, steps} = req.body;
+
+      if (!date || !title)
+        return res.status(400).json({ error: "Date and title required" });
 
     const result = await db.query(
       `
@@ -100,8 +166,8 @@ calendarRouter.post("/activities", authRequired, async (req, res, next) => {
         created_at = now()
       RETURNING TO_CHAR(day_date, 'YYYY-MM-DD') AS day_date, data
       `,
-      [userId, date, { title, type, duration, calories, steps, notes }]
-    );
+        [userId, date, { title, type, duration, calories, steps}],
+      );
 
     res.json({ success: true, entry: result.rows[0] });
 

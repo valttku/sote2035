@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 import { ensureSchema } from "./db/init.js";
-import { dbOk } from "./db/healthCheck.js";
+import { dbOk } from "./db/healthCheckDb.js";
 
 import { homeRouter } from "./routes/home.js";
 import { authRouter } from "./routes/auth.js";
@@ -17,13 +17,13 @@ import { openAIRouter } from "./routes/openAI.js";
 
 import { polarRouter } from "./routes/integrations/polar.js";
 import { garminRouter } from "./routes/integrations/garmin.js";
+import { garminWebhookRouter } from "./routes/webhooks/garminWebhooks.js";
 
 import { errorHandler } from "./middleware/error.js";
 
-
 const app = express();
 
-app.set("trust proxy", 1); 
+app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -43,10 +43,8 @@ app.use(
   }),
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
-
-
 
 // health and status check
 app.get("/health", (_req, res) => res.json({ ok: true }));
@@ -73,6 +71,9 @@ app.use("/api/v1/openai", openAIRouter);
 // providers (polar, garmin etc.)
 app.use("/api/v1/integrations/polar", polarRouter);
 app.use("/api/v1/integrations/garmin", garminRouter);
+
+// webhooks for providers
+app.use("/api/v1/webhooks/garmin", garminWebhookRouter);
 
 // global error handler
 app.use(errorHandler);
