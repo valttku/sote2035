@@ -3,13 +3,17 @@ import { db } from "../../db/db.js";
 import {
   upsertGarminUserMetrics,
   mapGarminUserMetricsToRows,
-} from "../../db/userMetricsGarmin.js";
+} from "../../db/garmin/metrics.js";
 import {
   upsertGarminDailies,
-  mapGarminDailiesToRows
-} from "../../db/userDailiesGarmin.js";
-import { mapGarminHrvToRow, upsertGarminHrv } from "../../db/userHrvGarmin.js";
-
+  mapGarminDailiesToRows,
+} from "../../db/garmin/dailies.js";
+import {
+  mapGarminHrvToRow,
+  upsertGarminHrv,
+} from "../../db/garmin/hrv.js";
+import { mapGarminSkinTempToRow, upsertGarminSkinTemp } from "../../db/garmin/skinTemp.js";
+import { mapGarminSleepToRow, upsertGarminSleep } from "../../db/garmin/sleep.js";
 
 // Router for Garmin webhooks
 
@@ -115,7 +119,9 @@ garminWebhookRouter.post("/hrv", async (req, res) => {
   console.log("Payload:", JSON.stringify(req.body, null, 2));
 
   try {
-    const payload = req.body.hrvSummaries || (Array.isArray(req.body) ? req.body : [req.body]);
+    const payload =
+      req.body.hrvSummaries ||
+      (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {
       const providerUserId = item.userId;
@@ -136,6 +142,69 @@ garminWebhookRouter.post("/hrv", async (req, res) => {
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin HRV webhook failed:", err);
+    res.sendStatus(200);
+  }
+});
+
+
+// POST /api/v1/webhooks/garmin/skin_temp
+garminWebhookRouter.post("/skin_temp", async (req, res) => {
+  console.log("Skin Temp Webhook received at:", new Date().toISOString());
+  console.log("Payload:", JSON.stringify(req.body, null, 2));
+
+  try {
+    const payload =
+      req.body.skinTempSummaries ||
+      (Array.isArray(req.body) ? req.body : [req.body]);
+    for (const item of payload) {
+      const providerUserId = item.userId;
+      if (!providerUserId) continue;
+      const r = await db.query(
+        `SELECT user_id FROM app.user_integrations
+         WHERE provider = 'garmin' AND provider_user_id = $1`,
+        [providerUserId],
+      );
+
+      if (r.rowCount === 0) continue;
+      const row = mapGarminSkinTempToRow(r.rows[0].user_id, item);
+      await upsertGarminSkinTemp(row);
+    }
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Garmin Skin Temp webhook failed:", err);
+    res.sendStatus(200);
+  }
+});
+
+// POST /api/v1/webhooks/garmin/sleeps
+garminWebhookRouter.post("/sleeps", async (req, res) => {
+  console.log("Sleeps Webhook received at:", new Date().toISOString());
+  console.log("Payload:", JSON.stringify(req.body, null, 2));
+
+  try {
+    const payload =
+      req.body.sleepSummaries ||
+      (Array.isArray(req.body) ? req.body : [req.body]);
+
+    for (const item of payload) {
+      const providerUserId = item.userId;
+      if (!providerUserId) continue;
+
+      const r = await db.query(
+        `SELECT user_id FROM app.user_integrations
+         WHERE provider = 'garmin' AND provider_user_id = $1`,
+        [providerUserId],
+      );
+
+      if (r.rowCount === 0) continue;
+
+      const row = mapGarminSleepToRow(r.rows[0].user_id, item);
+      await upsertGarminSleep(row);
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Garmin Sleep webhook failed:", err);
     res.sendStatus(200);
   }
 });

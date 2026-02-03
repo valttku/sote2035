@@ -1,4 +1,4 @@
-import { db } from "./db.js";
+import { db } from "../db.js";
 
 export type GarminUserMetricRow = {
   user_id: number;
@@ -10,7 +10,10 @@ export type GarminUserMetricRow = {
   enhanced?: boolean | null;
 };
 
-export function mapGarminUserMetricsToRows(user_id: number, m: any): GarminUserMetricRow {
+export function mapGarminUserMetricsToRows(
+  user_id: number,
+  m: any,
+): GarminUserMetricRow {
   return {
     user_id,
     day_date: m.calendarDate,
@@ -24,7 +27,7 @@ export function mapGarminUserMetricsToRows(user_id: number, m: any): GarminUserM
 
 export async function upsertGarminUserMetrics(row: GarminUserMetricRow) {
   if (!row) return;
-  
+
   // Insert or update user metrics
   await db.query(
     `INSERT INTO app.user_metrics_garmin
