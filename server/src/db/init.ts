@@ -192,6 +192,21 @@ export async function ensureSchema() {
 
     delete from app.user_sleep_garmin
     where user_id = old.user_id;
+
+    delete from app.user_stress_garmin
+    where user_id = old.user_id;
+
+    delete from app.user_respiration_garmin
+    where user_id = old.user_id;
+
+    delete from app.user_body_comp_garmin
+    where user_id = old.user_id;
+
+    delete from app.user_activities_garmin
+    where user_id = old.user_id;
+
+    delete from app.user_move_iq_garmin
+    where user_id = old.user_id;
     
     return old;
   end;
