@@ -37,10 +37,10 @@ export async function getHealthData(
     const data = row.data ?? {};
 
     if (row.kind === "heart_daily") {
-      if (data.hr_avg != null) metrics["HR avg"] = data.hr_avg;
-      if (data.hrv != null) metrics["HRV"] = data.hrv;
-      if (data.rhr != null) metrics["Resting HR"] = data.rhr;
-      if (data.vo2_max != null) metrics["VO2 max"] = data.vo2_max;
+      if (data.hr_avg != null) metrics["Average heart rate"] = data.hr_avg;
+      if (data.rhr != null) metrics["Resting heart rate"] = data.rhr;
+      if (data.hr_max != null) metrics["Max heart rate"] = data.hr_max;
+      if (data.hr_min != null) metrics["Min heart rate"] = data.hr_min;
     }
 
     if (row.kind === "sleep_daily") {
@@ -51,21 +51,26 @@ export async function getHealthData(
 
     if (row.kind === "activity_daily") {
       if (data.steps != null) metrics["Steps"] = data.steps;
-      if (data.training_load != null)
-        metrics["Training load"] = data.training_load;
+      if (data.distance_meters != null)
+        metrics["Distance (km)"] = +(data.distance_meters / 1000).toFixed(2);
+      if (data.active_kcal != null) metrics["Active kcal"] = data.active_kcal;
+      if (data.total_kcal != null) metrics["Total kcal"] = data.total_kcal;
+      if (data.floors_climbed != null)
+        metrics["Floors climbed"] = data.floors_climbed;
+      if (data.intensity_duration_seconds != null)
+        metrics["Intensity duration (min)"] = +(
+          data.intensity_duration_seconds / 60
+        ).toFixed(1);
     }
 
     if (row.kind === "resp_daily" && data.resp_rate != null) {
-      metrics["Resp rate"] = data.resp_rate;
+      metrics["Respiratory rate"] = data.resp_rate;
     }
 
     if (row.kind === "stress_daily") {
-      if (data.avg_stress_level != null)
-        metrics["Avg stress"] = data.avg_stress_level;
-      if (data.max_stress_level != null)
-        metrics["Max stress"] = data.max_stress_level;
+      if (data.stress_avg != null) metrics["Average stress"] = data.stress_avg;
+      if (data.stress_max != null) metrics["Max stress"] = data.stress_max;
     }
-
     if (row.kind === "skin_temp_daily" && data.skin_temp != null) {
       metrics["Skin temp (°C)"] = data.skin_temp;
     }
@@ -73,4 +78,3 @@ export async function getHealthData(
 
   return metrics;
 }
-
