@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { ActivitiesSection } from "./ActivitiesSection";
 import { useHealthData } from "./useHealthDataGarmin";
+import type { Activity } from "./ActivitiesSection";
 
 type Section = "activities" | "sleep" | "stress" | "cardiovascular" | "dailies";
 
@@ -90,7 +91,7 @@ export default function HealthInsightsClient() {
             ) : (
               <>
                 {activeSection === "activities" && (
-                  <ActivitiesSection activities={healthData?.activities} />
+                  <ActivitiesSection activities={healthData?.activities as Activity[] | undefined} />
                 )}
                 {activeSection === "sleep" && (
                   <div className="p-4">Sleep section coming soon...</div>
