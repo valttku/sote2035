@@ -61,6 +61,13 @@ export default function ManualActivityForm({
           >
             <input
               type="text"
+              name="title"
+              placeholder="Activity title (e.g., Morning Run)"
+              className="w-full border rounded p-1"
+              required
+            />
+            <input
+              type="text"
               name="type"
               placeholder="Type (e.g., Run)"
               className="w-full border rounded p-1"

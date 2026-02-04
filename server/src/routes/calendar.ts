@@ -87,12 +87,24 @@ calendarRouter.get("/activities", authRequired, async (req, res, next) => {
       `
       select id, device_name, activity_name, duration_in_seconds, 
       start_time_in_seconds, start_time_offset_in_seconds,
-      average_heart_rate, active_kilocalories, steps, created_at, 'garmin'::text as source_type
+      average_heart_rate, active_kilocalories, steps, created_at, 'Garmin'::text as source_type
       from app.user_activities_garmin
       where user_id = $1 and (to_timestamp(start_time_in_seconds) at time zone 'UTC')::date = $2::date
       `,
       [userId, date],
     );
+
+    // Get Garmin moveIQ events (add later)
+    //const garminMoveIQEvents = await db.query(
+    //   `
+    //  select id, device_name, activity_type as activity_name, duration_in_seconds,
+    //  start_time_in_seconds, offset_in_seconds as start_time_offset_in_seconds,
+    //  created_at, 'Garmin'::text as source_type
+    //  from app.user_move_iq_garmin
+    //  where user_id = $1 and (to_timestamp(start_time_in_seconds) at time zone 'UTC')::date = $2::date
+    //  `,
+    //  [userId, date],
+    //  );
 
     // Get polar activities (to be added)
 
