@@ -1,4 +1,4 @@
-type Activity = {
+export type Activity = {
   id: string;
   activity_name: string;
   duration_in_seconds: number;
