@@ -604,7 +604,7 @@ export async function createGarminTables() {
   // Create triggers to auto-generate health_stat_entries when Garmin data is inserted/updated
   // These triggers ensure health stats are always in sync with the raw Garmin data
 
-  // Trigger for dailies: generates heart_daily and activity_daily
+  // Trigger for dailies: generates heart_daily, activity_daily, stress_daily
   await db.query(`
     create or replace function app.update_health_stats_on_dailies()
     returns trigger as $$
@@ -613,12 +613,13 @@ export async function createGarminTables() {
       select
         new.user_id,
         new.day_date,
-        new.source,
+        'garmin',
         'heart_daily',
         jsonb_build_object(
           'hr_avg', new.avg_heart_rate,
-          'rhr', new.resting_heart_rate,
-          'vo2_max', (select vo2_max from app.user_metrics_garmin m where m.user_id = new.user_id and m.day_date = new.day_date)
+          'hr_min', new.min_heart_rate,
+          'hr_max', new.max_heart_rate,
+          'rhr', new.resting_heart_rate
         )
       on conflict (user_id, day_date, kind)
       do update set data = EXCLUDED.data, updated_at = now();
@@ -627,11 +628,28 @@ export async function createGarminTables() {
       select
         new.user_id,
         new.day_date,
-        new.source,
+        'garmin',
         'activity_daily',
         jsonb_build_object(
           'steps', new.steps,
-          'training_load', null
+          'distance_meters', new.distance_in_meters,
+          'active_kcal', new.active_kilocalories,
+          'total_kcal', new.active_kilocalories + new.bmr_kilocalories,
+          'intensity_duration_seconds', new.moderate_intensity_duration_in_seconds + new.vigorous_intensity_duration_in_seconds,
+          'floors_climbed', new.floors_climbed
+        )
+      on conflict (user_id, day_date, kind)
+      do update set data = EXCLUDED.data, updated_at = now();
+
+      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
+      select
+        new.user_id,
+        new.day_date,
+        'garmin',
+        'stress_daily',
+        jsonb_build_object(
+          'stress_avg', new.avg_stress_level,
+          'stress_max', new.max_stress_level
         )
       on conflict (user_id, day_date, kind)
       do update set data = EXCLUDED.data, updated_at = now();
@@ -646,106 +664,27 @@ export async function createGarminTables() {
     for each row execute function app.update_health_stats_on_dailies();
   `);
 
-  // Trigger for HRV: updates heart_daily with HRV value
-  await db.query(`
-    create or replace function app.update_health_stats_on_hrv()
-    returns trigger as $$
-    begin
-      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      select
-        new.user_id,
-        new.day_date,
-        new.source,
-        'heart_daily',
-        jsonb_build_object(
-          'hrv', new.last_night_avg,
-          'hr_avg', (select avg_heart_rate from app.user_dailies_garmin d where d.user_id = new.user_id and d.day_date = new.day_date),
-          'rhr', (select resting_heart_rate from app.user_dailies_garmin d where d.user_id = new.user_id and d.day_date = new.day_date),
-          'vo2_max', (select vo2_max from app.user_metrics_garmin m where m.user_id = new.user_id and m.day_date = new.day_date)
-        )
-      on conflict (user_id, day_date, kind)
-      do update set data = EXCLUDED.data, updated_at = now();
-
-      return new;
-    end;
-    $$ language plpgsql;
-
-    drop trigger if exists trg_update_health_stats_on_hrv on app.user_hrv_garmin;
-    create trigger trg_update_health_stats_on_hrv
-    after insert or update on app.user_hrv_garmin
-    for each row execute function app.update_health_stats_on_hrv();
-  `);
-
-  // Trigger for sleep: generates sleep_daily
-  await db.query(`
-    create or replace function app.update_health_stats_on_sleep()
-    returns trigger as $$
-    begin
-      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      select
-        new.user_id,
-        new.day_date,
-        new.source,
-        'sleep_daily',
-        jsonb_build_object(
-          'duration_min', round(new.duration_in_seconds / 60.0),
-          'score', new.overall_sleep_score
-        )
-      on conflict (user_id, day_date, kind)
-      do update set data = EXCLUDED.data, updated_at = now();
-
-      return new;
-    end;
-    $$ language plpgsql;
-
-    drop trigger if exists trg_update_health_stats_on_sleep on app.user_sleep_garmin;
-    create trigger trg_update_health_stats_on_sleep
-    after insert or update on app.user_sleep_garmin
-    for each row execute function app.update_health_stats_on_sleep();
-  `);
-
-  // Trigger for stress: generates stress_daily
-  await db.query(`
-    create or replace function app.update_health_stats_on_stress()
-    returns trigger as $$
-    begin
-      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      select
-        new.user_id,
-        new.day_date,
-        new.source,
-        'stress_daily',
-        jsonb_build_object(
-          'avg_stress_level', new.average_stress_level,
-          'max_stress_level', new.max_stress_level
-        )
-      on conflict (user_id, day_date, kind)
-      do update set data = EXCLUDED.data, updated_at = now();
-
-      return new;
-    end;
-    $$ language plpgsql;
-
-    drop trigger if exists trg_update_health_stats_on_stress on app.user_stress_garmin;
-    create trigger trg_update_health_stats_on_stress
-    after insert or update on app.user_stress_garmin
-    for each row execute function app.update_health_stats_on_stress();
-  `);
-
   // Trigger for respiration: generates resp_daily
   await db.query(`
     create or replace function app.update_health_stats_on_respiration()
     returns trigger as $$
+    declare
+      avg_resp_rate double precision;
     begin
+      -- Calculate average from the JSONB breath values
+      select avg(value::double precision) into avg_resp_rate
+      from jsonb_each_text(new.time_offset_epoch_to_breaths);
+
       insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      select
+      values (
         new.user_id,
         new.day_date,
-        new.source,
+        'garmin',
         'resp_daily',
         jsonb_build_object(
-          'resp_rate', new.avg_waking_respiration_value
+          'resp_rate', round(avg_resp_rate::numeric, 2)
         )
+      )
       on conflict (user_id, day_date, kind)
       do update set data = EXCLUDED.data, updated_at = now();
 
@@ -768,10 +707,10 @@ export async function createGarminTables() {
       select
         new.user_id,
         new.day_date,
-        new.source,
+        'garmin',
         'skin_temp_daily',
         jsonb_build_object(
-          'skin_temp', new.last_skin_temp
+          'skin_temp', new.avg_deviation_celsius
         )
       on conflict (user_id, day_date, kind)
       do update set data = EXCLUDED.data, updated_at = now();
@@ -786,22 +725,23 @@ export async function createGarminTables() {
     for each row execute function app.update_health_stats_on_skin_temp();
   `);
 
-  // Trigger for metrics: updates heart_daily with vo2_max
+  // Trigger for sleep: generates sleep_daily
   await db.query(`
-    create or replace function app.update_health_stats_on_metrics()
+    create or replace function app.update_health_stats_on_sleep()
     returns trigger as $$
     begin
       insert into app.health_stat_entries (user_id, day_date, source, kind, data)
       select
         new.user_id,
         new.day_date,
-        new.source,
-        'heart_daily',
+        'garmin',
+        'sleep_daily',
         jsonb_build_object(
-          'vo2_max', new.vo2_max,
-          'hr_avg', (select avg_heart_rate from app.user_dailies_garmin d where d.user_id = new.user_id and d.day_date = new.day_date),
-          'rhr', (select resting_heart_rate from app.user_dailies_garmin d where d.user_id = new.user_id and d.day_date = new.day_date),
-          'hrv', (select last_night_avg from app.user_hrv_garmin h where h.user_id = new.user_id and h.day_date = new.day_date)
+          'duration_min', (new.duration_in_seconds / 60)::int,
+          'score', (new.overall_sleep_score->>'value')::int,
+          'deep_sleep_min', (new.deep_sleep_duration_in_seconds / 60)::int,
+          'light_sleep_min', (new.light_sleep_duration_in_seconds / 60)::int,
+          'rem_sleep_min', (new.rem_sleep_in_seconds / 60)::int
         )
       on conflict (user_id, day_date, kind)
       do update set data = EXCLUDED.data, updated_at = now();
@@ -810,10 +750,10 @@ export async function createGarminTables() {
     end;
     $$ language plpgsql;
 
-    drop trigger if exists trg_update_health_stats_on_metrics on app.user_metrics_garmin;
-    create trigger trg_update_health_stats_on_metrics
-    after insert or update on app.user_metrics_garmin
-    for each row execute function app.update_health_stats_on_metrics();
+    drop trigger if exists trg_update_health_stats_on_sleep on app.user_sleep_garmin;
+    create trigger trg_update_health_stats_on_sleep
+    after insert or update on app.user_sleep_garmin
+    for each row execute function app.update_health_stats_on_sleep();
   `);
 
   // Cleanup users garmin data when a user integration is deleted

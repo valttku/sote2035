@@ -5,6 +5,7 @@ import type { BodyPartId } from "./DigitalTwinClient";
 type Props = {
   selected: BodyPartId;
   onClose: () => void;
+  selectedDate?: string;
 };
 
 const TITLE: Record<BodyPartId, string> = {
@@ -17,7 +18,7 @@ const TITLE: Record<BodyPartId, string> = {
 /*Get health data from database */
 type HealthMetrics = Record<string, string | number>;
 
-export default function HealthClient({ selected, onClose }: Props) {
+export default function HealthClient({ selected, onClose, selectedDate }: Props) {
   const [metrics, setMetrics] = React.useState<HealthMetrics>({});
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -31,9 +32,7 @@ export default function HealthClient({ selected, onClose }: Props) {
       setMetrics({});
 
       try {
-        //const date = "2026-01-19"; // to test with a fixed date
-
-        const date = new Date().toISOString().split("T")[0];
+        const date = selectedDate || new Date().toISOString().split("T")[0];
 
         const res = await fetch(
           `/api/v1/digitalTwin?date=${date}&part=${selected}`,
@@ -71,7 +70,7 @@ export default function HealthClient({ selected, onClose }: Props) {
 
     fetchHealthMetrics();
     return () => controller.abort();
-  }, [selected]);
+  }, [selected, selectedDate]);
 
   return (
     <div className="panel-animation ui-component-styles p-4 pt-2 rounded-2xl">

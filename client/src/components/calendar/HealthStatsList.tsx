@@ -16,8 +16,6 @@ function labelForKind(kind: string) {
       return "Lungs";
     case "skin_temp_daily":
       return "Lungs";
-    case "spo2_daily":
-      return "Lungs";
     case "manual_activity":
       return "Manual Activity";
     default:
