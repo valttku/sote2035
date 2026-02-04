@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 
 // Custom hook to fetch garmin health data for a given date
 export function useHealthData(date?: string) {
-  const [healthData, setHealthData] = useState<any>(null);
+  const [healthData, setHealthData] = useState<Record<string, unknown> | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
