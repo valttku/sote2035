@@ -19,7 +19,7 @@ export default function proxy(request: NextRequest) {
   const session = request.cookies.get("session");
 
   // routes that do NOT require authentication
-  const publicRoutes = ["/login", "/forgot-password", "/reset-password"];
+  const publicRoutes = ["/login", "/forgot-password", "/reset-password"];  
 
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route),
