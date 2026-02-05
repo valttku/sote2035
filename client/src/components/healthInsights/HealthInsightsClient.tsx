@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ActivitiesSection } from "./ActivitiesSection";
 import { useHealthData } from "./useHealthDataGarmin";
 import type { Activity } from "./ActivitiesSection";
@@ -11,6 +11,15 @@ type Section =
   | "stress"
   | "cardiovascular"
   | "bodyComposition";
+
+type HealthDataToAnalyze = {
+  activities?: Activity[];
+  sleep?: unknown;
+  stress?: unknown;
+  cardiovascular?: unknown;
+  dailies?: unknown;
+  bodyComposition?: unknown;
+};
 
 export default function HealthInsightsClient() {
   const [activeSection, setActiveSection] = useState<Section>("activities");
@@ -32,15 +41,15 @@ export default function HealthInsightsClient() {
 
     try {
       // If specific activities are selected, analyze only those; otherwise analyze all
-      let dataToAnalyze: any;
+      let dataToAnalyze: HealthDataToAnalyze;
 
       if (selectedActivityIds.size > 0 && healthData?.activities) {
         const filteredActivities = (healthData.activities as Activity[]).filter(
-          (activity: Activity) => selectedActivityIds.has(activity.id),
+          (activity) => selectedActivityIds.has(activity.id),
         );
         dataToAnalyze = { activities: filteredActivities };
       } else {
-        dataToAnalyze = healthData;
+        dataToAnalyze = healthData as HealthDataToAnalyze;
       }
 
       const response = await fetch(`/api/v1/openai`, {
