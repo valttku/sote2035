@@ -2,7 +2,6 @@
 import { useState } from "react";
 import HealthStatsPanel from "./healthStatsPanel";
 
-
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
 const BODY_PARTS: Array<{
@@ -25,12 +24,11 @@ export default function DigitalTwinClient() {
   const avatarWidth = isFemale ? 208 : 244;
 
   return (
-    <div className="min-h-screen w-full min-w-0 overflow-x-hidden pt-10">
-      <div className="flex items-start justify-between min-w-0 flex-col md:flex-row mr-[20%]">
-        <h1 className="text-5xl ml-10 shrink-0">Today</h1>
-
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden pt-10 ">
+      <h1 className="text-5xl ml-10 mb-10 shrink-0 sticky">Today</h1>
+      <div className="flex flex-row items-center justify-center md:gap-[20%] min-w-full">
         {/* Avatar + dots */}
-        <div className="relative w-[230px] mt-10 md:mt-45 ml-[10%] md:ml-[5%] shrink-0">
+        <div className="relative w-[230px] mt-70 md:mt-20 ml-[10%] md:ml-[5%] shrink-0">
           <img
             src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
             alt="Digital twin"
@@ -39,7 +37,6 @@ export default function DigitalTwinClient() {
               height: "auto",
               display: "block",
             }}
-           
           />
 
           {BODY_PARTS.map(({ id, top, left }) => (
@@ -65,7 +62,7 @@ export default function DigitalTwinClient() {
         </div>
 
         {/* Guide + info-panel */}
-        <div className="w-full max-w-[320px] flex-shrink-0 mt-5 md:mt-30 p-5">
+        <div className="w-full max-w-[320px] flex-shrink-0 md:mb-50 p-5 mt-10">
           <p className="mb-10 ml-2">
             Select a body part by clicking on a white dot on the body
           </p>
