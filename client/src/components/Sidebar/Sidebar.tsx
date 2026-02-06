@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import DarkModeToggle from "../DarkModeToggle";
@@ -28,14 +28,14 @@ export default function Sidebar() {
   }, []);
 
   return (
-     <>
+    <>
       {/*  MOBILE MENU BUTTON */}
       <button
         className="
           md:hidden
           fixed
           top-4
-          left-4
+          right-4
           z-50
           ui-component-styles
           px-3
@@ -46,51 +46,66 @@ export default function Sidebar() {
       >
         ☰
       </button>
-
       {/* DARK OVERLAY when sidebar opens */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          className="fixed inset-0 backdrop-blur-xl z-40 md:hidden"
           onClick={() => setOpen(false)}
         />
       )}
 
       {/* SIDEBAR */}
+      <aside
+        className={`
+        ui-component-styles
+        fixed top-0 left-0 h-full w-64 p-4 flex flex-col shrink-0 rounded-r-3xl
+        bg-white dark:bg-gray-900
+        transform transition-transform duration-300
+        md:translate-x-0
+        ${open ? "translate-x-0" : "-translate-x-full"}
+        z-50
+     `}
+      >
+        <div>
+          <h2 className="text-3xl mb-4">Digital Twin</h2>
+          <p className="text-lg">{displayName}</p>{" "}
+          {/* display name will update after fetch */}
+          <nav>
+            <ul className="flex flex-col gap-4 mt-6">
+              <hr />
+              <li>
+                <Link href="/" onClick={() => setOpen(false)}>
+                  Home
+                </Link>
+              </li>
+              <hr />
+              <li>
+                <Link href="/calendar" onClick={() => setOpen(false)}>
+                  Calendar
+                </Link>
+              </li>
+              <hr />
+              <li>
+                <Link href="/settings" onClick={() => setOpen(false)}>
+                  Settings
+                </Link>
+              </li>
+              <hr />
+              <li>
+                <Link href="/health-insights" onClick={() => setOpen(false)}>
+                  Health Insights
+                </Link>
+              </li>
+              <hr />
+            </ul>
+          </nav>
+        </div>
 
-    
-    <aside className="ui-component-styles fixed left-0 top-0 h-full w-64 p-4 flex flex-col shrink-0 rounded-r-3xl">
-      <div>
-        <h2 className="text-3xl mb-4">Digital Twin</h2>
-        <p className="text-lg">{displayName}</p>{" "}
-        {/* display name will update after fetch */}
-        <nav>
-          <ul className="flex flex-col gap-4 mt-6">
-            <hr />
-            <li>
-              <Link href="/">Home</Link>
-            </li>
-            <hr />
-            <li>
-              <Link href="/calendar">Calendar</Link>
-            </li>
-            <hr />
-            <li>
-              <Link href="/settings">Settings</Link>
-            </li>
-            <hr />
-            <li>
-              <Link href="/health-insights">Health Insights</Link>
-            </li>
-            <hr />
-          </ul>
-        </nav>
-      </div>
-
-      <div className="mt-auto flex flex-col gap-2">
-        <DarkModeToggle />
-        <LogoutButton />
-      </div>
-    </aside>
+        <div className="mt-auto flex flex-col gap-2">
+          <DarkModeToggle />
+          <LogoutButton />
+        </div>
+      </aside>
     </>
   );
 }
