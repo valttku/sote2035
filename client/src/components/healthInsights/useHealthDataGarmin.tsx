@@ -1,10 +1,26 @@
 import { useState, useEffect } from "react";
+import { Activity } from "./ActivitiesSection";
+import { Dailies } from "./DailiesSection";
 
-// Custom hook to fetch garmin health data for a given date
+export type UserProfile = {
+  id: number;
+  height: number;
+  weight: number;
+  gender: string;
+};
+
+export type HealthData = {
+  activities?: Activity[];
+  dailies?: Dailies[];
+  sleep?: unknown;
+  stress?: unknown;
+  heartRate?: unknown;
+  bodyComposition?: unknown;
+  profile?: UserProfile;
+};
+
 export function useHealthData(date?: string) {
-  const [healthData, setHealthData] = useState<Record<string, unknown> | null>(
-    null,
-  );
+  const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,9 +41,10 @@ export function useHealthData(date?: string) {
         if (!response.ok) {
           setError(`${response.status} ${response.statusText}`);
           setHealthData(null);
+          return;
         }
 
-        const data = await response.json();
+        const data: HealthData = await response.json();
         setHealthData(data);
       } catch (err) {
         console.error("Failed to load health data:", err);

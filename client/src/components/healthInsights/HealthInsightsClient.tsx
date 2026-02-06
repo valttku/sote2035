@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import { ActivitiesSection } from "./ActivitiesSection";
+import { ActivitiesSection, Activity } from "./ActivitiesSection";
+import { DailiesSection, Dailies } from "./DailiesSection";
 import { useHealthData } from "./useHealthDataGarmin";
-import type { Activity } from "./ActivitiesSection";
 
 type Section =
   | "dailies"
@@ -14,11 +14,12 @@ type Section =
 
 type HealthDataToAnalyze = {
   activities?: Activity[];
-  sleep?: unknown;
-  stress?: unknown;
-  cardiovascular?: unknown;
-  dailies?: unknown;
-  bodyComposition?: unknown;
+  dailies?: Dailies;
+  profile?: {
+    height: number;
+    weight: number;
+    gender: string;
+  };
 };
 
 export default function HealthInsightsClient() {
@@ -40,27 +41,48 @@ export default function HealthInsightsClient() {
     setShowResult(false);
 
     try {
-      // If specific activities are selected, analyze only those; otherwise analyze all
-      let dataToAnalyze: HealthDataToAnalyze;
+      let dataToAnalyze: HealthDataToAnalyze = {};
 
-      if (selectedActivityIds.size > 0 && healthData?.activities) {
-        const filteredActivities = (healthData.activities as Activity[]).filter(
-          (activity) => selectedActivityIds.has(activity.id),
-        );
-        dataToAnalyze = { activities: filteredActivities };
-      } else {
-        dataToAnalyze = healthData as HealthDataToAnalyze;
+      // Include profile
+      if (healthData?.profile) {
+        dataToAnalyze.profile = {
+          height: healthData.profile.height,
+          weight: healthData.profile.weight,
+          gender: healthData.profile.gender,
+        };
       }
+
+      if (activeSection === "activities") {
+        if (selectedActivityIds.size > 0 && healthData?.activities) {
+          dataToAnalyze.activities = healthData.activities.filter((activity) =>
+            selectedActivityIds.has(activity.id),
+          );
+        } else {
+          dataToAnalyze.activities = healthData?.activities;
+        }
+      }
+
+      if (activeSection === "dailies") {
+        dataToAnalyze.dailies = healthData?.dailies?.[0];
+      }
+
+      console.log("Data sent to AI:", dataToAnalyze);
+
+      const isToday = selectedDate === new Date().toISOString().split("T")[0];
 
       const response = await fetch(`/api/v1/openai`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: `Analyze my health data for ${selectedDate}:\n${JSON.stringify(
+          prompt: `Analyze my ${activeSection} data for ${selectedDate}:\n${JSON.stringify(
             dataToAnalyze,
             null,
             2,
-          )}`,
+          )}\nProvide insights and suggestions based on the data. 
+            ${isToday ? "Speak to me in present tense." : "Speak to me in past tense."}
+            If the day is not finished yet, provide insights based on the 
+            available data and mention that the analysis is preliminary.
+            Don't list things. Don't greet. Max 10 sentences.`,
         }),
       });
 
@@ -86,11 +108,11 @@ export default function HealthInsightsClient() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="ui-component-styles p-6 w-full max-w-5xl h-[80vh] flex flex-col overflow-hidden">
+      <div className="ui-component-styles p-6 w-full max-w-6xl h-[80vh] flex flex-col overflow-hidden">
         <h1 className="text-4xl m-2">Health Insights</h1>
 
         {/* Navigation */}
-        <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center">
+        <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 pt-3">
           <div className="flex flex-wrap gap-2">
             {sections.map((section) => (
               <button
@@ -101,8 +123,8 @@ export default function HealthInsightsClient() {
                 disabled={section.disabled}
                 className={`px-4 py-2 rounded-full text-sm font-medium ${
                   activeSection === section.id
-                    ? "bg-[#1aa5b0] text-white"
-                    : "bg-[#2a2a60] text-gray-300 hover:bg-[#1e1c4f]/60 hover:text-white"
+                    ? "bg-[#31c2d5] text-white"
+                    : "bg-[#1e1c4f]/40 text-gray-300 hover:bg-[#2a2a60]/80 hover:text-white"
                 }`}
               >
                 {section.label}
@@ -117,7 +139,11 @@ export default function HealthInsightsClient() {
               id="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+              className="block w-full rounded-md 
+              border-gray-300 shadow-sm 
+              focus:border-blue-500 
+              focus:ring-blue-500 
+              sm:text-sm p-2 border"
             />
           </div>
         </div>
@@ -133,7 +159,7 @@ export default function HealthInsightsClient() {
               ) : (
                 <>
                   {activeSection === "dailies" && (
-                    <div className="p-4">Dailies section coming soon...</div>
+                    <DailiesSection dailies={healthData?.dailies?.[0]} />
                   )}
                   {activeSection === "activities" && (
                     <ActivitiesSection
@@ -159,8 +185,8 @@ export default function HealthInsightsClient() {
 
             {/* AI Panel */}
             <div className="flex-[0_0_40%] min-w-[200px] flex flex-col overflow-hidden mt-4 md:mt-0">
-              <div className="bg-[#171741]/20 border-2 border-[#1aa5b0] rounded-lg flex flex-col h-full">
-                <p className="sticky top-0 z-10 text-lg p-1 pl-5 bg-[#1d9dad]">
+              <div className="bg-[#1e1c4f]/20 border-2 border-[#31c2d5] rounded-lg flex flex-col h-full">
+                <p className="sticky top-0 z-10 text-lg p-1 pl-5 bg-[#31c2d5]">
                   AI Analysis
                 </p>
                 <div className="flex-1 overflow-y-auto p-5">
@@ -168,7 +194,8 @@ export default function HealthInsightsClient() {
                     <p className="whitespace-pre-wrap text-sm">{result}</p>
                   ) : (
                     <p className="italic text-sm">
-                      Select activities to analyze...
+                      Select data and click "Analyze" to get insights and
+                      suggestions from the AI.
                     </p>
                   )}
                 </div>
@@ -178,7 +205,7 @@ export default function HealthInsightsClient() {
 
           {/* Analyze Button */}
           <button
-            className="button-style-blue w-full md:w-[200px] justify-center mt-auto"
+            className="button-style-blue w-full md:w-[200px] justify-center mt-3"
             onClick={() => {
               if (showResult) setShowResult(false);
               else handleAnalyzeClick();
@@ -190,7 +217,7 @@ export default function HealthInsightsClient() {
               : showResult
                 ? "Clear Analysis"
                 : selectedActivityIds.size > 0
-                  ? `Analyze ${selectedActivityIds.size} activity(ies)`
+                  ? `Analyze ${activeSection}`
                   : "Analyze all data"}
           </button>
         </div>
