@@ -89,7 +89,7 @@ export default function RegisterForm({
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-2">
-        <h2 className="text-3xl mb-8 text-center">REGISTER</h2>
+        <h2 className="text-2xl sm:text-3xl mb-8 text-center">REGISTER</h2>
 
         {/* Email */}
         <label htmlFor="reg-email">Email</label>

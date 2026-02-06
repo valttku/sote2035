@@ -12,8 +12,14 @@ export default function Modal({ children, onClose }: ModalProps) {
       <div
         className="
           ui-component-styles
-          p-6 rounded-2xl
+
+          mx-4  //prevent edge touching on mobile
+
+          sm:mx-0   //desktop resets margin
+          
+          p-4 sm:p-6    //smaller padding on phones
           w-full max-w-md
+          rounded-2xl
           max-h-[90vh] overflow-y-auto
         "
 

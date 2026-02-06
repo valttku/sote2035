@@ -34,10 +34,10 @@ export default function LoginForm({
     await onSubmit(email, password);
     setLoading(false);
   }
-
+//add here today
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
-      <h1 className="text-3xl mb-8 text-center">LOGIN</h1>
+      <h1 className="text-2xl sm:text-3xl mb-8 text-center">LOGIN</h1>
 
       <label htmlFor="login-email">
         Email
@@ -51,7 +51,7 @@ export default function LoginForm({
         spellCheck={false}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="block w-full bg-[var (--input-bg)] text[var(--input-text)"
+        className="block w-full bg-[var (--input-bg)] text[var(--input-text)]"
         required
         aria-invalid={!!emailError}
       />
