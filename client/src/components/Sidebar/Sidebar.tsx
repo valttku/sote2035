@@ -6,6 +6,7 @@ import LogoutButton from "./LogoutButton";
 
 export default function Sidebar() {
   const [displayName, setDisplayName] = useState("");
+  const [open, setOpen] = useState(false); //controls mobile sidebar
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -27,6 +28,36 @@ export default function Sidebar() {
   }, []);
 
   return (
+     <>
+      {/*  MOBILE MENU BUTTON */}
+      <button
+        className="
+          md:hidden
+          fixed
+          top-4
+          left-4
+          z-50
+          ui-component-styles
+          px-3
+          py-2
+          rounded-xl
+        "
+        onClick={() => setOpen(!open)}
+      >
+        ☰
+      </button>
+
+      {/* DARK OVERLAY when sidebar opens */}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* SIDEBAR */}
+
+    
     <aside className="ui-component-styles fixed left-0 top-0 h-full w-64 p-4 flex flex-col shrink-0 rounded-r-3xl">
       <div>
         <h2 className="text-3xl mb-4">Digital Twin</h2>
@@ -60,5 +91,6 @@ export default function Sidebar() {
         <LogoutButton />
       </div>
     </aside>
+    </>
   );
 }

@@ -148,3 +148,10 @@ h2 {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
+
+/*  Prevent horizontal scrolling on mobile */  
+html,
+body {
+  overflow-x: hidden;
+}
+

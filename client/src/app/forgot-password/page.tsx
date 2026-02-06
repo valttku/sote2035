@@ -43,27 +43,34 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="flex items-center justify-center min-h-screen">
-      {/*Modal for forgotten password*/}
+    <main className="flex items-center justify-center min-h-screen p-4 md:p-8">
+      {/* RESPONSIVE: Added padding p-4 mobile, md:p-8 desktop */}
+
+      {/* Modal for forgotten password */}
       <Modal onClose={() => closeModal()}>
         {done ? (
-          // Success message displayed after email is sent
           <div className="text-center">
-            <h1 className="text-xl mb-2">Check your email</h1>
+            <h1 className="text-xl sm:text-2xl mb-2">
+              {/* RESPONSIVE: text-xl mobile, md:text-2xl desktop */}
+              Check your email
+            </h1>
             <p className="mb-4">
               If an account exists for this email, a password reset link has
               been sent.
             </p>
-            <a href="/login" className="text-sm text-[#c3dafe]/80 underline">
+            <a href="/login" className="text-sm md:text-base text-[#c3dafe]/80 underline">
+            
+              {/* RESPONSIVE: text-sm mobile, md:text-base desktop */}
               Back to login
             </a>
           </div>
         ) : (
-          // Form for entering email to request password reset
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h1 className="text-2xl text-center mb-4">Forgot password?</h1>
+            <h1 className="text-2xl md:text-3xl text-center mb-4">
+              {/* RESPONSIVE: text-2xl mobile, md:text-3xl desktop */}
+              Forgot password?
+            </h1>
 
-            {/* Email label and input field */}
             <label htmlFor="email" className="block text-left">
               Email
             </label>
@@ -73,19 +80,19 @@ export default function ForgotPasswordPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded md:p-3"
+              /* RESPONSIVE: p-2 mobile, md:p-3 desktop for larger input */
             />
 
-            {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
-              className="button-style-blue w-full disabled:opacity-50"
+              className="button-style-blue w-full disabled:opacity-50 md:px-6 md:py-3"
+              /* RESPONSIVE: increase padding on desktop for bigger click area */
             >
               {loading ? "Sending..." : "Send password reset link to email"}
             </button>
 
-            {/* Error message displayed if request fails */}
             {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
           </form>
         )}
