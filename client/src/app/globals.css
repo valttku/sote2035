@@ -10,8 +10,6 @@
     ),
     linear-gradient(180deg, #171741 0%, #705abf 50%, #171741 100%);
   --foreground: #ededed;
-  --ui-bg: rgba(40, 37, 84, 0.5);
-  --ui-border: rgba(179, 196, 243, 0.8);
   --button-blue-bg: #31c2d5;
   --button-blue-hover: #22b1c4;
   --cancel-button-bg: #e30f3d;
@@ -20,8 +18,6 @@
 
 html.dark {
   --foreground: #bbc3ed;
-  --ui-bg: rgba(23, 23, 60, 0.6);
-  --ui-border: rgba(120, 130, 180, 0.8);
 }
 
 /* Dark mode gradient */
@@ -108,12 +104,12 @@ button {
 
 /* UI components */
 .ui-component-styles {
-  background: rgba(255, 255, 255, 0.064);
+  background: rgba(255, 255, 255, 0.09);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.138);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  box-shadow: 0 8px 32px 0 rgba(26, 28, 62, 0.5);
 }
 
 /* Inputs, textareas, selects */
