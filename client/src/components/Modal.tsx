@@ -8,7 +8,8 @@ type ModalProps = {
 
 export default function Modal({ children, onClose }: ModalProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-indigo-950/50 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center bg-indigo-950/50 backdrop-blur-xl
+">
       <div
         // Responsive UI added
         className="

@@ -8,12 +8,12 @@
       rgba(90, 114, 191, 0.35),
       transparent 60%
     ),
-    linear-gradient(180deg, #171741 0%, #5a72bf 50%, #171741 100%);
+    linear-gradient(180deg, #171741 0%, #705abf 50%, #171741 100%);
   --foreground: #ededed;
   --ui-bg: rgba(40, 37, 84, 0.5);
   --ui-border: rgba(179, 196, 243, 0.8);
-  --button-blue-bg: #45c4cd;
-  --button-blue-hover: #1d9dad;
+  --button-blue-bg: #31c2d5;
+  --button-blue-hover: #22b1c4;
   --cancel-button-bg: #e30f3d;
   --cancel-button-hover: #c5002a;
 }
@@ -32,7 +32,7 @@ html.dark body {
       rgba(90, 114, 191, 0.35),
       transparent 60%
     ),
-    linear-gradient(180deg, #0a0a1f 0%, #3f4a8c 50%, #0a0a1f 100%);
+    linear-gradient(180deg, #0a0a1f 0%, #4f3ba0 50%, #0a0a1f 100%);
   --button-blue-bg: #20a0b0;
   --button-blue-hover: #118892;
   --cancel-button-bg: #b41f3f;
@@ -75,10 +75,17 @@ button {
   color: white;
   padding: 10px;
   border-radius: 6px;
+  box-shadow: 0 0 5px var(--button-blue-bg);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
 }
 
 .button-style-blue:hover {
-  background-color: var(--button-blue-hover);
+  box-shadow:
+    0 0 10px var(--button-blue-bg),
+    0 0 10px var(--button-blue-bg);
+  transform: scale(1.01);
 }
 
 .cancel-button-style {
@@ -86,20 +93,27 @@ button {
   color: white;
   padding: 10px;
   border-radius: 6px;
+  box-shadow: 0 0 5px var(--cancel-button-bg);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
 }
 
 .cancel-button-style:hover {
-  background-color: var(--cancel-button-hover);
+  box-shadow:
+    0 0 10px var(--cancel-button-bg),
+    0 0 10px var(--cancel-button-bg);
+  transform: scale(1.01);
 }
 
 /* UI components */
 .ui-component-styles {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  background-color: var(--ui-bg);
-  color: var(--foreground);
-  border: 1px solid var(--ui-border);
-  border-radius: 1rem;
-
+  background: rgba(255, 255, 255, 0.064);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.138);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 /* Inputs, textareas, selects */
@@ -149,9 +163,8 @@ h2 {
   margin-bottom: 1rem;
 }
 
-/*  Prevent horizontal scrolling on mobile */  
+/*  Prevent horizontal scrolling on mobile */
 html,
 body {
   overflow-x: hidden;
 }
-
