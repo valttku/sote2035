@@ -68,8 +68,6 @@ export default function HealthInsightsClient() {
 
       console.log("Data sent to AI:", dataToAnalyze);
 
-      const isToday = selectedDate === new Date().toISOString().split("T")[0];
-
       const response = await fetch(`/api/v1/openai`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -190,8 +188,8 @@ export default function HealthInsightsClient() {
                     <p className="whitespace-pre-wrap text-sm">{result}</p>
                   ) : (
                     <p className="italic text-sm">
-                      Select data and click "Analyze" to get insights and
-                      suggestions from the AI.
+                      Select data and click &quot;Analyze&quot; to get insights
+                      and suggestions from the AI.
                     </p>
                   )}
                 </div>
