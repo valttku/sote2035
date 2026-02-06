@@ -78,7 +78,7 @@ export default function HealthInsightsClient() {
             dataToAnalyze,
             null,
             2,
-          )}\nProvide insights and suggestions based on the data for me. Max 10 sentences.`,
+          )}'Provide insights and suggestions based on the data for me. Max 10 sentences.`,
         }),
       });
 
