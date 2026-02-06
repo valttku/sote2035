@@ -28,7 +28,7 @@ html.dark body {
       rgba(90, 114, 191, 0.35),
       transparent 60%
     ),
-    linear-gradient(180deg, #0a0a1f 0%, #4f3ba0 50%, #0a0a1f 100%);
+    linear-gradient(180deg, #07071f  0%, #382783 50%, #07071f 100%);
 }
 
 html.dark input,
