@@ -78,11 +78,7 @@ export default function HealthInsightsClient() {
             dataToAnalyze,
             null,
             2,
-          )}\nProvide insights and suggestions based on the data. 
-          ${isToday ? "Speak to me in present tense." : "Speak to me in past tense."}
-          If the day is not finished yet, provide insights based on the 
-          available data and mention that the analysis is preliminary.
-          Don&apos;t list things. Don&apos;t greet. Max 10 sentences.`,
+          )}\nProvide insights and suggestions based on the data for me. Max 10 sentences.`,
         }),
       });
 
