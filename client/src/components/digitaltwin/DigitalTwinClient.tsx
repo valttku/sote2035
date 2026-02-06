@@ -30,7 +30,7 @@ export default function DigitalTwinClient() {
 
       <div className="flex flex-row items-center justify-center w-full gap-10 md:gap-[15%]">
         {/* Avatar + dots */}
-        <div className="relative w-[60vw] max-w-[250px] sm:w-[50vw] md:w-[40vw] flex-shrink-0">
+        <div className="relative w-[60vw] max-w-[230px] sm:w-[50vw] md:w-[40vw] flex-shrink-0">
           <img
             src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
             alt="Digital twin"
@@ -60,7 +60,7 @@ export default function DigitalTwinClient() {
         </div>
 
         {/* Guide + info-panel */}
-        <div className="w-full max-w-[350px] min-h-[300px] flex-shrink-0 p-4 md:p-6 mb-70">
+        <div className="w-full max-w-[350px] h-[500px] p-4 md:p-6 mb-70">
           <p className="mb-6 text-sm md:text-base">
             Select a body part by clicking on a white dot on the body
           </p>
