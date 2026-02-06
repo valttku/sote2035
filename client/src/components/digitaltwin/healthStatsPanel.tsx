@@ -73,9 +73,9 @@ export default function HealthClient({ selected, onClose, selectedDate }: Props)
   }, [selected, selectedDate]);
 
   return (
-    <div className="panel-animation ui-component-styles p-4 pt-2 rounded-2xl">
+    <div className="panel-animation ui-component-styles p-4 pt-2">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl mb-2">{TITLE[selected]}</h1>
+        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">{TITLE[selected]}</h1>
         <button className="mb-5" onClick={onClose}>
           ✕
         </button>
@@ -88,10 +88,10 @@ export default function HealthClient({ selected, onClose, selectedDate }: Props)
         <p className="opacity-80 text-sm">No metrics for this day.</p>
       )}
 
-      <ul>
+      <ul className="min-h-[170px] pl-5">
         {Object.entries(metrics).map(([k, v]) => (
-          <li key={k}>
-            <span className="font-semibold">{k}: </span>
+          <li className="list-disc" key={k}>
+            <span>{k}: </span>
             {v}
           </li>
         ))}
