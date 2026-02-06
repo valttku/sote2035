@@ -3,7 +3,7 @@ import Sidebar from "./Sidebar/Sidebar";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen">
+    <div className="h-screen">
       <Sidebar  />
 
        {/* Main Content */}

@@ -34,7 +34,7 @@ export default function LoginForm({
     await onSubmit(email, password);
     setLoading(false);
   }
-//add here today
+
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
       <h1 className="text-2xl sm:text-3xl mb-8 text-center">LOGIN</h1>

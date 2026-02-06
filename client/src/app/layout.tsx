@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-black dark:bg-gray-900 dark:text-white`}
       >
-        <div className="min-h-screen flex flex-col">{children}</div> //i add here
+        <div className="min-h-screen flex flex-col">{children}</div> 
       </body>
     </html>
   );

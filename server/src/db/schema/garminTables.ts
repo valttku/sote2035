@@ -15,6 +15,7 @@ export async function createGarminTables() {
     vo2_max_cycling double precision,
     fitness_age integer,
     enhanced boolean,
+    source varchar(50) NOT NULL DEFAULT 'garmin',
 
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -106,6 +107,8 @@ export async function createGarminTables() {
     pushes_goal integer,
     intensity_duration_goal_in_seconds integer,
     floors_climbed_goal integer,
+
+    source varchar(50) NOT NULL DEFAULT 'garmin',
     
     -- timestamps
     start_time_in_seconds bigint,
@@ -169,6 +172,8 @@ export async function createGarminTables() {
     start_time_in_seconds bigint,
     hrv_values jsonb,  -- {300: 32, 600: 24, ...}
     
+    source varchar(50) NOT NULL DEFAULT 'garmin',
+
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     
@@ -221,6 +226,8 @@ export async function createGarminTables() {
     duration_in_seconds integer,
     start_time_in_seconds bigint,
     start_time_offset_in_seconds integer,
+
+    source varchar(50) NOT NULL DEFAULT 'garmin',
     
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -297,7 +304,9 @@ export async function createGarminTables() {
     overall_sleep_score jsonb,  -- {value: 87, qualifierKey: "GOOD"}
     sleep_scores jsonb,
     naps jsonb,  -- array of nap objects
-    
+
+    source varchar(50) NOT NULL DEFAULT 'garmin',
+
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     
@@ -356,6 +365,8 @@ export async function createGarminTables() {
     time_offset_body_battery_values jsonb,  -- {0: 55, 180: 56, ...}
     body_battery_dynamic_feedback_event jsonb,  -- {eventStartTimeInSeconds, bodyBatteryLevel}
     body_battery_activity_events jsonb,  -- array of event objects
+
+    source varchar(50) NOT NULL DEFAULT 'garmin',
     
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -409,6 +420,8 @@ export async function createGarminTables() {
     duration_in_seconds integer,
     start_time_offset_in_seconds integer,
     time_offset_epoch_to_breaths jsonb,  -- {0: 14.63, 60: 14.4, ...}
+
+    source varchar(50) NOT NULL DEFAULT 'garmin',
     
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -465,6 +478,8 @@ export async function createGarminTables() {
     weight_in_grams integer,
     measurement_time_in_seconds bigint,
     measurement_time_offset_in_seconds integer,
+
+    source varchar(50) NOT NULL DEFAULT 'garmin',
     
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -542,6 +557,8 @@ export async function createGarminTables() {
     device_name varchar(100),
     manual boolean,
     is_web_upload boolean,
+
+    source varchar(50) NOT NULL DEFAULT 'garmin',
     
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -580,6 +597,8 @@ export async function createGarminTables() {
     activity_type varchar(50),
     activity_sub_type varchar(100),
     offset_in_seconds integer,
+
+    source varchar(50) NOT NULL DEFAULT 'garmin',
     
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
