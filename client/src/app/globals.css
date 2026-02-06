@@ -29,18 +29,24 @@ html.dark body {
       transparent 60%
     ),
     linear-gradient(180deg, #0a0a1f 0%, #4f3ba0 50%, #0a0a1f 100%);
-  --button-blue-bg: #20a0b0;
-  --button-blue-hover: #118892;
-  --cancel-button-bg: #b41f3f;
-  --cancel-button-hover: #a00f2c;
 }
 
 html.dark input,
 html.dark textarea,
 html.dark select {
-  background-color: #404650; /* dark gray */
-  color: #ededed;
-  border: 1px solid hsl(217, 19%, 27%);
+  background: rgba(94, 94, 94, 0.35);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+html.dark select option {
+  background: rgba(247, 247, 247, 0.35);
 }
 
 /* Apply colors to html and body (default light mode)*/
@@ -116,19 +122,33 @@ button {
 input,
 textarea,
 select {
-  background-color: rgb(228 234 252);
-  color: black;
-  padding: 8px;
-  margin-bottom: 15px;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  color: #000;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   font-size: 1rem;
-  border: 1px solid #ccc;
+  outline: none;
+  transition: all 0.3s ease;
+  color: white;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid #22bfd4;
+  outline: none; /* remove default outline */
+  border-color: #22bfd4; /* main accent */
+  box-shadow:
+    0 0 8px #22bfd4aa,
+    0 4px 20px rgba(0, 0, 0, 0.05); /* subtle glow + depth */
+  background: rgba(255, 255, 255, 0.35); /* slightly brighter glass */
+  transition: all 0.3s ease;
+}
+
+select option {
+  background-color: rgba(255, 255, 255, 1);
+  color: black;
 }
 
 /* Headings */
@@ -143,7 +163,7 @@ h2 {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgb(116, 116, 116);
+  color: rgb(255, 255, 255);
   display: flex;
   align-items: center;
 }
