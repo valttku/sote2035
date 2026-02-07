@@ -66,7 +66,7 @@ export interface Translations {
   startup_welcome: string;
   startup_get_started: string;
 
-  // NEW keys you added
+  
   profileAccount: string;
   providerAccountManagement: string;
   accountManagement: string;

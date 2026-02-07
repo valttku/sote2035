@@ -16,7 +16,7 @@ export default function LanguageSelector({ currentLang, onChange }: Props) {
     >
       {languages.map((lang) => (
         <option key={lang} value={lang}>
-          {lang.toUpperCase()} {/* Just show "EN" / "FI" */}
+          {lang.toUpperCase()} {/* "EN" / "FI" */}
         </option>
       ))}
     </select>
