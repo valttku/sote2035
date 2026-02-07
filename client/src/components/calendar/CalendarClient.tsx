@@ -366,7 +366,7 @@ export default function CalendarClient() {
 
                   {/* --- Show dot if there is data for the day --- */}
                   {hasData && (
-                    <span className="w-2 h-2 bg-[#1d9dad] rounded-full block"></span>
+                    <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>
                   )}
                 </div>
               </button>

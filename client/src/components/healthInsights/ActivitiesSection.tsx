@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 
 export type Activity = {
   id: string;
@@ -40,8 +39,8 @@ export function ActivitiesSection({
           {activities.map((activity: Activity) => (
             <div
               key={activity.id}
-              className="border-l-4 border-l-[#1d9dad] bg-[#1e1c4f]/50 rounded-xl 
-              p-4 shadow-md hover:shadow-lg hover:bg-[#1e1c4f]/60 
+              className="border-l-4 border-l-[#31c2d5] bg-[#1e1c4f]/40  rounded-xl 
+              p-4 shadow-md hover:shadow-lg hover:bg-[#2a2a60]/80  
               transition-all duration-200 cursor-pointer"
             >
               {/* Title row */}

@@ -69,24 +69,32 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     );
 
     // Fetch dailies data
-    // Fetch dailies data
     const dailiesResult = await db.query(
-      `SELECT id, user_id, day_date, summary_id, activity_type, active_kilocalories, 
-          bmr_kilocalories, steps, pushes, distance_in_meters, push_distance_in_meters, 
-          duration_in_seconds, active_time_in_seconds, moderate_intensity_duration_in_seconds, 
-          vigorous_intensity_duration_in_seconds, floors_climbed, min_heart_rate, 
-          max_heart_rate, avg_heart_rate, resting_heart_rate, avg_stress_level, 
-          max_stress_level, stress_duration_in_seconds, rest_stress_duration_in_seconds, 
-          activity_stress_duration_in_seconds, low_stress_duration_in_seconds, 
-          medium_stress_duration_in_seconds, high_stress_duration_in_seconds, 
-          stress_qualifier, body_battery_charged, body_battery_drained, steps_goal, 
-          pushes_goal, intensity_duration_goal_in_seconds, floors_climbed_goal, 
-          start_time_in_seconds, start_time_offset_in_seconds, source, created_at, updated_at
-   FROM app.user_dailies_garmin 
-   WHERE user_id = $1 AND day_date = $2::date`,
+      `SELECT id, user_id, day_date, summary_id, active_kilocalories, 
+           bmr_kilocalories, steps, distance_in_meters,  
+          active_time_in_seconds, floors_climbed,  
+          avg_heart_rate, resting_heart_rate, avg_stress_level, 
+          body_battery_charged, body_battery_drained, steps_goal, 
+          moderate_intensity_duration_in_seconds, 
+          vigorous_intensity_duration_in_seconds,
+          floors_climbed_goal, source, created_at, updated_at
+        FROM app.user_dailies_garmin 
+        WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],
     );
-    console.log(`[health-insights] Dailies data fetched (without heart_rate_samples):`,dailiesResult.rows);
+    console.log(
+      `[health-insights] Dailies data fetched (without heart_rate_samples):`,
+      dailiesResult.rows,
+    );
+
+    // Fetch user profile
+    const profileResult = await db.query(
+      `SELECT id, height, weight, gender
+      FROM app.users
+      WHERE id = $1`,
+      [userId],
+    );
+    console.log(`[health-insights] User profile fetched:`, profileResult.rows);
 
     const insights = {
       date,
@@ -95,6 +103,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       stress: stressResult.rows,
       heartRate: heartRateResult.rows,
       dailies: dailiesResult.rows,
+      profile: profileResult.rows[0],
     };
 
     res.json(insights);
