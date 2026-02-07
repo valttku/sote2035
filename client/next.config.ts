@@ -4,6 +4,8 @@ const nextConfig = {
     root: __dirname,
   },
 
+  
+
   async rewrites() {
     const isProduction = process.env.NODE_ENV === "production";
 
