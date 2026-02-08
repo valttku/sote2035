@@ -101,8 +101,8 @@ export default function HealthInsightsClient() {
   ];
 
   return (
-    <div className="w-full my-auto flex justify-center">
-      <div className="ui-component-styles p-6 w-full  min-h-[80vh] max-w-5xl space-y-6 mx-auto flex flex-col overflow-hidden">
+    <div className="w-full flex justify-center pt-4 md:pt-12 pb-4 md:pb-12">
+      <div className="ui-component-styles p-6 w-full max-w-5xl space-y-6 mx-auto flex flex-col overflow-hidden">
         <h1 className="text-4xl">Health Insights</h1>
 
         {/* Navigation */}

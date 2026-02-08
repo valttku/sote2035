@@ -219,8 +219,8 @@ export default function SettingsClient() {
   if (!data) return null;
 
   return (
-    <main className="w-full my-auto">
-      <div className="flex flex-col items-center space-y-6 w-full min-h-[80vh] max-w-5xl mx-auto">
+    <main className="w-full flex justify-center pt-4 md:pt-12 pb-4 md:pb-12">
+      <div className="flex flex-col items-center space-y-6 w-full max-w-5xl mx-auto">
         {/* PROFILE */}
         <section className="ui-component-styles p-4 w-full space-y-3">
           <h2 className="text-xl font-semibold">{t.profile_section_title}</h2>
