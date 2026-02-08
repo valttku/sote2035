@@ -58,7 +58,8 @@ export default function SettingsClient() {
     };
 
     window.addEventListener("languageChange", handleLanguageChange);
-    return () => window.removeEventListener("languageChange", handleLanguageChange);
+    return () =>
+      window.removeEventListener("languageChange", handleLanguageChange);
   }, []);
 
   // Providers
@@ -78,22 +79,22 @@ export default function SettingsClient() {
 
   const strengthScore = useMemo(
     () => PASSWORD_REQUIREMENTS.filter((r) => r.test(newPassword)).length,
-    [newPassword]
+    [newPassword],
   );
 
   const strengthColor =
     strengthScore <= 2
       ? "bg-red-500"
       : strengthScore <= 4
-      ? "bg-amber-500"
-      : "bg-emerald-500";
+        ? "bg-amber-500"
+        : "bg-emerald-500";
 
   const strengthText =
     strengthScore <= 2
       ? t.weak_password
       : strengthScore <= 4
-      ? t.medium_password
-      : t.strong_password;
+        ? t.medium_password
+        : t.strong_password;
 
   // ---------------- EFFECTS ----------------
   useEffect(() => {
@@ -219,22 +220,38 @@ export default function SettingsClient() {
   if (!data) return null;
 
   return (
-    <main className="w-full my-auto">
-      <div className="flex flex-col items-center space-y-6 w-full min-h-[80vh] max-w-5xl mx-auto">
+    <main className="w-full flex justify-center">
+      <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6">
         {/* PROFILE */}
-        <section className="ui-component-styles p-4 w-full space-y-3">
+        <section className="ui-component-styles p-4 w-full space-y-2">
           <h2 className="text-xl font-semibold">{t.profile_section_title}</h2>
-          <p>{t.email_label}: {data.email}</p>
-          <p>{t.username_label}: {data.display_name ?? "-"}</p>
-          <p>{t.gender_label}: {data.gender ?? "-"}</p>
-          <p>{t.height_label}: {data.height ?? "-"} cm</p>
-          <p>{t.weight_label}: {data.weight ?? "-"} kg</p>
+          <p>
+            {t.email_label}: {data.email}
+          </p>
+          <p>
+            {t.username_label}: {data.display_name ?? "-"}
+          </p>
+          <p>
+            {t.gender_label}: {data.gender ?? "-"}
+          </p>
+          <p>
+            {t.height_label}: {data.height ?? "-"} cm
+          </p>
+          <p>
+            {t.weight_label}: {data.weight ?? "-"} kg
+          </p>
 
           <div className="flex gap-3 pt-2">
-            <button onClick={() => setShowEditProfile(true)} className="button-style-blue min-w-[120px]">
+            <button
+              onClick={() => setShowEditProfile(true)}
+              className="button-style-blue min-w-[120px]"
+            >
               {t.edit_profile}
             </button>
-            <button onClick={() => setShowChangePassword(true)} className="button-style-blue min-w-[120px]">
+            <button
+              onClick={() => setShowChangePassword(true)}
+              className="button-style-blue min-w-[120px]"
+            >
               {t.change_password}
             </button>
           </div>
@@ -247,11 +264,18 @@ export default function SettingsClient() {
           <div className="flex justify-between items-center">
             <p>Polar</p>
             {polarLinked ? (
-              <button onClick={unlinkPolar} disabled={polarBusy} className="button-style-blue min-w-[120px]">
+              <button
+                onClick={unlinkPolar}
+                disabled={polarBusy}
+                className="button-style-blue min-w-[120px]"
+              >
                 {polarBusy ? "Unlinking..." : t.unlink_polar}
               </button>
             ) : (
-              <button onClick={linkPolar} className="button-style-blue min-w-[120px]">
+              <button
+                onClick={linkPolar}
+                className="button-style-blue min-w-[120px]"
+              >
                 {t.link_polar}
               </button>
             )}
@@ -260,11 +284,18 @@ export default function SettingsClient() {
           <div className="flex justify-between items-center">
             <p>Garmin</p>
             {garminLinked ? (
-              <button onClick={unlinkGarmin} disabled={garminBusy} className="button-style-blue min-w-[120px]">
+              <button
+                onClick={unlinkGarmin}
+                disabled={garminBusy}
+                className="button-style-blue min-w-[120px]"
+              >
                 {garminBusy ? "Unlinking..." : t.unlink_garmin}
               </button>
             ) : (
-              <button onClick={linkGarmin} className="button-style-blue min-w-[120px]">
+              <button
+                onClick={linkGarmin}
+                className="button-style-blue min-w-[120px]"
+              >
                 {t.link_garmin}
               </button>
             )}
@@ -276,7 +307,10 @@ export default function SettingsClient() {
           <h2 className="text-xl font-semibold mb-2">
             {t.providerAccountManagement}
           </h2>
-          <button onClick={deleteAccount} className="cancel-button-style w-full">
+          <button
+            onClick={deleteAccount}
+            className="cancel-button-style w-full"
+          >
             {t.delete_account}
           </button>
         </section>
@@ -285,7 +319,9 @@ export default function SettingsClient() {
       {/* MODALS */}
       {showEditProfile && (
         <Modal onClose={() => setShowEditProfile(false)}>
-          <h2 className="text-lg font-bold mb-4 text-center">{t.edit_profile}</h2>
+          <h2 className="text-lg font-bold mb-4 text-center">
+            {t.edit_profile}
+          </h2>
 
           <input
             className="block w-full mb-2"
@@ -323,10 +359,17 @@ export default function SettingsClient() {
           />
 
           <div className="flex gap-2">
-            <button onClick={saveProfile} disabled={savingProfile} className="button-style-blue w-full">
+            <button
+              onClick={saveProfile}
+              disabled={savingProfile}
+              className="button-style-blue w-full"
+            >
               {savingProfile ? "Saving..." : t.save}
             </button>
-            <button onClick={() => setShowEditProfile(false)} className="cancel-button-style w-full">
+            <button
+              onClick={() => setShowEditProfile(false)}
+              className="cancel-button-style w-full"
+            >
               {t.cancel}
             </button>
           </div>
@@ -335,7 +378,9 @@ export default function SettingsClient() {
 
       {showChangePassword && (
         <Modal onClose={() => setShowChangePassword(false)}>
-          <h2 className="text-lg font-bold mb-4 text-center">{t.change_password}</h2>
+          <h2 className="text-lg font-bold mb-4 text-center">
+            {t.change_password}
+          </h2>
 
           <div className="relative mb-2">
             <input
@@ -345,7 +390,10 @@ export default function SettingsClient() {
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
             />
-            <button onClick={() => setShowOldPassword(!showOldPassword)} className="absolute right-2 top-2">
+            <button
+              onClick={() => setShowOldPassword(!showOldPassword)}
+              className="absolute right-2 top-2"
+            >
               <FaEyeSlash />
             </button>
           </div>
@@ -358,18 +406,28 @@ export default function SettingsClient() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
-            <button onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-2 top-2">
+            <button
+              onClick={() => setShowNewPassword(!showNewPassword)}
+              className="absolute right-2 top-2"
+            >
               <FaEye />
             </button>
           </div>
 
           <div className="h-2 bg-gray-200 rounded mb-2">
-            <div className={`${strengthColor} h-full rounded`} style={{ width: `${(strengthScore / 5) * 100}%` }} />
+            <div
+              className={`${strengthColor} h-full rounded`}
+              style={{ width: `${(strengthScore / 5) * 100}%` }}
+            />
           </div>
 
           <p className="text-sm mb-2">{strengthText}</p>
 
-          <button onClick={changePassword} disabled={changingPassword} className="button-style-blue w-full">
+          <button
+            onClick={changePassword}
+            disabled={changingPassword}
+            className="button-style-blue w-full"
+          >
             {changingPassword ? "Changing..." : t.change_password}
           </button>
         </Modal>

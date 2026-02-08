@@ -23,19 +23,19 @@ export default function DigitalTwinClient() {
   const isFemale = avatarType === "female";
 
   return (
-    <div className="w-full my-auto flex justify-center">
-      <div className="flex flex-col w-full max-w-5xl gap-10 min-h-[80vh] p-4">
+    <div className="w-full flex justify-center">
+      <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
         {/* Title at the top */}
         <h1 className="text-5xl text-left">Today</h1>
 
         {/* Main content: avatar + info panel */}
-        <div className="flex flex-row items-start justify-center gap-20">
+        <div className="flex flex-row items-start justify-center gap-70">
           {/* Avatar + dots on the left */}
-          <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] md:ml-40 flex-shrink-0 ">
+          <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-50">
             <img
               src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
               alt="Digital twin"
-              className="w-full h-auto block"
+              className="w-full max-h-[60vh] object-contain block"
             />
 
             {BODY_PARTS.map(({ id, top, left }) => (
