@@ -101,12 +101,12 @@ export default function HealthInsightsClient() {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="ui-component-styles p-6 w-full max-w-6xl h-[80vh] flex flex-col overflow-hidden">
-        <h1 className="text-4xl m-2">Health Insights</h1>
+    <div className="w-full my-auto flex justify-center">
+      <div className="ui-component-styles p-6 w-full  min-h-[80vh] max-w-5xl space-y-6 mx-auto flex flex-col overflow-hidden">
+        <h1 className="text-4xl">Health Insights</h1>
 
         {/* Navigation */}
-        <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 pt-3">
+        <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 ">
           <div className="flex flex-wrap gap-2">
             {sections.map((section) => (
               <button

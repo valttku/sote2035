@@ -41,7 +41,8 @@ export default function DarkModeToggle() {
     <button
       onClick={toggleDarkMode}
       className="
-        flex items-center justify-center gap-2 w-full p-2 rounded-xl
+        flex items-center justify-center gap-2 min-w-[150px] 
+        p-2 rounded-xl
         bg-white/25 dark:bg-white/10
         backdrop-blur-md
         border border-white/30 dark:border-white/15
@@ -52,7 +53,7 @@ export default function DarkModeToggle() {
       "
     >
       {darkMode ? <FaSun /> : <FaMoon />}
-      {darkMode ? "Switch To Light Mode" : "Switch To Dark Mode"}
+      {darkMode ? "Light Mode" : "Dark Mode"}
     </button>
   );
 }
