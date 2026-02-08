@@ -29,9 +29,9 @@ export default function DigitalTwinClient() {
         <h1 className="text-5xl text-left">Today</h1>
 
         {/* Main content: avatar + info panel */}
-        <div className="flex flex-row items-start justify-center gap-20">
+        <div className="flex flex-row items-start justify-center gap-70">
           {/* Avatar + dots on the left */}
-          <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-5">
+          <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-50">
             <img
               src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
               alt="Digital twin"
