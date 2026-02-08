@@ -38,6 +38,8 @@ export default function Navbar() {
 
   useEffect(() => {
     localStorage.setItem("lang", language);
+    // Notify other components about language change
+    window.dispatchEvent(new CustomEvent("languageChange", { detail: language }));
   }, [language]);
 
   useEffect(() => {

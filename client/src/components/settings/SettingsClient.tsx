@@ -50,6 +50,17 @@ export default function SettingsClient() {
 
   const t = translations[language];
 
+  // Listen for language changes from other components
+  useEffect(() => {
+    const handleLanguageChange = (e: Event) => {
+      const customEvent = e as CustomEvent<LanguageCode>;
+      setLanguage(customEvent.detail);
+    };
+
+    window.addEventListener("languageChange", handleLanguageChange);
+    return () => window.removeEventListener("languageChange", handleLanguageChange);
+  }, []);
+
   // Providers
   const [polarLinked, setPolarLinked] = useState(false);
   const [garminLinked, setGarminLinked] = useState(false);
