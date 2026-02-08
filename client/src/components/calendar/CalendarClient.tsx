@@ -299,79 +299,77 @@ export default function CalendarClient() {
   const offset = (firstDay + 6) % 7; // 0=Mon..6=Sun
 
   return (
-    <div className="w-full flex justify-center pt-4 md:pt-10 pb-4 md:pb-10">
-      <div className="p-6 mx-auto w-full max-w-5xl ui-component-styles flex-1 min-h-0 overflow-y-auto">
+    <div className="w-full flex justify-center">
+      <div className="p-6 mx-auto w-full max-w-5xl space-y-6 ui-component-styles flex-1">
         <h1 className="text-4xl">Calendar</h1>
 
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-6 mt-5">
-          {/* Month navigation */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={prevMonth}
-              className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
-            >
-              Prev
-            </button>
-            <div className="font-semibold">
-              {year}-{pad2(month)}
-            </div>
-            <button
-              onClick={nextMonth}
-              className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
-            >
-              Next
-            </button>
+        {/* Month navigation */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={prevMonth}
+            className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+          >
+            Prev
+          </button>
+          <div className="font-semibold">
+            {year}-{pad2(month)}
           </div>
+          <button
+            onClick={nextMonth}
+            className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+          >
+            Next
+          </button>
+        </div>
 
-          <div className="p-3">
-            {/* Error message (only when no date selected) */}
-            {error && !selectedDate && <p className="text-red-600">{error}</p>}
+        <div className="p-3">
+          {/* Error message (only when no date selected) */}
+          {error && !selectedDate && <p className="text-red-600">{error}</p>}
 
-            {/* Weekday headers */}
-            <section className="grid grid-cols-7 gap-3">
-              {getDaysOfWeek().map((day) => (
-                <div key={day} className="font-bold text-center pb-1">
-                  {day}
-                </div>
-              ))}
-            </section>
+          {/* Weekday headers */}
+          <section className="grid grid-cols-7 gap-3">
+            {getDaysOfWeek().map((day) => (
+              <div key={day} className="font-bold text-center pb-1">
+                {day}
+              </div>
+            ))}
+          </section>
 
-            {/* Calendar grid */}
-            <section className="grid grid-cols-7 gap-3">
-              {/* Empty cells for days before month starts */}
-              {Array.from({ length: offset }).map((_, i) => (
-                <div
-                  key={`blank-${year}-${month}-${i}`}
-                  className="min-h-18 w-full"
-                />
-              ))}
+          {/* Calendar grid */}
+          <section className="grid grid-cols-7 gap-3">
+            {/* Empty cells for days before month starts */}
+            {Array.from({ length: offset }).map((_, i) => (
+              <div
+                key={`blank-${year}-${month}-${i}`}
+                className="min-h-18 w-full"
+              />
+            ))}
 
-              {/* Day cells */}
-              {Array.from({ length: totalDays }, (_, i) => {
-                const day = i + 1;
-                const date = toYmd(year, month, day);
-                const hasData = daysWithData.has(date);
+            {/* Day cells */}
+            {Array.from({ length: totalDays }, (_, i) => {
+              const day = i + 1;
+              const date = toYmd(year, month, day);
+              const hasData = daysWithData.has(date);
 
-                return (
-                  <button
-                    key={date}
-                    onClick={() => openDay(date)}
-                    className="border rounded min-h-18 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
-                    title={hasData ? "Has health data" : "No health data"}
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="leading-none">{day}</span>
+              return (
+                <button
+                  key={date}
+                  onClick={() => openDay(date)}
+                  className="border rounded min-h-18 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
+                  title={hasData ? "Has health data" : "No health data"}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="leading-none">{day}</span>
 
-                      {/* --- Show dot if there is data for the day --- */}
-                      {hasData && (
-                        <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </section>
-          </div>
+                    {/* --- Show dot if there is data for the day --- */}
+                    {hasData && (
+                      <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </section>
         </div>
 
         {/* Day details modal */}

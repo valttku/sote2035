@@ -23,8 +23,8 @@ export default function DigitalTwinClient() {
   const isFemale = avatarType === "female";
 
   return (
-    <div className="w-full flex justify-center pt-4 md:pt-10 pb-4 md:pb-10">
-      <div className="flex flex-col w-full max-w-5xl gap-10 min-h-[80vh] p-4 flex-1 min-h-0 overflow-y-auto">
+    <div className="w-full flex justify-center">
+      <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
         {/* Title at the top */}
         <h1 className="text-5xl text-left">Today</h1>
 

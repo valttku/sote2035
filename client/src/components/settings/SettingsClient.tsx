@@ -220,10 +220,10 @@ export default function SettingsClient() {
   if (!data) return null;
 
   return (
-    <main className="w-full flex justify-center pt-4 md:pt-10 pb-4 md:pb-10">
-      <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 min-h-0 overflow-y-auto space-y-6">
+    <main className="w-full flex justify-center">
+      <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6">
         {/* PROFILE */}
-        <section className="ui-component-styles p-4 w-full space-y-3">
+        <section className="ui-component-styles p-4 w-full space-y-2">
           <h2 className="text-xl font-semibold">{t.profile_section_title}</h2>
           <p>
             {t.email_label}: {data.email}

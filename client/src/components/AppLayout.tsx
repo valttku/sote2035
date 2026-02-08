@@ -12,7 +12,7 @@ export default function AppLayout({
     <div className="h-dvh flex flex-col overflow-hidden">
       <Navbar></Navbar>
       <main
-        className={`flex-1 px-4 sm:px-6 lg:px-8 flex justify-center overflow-y-auto`}
+        className={`flex-1 p-8 px-4 sm:px-6 lg:px-8 flex justify-center overflow-y-auto`}
       >
         {children}
       </main>
