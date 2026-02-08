@@ -296,16 +296,9 @@ export default function CalendarClient() {
   const offset = (firstDay + 6) % 7; // 0=Mon..6=Sun
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div
-        className="
-          p-6 space-y-6 mx-auto
-          w-full max-w-4xl
-          rounded-2xl
-          ui-component-styles
-        "
-      >
-        <h2 className="text-3xl">Calendar</h2>
+    <div className="w-full my-auto flex justify-center">
+      <div className="p-6 space-y-6 mx-auto w-full min-h-[80vh] max-w-5xl ui-component-styles">
+        <h1 className="text-4xl">Calendar</h1>
 
         {/* Month navigation */}
         <div className="flex items-center gap-2">
@@ -358,7 +351,7 @@ export default function CalendarClient() {
               <button
                 key={date}
                 onClick={() => openDay(date)}
-                className="border rounded min-h-20 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
+                className="border rounded min-h-18 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
                 title={hasData ? "Has health data" : "No health data"}
               >
                 <div className="flex items-center justify-center gap-2">
@@ -482,7 +475,6 @@ export default function CalendarClient() {
             <ManualActivityForm
               selectedDate={selectedDate}
               onActivityAdded={() => {
-                loadHealthStats(selectedDate);
                 loadManualActivities(selectedDate);
               }}
             />

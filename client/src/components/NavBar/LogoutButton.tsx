@@ -17,9 +17,9 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="cursor-pointer text-indigo-200 hover:text-[#f2345d] transition text-lg"
+      className="w-full text-indigo-200 hover:text-[#f2345d] transition py-2"
     >
-      <span className="bi bi-power text-lg"></span>
+      <span className="bi bi-power"></span>
       Log off
     </button>
   );

@@ -50,7 +50,7 @@ export default function HealthStatsList({
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg text-[#1d9dad]">{labelForKind(e.kind)}</h3>
+            <h3 className="font-semibold text-lg text-[#31c2d5]">{labelForKind(e.kind)}</h3>
             <div className="flex items-center gap-2">
               <span className="text-xs opacity-70">{e.source ?? "unknown"}</span>
               {e.kind === "manual_activity" && onDelete && (

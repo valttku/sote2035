@@ -87,7 +87,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
           icon="⏱"
         />
         <StatCard
-          label="Resting Heart Rate"
+          label="Rest Heart Rate"
           value={`${dailies.resting_heart_rate} bpm`}
           icon="❤️"
         />

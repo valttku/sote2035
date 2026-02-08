@@ -39,7 +39,7 @@ export default function ActivitiesList({
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-[#1d9dad]">{e.activity_name}</h3>
+            <h3 className="font-semibold text-[#31c2d5]">{e.activity_name}</h3>
             <span className="text-xs opacity-70">
               {e.source_type === "manual" ? "Manually added activity" : (e.device_name)}
             </span>
