@@ -45,7 +45,6 @@ export default function DarkModeToggle() {
         p-1 rounded-xl
         bg-white/25 dark:bg-white/10
         border border-white/30 dark:border-white/15
-        text-black dark:text-white
         hover:bg-white/35 dark:hover:bg-white/20
         transition-all duration-300
         shadow-sm

@@ -180,7 +180,7 @@ export default function HealthInsightsClient() {
             {/* AI Panel */}
             <div className="flex-[0_0_40%] min-w-[200px] flex flex-col overflow-hidden mt-4 md:mt-0">
               <div className="bg-[#1e1c4f]/20 border-2 border-[#31c2d5] rounded-lg flex flex-col h-full">
-                <p className="sticky top-0 z-10 text-lg p-1 pl-5 bg-[#31c2d5]">
+                <p className="sticky text-white top-0 z-10 text-lg p-1 pl-5 bg-[#31c2d5]">
                   AI Analysis
                 </p>
                 <div className="flex-1 overflow-y-auto p-5">

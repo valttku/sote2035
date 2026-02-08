@@ -39,7 +39,9 @@ export default function Navbar() {
   useEffect(() => {
     localStorage.setItem("lang", language);
     // Notify other components about language change
-    window.dispatchEvent(new CustomEvent("languageChange", { detail: language }));
+    window.dispatchEvent(
+      new CustomEvent("languageChange", { detail: language }),
+    );
   }, [language]);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function Navbar() {
               key={item.path}
               href={item.path}
               className={`flex items-center gap-2 font-medium ${
-                pathname === item.path ? "text-[#31c2d5]" : "text-gray-200"
+                pathname === item.path ? "text-[#31c2d5]" : ""
               } hover:text-[#31c2d5] transition-colors duration-200`}
             >
               {item.icon}
@@ -82,15 +84,15 @@ export default function Navbar() {
               onClick={() => setLangOpen(!langOpen)}
               className="
               flex items-center justify-center gap-2
-              p-1 px-3 rounded-xl
+              p-1 px-3 rounded-xl 
               bg-white/25 dark:bg-white/10
               border border-white/30 dark:border-white/15
-              text-black dark:text-white
               hover:bg-white/35 dark:hover:bg-white/20
               transition-all duration-300
               shadow-sm"
             >
-              <FaGlobe />Language 
+              <FaGlobe />
+              Language
             </button>
             {langOpen && (
               <div className="absolute right-0 mt-2 w-20 bg-gray-800 text-white rounded shadow-lg z-50">
