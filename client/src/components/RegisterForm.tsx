@@ -99,7 +99,6 @@ export default function RegisterForm({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
           className="block w-full"
           required
         />
@@ -110,7 +109,6 @@ export default function RegisterForm({
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          placeholder="Display Name (optional)"
           className="block w-full"
         />
 
@@ -122,7 +120,6 @@ export default function RegisterForm({
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
             className="block w-full"
             required
           />
@@ -159,7 +156,7 @@ export default function RegisterForm({
             <li
               key={req.text}
               className={`text-sm flex items-center gap-2 ${
-                req.regex.test(password) ? "text-green-600" : "text-red-500"
+                req.regex.test(password) ? "text-green-500" : "text-red-400"
               }`}
             >
               {req.text} {req.regex.test(password) ? "✓" : "✕"}
@@ -175,7 +172,6 @@ export default function RegisterForm({
             type={showConfirmPassword ? "text" : "password"}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm Password"
             className="block w-full"
             required
           />
