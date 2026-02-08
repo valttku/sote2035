@@ -65,7 +65,7 @@ export default function Navbar() {
               key={item.path}
               href={item.path}
               className={`flex items-center gap-2 font-medium ${
-                pathname === item.path ? "text-white" : "text-gray-200"
+                pathname === item.path ? "text-[#31c2d5]" : "text-gray-200"
               } hover:text-[#31c2d5] transition-colors duration-200`}
             >
               {item.icon}
@@ -78,9 +78,17 @@ export default function Navbar() {
           <div className="relative" ref={langRef}>
             <button
               onClick={() => setLangOpen(!langOpen)}
-              className="text-white text-xl hover:text-blue-300"
+              className="
+              flex items-center justify-center gap-2
+              p-1 px-3 rounded-xl
+              bg-white/25 dark:bg-white/10
+              border border-white/30 dark:border-white/15
+              text-black dark:text-white
+              hover:bg-white/35 dark:hover:bg-white/20
+              transition-all duration-300
+              shadow-sm"
             >
-              <FaGlobe />
+              <FaGlobe />Language 
             </button>
             {langOpen && (
               <div className="absolute right-0 mt-2 w-20 bg-gray-800 text-white rounded shadow-lg z-50">

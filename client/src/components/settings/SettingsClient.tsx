@@ -220,10 +220,10 @@ export default function SettingsClient() {
           <p>{t.weight_label}: {data.weight ?? "-"} kg</p>
 
           <div className="flex gap-3 pt-2">
-            <button onClick={() => setShowEditProfile(true)} className="button-style-blue">
+            <button onClick={() => setShowEditProfile(true)} className="button-style-blue min-w-[120px]">
               {t.edit_profile}
             </button>
-            <button onClick={() => setShowChangePassword(true)} className="button-style-blue">
+            <button onClick={() => setShowChangePassword(true)} className="button-style-blue min-w-[120px]">
               {t.change_password}
             </button>
           </div>
@@ -236,11 +236,11 @@ export default function SettingsClient() {
           <div className="flex justify-between items-center">
             <p>Polar</p>
             {polarLinked ? (
-              <button onClick={unlinkPolar} disabled={polarBusy} className="button-style-blue">
+              <button onClick={unlinkPolar} disabled={polarBusy} className="button-style-blue min-w-[120px]">
                 {polarBusy ? "Unlinking..." : t.unlink_polar}
               </button>
             ) : (
-              <button onClick={linkPolar} className="button-style-blue">
+              <button onClick={linkPolar} className="button-style-blue min-w-[120px]">
                 {t.link_polar}
               </button>
             )}
@@ -249,11 +249,11 @@ export default function SettingsClient() {
           <div className="flex justify-between items-center">
             <p>Garmin</p>
             {garminLinked ? (
-              <button onClick={unlinkGarmin} disabled={garminBusy} className="button-style-blue">
+              <button onClick={unlinkGarmin} disabled={garminBusy} className="button-style-blue min-w-[120px]">
                 {garminBusy ? "Unlinking..." : t.unlink_garmin}
               </button>
             ) : (
-              <button onClick={linkGarmin} className="button-style-blue">
+              <button onClick={linkGarmin} className="button-style-blue min-w-[120px]">
                 {t.link_garmin}
               </button>
             )}

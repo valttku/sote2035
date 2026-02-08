@@ -332,12 +332,12 @@ export default function CalendarClient() {
         </section>
 
         {/* Calendar grid */}
-        <section className="grid grid-cols-7 gap-2">
+        <section className="grid grid-cols-7 gap-4">
           {/* Empty cells for days before month starts */}
           {Array.from({ length: offset }).map((_, i) => (
             <div
               key={`blank-${year}-${month}-${i}`}
-              className="min-h-20 w-full"
+              className="min-h-18 w-full"
             />
           ))}
 
