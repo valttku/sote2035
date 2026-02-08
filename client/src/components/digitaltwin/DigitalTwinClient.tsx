@@ -31,11 +31,11 @@ export default function DigitalTwinClient() {
         {/* Main content: avatar + info panel */}
         <div className="flex flex-row items-start justify-center gap-20">
           {/* Avatar + dots on the left */}
-          <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] md:ml-40 flex-shrink-0 ">
+          <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-5">
             <img
               src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
               alt="Digital twin"
-              className="w-full h-auto block"
+              className="w-full max-h-[60vh] object-contain block"
             />
 
             {BODY_PARTS.map(({ id, top, left }) => (
