@@ -300,7 +300,7 @@ export default function CalendarClient() {
 
   return (
     <div className="w-full flex justify-center">
-      <div className="p-6 mx-auto w-full max-w-5xl space-y-6 ui-component-styles flex-1">
+      <div className="p-6 mx-auto w-full max-w-5xl space-y-6 ui-component-styles flex-1 overflow-auto">
         <h1 className="text-4xl">Calendar</h1>
 
         {/* Month navigation */}
