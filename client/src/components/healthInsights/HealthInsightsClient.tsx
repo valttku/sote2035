@@ -101,12 +101,12 @@ export default function HealthInsightsClient() {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="ui-component-styles p-6 w-full max-w-6xl h-[80vh] flex flex-col overflow-hidden">
-        <h1 className="text-4xl m-2">Health Insights</h1>
+    <div className="w-full flex justify-center">
+      <div className="ui-component-styles p-6 w-full max-w-5xl space-y-6 mx-auto flex flex-col flex-1">
+        <h1 className="text-4xl">Health Insights</h1>
 
         {/* Navigation */}
-        <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 pt-3">
+        <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 ">
           <div className="flex flex-wrap gap-2">
             {sections.map((section) => (
               <button
@@ -180,7 +180,7 @@ export default function HealthInsightsClient() {
             {/* AI Panel */}
             <div className="flex-[0_0_40%] min-w-[200px] flex flex-col overflow-hidden mt-4 md:mt-0">
               <div className="bg-[#1e1c4f]/20 border-2 border-[#31c2d5] rounded-lg flex flex-col h-full">
-                <p className="sticky top-0 z-10 text-lg p-1 pl-5 bg-[#31c2d5]">
+                <p className="sticky text-white top-0 z-10 text-lg p-1 pl-5 bg-[#31c2d5]">
                   AI Analysis
                 </p>
                 <div className="flex-1 overflow-y-auto p-5">

@@ -33,8 +33,9 @@ export default function ChooseServicePage() {
     <main className="flex items-center justify-center min-h-screen">
       <Modal onClose={closeModal}>
         <h1 className="text-2xl md:text-3xl mb-4 text-center">
-          {/* Responsive heading: text-2xl mobile, text-3xl desktop */} 
-          Choose your device</h1>
+          {/* Responsive heading: text-2xl mobile, text-3xl desktop */}
+          Choose your device
+        </h1>
 
         <div className="flex flex-col md:flex-row gap-4">
           {/* Responsive button container: stacked on mobile, horizontal on desktop */}
@@ -42,8 +43,8 @@ export default function ChooseServicePage() {
           {/* Garmin Button */}
           <button
             className="
-              bg-[var(--button-blue-bg)] 
-              hover:bg-[var(--button-blue-hover)] 
+              button-style-blue 
+              hover: button-blue-hover
               text-white 
               rounded-md 
               px-4 py-2 
@@ -58,8 +59,8 @@ export default function ChooseServicePage() {
           {/* Polar Button */}
           <button
             className="
-              bg-[var(--button-blue-bg)] 
-              hover:bg-[var(--button-blue-hover)] 
+              button-style-blue 
+              hover: button-blue-hover
               text-white 
               rounded-md 
               px-4 py-2 
@@ -74,8 +75,8 @@ export default function ChooseServicePage() {
           {/* Skip Button */}
           <button
             className="
-              bg-[var(--cancel-button-bg)] 
-              hover:bg-[var(--cancel-button-hover)] 
+              cancel-button-style
+              hover:cancel-button-hover
               text-white 
               rounded-md 
               px-4 py-2 

@@ -100,7 +100,7 @@ export default function HealthClient({ selected, onClose, selectedDate }: Props)
       {/* animation for panel */}
       <style jsx>{`
         .panel-animation {
-          animation: fade 0.3s ease-in-out forwards;
+          animation: fade 1s ease-in-out forwards;
         }
 
         @keyframes fade {

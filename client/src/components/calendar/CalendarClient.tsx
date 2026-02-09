@@ -46,9 +46,12 @@ export default function CalendarClient() {
 
   // Modal and day details state
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [healthStats, setHealthStats] = useState<HealthStatsResponse | null>(null);
+  const [healthStats, setHealthStats] = useState<HealthStatsResponse | null>(
+    null,
+  );
   const [activities, setActivities] = useState<ActivitiesResponse | null>(null);
-  const [manualActivities, setManualActivities] = useState<HealthStatsResponse | null>(null);
+  const [manualActivities, setManualActivities] =
+    useState<HealthStatsResponse | null>(null);
 
   // Fetch days with data for the current month
   useEffect(() => {
@@ -77,7 +80,7 @@ export default function CalendarClient() {
           ? (json.map((d) => String(d)) as MonthDaysResponse)
           : [];
 
-      // Mark days with data
+        // Mark days with data
         setDaysWithData(new Set(days));
       } catch {
         setError("Failed to connect to server");
@@ -195,7 +198,7 @@ export default function CalendarClient() {
       ) {
         const stats = json as HealthStatsResponse;
         const manualEntries = stats.entries.filter(
-          (e) => e.kind === "manual_activity"
+          (e) => e.kind === "manual_activity",
         );
         setManualActivities({
           date: stats.date,
@@ -296,16 +299,9 @@ export default function CalendarClient() {
   const offset = (firstDay + 6) % 7; // 0=Mon..6=Sun
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div
-        className="
-          p-6 space-y-6 mx-auto
-          w-full max-w-4xl
-          rounded-2xl
-          ui-component-styles
-        "
-      >
-        <h2 className="text-3xl">Calendar</h2>
+    <div className="w-full flex justify-center">
+      <div className="p-6 mx-auto w-full max-w-5xl space-y-6 ui-component-styles flex-1">
+        <h1 className="text-4xl">Calendar</h1>
 
         {/* Month navigation */}
         <div className="flex items-center gap-2">
@@ -326,53 +322,55 @@ export default function CalendarClient() {
           </button>
         </div>
 
-        {/* Error message (only when no date selected) */}
-        {error && !selectedDate && <p className="text-red-600">{error}</p>}
+        <div className="p-3">
+          {/* Error message (only when no date selected) */}
+          {error && !selectedDate && <p className="text-red-600">{error}</p>}
 
-        {/* Weekday headers */}
-        <section className="grid grid-cols-7 gap-2">
-          {getDaysOfWeek().map((day) => (
-            <div key={day} className="font-bold text-center pb-1">
-              {day}
-            </div>
-          ))}
-        </section>
+          {/* Weekday headers */}
+          <section className="grid grid-cols-7 gap-3">
+            {getDaysOfWeek().map((day) => (
+              <div key={day} className="font-bold text-center pb-1">
+                {day}
+              </div>
+            ))}
+          </section>
 
-        {/* Calendar grid */}
-        <section className="grid grid-cols-7 gap-2">
-          {/* Empty cells for days before month starts */}
-          {Array.from({ length: offset }).map((_, i) => (
-            <div
-              key={`blank-${year}-${month}-${i}`}
-              className="min-h-20 w-full"
-            />
-          ))}
+          {/* Calendar grid */}
+          <section className="grid grid-cols-7 gap-3">
+            {/* Empty cells for days before month starts */}
+            {Array.from({ length: offset }).map((_, i) => (
+              <div
+                key={`blank-${year}-${month}-${i}`}
+                className="min-h-18 w-full"
+              />
+            ))}
 
-          {/* Day cells */}
-          {Array.from({ length: totalDays }, (_, i) => {
-            const day = i + 1;
-            const date = toYmd(year, month, day);
-            const hasData = daysWithData.has(date);
+            {/* Day cells */}
+            {Array.from({ length: totalDays }, (_, i) => {
+              const day = i + 1;
+              const date = toYmd(year, month, day);
+              const hasData = daysWithData.has(date);
 
-            return (
-              <button
-                key={date}
-                onClick={() => openDay(date)}
-                className="border rounded min-h-20 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
-                title={hasData ? "Has health data" : "No health data"}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <span className="leading-none">{day}</span>
+              return (
+                <button
+                  key={date}
+                  onClick={() => openDay(date)}
+                  className="border rounded min-h-18 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
+                  title={hasData ? "Has health data" : "No health data"}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="leading-none">{day}</span>
 
-                  {/* --- Show dot if there is data for the day --- */}
-                  {hasData && (
-                    <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </section>
+                    {/* --- Show dot if there is data for the day --- */}
+                    {hasData && (
+                      <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </section>
+        </div>
 
         {/* Day details modal */}
         {selectedDate && (
@@ -482,7 +480,6 @@ export default function CalendarClient() {
             <ManualActivityForm
               selectedDate={selectedDate}
               onActivityAdded={() => {
-                loadHealthStats(selectedDate);
                 loadManualActivities(selectedDate);
               }}
             />
