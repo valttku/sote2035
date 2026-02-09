@@ -18,7 +18,11 @@ const TITLE: Record<BodyPartId, string> = {
 /*Get health data from database */
 type HealthMetrics = Record<string, string | number>;
 
-export default function HealthClient({ selected, onClose, selectedDate }: Props) {
+export default function HealthClient({
+  selected,
+  onClose,
+  selectedDate,
+}: Props) {
   const [metrics, setMetrics] = React.useState<HealthMetrics>({});
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -32,33 +36,12 @@ export default function HealthClient({ selected, onClose, selectedDate }: Props)
       setMetrics({});
 
       try {
-        let date = selectedDate || new Date().toISOString().split("T")[0];
+        const date = selectedDate || new Date().toISOString().split("T")[0];
 
         const res = await fetch(
-          `/api/v1/digitalTwin?date=2026-02-04&part=${selected}`,
+          `/api/v1/digitalTwin?date=${date}&part=${selected}`,
           { credentials: "include" },
         );
-
-        // If no data for today, try February 5th
-        if (!res.ok && res.status !== 401) {
-          const fallbackDate = "2025-02-05";
-          const retryRes = await fetch(
-            `/api/v1/digitalTwin?date=${fallbackDate}&part=${selected}`,
-            { credentials: "include" },
-          );
-          if (retryRes.ok) {
-            // Use the retry response
-            const data: unknown = await retryRes.json();
-            const metricsObj =
-              typeof data === "object" && data !== null && "metrics" in data
-          ? ((data as { metrics?: HealthMetrics }).metrics ?? {})
-          : {};
-            setMetrics(metricsObj);
-            setLoading(false);
-            return;
-          }
-        }
-
 
         if (!res.ok) {
           // Read body ONCE only in the error case
@@ -96,7 +79,9 @@ export default function HealthClient({ selected, onClose, selectedDate }: Props)
   return (
     <div className="panel-animation ui-component-styles p-4 pt-2">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">{TITLE[selected]}</h1>
+        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">
+          {TITLE[selected]}
+        </h1>
         <button className="mb-5" onClick={onClose}>
           ✕
         </button>
