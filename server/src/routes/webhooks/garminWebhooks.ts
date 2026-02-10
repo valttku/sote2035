@@ -53,10 +53,22 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
     const payload =
       req.body.userMetrics || (Array.isArray(req.body) ? req.body : [req.body]);
 
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
+
     for (const item of payload) {
       const providerUserId = item.userId;
       console.log("Processing Garmin user:", providerUserId);
-      if (!providerUserId) continue;
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in user-metrics item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
 
       const r = await db.query(
         `
@@ -78,11 +90,19 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
       const row = mapGarminUserMetricsToRows(user_id, item);
       console.log("Mapped row:", row);
       await upsertGarminUserMetrics(row);
+      console.log(
+        "Successfully upserted user metrics for user:",
+        r.rows[0].user_id,
+      );
     }
 
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });
@@ -178,22 +198,54 @@ garminWebhookRouter.post("/skin_temp", async (req, res) => {
     const payload =
       req.body.skinTempSummaries ||
       (Array.isArray(req.body) ? req.body : [req.body]);
+
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
+
     for (const item of payload) {
       const providerUserId = item.userId;
-      if (!providerUserId) continue;
+      console.log("Processing Garmin user:", providerUserId);
+
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in skin_temp item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
+
       const r = await db.query(
         `SELECT user_id FROM app.user_integrations
          WHERE provider = 'garmin' AND provider_user_id = $1`,
         [providerUserId],
       );
 
-      if (r.rowCount === 0) continue;
+      console.log("Found internal user:", r.rows[0]?.user_id);
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
+
       const row = mapGarminSkinTempToRow(r.rows[0].user_id, item);
+      console.log("Mapped skin_temp row:", JSON.stringify(row, null, 2));
+
       await upsertGarminSkinTemp(row);
+      console.log(
+        "Successfully upserted skin_temp data for user:",
+        r.rows[0].user_id,
+      );
     }
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin Skin Temp webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });
@@ -208,9 +260,23 @@ garminWebhookRouter.post("/sleeps", async (req, res) => {
       req.body.sleepSummaries ||
       (Array.isArray(req.body) ? req.body : [req.body]);
 
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
+
     for (const item of payload) {
       const providerUserId = item.userId;
-      if (!providerUserId) continue;
+      console.log("Processing Garmin user:", providerUserId);
+
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in sleep item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
 
       const r = await db.query(
         `SELECT user_id FROM app.user_integrations
@@ -218,15 +284,30 @@ garminWebhookRouter.post("/sleeps", async (req, res) => {
         [providerUserId],
       );
 
-      if (r.rowCount === 0) continue;
+      console.log("Found internal user:", r.rows[0]?.user_id);
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
 
       const row = mapGarminSleepToRow(r.rows[0].user_id, item);
+      console.log("Mapped sleep row:", JSON.stringify(row, null, 2));
+
       await upsertGarminSleep(row);
+      console.log(
+        "Successfully upserted sleep data for user:",
+        r.rows[0].user_id,
+      );
     }
 
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin Sleep webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });
@@ -235,26 +316,59 @@ garminWebhookRouter.post("/sleeps", async (req, res) => {
 garminWebhookRouter.post("/stress", async (req, res) => {
   console.log("Stress Webhook received at:", new Date().toISOString());
   console.log("Payload:", JSON.stringify(req.body, null, 2));
+
   try {
     const payload =
       req.body.stressSummaries ||
       (Array.isArray(req.body) ? req.body : [req.body]);
+
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
+
     for (const item of payload) {
       const providerUserId = item.userId;
-      if (!providerUserId) continue;
+      console.log("Processing Garmin user:", providerUserId);
+
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in stress item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
+
       const r = await db.query(
         `SELECT user_id FROM app.user_integrations
          WHERE provider = 'garmin' AND provider_user_id = $1`,
         [providerUserId],
       );
 
-      if (r.rowCount === 0) continue;
+      console.log("Found internal user:", r.rows[0]?.user_id);
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
+
       const row = mapGarminStressToRow(r.rows[0].user_id, item);
+      console.log("Mapped stress row:", JSON.stringify(row, null, 2));
+
       await upsertGarminStress(row);
+      console.log(
+        "Successfully upserted stress data for user:",
+        r.rows[0].user_id,
+      );
     }
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin Stress webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });
@@ -266,12 +380,27 @@ garminWebhookRouter.post("/respiration", async (req, res) => {
 
   try {
     const payload =
+      req.body.allDayRespiration ||
       req.body.respirationSummaries ||
       (Array.isArray(req.body) ? req.body : [req.body]);
 
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
+
     for (const item of payload) {
       const providerUserId = item.userId;
-      if (!providerUserId) continue;
+      console.log("Processing Garmin user:", providerUserId);
+
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in respiration item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
 
       const r = await db.query(
         `SELECT user_id FROM app.user_integrations
@@ -279,15 +408,30 @@ garminWebhookRouter.post("/respiration", async (req, res) => {
         [providerUserId],
       );
 
-      if (r.rowCount === 0) continue;
+      console.log("Found internal user:", r.rows[0]?.user_id);
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
 
       const row = mapGarminRespirationToRow(r.rows[0].user_id, item);
+      console.log("Mapped respiration row:", JSON.stringify(row, null, 2));
+
       await upsertGarminRespiration(row);
+      console.log(
+        "Successfully upserted respiration data for user:",
+        r.rows[0].user_id,
+      );
     }
 
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin Respiration webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });
@@ -302,9 +446,23 @@ garminWebhookRouter.post("/body_comp", async (req, res) => {
       req.body.bodyCompositionSummaries ||
       (Array.isArray(req.body) ? req.body : [req.body]);
 
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
+
     for (const item of payload) {
       const providerUserId = item.userId;
-      if (!providerUserId) continue;
+      console.log("Processing Garmin user:", providerUserId);
+
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in body_comp item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
 
       const r = await db.query(
         `SELECT user_id FROM app.user_integrations
@@ -312,15 +470,30 @@ garminWebhookRouter.post("/body_comp", async (req, res) => {
         [providerUserId],
       );
 
-      if (r.rowCount === 0) continue;
+      console.log("Found internal user:", r.rows[0]?.user_id);
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
 
       const row = mapGarminBodyCompToRow(r.rows[0].user_id, item);
+      console.log("Mapped body_comp row:", JSON.stringify(row, null, 2));
+
       await upsertGarminBodyComp(row);
+      console.log(
+        "Successfully upserted body_comp data for user:",
+        r.rows[0].user_id,
+      );
     }
 
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin Body Comp webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });
