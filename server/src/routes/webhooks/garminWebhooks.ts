@@ -207,10 +207,18 @@ garminWebhookRouter.post("/sleeps", async (req, res) => {
     const payload =
       req.body.sleepSummaries ||
       (Array.isArray(req.body) ? req.body : [req.body]);
+    
+    console.log("Extracted payload array length:", Array.isArray(payload) ? payload.length : "Not an array");
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
 
     for (const item of payload) {
       const providerUserId = item.userId;
-      if (!providerUserId) continue;
+      console.log("Processing Garmin user:", providerUserId);
+      
+      if (!providerUserId) {
+        console.warn("No userId found in sleep item:", JSON.stringify(item, null, 2));
+        continue;
+      }
 
       const r = await db.query(
         `SELECT user_id FROM app.user_integrations
@@ -218,15 +226,24 @@ garminWebhookRouter.post("/sleeps", async (req, res) => {
         [providerUserId],
       );
 
-      if (r.rowCount === 0) continue;
+      console.log("Found internal user:", r.rows[0]?.user_id);
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
 
       const row = mapGarminSleepToRow(r.rows[0].user_id, item);
+      console.log("Mapped sleep row:", JSON.stringify(row, null, 2));
+      
       await upsertGarminSleep(row);
+      console.log("Successfully upserted sleep data for user:", r.rows[0].user_id);
     }
 
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin Sleep webhook failed:", err);
+    console.error("Error stack:", err instanceof Error ? err.stack : "No stack trace");
     res.sendStatus(200);
   }
 });
