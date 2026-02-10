@@ -1,5 +1,5 @@
 "use client";
-import { StatCard } from "./StatCard";
+import { StatCard } from "../components/StatCard";
 
 export type Dailies = {
   id: string;
@@ -96,24 +96,6 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
           label="Avg Heart Rate"
           value={`${dailies.avg_heart_rate} bpm`}
           icon="❤️"
-        />
-
-        <StatCard
-          label="Stress Level"
-          value={`${dailies.avg_stress_level}`}
-          icon="🧠"
-        />
-
-        <StatCard
-          label="Floors Climbed"
-          value={`${dailies.floors_climbed} / ${dailies.floors_climbed_goal}`}
-          icon="🧗"
-        />
-
-        <StatCard
-          label="Body Battery"
-          value={`+${dailies.body_battery_charged} / -${dailies.body_battery_drained}`}
-          icon="🔋"
         />
       </div>
     </div>

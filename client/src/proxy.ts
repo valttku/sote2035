@@ -19,7 +19,7 @@ export default function proxy(request: NextRequest) {
   const session = request.cookies.get("session");
 
   // routes that do NOT require authentication
-  const publicRoutes = ["/login", "/forgot-password", "/reset-password"];  
+  const publicRoutes = ["/startup", "/forgot-password", "/reset-password"];
 
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route),
@@ -27,11 +27,11 @@ export default function proxy(request: NextRequest) {
 
   // not logged in = redirect to login unless route is public
   if (!session && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/startup", request.url));
   }
 
   // logged in = prevent access to login page
-  if (session && pathname.startsWith("/login")) {
+  if (session && pathname.startsWith("/startup")) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

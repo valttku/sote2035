@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Activity } from "./ActivitiesSection";
-import { Dailies } from "./DailiesSection";
+import { Activity } from "../sections/ActivitiesSection";
+import { Dailies } from "../sections/DailiesSection";
 
 export type UserProfile = {
   id: number;
