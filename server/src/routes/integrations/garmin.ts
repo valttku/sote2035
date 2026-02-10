@@ -3,6 +3,7 @@ import { buildGarminAuthUrl } from "./garmin-oauth/garminAuthUrl.js";
 import { consumeOAuthState } from "./garmin-oauth/stateStore.js";
 import { exchangeGarminCodeForToken } from "./garmin-oauth/garminToken.js";
 import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
+import { refreshGarminToken } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
 import {
@@ -199,53 +200,153 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
   try {
     const userId = (req as any).userId as number;
     const r = await db.query(
-      `SELECT access_token FROM app.user_integrations WHERE user_id = $1 AND provider = 'garmin'`,
+      `SELECT access_token, refresh_token, provider_user_id FROM app.user_integrations WHERE user_id = $1 AND provider = 'garmin'`,
       [userId],
     );
     if (r.rowCount === 0) {
       return res.status(400).json({ error: "Garmin not linked" });
     }
-    const accessToken = r.rows[0].access_token;
+
+    let accessToken = r.rows[0].access_token;
+    const refreshToken = r.rows[0].refresh_token;
+    const garminUserId = r.rows[0].provider_user_id;
+
+    if (!garminUserId) {
+      return res.status(400).json({ error: "Garmin user ID not found" });
+    }
+
+    // Helper to refresh token and update database
+    const refreshAccessToken = async () => {
+      if (!refreshToken) {
+        throw new Error("No refresh token available. Please reconnect Garmin.");
+      }
+
+      console.log("Refreshing Garmin access token...");
+      const newTokens = await refreshGarminToken(refreshToken);
+      accessToken = newTokens.access_token;
+
+      // Update database with new tokens
+      await db.query(
+        `UPDATE app.user_integrations 
+         SET access_token = $1, 
+             refresh_token = $2,
+             token_expires_at = $3,
+             updated_at = NOW()
+         WHERE user_id = $4 AND provider = 'garmin'`,
+        [
+          newTokens.access_token,
+          newTokens.refresh_token || refreshToken,
+          newTokens.expires_in
+            ? new Date(Date.now() + newTokens.expires_in * 1000)
+            : null,
+          userId,
+        ],
+      );
+      console.log("✓ Token refreshed successfully");
+    };
+
+    // Helper to make authenticated fetch with automatic token refresh
+    const authenticatedFetch = async (
+      url: string,
+      options: RequestInit = {},
+      retry = true,
+    ): Promise<Response> => {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // If 401 and we have a refresh token, refresh and retry once
+      if (response.status === 401 && retry && refreshToken) {
+        try {
+          await refreshAccessToken();
+          // Retry with new token
+          return authenticatedFetch(url, options, false);
+        } catch (err) {
+          console.error("Token refresh failed:", err);
+          throw err;
+        }
+      }
+
+      return response;
+    };
 
     const results = {
       sleeps: 0,
       respiration: 0,
       stress: 0,
       bodyComp: 0,
-      skinTemp: 0,
-      hrv: 0,
-      userMetrics: 0,
       dailies: 0,
       activities: 0,
-      moveIQ: 0,
       errors: [] as string[],
     };
 
-    const GARMIN_API_BASE =
-      "https://apis.garmin.com/wellness-api/rest/backfill";
-    const headers = {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    };
+    // Date range: last 7 days for backfill, last 24 hours for daily data
+    const endDate = Math.floor(Date.now() / 1000); // Current time in seconds
+    const startDate = endDate - 7 * 24 * 60 * 60; // 7 days ago for backfill
+    const dailyStartDate = endDate - 24 * 60 * 60; // 24 hours ago for daily endpoint
 
-    // Helper function to fetch and process data
+    const GARMIN_API_BASE = "https://apis.garmin.com/wellness-api/rest";
+
+    // Helper function to fetch and process data with custom parameters
     const syncDataType = async (
       endpoint: string,
       arrayKey: string,
       mapper: (user_id: number, item: any) => any,
       upsert: (row: any) => Promise<void>,
       resultKey: string,
+      customStartDate?: number,
+      customEndDate?: number,
+      useUploadParams?: boolean,
     ) => {
       try {
         console.log(`Syncing ${endpoint}...`);
-        const response = await fetch(`${GARMIN_API_BASE}${endpoint}`, {
-          headers,
+        const start = customStartDate ?? startDate;
+        const end = customEndDate ?? endDate;
+        
+        // Use different parameter names for dailies endpoint
+        const startParam = useUploadParams ? 'uploadStartTimeInSeconds' : 'summaryStartTimeInSeconds';
+        const endParam = useUploadParams ? 'uploadEndTimeInSeconds' : 'summaryEndTimeInSeconds';
+        const url = `${GARMIN_API_BASE}${endpoint}?${startParam}=${start}&${endParam}=${end}`;
+        
+        console.log(`  URL: ${url}`);
+        const response = await authenticatedFetch(url, {
+          headers: { "Content-Type": "application/json" },
         });
+        
+        // Handle 409 Conflict (duplicate backfill) as a success case
+        if (response.status === 409) {
+          console.log(`  ⚠ Duplicate backfill detected for ${endpoint} - skipping (already processed)`);
+          (results as any)[resultKey] = 0;
+          return;
+        }
+        
         if (!response.ok) {
           const text = await response.text();
           throw new Error(`Garmin API error: ${response.status} ${text}`);
         }
-        const data = await response.json();
+        
+        // Handle empty responses
+        const text = await response.text();
+        if (!text || text.trim() === '') {
+          console.log(`  ⚠ Empty response from ${endpoint}`);
+          (results as any)[resultKey] = 0;
+          return;
+        }
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseErr) {
+          console.log(`  ⚠ Invalid JSON from ${endpoint}: ${text.substring(0, 100)}`);
+          (results as any)[resultKey] = 0;
+          return;
+        }
+        
+        console.log(`  Response keys: ${Object.keys(data).join(", ")}`);
         const items = data[arrayKey] || [];
         let count = 0;
         for (const item of items) {
@@ -262,97 +363,67 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
       }
     };
 
-    // Special handler for /userMetrics which returns both userMetrics and dailies
-    const syncUserMetrics = async () => {
-      try {
-        console.log("Syncing /userMetrics...");
-        const response = await fetch(`${GARMIN_API_BASE}/userMetrics`, {
-          headers,
-        });
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(`Garmin API error: ${response.status} ${text}`);
-        }
-        const data = await response.json();
-
-        // Process userMetrics
-        const metrics = data.userMetrics || [];
-        for (const item of metrics) {
-          const row = mapGarminUserMetricsToRows(userId, item);
-          await upsertGarminUserMetrics(row);
-        }
-        results.userMetrics = metrics.length;
-        console.log(`  ✓ Synced ${metrics.length} userMetrics records`);
-
-        // Process dailies (if available in same response)
-        const dailies = data.dailies || data.summaries || [];
-        for (const item of dailies) {
-          const row = mapGarminDailiesToRows(userId, item);
-          await upsertGarminDailies(row);
-        }
-        results.dailies = dailies.length;
-        if (dailies.length > 0) {
-          console.log(`  ✓ Synced ${dailies.length} dailies records`);
-        }
-      } catch (err: any) {
-        const msg = `Failed to sync /userMetrics: ${err.message}`;
-        console.error(msg);
-        results.errors.push(msg);
-      }
-    };
-
     // Execute all syncs in parallel
     await Promise.all([
       syncDataType(
-        "/sleeps",
+        "/backfill/sleeps",
         "sleeps",
         mapGarminSleepToRow,
         upsertGarminSleep,
         "sleeps",
       ),
       syncDataType(
-        "/respiration",
+        "/backfill/respiration",
         "allDayRespiration",
         mapGarminRespirationToRow,
         upsertGarminRespiration,
         "respiration",
       ),
       syncDataType(
-        "/stress",
-        "stress",
+        "/backfill/stressDetails",
+        "stressDetailsData",
         mapGarminStressToRow,
         upsertGarminStress,
         "stress",
       ),
       syncDataType(
-        "/bodyComposition",
-        "bodyComposition",
+        "/backfill/bodyComps",
+        "dateWeightList",
         mapGarminBodyCompToRow,
         upsertGarminBodyComp,
         "bodyComp",
       ),
       syncDataType(
-        "/skinTemperature",
-        "skinTemp",
-        mapGarminSkinTempToRow,
-        upsertGarminSkinTemp,
-        "skinTemp",
-      ),
-      syncDataType("/hrv", "hrv", mapGarminHrvToRow, upsertGarminHrv, "hrv"),
-      syncUserMetrics(),
-      syncDataType(
-        "/activities",
-        "activities",
+        "/backfill/activities",
+        "activityDetails",
         mapGarminActivityToRow,
         upsertGarminActivity,
         "activities",
       ),
       syncDataType(
-        "/moveIQ",
-        "moveIQ",
+        "/backfill/moveiq",
+        "moveIQActivities",
         mapGarminMoveIQToRow,
         upsertGarminMoveIQ,
-        "moveIQ",
+        "moveiq",
+      ),
+      syncDataType(
+        "/backfill/userMetrics",
+        "userMetrics",
+        mapGarminUserMetricsToRows,
+        upsertGarminUserMetrics,
+        "metrics",
+      ),
+      // Daily data with 24-hour window (Garmin API limit)
+      syncDataType(
+        "/dailies",
+        "dailies",
+        mapGarminDailiesToRows,
+        upsertGarminDailies,
+        "dailies",
+        dailyStartDate,
+        endDate,
+        true, // Use uploadStartTimeInSeconds/uploadEndTimeInSeconds for dailies
       ),
     ]);
 
