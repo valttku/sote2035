@@ -13,9 +13,16 @@ export type GarminHrvRow = {
 };
 
 export function mapGarminHrvToRow(user_id: number, h: any): GarminHrvRow {
+  // Derive day_date from startTimeInSeconds if calendarDate is not provided
+  let day_date = h.calendarDate;
+  if (!day_date && h.startTimeInSeconds) {
+    const date = new Date(h.startTimeInSeconds * 1000);
+    day_date = date.toISOString().split('T')[0];
+  }
+
   return {
     user_id,
-    day_date: h.calendarDate,
+    day_date,
     summary_id: h.summaryId ?? null,
     last_night_avg: h.lastNightAvg ?? null,
     last_night_5min_high: h.lastNight5MinHigh ?? null,

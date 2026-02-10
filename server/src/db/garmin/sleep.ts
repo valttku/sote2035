@@ -23,9 +23,16 @@ export type GarminSleepRow = {
 };
 
 export function mapGarminSleepToRow(user_id: number, s: any): GarminSleepRow {
+  // Derive day_date from startTimeInSeconds if calendarDate is not provided
+  let day_date = s.calendarDate;
+  if (!day_date && s.startTimeInSeconds) {
+    const date = new Date(s.startTimeInSeconds * 1000);
+    day_date = date.toISOString().split("T")[0];
+  }
+
   return {
     user_id,
-    day_date: s.calendarDate,
+    day_date,
     summary_id: s.summaryId ?? null,
     duration_in_seconds: s.durationInSeconds ?? null,
     total_nap_duration_in_seconds: s.totalNapDurationInSeconds ?? null,
@@ -92,12 +99,15 @@ export async function upsertGarminSleep(row: GarminSleepRow) {
       row.awake_duration_in_seconds,
       row.sleep_levels_map ? JSON.stringify(row.sleep_levels_map) : null,
       row.validation,
-      row.time_offset_sleep_spo2 ? JSON.stringify(row.time_offset_sleep_spo2) : null,
-      row.time_offset_sleep_respiration ? JSON.stringify(row.time_offset_sleep_respiration) : null,
+      row.time_offset_sleep_spo2
+        ? JSON.stringify(row.time_offset_sleep_spo2)
+        : null,
+      row.time_offset_sleep_respiration
+        ? JSON.stringify(row.time_offset_sleep_respiration)
+        : null,
       row.overall_sleep_score ? JSON.stringify(row.overall_sleep_score) : null,
       row.sleep_scores ? JSON.stringify(row.sleep_scores) : null,
       row.naps ? JSON.stringify(row.naps) : null,
     ],
   );
 }
-
