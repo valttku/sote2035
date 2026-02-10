@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import Navbar from "./navbar/Navbar";
+import Navbar from "./NavBar/Navbar";
 
 export default function AppLayout({
   children,
