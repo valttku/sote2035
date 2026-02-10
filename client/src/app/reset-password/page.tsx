@@ -1,10 +1,10 @@
 "use client";
 import Modal from "@/components/Modal";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, Suspense } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const params = useSearchParams();
   const token = params.get("token");
   const router = useRouter();
@@ -198,5 +198,19 @@ export default function ResetPasswordPage() {
         </form>
       </Modal>
     </main>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex items-center justify-center min-h-screen">
+          <div>Loading...</div>
+        </main>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
