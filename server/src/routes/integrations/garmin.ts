@@ -5,6 +5,43 @@ import { exchangeGarminCodeForToken } from "./garmin-oauth/garminToken.js";
 import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
+import {
+  mapGarminSleepToRow,
+  upsertGarminSleep,
+} from "../../db/garmin/sleep.js";
+import {
+  mapGarminRespirationToRow,
+  upsertGarminRespiration,
+} from "../../db/garmin/respiration.js";
+import {
+  mapGarminStressToRow,
+  upsertGarminStress,
+} from "../../db/garmin/stress.js";
+import {
+  mapGarminBodyCompToRow,
+  upsertGarminBodyComp,
+} from "../../db/garmin/bodyComp.js";
+import {
+  mapGarminSkinTempToRow,
+  upsertGarminSkinTemp,
+} from "../../db/garmin/skinTemp.js";
+import { mapGarminHrvToRow, upsertGarminHrv } from "../../db/garmin/hrv.js";
+import {
+  mapGarminDailiesToRows,
+  upsertGarminDailies,
+} from "../../db/garmin/dailies.js";
+import {
+  mapGarminUserMetricsToRows,
+  upsertGarminUserMetrics,
+} from "../../db/garmin/metrics.js";
+import {
+  mapGarminActivityToRow,
+  upsertGarminActivity,
+} from "../../db/garmin/activities.js";
+import {
+  mapGarminMoveIQToRow,
+  upsertGarminMoveIQ,
+} from "../../db/garmin/moveIQ.js";
 
 // Router for Garmin integration endpoints
 
@@ -154,6 +191,178 @@ garminRouter.get("/test-profile", async (req, res) => {
   } catch (err: any) {
     console.error("Test route error:", err);
     res.status(500).send(`Server error: ${err.message}`);
+  }
+});
+
+// POST /api/v1/integrations/garmin/sync-now
+garminRouter.post("/sync-now", authRequired, async (req, res) => {
+  try {
+    const userId = (req as any).userId as number;
+    const r = await db.query(
+      `SELECT access_token FROM app.user_integrations WHERE user_id = $1 AND provider = 'garmin'`,
+      [userId],
+    );
+    if (r.rowCount === 0) {
+      return res.status(400).json({ error: "Garmin not linked" });
+    }
+    const accessToken = r.rows[0].access_token;
+
+    const results = {
+      sleeps: 0,
+      respiration: 0,
+      stress: 0,
+      bodyComp: 0,
+      skinTemp: 0,
+      hrv: 0,
+      userMetrics: 0,
+      dailies: 0,
+      activities: 0,
+      moveIQ: 0,
+      errors: [] as string[],
+    };
+
+    const GARMIN_API_BASE =
+      "https://apis.garmin.com/wellness-api/rest/backfill";
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    };
+
+    // Helper function to fetch and process data
+    const syncDataType = async (
+      endpoint: string,
+      arrayKey: string,
+      mapper: (user_id: number, item: any) => any,
+      upsert: (row: any) => Promise<void>,
+      resultKey: string,
+    ) => {
+      try {
+        console.log(`Syncing ${endpoint}...`);
+        const response = await fetch(`${GARMIN_API_BASE}${endpoint}`, {
+          headers,
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Garmin API error: ${response.status} ${text}`);
+        }
+        const data = await response.json();
+        const items = data[arrayKey] || [];
+        let count = 0;
+        for (const item of items) {
+          const row = mapper(userId, item);
+          await upsert(row);
+          count++;
+        }
+        console.log(`  ✓ Synced ${count} ${endpoint} records`);
+        (results as any)[resultKey] = count;
+      } catch (err: any) {
+        const msg = `Failed to sync ${endpoint}: ${err.message}`;
+        console.error(msg);
+        results.errors.push(msg);
+      }
+    };
+
+    // Special handler for /userMetrics which returns both userMetrics and dailies
+    const syncUserMetrics = async () => {
+      try {
+        console.log("Syncing /userMetrics...");
+        const response = await fetch(`${GARMIN_API_BASE}/userMetrics`, {
+          headers,
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Garmin API error: ${response.status} ${text}`);
+        }
+        const data = await response.json();
+
+        // Process userMetrics
+        const metrics = data.userMetrics || [];
+        for (const item of metrics) {
+          const row = mapGarminUserMetricsToRows(userId, item);
+          await upsertGarminUserMetrics(row);
+        }
+        results.userMetrics = metrics.length;
+        console.log(`  ✓ Synced ${metrics.length} userMetrics records`);
+
+        // Process dailies (if available in same response)
+        const dailies = data.dailies || data.summaries || [];
+        for (const item of dailies) {
+          const row = mapGarminDailiesToRows(userId, item);
+          await upsertGarminDailies(row);
+        }
+        results.dailies = dailies.length;
+        if (dailies.length > 0) {
+          console.log(`  ✓ Synced ${dailies.length} dailies records`);
+        }
+      } catch (err: any) {
+        const msg = `Failed to sync /userMetrics: ${err.message}`;
+        console.error(msg);
+        results.errors.push(msg);
+      }
+    };
+
+    // Execute all syncs in parallel
+    await Promise.all([
+      syncDataType(
+        "/sleeps",
+        "sleeps",
+        mapGarminSleepToRow,
+        upsertGarminSleep,
+        "sleeps",
+      ),
+      syncDataType(
+        "/respiration",
+        "allDayRespiration",
+        mapGarminRespirationToRow,
+        upsertGarminRespiration,
+        "respiration",
+      ),
+      syncDataType(
+        "/stress",
+        "stress",
+        mapGarminStressToRow,
+        upsertGarminStress,
+        "stress",
+      ),
+      syncDataType(
+        "/bodyComposition",
+        "bodyComposition",
+        mapGarminBodyCompToRow,
+        upsertGarminBodyComp,
+        "bodyComp",
+      ),
+      syncDataType(
+        "/skinTemperature",
+        "skinTemp",
+        mapGarminSkinTempToRow,
+        upsertGarminSkinTemp,
+        "skinTemp",
+      ),
+      syncDataType("/hrv", "hrv", mapGarminHrvToRow, upsertGarminHrv, "hrv"),
+      syncUserMetrics(),
+      syncDataType(
+        "/activities",
+        "activities",
+        mapGarminActivityToRow,
+        upsertGarminActivity,
+        "activities",
+      ),
+      syncDataType(
+        "/moveIQ",
+        "moveIQ",
+        mapGarminMoveIQToRow,
+        upsertGarminMoveIQ,
+        "moveIQ",
+      ),
+    ]);
+
+    res.json({
+      message: "Sync completed",
+      results,
+    });
+  } catch (err: any) {
+    console.error("Sync now error:", err);
+    res.status(500).json({ error: "Failed to trigger sync" });
   }
 });
 

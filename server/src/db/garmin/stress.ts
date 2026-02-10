@@ -16,9 +16,16 @@ export type GarminStressRow = {
 };
 
 export function mapGarminStressToRow(user_id: number, s: any): GarminStressRow {
+  // Derive day_date from startTimeInSeconds if calendarDate is not provided
+  let day_date = s.calendarDate;
+  if (!day_date && s.startTimeInSeconds) {
+    const date = new Date(s.startTimeInSeconds * 1000);
+    day_date = date.toISOString().split('T')[0];
+  }
+
   return {
     user_id,
-    day_date: s.calendarDate,
+    day_date,
     summary_id: s.summaryId ?? null,
     start_time_in_seconds: s.startTimeInSeconds ?? null,
     start_time_offset_in_seconds: s.startTimeOffsetInSeconds ?? null,

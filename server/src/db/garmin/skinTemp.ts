@@ -11,9 +11,16 @@ export type GarminSkinTempRow = {
 };
 
 export function mapGarminSkinTempToRow(user_id: number, s: any): GarminSkinTempRow {
+  // Derive day_date from startTimeInSeconds if calendarDate is not provided
+  let day_date = s.calendarDate;
+  if (!day_date && s.startTimeInSeconds) {
+    const date = new Date(s.startTimeInSeconds * 1000);
+    day_date = date.toISOString().split('T')[0];
+  }
+
   return {
     user_id,
-    day_date: s.calendarDate,
+    day_date,
     summary_id: s.summaryId ?? null,
     avg_deviation_celsius: s.avgDeviationCelsius ?? null,
     duration_in_seconds: s.durationInSeconds ?? null,
