@@ -27,6 +27,12 @@ export async function createGarminTables() {
     on app.user_metrics_garmin (user_id, day_date);
 `);
 
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_metrics_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
+
   // automatically update user_metrics.updated_at on every update
   await db.query(`
   drop trigger if exists update_user_metrics_garmin_updated_at on app.user_metrics_garmin;
@@ -113,7 +119,6 @@ export async function createGarminTables() {
     -- timestamps
     start_time_in_seconds bigint,
     start_time_offset_in_seconds integer,
-    source varchar(50),
     
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -124,6 +129,12 @@ export async function createGarminTables() {
   create index if not exists idx_user_dailies_garmin_user_day
     on app.user_dailies_garmin (user_id, day_date);
 `);
+
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_dailies_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
 
   // Trigger for user_dailies_garmin (ensure health_days entry exists)
   await db.query(`
@@ -184,6 +195,12 @@ export async function createGarminTables() {
     on app.user_hrv_garmin (user_id, day_date);
 `);
 
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_hrv_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
+
   // Trigger for user_hrv_garmin
   await db.query(`
     create or replace function app.ensure_health_day_exists_for_hrv()
@@ -238,6 +255,12 @@ export async function createGarminTables() {
   create index if not exists idx_user_skin_temp_garmin_user_day
     on app.user_skin_temp_garmin (user_id, day_date);
 `);
+
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_skin_temp_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
 
   // automatically update user_skin_temp_garmin.updated_at on every update
   await db.query(`
@@ -378,6 +401,12 @@ export async function createGarminTables() {
     on app.user_stress_garmin (user_id, day_date);
 `);
 
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_stress_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
+
   // automatically update user_stress_garmin.updated_at on every update
   await db.query(`
   drop trigger if exists update_user_stress_garmin_updated_at on app.user_stress_garmin;
@@ -432,6 +461,12 @@ export async function createGarminTables() {
   create index if not exists idx_user_respiration_garmin_user_day
     on app.user_respiration_garmin (user_id, day_date);
 `);
+
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_respiration_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
 
   // automatically update user_respiration_garmin.updated_at on every update
   await db.query(`
@@ -490,7 +525,11 @@ export async function createGarminTables() {
   create index if not exists idx_user_body_comp_garmin_user_id
     on app.user_body_comp_garmin (user_id);
 `);
-
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_body_comp_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
   // automatically update user_body_comp_garmin.updated_at on every update
   await db.query(`
   drop trigger if exists update_user_body_comp_garmin_updated_at on app.user_body_comp_garmin;
@@ -573,6 +612,12 @@ export async function createGarminTables() {
     on app.user_activities_garmin (user_id, start_time_in_seconds);
 `);
 
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_activities_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
+
   // automatically update user_activities_garmin.updated_at on every update
   await db.query(`
   drop trigger if exists update_user_activities_garmin_updated_at on app.user_activities_garmin;
@@ -609,6 +654,12 @@ export async function createGarminTables() {
   create index if not exists idx_user_move_iq_garmin_user_day
     on app.user_move_iq_garmin (user_id, day_date);
 `);
+
+  // Add source column if it doesn't exist (migration for existing tables)
+  await db.query(`
+    alter table app.user_move_iq_garmin
+    add column if not exists source varchar(50) not null default 'garmin';
+  `);
 
   // automatically update user_move_iq_garmin.updated_at on every update
   await db.query(`
