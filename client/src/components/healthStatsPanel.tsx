@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
-import type { BodyPartId } from "./DigitalTwinClient";
+
+export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
 type Props = {
   selected: BodyPartId;
@@ -18,7 +19,7 @@ const TITLE: Record<BodyPartId, string> = {
 /*Get health data from database */
 type HealthMetrics = Record<string, string | number>;
 
-export default function HealthClient({
+export default function HealthStatsPanel({
   selected,
   onClose,
   selectedDate,
@@ -39,7 +40,7 @@ export default function HealthClient({
         const date = selectedDate || new Date().toISOString().split("T")[0];
 
         const res = await fetch(
-          `/api/v1/digitalTwin?date=${date}&part=${selected}`,
+          `/api/v1/home?date=${date}&part=${selected}`,
           { credentials: "include" },
         );
 

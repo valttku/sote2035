@@ -5,7 +5,7 @@ import Modal from "../../components/Modal";
 import LoginForm from "../../components/LoginForm";
 import RegisterForm from "../../components/RegisterForm";
 
-export default function LoginPage() {
+export default function StartUpPage() {
   // States to track if login and registration modal visibility
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);

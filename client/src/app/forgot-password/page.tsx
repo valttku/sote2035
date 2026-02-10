@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
               If an account exists for this email, a password reset link has
               been sent.
             </p>
-            <a href="/login" className="text-sm md:text-base text-[#c3dafe]/80 underline">
+            <a href="/startup" className="text-sm md:text-base text-[#c3dafe]/80 underline">
             
               {/* RESPONSIVE: text-sm mobile, md:text-base desktop */}
               Back to login
