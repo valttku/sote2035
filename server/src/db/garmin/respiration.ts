@@ -11,9 +11,16 @@ export type GarminRespirationRow = {
 };
 
 export function mapGarminRespirationToRow(user_id: number, r: any): GarminRespirationRow {
+  // Derive day_date from startTimeInSeconds if calendarDate is not provided
+  let day_date = r.calendarDate;
+  if (!day_date && r.startTimeInSeconds) {
+    const date = new Date(r.startTimeInSeconds * 1000);
+    day_date = date.toISOString().split('T')[0];
+  }
+
   return {
     user_id,
-    day_date: r.calendarDate,
+    day_date,
     summary_id: r.summaryId ?? null,
     start_time_in_seconds: r.startTimeInSeconds ?? null,
     duration_in_seconds: r.durationInSeconds ?? null,

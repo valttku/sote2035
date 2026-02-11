@@ -172,47 +172,32 @@ export async function ensureSchema() {
   execute function app.update_health_days_updated_at();
 `);
 
-  // create health_stat_entries table
+  // health_stat_entries table
   await db.query(`
-  create table if not exists app.health_stat_entries (
-    id uuid primary key default gen_random_uuid(),
-    user_id integer not null references app.users(id) on delete cascade,
-    day_date date not null,
+    create table if not exists app.health_stat_entries (
+      id uuid primary key default gen_random_uuid(),
+      user_id integer not null references app.users(id) on delete cascade,
+      day_date date not null,
+      source varchar(50),
+      kind varchar(80) not null,
+      data jsonb not null,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    );
 
-    source varchar(50),         -- optional for now: 'garmin', 'polar'
-    kind varchar(80) not null,  -- free text for now
-    data jsonb not null,
+    create index if not exists idx_health_stat_entries_user_day
+      on app.health_stat_entries (user_id, day_date);
 
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now()
-  );
+    create unique index if not exists ux_health_stat_entries_user_day_kind
+      on app.health_stat_entries (user_id, day_date, kind);
+  `);
 
-  create index if not exists idx_health_stat_entries_user_day
-    on app.health_stat_entries (user_id, day_date);
-
-  create unique index if not exists ux_health_stat_entries_user_day_kind
-  on app.health_stat_entries (user_id, day_date, kind);
-`);
-
-  // ensure health_days entry exists when inserting into health_stat_entries
   await db.query(`
-  create or replace function app.ensure_health_day_exists_for_stats()
-  returns trigger as $$
-  begin
-    insert into app.health_days (user_id, day_date)
-    values (new.user_id, new.day_date)
-    on conflict (user_id, day_date) do nothing;
-    return new;
-  end;
-  $$ language plpgsql;
-
-  drop trigger if exists trg_ensure_health_day_exists_on_stats on app.health_stat_entries;
-
-  create trigger trg_ensure_health_day_exists_on_stats
-  after insert or update on app.health_stat_entries
-  for each row
-  execute function app.ensure_health_day_exists_for_stats();
-`);
+    drop trigger if exists trg_ensure_health_day_exists_on_stats on app.health_stat_entries;
+    create trigger trg_ensure_health_day_exists_on_stats
+    after insert or update on app.health_stat_entries
+    for each row execute function app.ensure_health_day_exists();
+  `);
 
   // Add verifier column if table already existed without it (e.g. before Garmin PKCE)
   await db.query(`

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
-import type { BodyPartId } from "./DigitalTwinClient";
+
+export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
 type Props = {
   selected: BodyPartId;
@@ -18,7 +19,11 @@ const TITLE: Record<BodyPartId, string> = {
 /*Get health data from database */
 type HealthMetrics = Record<string, string | number>;
 
-export default function HealthClient({ selected, onClose, selectedDate }: Props) {
+export default function HealthStatsPanel({
+  selected,
+  onClose,
+  selectedDate,
+}: Props) {
   const [metrics, setMetrics] = React.useState<HealthMetrics>({});
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -35,7 +40,7 @@ export default function HealthClient({ selected, onClose, selectedDate }: Props)
         const date = selectedDate || new Date().toISOString().split("T")[0];
 
         const res = await fetch(
-          `/api/v1/digitalTwin?date=${date}&part=${selected}`,
+          `/api/v1/home?date=${date}&part=${selected}`,
           { credentials: "include" },
         );
 
@@ -75,7 +80,9 @@ export default function HealthClient({ selected, onClose, selectedDate }: Props)
   return (
     <div className="panel-animation ui-component-styles p-4 pt-2">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">{TITLE[selected]}</h1>
+        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">
+          {TITLE[selected]}
+        </h1>
         <button className="mb-5" onClick={onClose}>
           ✕
         </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ActivitiesEntry } from "./types";
+import type { ActivitiesEntry } from "../types";
 
 function formatDuration(seconds?: number | null): string {
   if (!seconds) return "0 min";
@@ -41,7 +41,9 @@ export default function ActivitiesList({
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-[#31c2d5]">{e.activity_name}</h3>
             <span className="text-xs opacity-70">
-              {e.source_type === "manual" ? "Manually added activity" : (e.device_name)}
+              {e.source_type === "manual"
+                ? "Manually added activity"
+                : e.device_name}
             </span>
           </div>
 
