@@ -7,30 +7,13 @@ import { refreshGarminToken } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
 import {
-  mapGarminSleepToRow,
-  upsertGarminSleep,
-} from "../../db/garmin/sleep.js";
-import {
   mapGarminRespirationToRow,
   upsertGarminRespiration,
 } from "../../db/garmin/respiration.js";
 import {
-  mapGarminStressToRow,
-  upsertGarminStress,
-} from "../../db/garmin/stress.js";
-import {
   mapGarminBodyCompToRow,
   upsertGarminBodyComp,
 } from "../../db/garmin/bodyComp.js";
-import {
-  mapGarminSkinTempToRow,
-  upsertGarminSkinTemp,
-} from "../../db/garmin/skinTemp.js";
-import { mapGarminHrvToRow, upsertGarminHrv } from "../../db/garmin/hrv.js";
-import {
-  mapGarminDailiesToRows,
-  upsertGarminDailies,
-} from "../../db/garmin/dailies.js";
 import {
   mapGarminUserMetricsToRows,
   upsertGarminUserMetrics,
@@ -39,10 +22,6 @@ import {
   mapGarminActivityToRow,
   upsertGarminActivity,
 } from "../../db/garmin/activities.js";
-import {
-  mapGarminMoveIQToRow,
-  upsertGarminMoveIQ,
-} from "../../db/garmin/moveIQ.js";
 
 // Router for Garmin integration endpoints
 
@@ -275,12 +254,11 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
     };
 
     const results = {
-      sleeps: 0,
       respiration: 0,
-      stress: 0,
       bodyComp: 0,
       dailies: 0,
       activities: 0,
+        metrics: 0,
       errors: [] as string[],
     };
 
@@ -366,25 +344,11 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
     // Execute all syncs in parallel
     await Promise.all([
       syncDataType(
-        "/backfill/sleeps",
-        "sleeps",
-        mapGarminSleepToRow,
-        upsertGarminSleep,
-        "sleeps",
-      ),
-      syncDataType(
         "/backfill/respiration",
         "allDayRespiration",
         mapGarminRespirationToRow,
         upsertGarminRespiration,
         "respiration",
-      ),
-      syncDataType(
-        "/backfill/stressDetails",
-        "stressDetailsData",
-        mapGarminStressToRow,
-        upsertGarminStress,
-        "stress",
       ),
       syncDataType(
         "/backfill/bodyComps",
@@ -401,29 +365,11 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
         "activities",
       ),
       syncDataType(
-        "/backfill/moveiq",
-        "moveIQActivities",
-        mapGarminMoveIQToRow,
-        upsertGarminMoveIQ,
-        "moveiq",
-      ),
-      syncDataType(
         "/backfill/userMetrics",
         "userMetrics",
         mapGarminUserMetricsToRows,
         upsertGarminUserMetrics,
         "metrics",
-      ),
-      // Daily data with 24-hour window (Garmin API limit)
-      syncDataType(
-        "/dailies",
-        "dailies",
-        mapGarminDailiesToRows,
-        upsertGarminDailies,
-        "dailies",
-        dailyStartDate,
-        endDate,
-        true, // Use uploadStartTimeInSeconds/uploadEndTimeInSeconds for dailies
       ),
     ]);
 

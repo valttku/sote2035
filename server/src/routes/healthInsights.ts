@@ -42,31 +42,10 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     console.log(`[health-insights] Activities fetched:`, activitiesResult.rows);
 
     // Fetch sleep data
-    const sleepResult = await db.query(
-      `SELECT * FROM app.user_sleep_garmin 
-       WHERE user_id = $1 AND day_date = $2::date`,
-      [userId, date],
-    );
-    console.log(`[health-insights] Sleep data fetched:`, sleepResult.rows);
 
     // Fetch stress data
-    const stressResult = await db.query(
-      `SELECT * FROM app.user_stress_garmin 
-       WHERE user_id = $1 AND day_date = $2::date`,
-      [userId, date],
-    );
-    console.log(`[health-insights] Stress data fetched:`, stressResult.rows);
 
     // Fetch heart rate data
-    const heartRateResult = await db.query(
-      `SELECT * FROM app.user_hrv_garmin
-       WHERE user_id = $1 AND day_date = $2::date`,
-      [userId, date],
-    );
-    console.log(
-      `[health-insights] Heart rate data fetched:`,
-      heartRateResult.rows,
-    );
 
     // Fetch dailies data
     const dailiesResult = await db.query(
@@ -99,9 +78,6 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     const insights = {
       date,
       activities: activitiesResult.rows,
-      sleep: sleepResult.rows,
-      stress: stressResult.rows,
-      heartRate: heartRateResult.rows,
       dailies: dailiesResult.rows,
       profile: profileResult.rows[0],
     };

@@ -14,7 +14,7 @@ export async function getHealthData(
     heart: ["heart_daily"],
     brain: ["sleep_daily", "stress_daily"],
     legs: ["activity_daily"],
-    lungs: ["resp_daily", "skin_temp_daily"],
+    lungs: ["resp_daily"],
   };
 
   const kinds = kindByPart[part];
@@ -71,10 +71,6 @@ export async function getHealthData(
       if (data.stress_avg != null) metrics["Average stress"] = data.stress_avg;
       if (data.stress_max != null) metrics["Max stress"] = data.stress_max;
     }
-    if (row.kind === "skin_temp_daily" && data.skin_temp != null) {
-      metrics["Skin temp (°C)"] = data.skin_temp;
-    }
   }
-
   return metrics;
 }

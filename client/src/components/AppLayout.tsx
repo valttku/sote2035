@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import Navbar from "./NavBar/Navbar";
+//import SyncButton from "./SyncButton";
 
 export default function AppLayout({
   children,
@@ -16,6 +17,7 @@ export default function AppLayout({
       >
         {children}
       </main>
+      {/*§<SyncButton />*/}
     </div>
   );
 }
