@@ -3,28 +3,28 @@ import { useState } from "react";
 import AppLayout from "../../components/AppLayout";
 import { ActivitiesSection, Activity } from "./sections/ActivitiesSection";
 import { DailiesSection, Dailies } from "./sections/DailiesSection";
+import { UserProfileSection, UserProfile } from "./sections/UserProfileSection";
 import { useHealthData } from "./hooks/useHealthDataGarmin";
 
 type Section =
+  | "profile"
   | "dailies"
   | "activities"
   | "sleep"
   | "stress"
-  | "cardiovascular"
-  | "bodyComposition";
+  | "cardiovascular";
 
 type HealthDataToAnalyze = {
-  activities?: Activity[];
+  profile?: UserProfile;
   dailies?: Dailies;
-  profile?: {
-    height: number;
-    weight: number;
-    gender: string;
-  };
+  activities?: Activity[];
+  // sleep?: Sleep;
+  // stress?: Stress;
+  // cardiovascular?: Cardiovascular;
 };
 
 export default function HealthInsightsPage() {
-  const [activeSection, setActiveSection] = useState<Section>("activities");
+  const [activeSection, setActiveSection] = useState<Section>("dailies");
   const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -44,13 +44,12 @@ export default function HealthInsightsPage() {
     try {
       const dataToAnalyze: HealthDataToAnalyze = {};
 
-      // Include profile
-      if (healthData?.profile) {
-        dataToAnalyze.profile = {
-          height: healthData.profile.height,
-          weight: healthData.profile.weight,
-          gender: healthData.profile.gender,
-        };
+      if (activeSection === "profile") {
+        dataToAnalyze.profile = healthData?.profile;
+      }
+
+      if (activeSection === "dailies") {
+        dataToAnalyze.dailies = healthData?.dailies?.[0];
       }
 
       if (activeSection === "activities") {
@@ -61,10 +60,6 @@ export default function HealthInsightsPage() {
         } else {
           dataToAnalyze.activities = healthData?.activities;
         }
-      }
-
-      if (activeSection === "dailies") {
-        dataToAnalyze.dailies = healthData?.dailies?.[0];
       }
 
       console.log("Data sent to AI:", dataToAnalyze);
@@ -94,11 +89,12 @@ export default function HealthInsightsPage() {
   };
 
   const sections: { id: Section; label: string; disabled?: boolean }[] = [
+    { id: "profile", label: "Profile" },
     { id: "dailies", label: "Dailies" },
     { id: "activities", label: "Activities" },
     { id: "sleep", label: "Sleep" },
     { id: "stress", label: "Stress" },
-    { id: "cardiovascular", label: "Heart Health" },
+    { id: "cardiovascular", label: "Cardiovascular" },
   ];
 
   return (
@@ -154,6 +150,9 @@ export default function HealthInsightsPage() {
                   <p>Loading health data...</p>
                 ) : (
                   <>
+                    {activeSection === "profile" && (
+                      <UserProfileSection profile={healthData?.profile} />
+                    )}
                     {activeSection === "dailies" && (
                       <DailiesSection dailies={healthData?.dailies?.[0]} />
                     )}

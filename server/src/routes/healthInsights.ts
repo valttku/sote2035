@@ -31,21 +31,31 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
 
     console.log(`[health-insights] user=${userId} date=${date}`);
 
-    // Fetch activities
-    const activitiesResult = await db.query(
-      `SELECT * FROM app.user_activities_garmin 
-       WHERE user_id = $1 
-       AND DATE(to_timestamp(start_time_in_seconds)) = $2::date
-       ORDER BY start_time_in_seconds DESC`,
-      [userId, date],
-    );
-    console.log(`[health-insights] Activities fetched:`, activitiesResult.rows);
+    // Fetch profile and metrics in parallel
+    const [profileResult, metricsResult] = await Promise.all([
+      db.query(
+        `SELECT id, gender, height, weight
+         FROM app.users
+         WHERE id = $1`,
+        [userId],
+      ),
+      db.query(
+        `SELECT vo2_max, vo2_max_cycling, fitness_age
+         FROM app.user_metrics_garmin
+         WHERE user_id = $1 AND day_date = (
+           SELECT MAX(day_date)
+           FROM app.user_metrics_garmin
+           WHERE user_id = $1 AND day_date <= $2::date
+         )`,
+        [userId, date],
+      ),
+    ]);
 
-    // Fetch sleep data
-
-    // Fetch stress data
-
-    // Fetch heart rate data
+    // Merge metrics into profile
+    const profile = {
+      ...profileResult.rows[0],
+      ...metricsResult.rows[0],
+    };
 
     // Fetch dailies data
     const dailiesResult = await db.query(
@@ -66,20 +76,27 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       dailiesResult.rows,
     );
 
-    // Fetch user profile
-    const profileResult = await db.query(
-      `SELECT id, height, weight, gender
-      FROM app.users
-      WHERE id = $1`,
-      [userId],
+    // Fetch activities
+    const activitiesResult = await db.query(
+      `SELECT * FROM app.user_activities_garmin 
+       WHERE user_id = $1 
+       AND DATE(to_timestamp(start_time_in_seconds)) = $2::date
+       ORDER BY start_time_in_seconds DESC`,
+      [userId, date],
     );
-    console.log(`[health-insights] User profile fetched:`, profileResult.rows);
+    console.log(`[health-insights] Activities fetched:`, activitiesResult.rows);
+
+    // Fetch sleep data
+
+    // Fetch stress data
+
+    // Fetch heart rate data
 
     const insights = {
       date,
+      profile,
       activities: activitiesResult.rows,
       dailies: dailiesResult.rows,
-      profile: profileResult.rows[0],
     };
 
     res.json(insights);
