@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "../db/db.js";
 import { authRequired } from "../middleware/authRequired.js";
-import { formatHealthEntry } from "../db/formatHealthStatEntry.js";
+import { formatHealthEntry } from "../db/healthStats/formatHealthStats.js";
 
 export const calendarRouter = Router();
 

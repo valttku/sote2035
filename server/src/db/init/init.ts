@@ -1,5 +1,5 @@
-import { db } from "./db.js";
-import { createGarminTables } from "./schema/garminTables.js";
+import { db } from "../db.js";
+import { createGarminTables } from "../init/garminTables.js";
 
 export async function ensureSchema() {
   // make sure the "app" schema exists

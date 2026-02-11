@@ -3,28 +3,28 @@ import { db } from "../../db/db.js";
 import {
   upsertGarminUserMetrics,
   mapGarminUserMetricsToRows,
-} from "../../db/garmin/metrics.js";
+} from "../../db/garmin/metricsDb.js";
 import {
   upsertGarminDailies,
   mapGarminDailiesToRows,
-} from "../../db/garmin/dailies.js";
+} from "../../db/garmin/dailiesDb.js";
 import {
   mapGarminRespirationToRow,
   upsertGarminRespiration,
-} from "../../db/garmin/respiration.js";
+} from "../../db/garmin/respirationDb.js";
 import {
   mapGarminActivityToRow,
   upsertGarminActivity,
-} from "../../db/garmin/activities.js";
+} from "../../db/garmin/activitiesDb.js";
 import {
   mapGarminBodyCompToRow,
   upsertGarminBodyComp,
-} from "../../db/garmin/bodyComp.js";
+} from "../../db/garmin/bodyCompDb.js";
 
 import {
   mapGarminSleepToRow,
   upsertGarminSleep,
-} from "../../db/garmin/sleep.js";
+} from "../../db/garmin/sleepDb.js";
 
 // Router for Garmin webhooks
 export const garminWebhookRouter = express.Router();

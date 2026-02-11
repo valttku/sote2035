@@ -10,23 +10,23 @@ import { db } from "../../db/db.js";
 import {
   mapGarminBodyCompToRow,
   upsertGarminBodyComp,
-} from "../../db/garmin/bodyComp.js";
+} from "../../db/garmin/bodyCompDb.js";
 import {
   mapGarminUserMetricsToRows,
   upsertGarminUserMetrics,
-} from "../../db/garmin/metrics.js";
+} from "../../db/garmin/metricsDb.js";
 import {
   mapGarminSleepToRow,
   upsertGarminSleep,
-} from "../../db/garmin/sleep.js";
+} from "../../db/garmin/sleepDb.js";
 import {
   mapGarminRespirationToRow,
   upsertGarminRespiration,
-} from "../../db/garmin/respiration.js";
+} from "../../db/garmin/respirationDb.js";
 import {
   mapGarminActivityToRow,
   upsertGarminActivity,
-} from "../../db/garmin/activities.js";
+} from "../../db/garmin/activitiesDb.js";
 
 // Router for Garmin integration endpoints
 

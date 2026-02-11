@@ -1,5 +1,5 @@
-import { db } from "./db.js";
-import { formatHealthEntry } from "./formatHealthStatEntry.js";
+import { db } from "../db.js";
+import { formatHealthEntry } from "./formatHealthStats.js";
 
 // This file contains queries related to the health_stat_entries table
 

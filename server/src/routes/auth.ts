@@ -3,7 +3,11 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { transporter } from "../nodemailer.js";
 
-import { createUser, findUserByEmail, updateLastLogin } from "../db/usersDb.js";
+import {
+  createUser,
+  findUserByEmail,
+  updateLastLogin,
+} from "../db/users/usersDb.js";
 import { db } from "../db/db.js";
 
 export const authRouter = Router();
