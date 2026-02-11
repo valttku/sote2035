@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppLayout from "../components/AppLayout";
 import HealthStatsPanel, {
   type BodyPartId,
@@ -20,7 +20,18 @@ const BODY_PARTS: Array<{
 export default function Home() {
   const [selected, setSelected] = useState<BodyPartId | null>(null);
 
-  const [avatarType] = useState<"male" | "female">("male");
+  const [avatarType, setAvatarType] = useState<"male" | "female">("male"); // default male
+
+  // Fetch user profile on mount to get gender
+  useEffect(() => {
+    fetch("/api/v1/settings", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.gender === "female") setAvatarType("female");
+      })
+      .catch(console.error);
+  }, []);
+
   const isFemale = avatarType === "female";
 
   return (
