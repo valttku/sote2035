@@ -15,12 +15,12 @@ export type GarminSleepRow = {
   rem_sleep_in_seconds?: number;
   awake_duration_in_seconds?: number;
 
-  sleep_levels_map?: any;
-  time_offset_sleep_spo2?: any;
-  time_offset_sleep_respiration?: any;
-  overall_sleep_score?: any;
-  sleep_scores?: any;
-  naps?: any;
+  //sleep_levels_map?: any;
+  //time_offset_sleep_spo2?: any;
+  //time_offset_sleep_respiration?: any;
+  //overall_sleep_score?: any;
+  //sleep_scores?: any;
+  //naps?: any;
   validation?: string;
   source?: string;
 };
@@ -40,12 +40,12 @@ export function mapGarminSleepToRow(user_id: number, s: any): GarminSleepRow {
     light_sleep_in_seconds: s.lightSleepDurationInSeconds ?? null,
     rem_sleep_in_seconds: s.remSleepInSeconds ?? null,
     awake_duration_in_seconds: s.awakeDurationInSeconds ?? null,
-    sleep_levels_map: s.sleepLevelsMap ?? null,
-    time_offset_sleep_spo2: s.timeOffsetSleepSpo2 ?? null,
-    time_offset_sleep_respiration: s.timeOffsetSleepRespiration ?? null,
-    overall_sleep_score: s.overallSleepScore ?? null,
-    sleep_scores: s.sleepScores ?? null,
-    naps: s.naps ?? null,
+    //sleep_levels_map: s.sleepLevelsMap ?? null,
+    //time_offset_sleep_spo2: s.timeOffsetSleepSpo2 ?? null,
+    //time_offset_sleep_respiration: s.timeOffsetSleepRespiration ?? null,
+    //overall_sleep_score: s.overallSleepScore ?? null,
+    //sleep_scores: s.sleepScores ?? null,
+    //naps: s.naps ?? null,
     validation: s.validation ?? null,
     source: s.source ?? "garmin",
   };
@@ -68,12 +68,12 @@ export async function upsertGarminSleep(row: GarminSleepRow) {
     "light_sleep_in_seconds",
     "rem_sleep_in_seconds",
     "awake_duration_in_seconds",
-    "sleep_levels_map",
-    "time_offset_sleep_spo2",
-    "time_offset_sleep_respiration",
-    "overall_sleep_score",
-    "sleep_scores",
-    "naps",
+    //"sleep_levels_map",
+    //"time_offset_sleep_spo2",
+    //"time_offset_sleep_respiration",
+    //"overall_sleep_score",
+    //"sleep_scores",
+    //"naps",
     "validation",
     "source",
   ];
@@ -91,16 +91,16 @@ export async function upsertGarminSleep(row: GarminSleepRow) {
     row.light_sleep_in_seconds,
     row.rem_sleep_in_seconds,
     row.awake_duration_in_seconds,
-    row.sleep_levels_map ? JSON.stringify(row.sleep_levels_map) : null,
-    row.time_offset_sleep_spo2
-      ? JSON.stringify(row.time_offset_sleep_spo2)
-      : null,
-    row.time_offset_sleep_respiration
-      ? JSON.stringify(row.time_offset_sleep_respiration)
-      : null,
-    row.overall_sleep_score ? JSON.stringify(row.overall_sleep_score) : null,
-    row.sleep_scores ? JSON.stringify(row.sleep_scores) : null,
-    row.naps ? JSON.stringify(row.naps) : null,
+    //row.sleep_levels_map ? JSON.stringify(row.sleep_levels_map) : null,
+    //row.time_offset_sleep_spo2
+    //  ? JSON.stringify(row.time_offset_sleep_spo2)
+    //  : null,
+    //row.time_offset_sleep_respiration
+    //  ? JSON.stringify(row.time_offset_sleep_respiration)
+    //  : null,
+    //row.overall_sleep_score ? JSON.stringify(row.overall_sleep_score) : null,
+    //row.sleep_scores ? JSON.stringify(row.sleep_scores) : null,
+    //row.naps ? JSON.stringify(row.naps) : null,
     row.validation,
     row.source,
   ];
@@ -120,12 +120,6 @@ export async function upsertGarminSleep(row: GarminSleepRow) {
       light_sleep_in_seconds = EXCLUDED.light_sleep_in_seconds,
       rem_sleep_in_seconds = EXCLUDED.rem_sleep_in_seconds,
       awake_duration_in_seconds = EXCLUDED.awake_duration_in_seconds,
-      sleep_levels_map = EXCLUDED.sleep_levels_map,
-      time_offset_sleep_spo2 = EXCLUDED.time_offset_sleep_spo2,
-      time_offset_sleep_respiration = EXCLUDED.time_offset_sleep_respiration,
-      overall_sleep_score = EXCLUDED.overall_sleep_score,
-      sleep_scores = EXCLUDED.sleep_scores,
-      naps = EXCLUDED.naps,
       validation = EXCLUDED.validation,
       source = EXCLUDED.source,
       updated_at = now()
