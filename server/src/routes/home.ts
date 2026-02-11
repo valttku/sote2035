@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getHealthStatEntriesData } from "../db/healthStatEntriesDb.js";
+import { getHealthStatEntriesData } from "../db/healthStats/healthStatsDb.js";
 import { authRequired } from "../middleware/authRequired.js";
 
 export const homeRouter = Router();
