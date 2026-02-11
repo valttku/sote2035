@@ -399,4 +399,6 @@ export async function createGarminTables() {
     after insert or update on app.user_respiration_garmin
     for each row execute function app.update_health_stats_on_respiration();
   `);
+
+  // sleeps -> sleep_daily
 }
