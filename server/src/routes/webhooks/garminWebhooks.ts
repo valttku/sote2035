@@ -16,12 +16,20 @@ import {
   mapGarminActivityToRow,
   upsertGarminActivity,
 } from "../../db/garmin/activities.js";
-import { mapGarminBodyCompToRow,
+import {
+  mapGarminBodyCompToRow,
   upsertGarminBodyComp,
 } from "../../db/garmin/bodyComp.js";
 
+import {
+  mapGarminSleepToRow,
+  upsertGarminSleep,
+} from "../../db/garmin/sleep.js";
+
+// Router for Garmin webhooks
 export const garminWebhookRouter = express.Router();
 
+// POST /api/v1/webhooks/garmin/user-metrics
 garminWebhookRouter.post("/user-metrics", async (req, res) => {
   console.log("Webhook received at:", new Date().toISOString());
   console.log("Payload:", JSON.stringify(req.body, null, 2));
@@ -85,6 +93,7 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
   }
 });
 
+// POST /api/v1/webhooks/garmin/dailies
 garminWebhookRouter.post("/dailies", async (req, res) => {
   console.log("Webhook received at:", new Date().toISOString());
   console.log("Payload:", JSON.stringify(req.body, null, 2));
@@ -132,6 +141,7 @@ garminWebhookRouter.post("/dailies", async (req, res) => {
   }
 });
 
+// POST /api/v1/webhooks/garmin/respiration
 garminWebhookRouter.post("/respiration", async (req, res) => {
   console.log("Respiration Webhook received at:", new Date().toISOString());
   console.log("Payload:", JSON.stringify(req.body, null, 2));
@@ -194,6 +204,7 @@ garminWebhookRouter.post("/respiration", async (req, res) => {
   }
 });
 
+// POST /api/v1/webhooks/garmin/body_comp
 garminWebhookRouter.post("/body_comp", async (req, res) => {
   console.log("Body Comp Webhook received at:", new Date().toISOString());
   console.log("Payload:", JSON.stringify(req.body, null, 2));
@@ -258,15 +269,30 @@ garminWebhookRouter.post("/body_comp", async (req, res) => {
 // POST /api/v1/webhooks/garmin/activities
 garminWebhookRouter.post("/activities", async (req, res) => {
   console.log("Activities Webhook received at:", new Date().toISOString());
-  console.log("Payload:", JSON.stringify(req.body, null, 2));
+  console.log("Raw Payload:", JSON.stringify(req.body, null, 2));
 
   try {
+    // Normalize payload to array
     const payload =
       req.body.activities || (Array.isArray(req.body) ? req.body : [req.body]);
 
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
+
     for (const item of payload) {
       const providerUserId = item.userId;
-      if (!providerUserId) continue;
+      console.log("Processing Garmin user:", providerUserId);
+
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in activity item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
 
       const r = await db.query(
         `SELECT user_id FROM app.user_integrations
@@ -274,18 +300,98 @@ garminWebhookRouter.post("/activities", async (req, res) => {
         [providerUserId],
       );
 
-      if (r.rowCount === 0) continue;
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
 
-      const row = mapGarminActivityToRow(r.rows[0].user_id, item);
+      const user_id = r.rows[0].user_id;
+      console.log("Found internal user:", user_id);
+
+      // Map Garmin payload to row object
+      const row = mapGarminActivityToRow(user_id, item);
+      console.log("Mapped activity row:", JSON.stringify(row, null, 2));
+
+      // Upsert into DB
       await upsertGarminActivity(row);
+      console.log(
+        `Successfully upserted activity data for user ${user_id}, activity ${row.summary_id}`,
+      );
     }
 
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin Activities webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });
 
+// POST /api/v1/webhooks/garmin/sleeps
+garminWebhookRouter.post("/sleeps", async (req, res) => {
+  console.log("Sleep Webhook received at:", new Date().toISOString());
+  console.log("Raw Payload:", JSON.stringify(req.body, null, 2));
+
+  try {
+    // Normalize payload to array
+    const payload =
+      req.body.sleeps || (Array.isArray(req.body) ? req.body : [req.body]);
+
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+    console.log("Payload items:", JSON.stringify(payload, null, 2));
+
+    for (const item of payload) {
+      const providerUserId = item.userId;
+      console.log("Processing Garmin user:", providerUserId);
+
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in sleep item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
+
+      const r = await db.query(
+        `SELECT user_id FROM app.user_integrations
+         WHERE provider = 'garmin' AND provider_user_id = $1`,
+        [providerUserId],
+      );
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
+
+      const user_id = r.rows[0].user_id;
+      console.log("Found internal user:", user_id);
+
+      // Map Garmin payload to row object
+      const row = mapGarminSleepToRow(user_id, item);
+      console.log("Mapped sleep row:", JSON.stringify(row, null, 2));
+
+      // Upsert into DB
+      await upsertGarminSleep(row);
+      console.log(
+        `Successfully upserted sleep data for user ${user_id}, day ${row.day_date}`,
+      );
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Garmin Sleep webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
+    res.sendStatus(200); // Garmin still expects 200
+  }
+});
 
 export default garminWebhookRouter;

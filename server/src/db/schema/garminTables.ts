@@ -270,6 +270,54 @@ export async function createGarminTables() {
     for each row execute function app.update_updated_at_column();
   `);
 
+  await db.query(`
+  create table if not exists app.user_sleeps_garmin (
+    id uuid primary key default gen_random_uuid(),
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    summary_id varchar(100),
+    
+    duration_in_seconds integer,
+    total_nap_duration_in_seconds integer,
+    start_time_in_seconds bigint,
+    start_time_offset_in_seconds integer,
+    unmeasurable_sleep_in_seconds integer,
+    deep_sleep_in_seconds integer,
+    light_sleep_in_seconds integer,
+    rem_sleep_in_seconds integer,
+    awake_duration_in_seconds integer,
+
+    sleep_levels_map jsonb,
+    time_offset_sleep_spo2 jsonb,
+    time_offset_sleep_respiration jsonb,
+    overall_sleep_score jsonb,
+    sleep_scores jsonb,
+    naps jsonb,
+    validation varchar(50),
+
+    source varchar(50) not null default 'garmin',
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+
+    unique (user_id, day_date, summary_id)
+  );
+
+  create index if not exists idx_user_sleeps_garmin_user_day
+    on app.user_sleeps_garmin(user_id, day_date);
+`);
+
+  await db.query(`
+  drop trigger if exists trg_ensure_health_day_for_sleeps on app.user_sleeps_garmin;
+  create trigger trg_ensure_health_day_for_sleeps
+  after insert or update on app.user_sleeps_garmin
+  for each row execute function app.ensure_health_day_exists();
+
+  drop trigger if exists update_user_sleeps_garmin_updated_at on app.user_sleeps_garmin;
+  create trigger update_user_sleeps_garmin_updated_at
+  before update on app.user_sleeps_garmin
+  for each row execute function app.update_updated_at_column();
+`);
+
   // ----------------------------
   // Health stat triggers
   // ----------------------------

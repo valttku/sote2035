@@ -17,7 +17,7 @@ export default function AppLayout({
       >
         {children}
       </main>
-      {/*§<SyncButton />*/}
+      {/*<SyncButton />*/}
     </div>
   );
 }

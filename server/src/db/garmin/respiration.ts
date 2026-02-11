@@ -20,7 +20,7 @@ export function mapGarminRespirationToRow(user_id: number, r: any): GarminRespir
 
   return {
     user_id,
-    day_date,
+    day_date: r.calendarDate,
     summary_id: r.summaryId ?? null,
     start_time_in_seconds: r.startTimeInSeconds ?? null,
     duration_in_seconds: r.durationInSeconds ?? null,

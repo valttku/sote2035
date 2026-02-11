@@ -6,10 +6,7 @@ import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
 import { refreshGarminToken } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
-import {
-  mapGarminRespirationToRow,
-  upsertGarminRespiration,
-} from "../../db/garmin/respiration.js";
+
 import {
   mapGarminBodyCompToRow,
   upsertGarminBodyComp,
@@ -18,6 +15,14 @@ import {
   mapGarminUserMetricsToRows,
   upsertGarminUserMetrics,
 } from "../../db/garmin/metrics.js";
+import {
+  mapGarminSleepToRow,
+  upsertGarminSleep,
+} from "../../db/garmin/sleep.js";
+import {
+  mapGarminRespirationToRow,
+  upsertGarminRespiration,
+} from "../../db/garmin/respiration.js";
 import {
   mapGarminActivityToRow,
   upsertGarminActivity,
@@ -254,18 +259,17 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
     };
 
     const results = {
-      respiration: 0,
       bodyComp: 0,
-      dailies: 0,
+      metrics: 0,
+      sleeps: 0,
+      respiration: 0,
       activities: 0,
-        metrics: 0,
       errors: [] as string[],
     };
 
     // Date range: last 7 days for backfill, last 24 hours for daily data
     const endDate = Math.floor(Date.now() / 1000); // Current time in seconds
     const startDate = endDate - 7 * 24 * 60 * 60; // 7 days ago for backfill
-    const dailyStartDate = endDate - 24 * 60 * 60; // 24 hours ago for daily endpoint
 
     const GARMIN_API_BASE = "https://apis.garmin.com/wellness-api/rest";
 
@@ -284,46 +288,54 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
         console.log(`Syncing ${endpoint}...`);
         const start = customStartDate ?? startDate;
         const end = customEndDate ?? endDate;
-        
+
         // Use different parameter names for dailies endpoint
-        const startParam = useUploadParams ? 'uploadStartTimeInSeconds' : 'summaryStartTimeInSeconds';
-        const endParam = useUploadParams ? 'uploadEndTimeInSeconds' : 'summaryEndTimeInSeconds';
+        const startParam = useUploadParams
+          ? "uploadStartTimeInSeconds"
+          : "summaryStartTimeInSeconds";
+        const endParam = useUploadParams
+          ? "uploadEndTimeInSeconds"
+          : "summaryEndTimeInSeconds";
         const url = `${GARMIN_API_BASE}${endpoint}?${startParam}=${start}&${endParam}=${end}`;
-        
+
         console.log(`  URL: ${url}`);
         const response = await authenticatedFetch(url, {
           headers: { "Content-Type": "application/json" },
         });
-        
+
         // Handle 409 Conflict (duplicate backfill) as a success case
         if (response.status === 409) {
-          console.log(`  ⚠ Duplicate backfill detected for ${endpoint} - skipping (already processed)`);
+          console.log(
+            `  ⚠ Duplicate backfill detected for ${endpoint} - skipping (already processed)`,
+          );
           (results as any)[resultKey] = 0;
           return;
         }
-        
+
         if (!response.ok) {
           const text = await response.text();
           throw new Error(`Garmin API error: ${response.status} ${text}`);
         }
-        
+
         // Handle empty responses
         const text = await response.text();
-        if (!text || text.trim() === '') {
+        if (!text || text.trim() === "") {
           console.log(`  ⚠ Empty response from ${endpoint}`);
           (results as any)[resultKey] = 0;
           return;
         }
-        
+
         let data;
         try {
           data = JSON.parse(text);
         } catch (parseErr) {
-          console.log(`  ⚠ Invalid JSON from ${endpoint}: ${text.substring(0, 100)}`);
+          console.log(
+            `  ⚠ Invalid JSON from ${endpoint}: ${text.substring(0, 100)}`,
+          );
           (results as any)[resultKey] = 0;
           return;
         }
-        
+
         console.log(`  Response keys: ${Object.keys(data).join(", ")}`);
         const items = data[arrayKey] || [];
         let count = 0;
@@ -344,13 +356,6 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
     // Execute all syncs in parallel
     await Promise.all([
       syncDataType(
-        "/backfill/respiration",
-        "allDayRespiration",
-        mapGarminRespirationToRow,
-        upsertGarminRespiration,
-        "respiration",
-      ),
-      syncDataType(
         "/backfill/bodyComps",
         "dateWeightList",
         mapGarminBodyCompToRow,
@@ -358,18 +363,32 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
         "bodyComp",
       ),
       syncDataType(
-        "/backfill/activities",
-        "activityDetails",
-        mapGarminActivityToRow,
-        upsertGarminActivity,
-        "activities",
-      ),
-      syncDataType(
         "/backfill/userMetrics",
         "userMetrics",
         mapGarminUserMetricsToRows,
         upsertGarminUserMetrics,
         "metrics",
+      ),
+      syncDataType(
+        "/backfill/sleeps",
+        "sleeps",
+        mapGarminSleepToRow,
+        upsertGarminSleep,
+        "sleeps",
+      ),
+      syncDataType(
+        "/backfill/respiration",
+        "allDayRespiration",
+        mapGarminRespirationToRow,
+        upsertGarminRespiration,
+        "respiration",
+      ),
+      syncDataType(
+        "/backfill/activities",
+        "activityDetails",
+        mapGarminActivityToRow,
+        upsertGarminActivity,
+        "activities",
       ),
     ]);
 
