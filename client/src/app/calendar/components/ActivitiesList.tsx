@@ -1,7 +1,27 @@
 "use client";
 
-import type { ActivitiesEntry } from "../types";
+// One activity entry from backend
+export type ActivitiesEntry = {
+  id: string;
+  device_name?: string | null; 
+  activity_name: string;
+  duration_in_seconds?: number | null; 
+  start_time_in_seconds?: number | null;
+  start_time_offset_in_seconds?: number | null;
+  average_heart_rate?: number | null;
+  active_kilocalories?: number | null;
+  steps?: number | null;
+  created_at: string;
+  source_type?: "garmin" | "manual" | "polar";
+};
 
+// API response for a day
+export type ActivitiesResponse = {
+  date: string;
+  entries: ActivitiesEntry[];
+};
+
+// Convert seconds to "Xm Ys" format for display
 function formatDuration(seconds?: number | null): string {
   if (!seconds) return "0 min";
   const minutes = Math.floor(seconds / 60);
@@ -11,14 +31,13 @@ function formatDuration(seconds?: number | null): string {
   return `${minutes}m ${secs}s`;
 }
 
+// Convert unix timestamp to readable "HH:MM" format
 function formatTime(
   unixSeconds?: number | null,
   offset?: number | null,
 ): string {
   if (unixSeconds == null) return "N/A";
-  // Convert Unix timestamp (in seconds) to milliseconds and create Date
-  const date = new Date(unixSeconds * 1000);
-  // Return time in 24-hour format
+  const date = new Date(unixSeconds * 1000); // convert to ms
   return date.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
@@ -26,6 +45,7 @@ function formatTime(
   });
 }
 
+// Show a list of activities
 export default function ActivitiesList({
   entries,
 }: {
@@ -34,8 +54,10 @@ export default function ActivitiesList({
   if (entries.length === 0) {
     return <p className="text-sm opacity-80">No activities for this day.</p>;
   }
+
   return (
     <div className="space-y-3 overflow-y-auto max-h-96">
+      {/* Header: activity name + source */}
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">
@@ -47,6 +69,7 @@ export default function ActivitiesList({
             </span>
           </div>
 
+          {/* Activity details */}
           <div className="text-sm space-y-1">
             <div>
               <span className="font-semibold">Duration: </span>
