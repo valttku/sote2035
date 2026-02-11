@@ -19,17 +19,17 @@ export type HealthStatsResponse = {
 function labelForKind(kind: string) {
   switch (kind) {
     case "heart_daily":
-      return "Heart";
+      return "Heart Data";
     case "sleep_daily":
-      return "Brain";
+      return "Sleep Data";
     case "stress_daily":
-      return "Brain";
+      return "Stress Data";
     case "activity_daily":
-      return "Legs";
+      return "Activity Data";
     case "resp_daily":
-      return "Lungs";
+      return "Respiration Data";
     case "manual_activity":
-      return "Manual Activity";
+      return "Manual Activity Entry";
     default:
       return kind;
   }
