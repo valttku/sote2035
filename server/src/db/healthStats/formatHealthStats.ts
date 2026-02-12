@@ -11,8 +11,21 @@ export function formatHealthEntry(kind: string, data: any) {
   }
 
   if (kind === "sleep_daily") {
-    if (data.duration_min != null)
-      metrics["Sleep (h)"] = +(data.duration_min / 60).toFixed(1);
+    if (data.duration_seconds != null) {
+      metrics["Total sleep (h)"] = +(data.duration_seconds / 3600).toFixed(1);
+    }
+    if (data.deep_seconds != null) {
+      metrics["Deep sleep (h)"] = +(data.deep_seconds / 3600).toFixed(1);
+    }
+    if (data.light_seconds != null) {
+      metrics["Light sleep (h)"] = +(data.light_seconds / 3600).toFixed(1);
+    }
+    if (data.rem_seconds != null) {
+      metrics["REM sleep (h)"] = +(data.rem_seconds / 3600).toFixed(1);
+    }
+    if (data.awake_seconds != null) {
+      metrics["Awake (h)"] = +(data.awake_seconds / 3600).toFixed(1);
+    }
   }
 
   if (kind === "activity_daily") {

@@ -401,4 +401,34 @@ export async function createGarminTables() {
   `);
 
   // sleeps -> sleep_daily
+  await db.query(`
+    create or replace function app.update_health_stats_on_sleeps()
+    returns trigger as $$
+    begin
+      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
+      values (
+        new.user_id,
+        new.day_date,
+        'garmin',
+        'sleep_daily',
+        jsonb_build_object(
+          'duration_seconds', new.duration_in_seconds,
+          'deep_seconds', new.deep_sleep_in_seconds,
+          'light_seconds', new.light_sleep_in_seconds,
+          'rem_seconds', new.rem_sleep_in_seconds,
+          'awake_seconds', new.awake_duration_in_seconds
+        )
+      )
+      on conflict (user_id, day_date, kind)
+      do update set data = EXCLUDED.data, updated_at = now();
+
+      return new;
+    end;
+    $$ language plpgsql;
+
+    drop trigger if exists trg_update_health_stats_on_sleeps on app.user_sleeps_garmin;
+    create trigger trg_update_health_stats_on_sleeps
+    after insert or update on app.user_sleeps_garmin
+    for each row execute function app.update_health_stats_on_sleeps();
+  `);
 }
