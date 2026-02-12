@@ -10,8 +10,19 @@ export type Stress = {
   activity_stress_duration_in_seconds: number;
   low_stress_duration_in_seconds: number;
   medium_stress_duration_in_seconds: number;
+  high_stress_duration_in_seconds: number;
   stress_qualifier: string;
 };
+
+// Helper to format seconds as hours and minutes"
+function formatSecondsToHoursMinutes(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  let result = "";
+  if (h > 0) result += `${h}h `;
+  result += `${m}m`;
+  return result.trim();
+}
 
 export function StressSection({ stress }: { stress?: Stress }) {
   if (!stress) {
@@ -33,23 +44,37 @@ export function StressSection({ stress }: { stress?: Stress }) {
         />
         <StatCard
           label="Total stress duration"
-          value={`${Math.floor(stress.stress_duration_in_seconds / 60)} min`}
+          value={formatSecondsToHoursMinutes(stress.stress_duration_in_seconds)}
         />
         <StatCard
           label="Rest stress duration"
-          value={`${Math.floor(stress.rest_stress_duration_in_seconds / 60)} min`}
+          value={formatSecondsToHoursMinutes(
+            stress.rest_stress_duration_in_seconds,
+          )}
         />
         <StatCard
           label="Activity stress duration"
-          value={`${Math.floor(stress.activity_stress_duration_in_seconds / 60)} min`}
+          value={formatSecondsToHoursMinutes(
+            stress.activity_stress_duration_in_seconds,
+          )}
         />
         <StatCard
           label="Low stress duration"
-          value={`${Math.floor(stress.low_stress_duration_in_seconds / 60)} min`}
+          value={formatSecondsToHoursMinutes(
+            stress.low_stress_duration_in_seconds,
+          )}
         />
         <StatCard
           label="Medium stress duration"
-          value={`${Math.floor(stress.medium_stress_duration_in_seconds / 60)} min`}
+          value={formatSecondsToHoursMinutes(
+            stress.medium_stress_duration_in_seconds,
+          )}
+        />
+        <StatCard
+          label="High stress duration"
+          value={formatSecondsToHoursMinutes(
+            stress.high_stress_duration_in_seconds,
+          )}
         />
         <StatCard
           label="Stress qualifier"
