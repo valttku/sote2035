@@ -12,7 +12,6 @@ type Section =
   | "activities"
   | "sleep"
   | "stress"
-  | "cardiovascular";
 
 type HealthDataToAnalyze = {
   profile?: UserProfile;
@@ -20,7 +19,6 @@ type HealthDataToAnalyze = {
   activities?: Activity[];
   // sleep?: Sleep;
   // stress?: Stress;
-  // cardiovascular?: Cardiovascular;
 };
 
 export default function HealthInsightsPage() {
@@ -94,7 +92,6 @@ export default function HealthInsightsPage() {
     { id: "activities", label: "Activities" },
     { id: "sleep", label: "Sleep" },
     { id: "stress", label: "Stress" },
-    { id: "cardiovascular", label: "Cardiovascular" },
   ];
 
   return (
@@ -170,9 +167,6 @@ export default function HealthInsightsPage() {
                     )}
                     {activeSection === "stress" && (
                       <div className="p-4">Stress section coming soon...</div>
-                    )}
-                    {activeSection === "cardiovascular" && (
-                      <div className="p-4">Cardio section coming soon...</div>
                     )}
                   </>
                 )}
