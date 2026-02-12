@@ -16,7 +16,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
     return <div className="p-4">No data for this user</div>;
   }
   return (
-    <div className="">
+    <div className="space-y-4">
       <h2 className="text-2xl mb-4">User profile</h2>
 
       {/* Body Composition Section */}
