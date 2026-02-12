@@ -4,21 +4,18 @@ import AppLayout from "../../components/AppLayout";
 import { ActivitiesSection, Activity } from "./sections/ActivitiesSection";
 import { DailiesSection, Dailies } from "./sections/DailiesSection";
 import { UserProfileSection, UserProfile } from "./sections/UserProfileSection";
+import { SleepSection, Sleep } from "./sections/SleepSection";
+import { StressSection, Stress } from "./sections/StressSection";
 import { useHealthData } from "./hooks/useHealthDataGarmin";
 
-type Section =
-  | "profile"
-  | "dailies"
-  | "activities"
-  | "sleep"
-  | "stress"
+type Section = "profile" | "dailies" | "activities" | "sleep" | "stress";
 
 type HealthDataToAnalyze = {
   profile?: UserProfile;
   dailies?: Dailies;
   activities?: Activity[];
-  // sleep?: Sleep;
-  // stress?: Stress;
+  sleep?: Sleep;
+  stress?: Stress;
 };
 
 export default function HealthInsightsPage() {
@@ -42,22 +39,28 @@ export default function HealthInsightsPage() {
     try {
       const dataToAnalyze: HealthDataToAnalyze = {};
 
-      if (activeSection === "profile") {
-        dataToAnalyze.profile = healthData?.profile;
-      }
-
-      if (activeSection === "dailies") {
-        dataToAnalyze.dailies = healthData?.dailies?.[0];
-      }
-
-      if (activeSection === "activities") {
-        if (selectedActivityIds.size > 0 && healthData?.activities) {
-          dataToAnalyze.activities = healthData.activities.filter((activity) =>
-            selectedActivityIds.has(activity.id),
-          );
-        } else {
-          dataToAnalyze.activities = healthData?.activities;
-        }
+      switch (activeSection) {
+        case "profile":
+          dataToAnalyze.profile = healthData?.profile;
+          break;
+        case "dailies":
+          dataToAnalyze.dailies = healthData?.dailies?.[0];
+          break;
+        case "sleep":
+          dataToAnalyze.sleep = healthData?.sleep?.[0];
+          break;
+        case "stress":
+          dataToAnalyze.stress = healthData?.stress?.[0];
+          break;
+        case "activities":
+          if (selectedActivityIds.size > 0 && healthData?.activities) {
+            dataToAnalyze.activities = healthData.activities.filter(
+              (activity) => selectedActivityIds.has(activity.id),
+            );
+          } else {
+            dataToAnalyze.activities = healthData?.activities;
+          }
+          break;
       }
 
       console.log("Data sent to AI:", dataToAnalyze);
@@ -163,10 +166,10 @@ export default function HealthInsightsPage() {
                       />
                     )}
                     {activeSection === "sleep" && (
-                      <div className="p-4">Sleep section coming soon...</div>
+                      <SleepSection sleep={healthData?.sleep?.[0]} />
                     )}
                     {activeSection === "stress" && (
-                      <div className="p-4">Stress section coming soon...</div>
+                      <StressSection stress={healthData?.stress?.[0]} />
                     )}
                   </>
                 )}

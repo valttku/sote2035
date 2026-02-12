@@ -57,10 +57,12 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       ...metricsResult.rows[0],
     };
 
-    // Fetch dailies data
+    console.log(`[health-insights] User profile and metrics fetched:`, profile);
+
+    // Fetch data from dailies table
     const dailiesResult = await db.query(
       `SELECT id, user_id, day_date, summary_id, active_kilocalories, 
-           bmr_kilocalories, steps, distance_in_meters,  
+          bmr_kilocalories, steps, distance_in_meters,  
           active_time_in_seconds, floors_climbed,  
           avg_heart_rate, resting_heart_rate, avg_stress_level, 
           body_battery_charged, body_battery_drained, steps_goal, 
@@ -76,6 +78,24 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       dailiesResult.rows,
     );
 
+    // Fetch stress data separately from dailies table
+    const stressResult = await db.query(
+      `SELECT id,
+          avg_stress_level,
+          max_stress_level,
+          stress_duration_in_seconds,
+          rest_stress_duration_in_seconds,
+          activity_stress_duration_in_seconds,
+          low_stress_duration_in_seconds,
+          medium_stress_duration_in_seconds,
+          high_stress_duration_in_seconds,
+          stress_qualifier
+      FROM app.user_dailies_garmin
+      WHERE user_id = $1 AND day_date = $2::date`,
+      [userId, date],
+    );
+    console.log(`[health-insights] Stress data fetched:`, stressResult.rows);
+
     // Fetch activities
     const activitiesResult = await db.query(
       `SELECT * FROM app.user_activities_garmin 
@@ -87,16 +107,20 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     console.log(`[health-insights] Activities fetched:`, activitiesResult.rows);
 
     // Fetch sleep data
-
-    // Fetch stress data
-
-    // Fetch heart rate data
+    const sleepResult = await db.query(
+      `SELECT * FROM app.user_sleeps_garmin
+      WHERE user_id = $1 AND day_date = $2::date`,
+      [userId, date],
+    );
+    console.log(`[health-insights] Sleep data fetched:`, sleepResult.rows);
 
     const insights = {
       date,
       profile,
       activities: activitiesResult.rows,
       dailies: dailiesResult.rows,
+      sleep: sleepResult.rows,
+      stress: stressResult.rows,
     };
 
     res.json(insights);
