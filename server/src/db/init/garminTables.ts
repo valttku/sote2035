@@ -270,6 +270,9 @@ export async function createGarminTables() {
     for each row execute function app.update_updated_at_column();
   `);
 
+  // ----------------------------
+  // user_sleeps_garmin table
+  // ----------------------------
   await db.query(`
   create table if not exists app.user_sleeps_garmin (
     id uuid primary key default gen_random_uuid(),
@@ -317,6 +320,51 @@ export async function createGarminTables() {
   before update on app.user_sleeps_garmin
   for each row execute function app.update_updated_at_column();
 `);
+
+  // ----------------------------
+  // user_stress_garmin table
+  // ----------------------------
+  await db.query(`
+  create table if not exists app.user_stress_garmin (
+      id uuid primary key default gen_random_uuid(),
+
+      user_id integer not null references app.users(id) on delete cascade,
+      day_date date not null, -- from calendarDate
+      summary_id varchar(100),
+
+      start_time_in_seconds integer,
+      start_time_offset_in_seconds integer,
+      duration_in_seconds integer,
+
+      max_stress_level integer,
+      average_stress_level integer,
+
+      time_offset_stress_level_values jsonb,
+      time_offset_body_battery_values jsonb,
+
+      body_battery_dynamic_feedback_event jsonb,
+      body_battery_activity_events jsonb,
+
+      source varchar(50) not null default 'garmin',
+
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+
+      unique (user_id, day_date, summary_id)
+      );
+      
+      -- Index for faster queries by user/day
+      create index if not exists idx_user_stress_garmin_user_day
+      on app.user_stress_garmin(user_id, day_date);
+  `);
+
+  await db.query(`
+    -- Trigger to auto-update updated_at
+    drop trigger if exists update_user_stress_garmin_updated_at on app.user_stress_garmin;
+    create trigger update_user_stress_garmin_updated_at
+    before update on app.user_stress_garmin
+    for each row execute function app.update_updated_at_column();
+  `);
 
   // ----------------------------
   // Health stat triggers

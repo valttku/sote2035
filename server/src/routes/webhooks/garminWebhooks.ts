@@ -26,6 +26,11 @@ import {
   upsertGarminSleep,
 } from "../../db/garmin/sleepDb.js";
 
+import {
+  mapGarminStressToRow,
+  upsertGarminStress,
+} from "../../db/garmin/stressDb.js";
+
 // Router for Garmin webhooks
 export const garminWebhookRouter = express.Router();
 
@@ -391,6 +396,70 @@ garminWebhookRouter.post("/sleeps", async (req, res) => {
       err instanceof Error ? err.stack : "No stack trace",
     );
     res.sendStatus(200); // Garmin still expects 200
+  }
+});
+
+// POST /api/v1/webhooks/garmin/stress
+garminWebhookRouter.post("/stress", async (req, res) => {
+  console.log("Stress Webhook received at:", new Date().toISOString());
+  console.log("Raw Payload:", JSON.stringify(req.body, null, 2));
+
+  try {
+    // Normalize payload to array
+    const payload =
+      req.body.stress || (Array.isArray(req.body) ? req.body : [req.body]);
+
+    console.log(
+      "Extracted payload array length:",
+      Array.isArray(payload) ? payload.length : "Not an array",
+    );
+
+    for (const item of payload) {
+      const providerUserId = item.userId;
+      console.log("Processing Garmin user:", providerUserId);
+
+      if (!providerUserId) {
+        console.warn(
+          "No userId found in stress item:",
+          JSON.stringify(item, null, 2),
+        );
+        continue;
+      }
+
+      const r = await db.query(
+        `SELECT user_id FROM app.user_integrations
+         WHERE provider = 'garmin' AND provider_user_id = $1`,
+        [providerUserId],
+      );
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
+
+      const user_id = r.rows[0].user_id;
+      console.log("Found internal user:", user_id);
+
+      // Map Garmin payload to row object
+      const row = mapGarminStressToRow(user_id, item);
+      console.log("Mapped stress row:", JSON.stringify(row, null, 2));
+
+      // Upsert into DB
+      await upsertGarminStress(row);
+      console.log(
+        `Successfully upserted stress data for user ${user_id}, day ${row.day_date}`,
+      );
+    }
+
+    // Garmin expects HTTP 200 even if some items failed
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Garmin Stress webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
+    res.sendStatus(200);
   }
 });
 
