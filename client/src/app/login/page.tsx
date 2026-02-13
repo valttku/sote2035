@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Modal from "../../components/Modal";
 import LoginForm from "../../components/LoginForm";
 import RegisterForm from "../../components/RegisterForm";
+import logo from "../../../public/logo.svg";
+import Image from "next/image";
 
 export default function LoginPage() {
   // States to track if login and registration modal visibility
@@ -55,30 +57,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen">
-      {/* Page title */}
-      <h1 className="text-7xl font-bold mb-10 text-center">
-        Patient
-        <br />
-        Digital Twin
-      </h1>
-
-      {/* Login and Registration buttons */}
-      <div className="flex flex-col gap-4 min-w-80">
-        <button
-          className="text-2xl bg-[#c3dafe]/70 px-4 py-5 rounded-2xl font-bold hover:bg-[#b3c4f3]/50"
-          onClick={() => setShowLogin(true)}
-        >
-          LOGIN
-        </button>
-        <button
-          className="text-2xl bg-[#c3dafe]/70 px-4 py-5 rounded-2xl font-bold hover:bg-[#b3c4f3]/50"
-          onClick={() => setShowRegister(true)}
-        >
-          REGISTER
-        </button>
-      </div>
-
+    <main className="main-page">
+      <Image src={logo} alt="Logo" className="logo" priority />
       {/* Login modal */}
       {showLogin && (
         <Modal onClose={() => setShowLogin(false)}>
@@ -99,7 +79,6 @@ export default function LoginPage() {
           </div>
         </Modal>
       )}
-
       {/* Registration modal */}
       {showRegister && (
         <Modal onClose={() => setShowRegister(false)}>
