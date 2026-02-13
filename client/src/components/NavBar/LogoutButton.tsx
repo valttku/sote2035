@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function LogoutButton() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   async function handleLogout() {
     await fetch(`/api/v1/auth/logout`, {
@@ -20,7 +22,7 @@ export default function LogoutButton() {
       className="w-full text-indigo-200 hover:text-[#f2345d] transition py-2"
     >
       <span className="bi bi-power"></span>
-      Log off
+        {t?.auth?.logout ?? "Logout"} {/* safe fallback */}
     </button>
   );
 }

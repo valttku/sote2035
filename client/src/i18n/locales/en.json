@@ -1,0 +1,234 @@
+{
+"navbar": {
+    "home": "Home",
+    "calendar": "Calendar",
+    "health": "Health Insights",
+    "settings": "Settings",
+    "language": "Language"
+  }, 
+
+  "home": {
+  "title": "Today",
+  "selectBodyPart": "Select a body part by clicking on a white dot on the body",
+
+"bodyParts": {
+  "brain": "Brain",
+  "heart": "Heart",
+  "lungs": "Lungs",
+  "legs": "Legs"
+}
+},
+
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "fill_both_fields": "Please fill both fields",
+    "weak_password": "Weak password",
+    "medium_password": "Medium password",
+    "strong_password": "Strong password"
+  },
+  "settings": {
+    "profile_section_title": "Profile",
+    "email_label": "Email",
+    "username_label": "Username",
+    "gender_label": "Gender",
+    "height_label": "Height",
+    "weight_label": "Weight",
+    "edit_profile": "Edit Profile",
+    "change_password": "Change Password",
+    "profileAccount": "Provider Accounts",
+    "link_polar": "Link Polar",
+    "unlink_polar": "Unlink Polar",
+    "unlink_polar_confirm": "Are you sure you want to unlink Polar?",
+    "link_garmin": "Link Garmin",
+    "unlink_garmin": "Unlink Garmin",
+    "unlink_garmin_confirm": "Are you sure you want to unlink Garmin?",
+    "providerAccountManagement": "Account Management",
+    "delete_account": "Delete Account",
+    "delete_account_confirm": "Are you sure you want to delete your account?",
+    "failed_load_settings": "Failed to load settings",
+    "failed_update_profile": "Failed to update profile",
+    "password_changed": "Password changed successfully",
+    "failed_connect_server": "Failed to connect to server",
+    "display_name_placeholder": "Enter display name",
+    "select_gender": "Select gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "unknown": "Unknown",
+    "height_placeholder": "Enter height in cm",
+    "weight_placeholder": "Enter weight in kg",
+    "old_password_placeholder": "Old Password",
+    "new_password_placeholder": "New Password"
+  },
+  "startup": {
+    "patient": "Patient",
+    "page_title": "Patient Digital Twin",
+    "login": "LOGIN",
+    "register": "REGISTER",
+    "forgot_password": "Forgot password?",
+    "login_failed_session": "Login failed: session not established",
+    "general_error": "An error occurred. Please try again."},
+ 
+  "calendar": {
+    "title": "Calendar",
+    "prev": "Prev",
+    "next": "Next",
+    "weekdays":{
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"},
+    "hasData": "Has health data",
+    "noData": "No health data",
+    "healthStats": "Health Stats",
+    "activities": "Activities",
+    "manualActivities": "Manually Added Activities",
+    "noManualActivities": "No manually added activities for this day",
+    "loadMonthError": "Failed to load calendar month",
+    "connectError": "Failed to connect to server",
+    "loadStatsError": "Failed to load health stats",
+    "loadActivitiesError": "Failed to load activities",
+    "loadManualError": "Failed to load manually added activities",
+    "deleteManualError": "Failed to delete manual activity",
+     "locale": "en-US",
+
+    "addActivityButton": "Add Activity",
+    "activityTitlePlaceholder": "Activity title (e.g., Morning Run)",
+    "activityTypePlaceholder": "Type (e.g., Run)",
+    "activityDurationPlaceholder": "Duration (minutes)",
+    "activityCaloriesPlaceholder": "Calories",
+    "activityStepsPlaceholder": "Steps",
+    "submitButton": "Submit",
+    "cancelButton": "Cancel",
+
+    "noActivities": "No activities for this day.",
+    "manuallyAdded": "Manually added activity",
+    "duration": "Duration",
+    "startTime": "Start Time",
+    "avgHeartRate": "Avg Heart Rate",
+    "activeCalories": "Active Kilocalories",
+    "stepsLabel": "Steps",
+    "noHealthStats": "No health stats for this day.",
+    "heart": "Heart",
+    "brain": "Brain",
+    "legs": "Legs",
+    "lungs": "Lungs",
+    "manualActivity": "Manual Activity",
+    
+"fields": {
+  "type": "Type",
+  "notes": "Notes",
+  "steps": "Steps",
+  "title": "Title",
+  "calories": "Calories",
+  "duration": "Duration"
+},
+    "deleteButton": "Delete",
+    "unknown": "unknown",
+    "minutesShort": "min",
+     
+  "durationPlaceholder": "Duration (minutes)",
+  "caloriesPlaceholder": "Calories",
+  "stepsPlaceholder": "Steps",
+ 
+  "submitting": "Submitting...",
+  "activityTypes": {
+    "run": "Run",
+    "walk": "Walk",
+    "gym": "Gym",
+    "cycling": "Cycling"
+  }
+    
+
+  },
+
+  "login": {
+  "title": "Login",
+  "email": "Email",
+  "password": "Password",
+  "emailError": "Enter a valid email address",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "loginButton": "Login",
+  "loading": "Loading..."
+},
+
+"register": {
+  "title": "Register",
+  "email": "Email",
+  "displayName": "Display Name",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+
+  "validEmail": "Enter a valid email address",
+  "weakPassword": "Password is too weak",
+  "passwordsDontMatch": "Passwords do not match",
+
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+
+  "loading": "Loading...",
+  "registerButton": "Register",
+
+  "passwordMustContain": "Password must contain:",
+
+  "passwordStrength": {
+    "enter": "Enter a password",
+    "weak": "Weak password",
+    "medium": "Medium password",
+    "strong": "Strong password"
+  },
+
+  "requirements": {
+    "characters": "At least 8 characters",
+    "number": "At least 1 number",
+    "lowercase": "At least 1 lowercase letter",
+    "uppercase": "At least 1 uppercase letter",
+    "special": "At least 1 special character"
+  }
+},
+
+"darkmodetoggle": {
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode"
+},
+
+"auth": {
+  "logout": "Log off"
+},
+
+ 
+
+
+  "healthInsights": {
+  "title": "Health Insights",
+  "sections": {
+    "dailies": "Dailies",
+    "activities": "Activities",
+    "sleep": "Sleep",
+    "stress": "Stress",
+    "cardiovascular": "Heart Health"
+   
+  },
+  "loading": "Loading health data...",
+  "aiTitle": "AI Analysis",
+  "aiPlaceholder": "Select data and click \"Analyze\" to get insights and suggestions from the AI.",
+  "comingSoon": "Section coming soon...",
+  "analyzing": "Analyzing...",
+  "clearAnalysis": "Clear Analysis",
+  "analyzeAll": "Analyze all data",
+  "analyzeSection": "Analyze {{section}}",
+  "failedInsights": "Failed to get AI insights. Try again.",
+  "noDailies": "No daily data available for this date.",       
+  "sleepComingSoon": "Sleep section coming soon...",           
+  "stressComingSoon": "Stress section coming soon...",         
+  "cardioComingSoon": "Cardio section coming soon...",         
+  "bodyCompositionComingSoon": "Body Composition section coming soon..." 
+}
+}
+
+

@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Modal from "../../components/Modal";
 import LoginForm from "../../components/LoginForm";
 import RegisterForm from "../../components/RegisterForm";
+import { useTranslation } from "../../i18n/LanguageProvider";
+
 
 export default function StartUpPage() {
   // States to track if login and registration modal visibility
@@ -12,6 +14,11 @@ export default function StartUpPage() {
 
   // Next.js router for client-side navigation
   const router = useRouter();
+
+  //for translation 
+  const { t } = useTranslation();
+  const text = t.startup;
+
 
   //Handles form submission for both login and registration flows
   async function handleSubmit(
@@ -40,7 +47,8 @@ export default function StartUpPage() {
         if (endpoint === "login") {
           router.push("/"); // Only redirect if /me confirms login
         } else {
-          alert("Login failed: session not established");
+          alert(text.login_failed_session);
+;
         }
       } else {
         // Registration flow
@@ -50,7 +58,7 @@ export default function StartUpPage() {
       }
     } catch (error) {
       console.error("Authentication error:", error);
-      alert("An error occurred. Please try again.");
+      alert(text.general_error);
     }
   }
 
@@ -58,9 +66,9 @@ export default function StartUpPage() {
     <main className="flex flex-col items-center justify-center min-h-screen">
       {/* Page title */}
       <h1 className="text-7xl font-bold mb-10 text-center">
-        Patient
+        {t.startup.patient}
         <br />
-        Digital Twin
+        {text.page_title}
       </h1>
 
       {/* Login and Registration buttons */}
@@ -69,13 +77,13 @@ export default function StartUpPage() {
           className="text-2xl bg-[#c3dafe]/70 px-4 py-5 rounded-2xl font-bold hover:bg-[#b3c4f3]/50"
           onClick={() => setShowLogin(true)}
         >
-          LOGIN
+          {text.login}
         </button>
         <button
           className="text-2xl bg-[#c3dafe]/70 px-4 py-5 rounded-2xl font-bold hover:bg-[#b3c4f3]/50"
           onClick={() => setShowRegister(true)}
         >
-          REGISTER
+          {text.register}
         </button>
       </div>
 
@@ -94,7 +102,7 @@ export default function StartUpPage() {
               href="/forgot-password"
               className="text-sm text-[#c3dafe]/80 underline"
             >
-              Forgot password?
+              {text.forgot_password}
             </a>
           </div>
         </Modal>

@@ -1,25 +1,27 @@
 "use client";
 
 import type { ActivitiesEntry } from "../types";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
-function formatDuration(seconds?: number | null): string {
-  if (!seconds) return "0 min";
+// Helper function to format duration in minutes/seconds
+function formatDuration(seconds?: number | null, t?: any): string {
+  if (!seconds) return `0 ${t?.calendar.minutesShort ?? "min"}`;
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
   if (minutes === 0) return `${secs}s`;
-  if (secs === 0) return `${minutes}m`;
-  return `${minutes}m ${secs}s`;
+  if (secs === 0) return `${minutes}${t?.calendar.minutesShort ?? "m"}`;
+  return `${minutes}${t?.calendar.minutesShort ?? "m"} ${secs}s`;
 }
 
+// Helper function to format Unix timestamp to 24-hour time
 function formatTime(
   unixSeconds?: number | null,
   offset?: number | null,
+  locale?: string
 ): string {
   if (unixSeconds == null) return "N/A";
-  // Convert Unix timestamp (in seconds) to milliseconds and create Date
   const date = new Date(unixSeconds * 1000);
-  // Return time in 24-hour format
-  return date.toLocaleTimeString("en-US", {
+  return date.toLocaleTimeString(locale || "en-US", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -31,49 +33,70 @@ export default function ActivitiesList({
 }: {
   entries: ActivitiesEntry[];
 }) {
+  const { t } = useTranslation(); // Get translation object
+
+  // Show message when no activities exist for this day
   if (entries.length === 0) {
-    return <p className="text-sm opacity-80">No activities for this day.</p>;
+    return (
+      <p className="text-sm opacity-80">
+        {t.calendar.noActivities ?? "No activities for this day."}
+      </p>
+    );
   }
+
   return (
     <div className="space-y-3 overflow-y-auto max-h-96">
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
+          {/* Activity header: name + source */}
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-[#31c2d5]">{e.activity_name}</h3>
             <span className="text-xs opacity-70">
               {e.source_type === "manual"
-                ? "Manually added activity"
+                ? t.calendar.manuallyAdded ?? "Manually added activity"
                 : e.device_name}
             </span>
           </div>
 
+          {/* Activity details */}
           <div className="text-sm space-y-1">
             <div>
-              <span className="font-semibold">Duration: </span>
-              {formatDuration(e.duration_in_seconds)}
+              <span className="font-semibold">
+                {t.calendar.duration ?? "Duration"}:{" "}
+              </span>
+              {formatDuration(e.duration_in_seconds, t)}
             </div>
             <div>
-              <span className="font-semibold">Start Time: </span>
+              <span className="font-semibold">
+                {t.calendar.startTime ?? "Start Time"}:{" "}
+              </span>
               {formatTime(
                 e.start_time_in_seconds,
                 e.start_time_offset_in_seconds,
+                t.locale // use locale from translation
               )}
             </div>
             {e.average_heart_rate != null && (
               <div>
-                <span className="font-semibold">Avg Heart Rate: </span>
+                <span className="font-semibold">
+                  {t.calendar.avgHeartRate ?? "Avg Heart Rate"}:{" "}
+                </span>
                 {e.average_heart_rate} bpm
               </div>
             )}
             {e.active_kilocalories != null && (
               <div>
-                <span className="font-semibold">Active Kilocalories: </span>
+                <span className="font-semibold">
+                  {t.calendar.activeCalories ?? "Active Kilocalories"}:{" "}
+                </span>
                 {e.active_kilocalories} kcal
               </div>
             )}
             {e.steps != null && (
               <div>
-                <span className="font-semibold">Steps: </span>
+                <span className="font-semibold">
+                  {t.calendar.stepsLabel ?? "Steps"}:{" "}
+                </span>
                 {e.steps}
               </div>
             )}
