@@ -8,6 +8,8 @@ import logo from "../../../public/logo.svg";
 import Image from "next/image";
 import Button from "@/components/Button/Button";
 
+import mainBg from "../../../public/main-bg.svg";
+
 export default function LoginPage() {
   // States to track if login and registration modal visibility
   const [showLogin, setShowLogin] = useState(false);
@@ -59,20 +61,33 @@ export default function LoginPage() {
 
   return (
     <main className="main-page">
+      <Image
+        src={mainBg}
+        alt="Authentication background"
+        fill
+        className="object-cover"
+      />
       <Image src={logo} alt="Logo" className="logo" priority />
 
-      <Button
-        size="large"
-        label="Get Started"
-        className="absolute bottom-50 left-1/2 -translate-x-1/2 w-68 text-white font-semibold"
-      />
+      {!showLogin && !showRegister && (
+        <>
+          <Button
+            size="large"
+            label="Get Started"
+            onClick={() => setShowRegister(true)}
+            className="absolute bottom-[200px] right-120 w-72 text-white font-semibold"
+          />
 
-      <Button
-        size="large"
-        borderColor="border-white"
-        label="I already have an account"
-        className="absolute bottom-30 left-1/2 -translate-x-1/2 w-68 text-white font-semibold bg-transparent"
-      />
+          <Button
+            size="large"
+            borderColor="border-white"
+            label="I already have an account"
+            onClick={() => setShowLogin(true)}
+            className="absolute bottom-[120px] right-120 w-72 text-white font-semibold bg-transparent"
+          />
+        </>
+      )}
+
       {/* Login modal */}
       {showLogin && (
         <Modal onClose={() => setShowLogin(false)}>

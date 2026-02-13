@@ -26,10 +26,10 @@ const Button: React.FC<ButtonProps> = ({
   size = "medium",
   type = "button",
   disabled = false,
-  bgColor = "bg-cyan-500",
   textColor = "text-black",
   cursor = "cursor-pointer",
   borderColor = "border-black",
+  bgColor = "button-style-blue",
   ...props
 }) => {
   const sizeClass = sizeClasses[size];
@@ -40,7 +40,7 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
       className={`${bgColor} ${textColor} border ${borderColor} rounded ${sizeClass} ${className} ${
-        disabled ? "opacity-75 cursor-not-allowed" : cursor
+        disabled ? "opacity-75 cursor-not-allowed pointer-events-none" : cursor
       }`}
       {...props}
     >

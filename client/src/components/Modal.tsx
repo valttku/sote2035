@@ -8,17 +8,20 @@ type ModalProps = {
 
 export default function Modal({ children, onClose }: ModalProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-indigo-950/50 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center">
       <div
         className="
           ui-component-styles
           p-6 rounded-2xl
-          w-full max-w-md
+          w-full max-w-xl
           max-h-[90vh] overflow-y-auto
+          translate-x-80
         "
-
         // Dark mode variables applied here
-        style= {{ backgroundColor:  "var(--input-bg)", color: "var(--foreground)" }}
+        style={{
+          backgroundColor: "var(--input-bg)",
+          color: "var(--foreground)",
+        }}
       >
         <button
           type="button"
@@ -28,7 +31,7 @@ export default function Modal({ children, onClose }: ModalProps) {
           ✕
         </button>
 
-           {/* Modal content */}
+        {/* Modal content */}
         {children}
       </div>
     </div>
