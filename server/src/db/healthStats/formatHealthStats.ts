@@ -37,7 +37,7 @@ export function formatHealthEntry(kind: string, data: any) {
     if (data.floors_climbed != null)
       metrics["Floors climbed"] = data.floors_climbed;
     if (data.intensity_duration_seconds != null)
-      metrics["Intensity duration (min)"] = +(
+      metrics["Intensity minutes"] = +(
         data.intensity_duration_seconds / 60
       ).toFixed(1);
   }

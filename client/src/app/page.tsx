@@ -74,7 +74,7 @@ export default function Home() {
             </div>
 
             {/* Guide + info-panel on the right */}
-            <div className="w-1/2 max-w-[320px] p-4 md:p-6 flex flex-col justify-start text-left">
+            <div className="w-1/2 max-w-[400px] p-4 md:p-6 flex flex-col justify-start text-left">
               {!selected && (
                 <div className="mb-2">
                   <p className="text-sm md:text-base">
@@ -84,7 +84,7 @@ export default function Home() {
               )}
 
               {selected && (
-                <div className="w-full md:max-w-[500px]">
+                <div className="w-full">
                   <HealthStatsPanel
                     selected={selected}
                     onClose={() => setSelected(null)}

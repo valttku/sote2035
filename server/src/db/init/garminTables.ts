@@ -347,7 +347,7 @@ export async function createGarminTables() {
           'distance_meters', new.distance_in_meters,
           'active_kcal', new.active_kilocalories,
           'total_kcal', new.active_kilocalories + new.bmr_kilocalories,
-          'intensity_duration_seconds', new.moderate_intensity_duration_in_seconds + new.vigorous_intensity_duration_in_seconds,
+          'intensity_duration_seconds', new.moderate_intensity_duration_in_seconds + (new.vigorous_intensity_duration_in_seconds * 2),
           'floors_climbed', new.floors_climbed
         )
       on conflict (user_id, day_date, kind)
