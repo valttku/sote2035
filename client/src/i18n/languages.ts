@@ -7,3 +7,5 @@ export const en: Translations = enJson as Translations;
 export const fi: Translations = fiJson as Translations;
 
 export const translations: Record<LanguageCode, Translations> = { en, fi };
+
+

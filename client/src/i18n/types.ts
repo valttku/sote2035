@@ -8,8 +8,7 @@ export type NavbarTranslations = {
   health: string;
   settings: string;
   language: string;
-  lightmode: string;
-  logoff: string;
+  
 };
 
 

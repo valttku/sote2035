@@ -1,5 +1,8 @@
 
 {
+
+ 
+
   "navbar": {
     "home": "Koti",
     "calendar": "Kalenteri",
@@ -72,6 +75,8 @@
     "login_failed_session": "Kirjautuminen epäonnistui: istuntoa ei luotu",
     "general_error": "Tapahtui virhe. Yritä uudelleen."
   },
+
+  "locale": "fi",
  
   "calendar": {
      "title": "Kalenteri",

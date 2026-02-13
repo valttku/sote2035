@@ -1,23 +1,24 @@
 {
-"navbar": {
+  "locale": "en",
+
+  "navbar": {
     "home": "Home",
     "calendar": "Calendar",
     "health": "Health Insights",
     "settings": "Settings",
     "language": "Language"
-  }, 
+  },
 
   "home": {
-  "title": "Today",
-  "selectBodyPart": "Select a body part by clicking on a white dot on the body",
-
-"bodyParts": {
-  "brain": "Brain",
-  "heart": "Heart",
-  "lungs": "Lungs",
-  "legs": "Legs"
-}
-},
+    "title": "Today",
+    "selectBodyPart": "Select a body part by clicking on a white dot on the body",
+    "bodyParts": {
+      "brain": "Brain",
+      "heart": "Heart",
+      "lungs": "Lungs",
+      "legs": "Legs"
+    }
+  },
 
   "common": {
     "save": "Save",
@@ -27,6 +28,7 @@
     "medium_password": "Medium password",
     "strong_password": "Strong password"
   },
+
   "settings": {
     "profile_section_title": "Profile",
     "email_label": "Email",
@@ -61,6 +63,7 @@
     "old_password_placeholder": "Old Password",
     "new_password_placeholder": "New Password"
   },
+
   "startup": {
     "patient": "Patient",
     "page_title": "Patient Digital Twin",
@@ -68,20 +71,22 @@
     "register": "REGISTER",
     "forgot_password": "Forgot password?",
     "login_failed_session": "Login failed: session not established",
-    "general_error": "An error occurred. Please try again."},
- 
+    "general_error": "An error occurred. Please try again."
+  },
+
   "calendar": {
     "title": "Calendar",
     "prev": "Prev",
     "next": "Next",
-    "weekdays":{
-    "mon": "Mon",
-    "tue": "Tue",
-    "wed": "Wed",
-    "thu": "Thu",
-    "fri": "Fri",
-    "sat": "Sat",
-    "sun": "Sun"},
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
     "hasData": "Has health data",
     "noData": "No health data",
     "healthStats": "Health Stats",
@@ -94,8 +99,8 @@
     "loadActivitiesError": "Failed to load activities",
     "loadManualError": "Failed to load manually added activities",
     "deleteManualError": "Failed to delete manual activity",
-     "locale": "en-US",
-     "loading": "Loading health data...",
+    "locale": "en-US",
+    "loading": "Loading health data...",
 
     "addActivityButton": "Add Activity",
     "activityTitlePlaceholder": "Activity title (e.g., Morning Run)",
@@ -114,128 +119,124 @@
     "activeCalories": "Active Kilocalories",
     "stepsLabel": "Steps",
     "noHealthStats": "No health stats for this day.",
+
     "heart": "Heart",
+    "brain": "Brain",
+    "legs": "Legs",
+    "lungs": "Lungs",
     "sleep": "Sleep",
     "stress": "Stress",
     "activity": "Activity",
     "respiratory": "Respiratory",
     "skinTemp": "Skin Temperature",
-    "brain": "Brain",
-    "legs": "Legs",
-    "lungs": "Lungs",
     "manualActivity": "Manual Activity",
-    
-"fields": {
-  "type": "Type",
-  "notes": "Notes",
-  "steps": "Steps",
-  "title": "Title",
-  "calories": "Calories",
-  "duration": "Duration"
-},
-    "deleteButton": "Delete",
-    "unknown": "unknown",
-    "minutesShort": "min",
-     
-  "durationPlaceholder": "Duration (minutes)",
-  "caloriesPlaceholder": "Calories",
-  "stepsPlaceholder": "Steps",
- 
-  "submitting": "Submitting...",
-  "activityTypes": {
-    "run": "Run",
-    "walk": "Walk",
-    "gym": "Gym",
-    "cycling": "Cycling"
-  }
-    
 
+    "fields": {
+      "type": "Type",
+      "notes": "Notes",
+      "steps": "Steps",
+      "title": "Title",
+      "calories": "Calories",
+      "duration": "Duration"
+    },
+
+    "deleteButton": "Delete",
+    "unknown": "Unknown",
+    "minutesShort": "min",
+
+    "durationPlaceholder": "Duration (minutes)",
+    "caloriesPlaceholder": "Calories",
+    "stepsPlaceholder": "Steps",
+
+    "submitting": "Submitting...",
+
+    "activityTypes": {
+      "run": "Run",
+      "walk": "Walk",
+      "gym": "Gym",
+      "cycling": "Cycling"
+    }
   },
 
   "login": {
-  "title": "Login",
-  "email": "Email",
-  "password": "Password",
-  "emailError": "Enter a valid email address",
-  "showPassword": "Show password",
-  "hidePassword": "Hide password",
-  "loginButton": "Login",
-  "loading": "Loading..."
-},
-
-"register": {
-  "title": "Register",
-  "email": "Email",
-  "displayName": "Display Name",
-  "password": "Password",
-  "confirmPassword": "Confirm Password",
-
-  "validEmail": "Enter a valid email address",
-  "weakPassword": "Password is too weak",
-  "passwordsDontMatch": "Passwords do not match",
-
-  "showPassword": "Show password",
-  "hidePassword": "Hide password",
-
-  "loading": "Loading...",
-  "registerButton": "Register",
-
-  "passwordMustContain": "Password must contain:",
-
-  "passwordStrength": {
-    "enter": "Enter a password",
-    "weak": "Weak password",
-    "medium": "Medium password",
-    "strong": "Strong password"
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "emailError": "Enter a valid email address",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "loginButton": "Login",
+    "loading": "Loading..."
   },
 
-  "requirements": {
-    "characters": "At least 8 characters",
-    "number": "At least 1 number",
-    "lowercase": "At least 1 lowercase letter",
-    "uppercase": "At least 1 uppercase letter",
-    "special": "At least 1 special character"
-  }
-},
+  "register": {
+    "title": "Register",
+    "email": "Email",
+    "displayName": "Display Name",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
 
-"darkmodetoggle": {
-  "darkMode": "Dark Mode",
-  "lightMode": "Light Mode"
-},
+    "validEmail": "Enter a valid email address",
+    "weakPassword": "Password is too weak",
+    "passwordsDontMatch": "Passwords do not match",
 
-"auth": {
-  "logout": "Log off"
-},
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
 
- 
+    "loading": "Loading...",
+    "registerButton": "Register",
 
+    "passwordMustContain": "Password must contain:",
+
+    "passwordStrength": {
+      "enter": "Enter a password",
+      "weak": "Weak password",
+      "medium": "Medium password",
+      "strong": "Strong password"
+    },
+
+    "requirements": {
+      "characters": "At least 8 characters",
+      "number": "At least 1 number",
+      "lowercase": "At least 1 lowercase letter",
+      "uppercase": "At least 1 uppercase letter",
+      "special": "At least 1 special character"
+    }
+  },
+
+  "darkmodetoggle": {
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode"
+  },
+
+  "auth": {
+    "logout": "Log off"
+  },
 
   "healthInsights": {
-  "title": "Health Insights",
-  "sections": {
-    "profile": "Profile",
-    "dailies": "Dailies",
-    "activities": "Activities",
-    "sleep": "Sleep",
-    "stress": "Stress",
-    "cardiovascular": "Heart Health"
-   
-  },
-  "loading": "Loading health data...",
-  "aiTitle": "AI Analysis",
-  "aiPlaceholder": "Select data and click \"Analyze\" to get insights and suggestions from the AI.",
-  "comingSoon": "Section coming soon...",
-  "analyzing": "Analyzing...",
-  "clearAnalysis": "Clear Analysis",
-  "analyzeAll": "Analyze all data",
-  "analyzeSection": "Analyze {{section}}",
-  "failedInsights": "Failed to get AI insights. Try again.",
-  "noDailies": "No daily data available for this date.",       
-  "sleepComingSoon": "Sleep section coming soon...",           
-  "stressComingSoon": "Stress section coming soon...",         
-  "cardioComingSoon": "Cardio section coming soon...",         
-  "bodyCompositionComingSoon": "Body Composition section coming soon..." 
+    "title": "Health Insights",
+    "sections": {
+      "profile": "Profile",
+      "dailies": "Dailies",
+      "activities": "Activities",
+      "sleep": "Sleep",
+      "stress": "Stress",
+      "cardiovascular": "Heart Health",
+      "bodyComposition": "Body Composition"
+    },
+    "loading": "Loading health data...",
+    "aiTitle": "AI Analysis",
+    "aiPlaceholder": "Select data and click \"Analyze\" to get insights and suggestions from the AI.",
+    "comingSoon": "Section coming soon...",
+    "analyzing": "Analyzing...",
+    "clearAnalysis": "Clear Analysis",
+    "analyzeAll": "Analyze all data",
+    "analyzeSection": "Analyze {{section}}",
+    "failedInsights": "Failed to get AI insights. Try again.",
+    "noDailies": "No daily data available for this date.",
+    "sleepComingSoon": "Sleep section coming soon...",
+    "stressComingSoon": "Stress section coming soon...",
+    "cardioComingSoon": "Cardio section coming soon...",
+    "bodyCompositionComingSoon": "Body Composition section coming soon..."
+  }
 }
-}
-
-

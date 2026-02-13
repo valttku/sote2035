@@ -33,6 +33,7 @@ export default function SyncButton() {
 
   return (
     <>
+    
       {/* Sync Button - Bottom Right Corner */}
       <button
         onClick={handleSync}
