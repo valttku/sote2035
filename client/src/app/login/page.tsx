@@ -6,6 +6,7 @@ import LoginForm from "../../components/LoginForm";
 import RegisterForm from "../../components/RegisterForm";
 import logo from "../../../public/logo.svg";
 import Image from "next/image";
+import Button from "@/components/Button/Button";
 
 export default function LoginPage() {
   // States to track if login and registration modal visibility
@@ -59,6 +60,19 @@ export default function LoginPage() {
   return (
     <main className="main-page">
       <Image src={logo} alt="Logo" className="logo" priority />
+
+      <Button
+        size="large"
+        label="Get Started"
+        className="absolute bottom-50 left-1/2 -translate-x-1/2 w-68 text-white font-semibold"
+      />
+
+      <Button
+        size="large"
+        borderColor="border-white"
+        label="I already have an account"
+        className="absolute bottom-30 left-1/2 -translate-x-1/2 w-68 text-white font-semibold bg-transparent"
+      />
       {/* Login modal */}
       {showLogin && (
         <Modal onClose={() => setShowLogin(false)}>
