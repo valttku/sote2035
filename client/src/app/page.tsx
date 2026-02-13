@@ -1,4 +1,9 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
+import AppLayout from "../components/AppLayout";
+import HealthStatsPanel, {
+  type BodyPartId,
+} from "../components/healthStatsPanel";
 
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
@@ -9,17 +14,55 @@ import { useTranslation } from "@/i18n/LanguageProvider";
 export default function Home() {
   const { t } = useTranslation();
 
-  const [selected, setSelected] = useState<BodyPartId | null>(null);
-  const [avatarType, setAvatarType] = useState<"male" | "female">("male");
+  const [avatarType, setAvatarType] = useState<"male" | "female">("male"); // default male
+  const genderLoaded = useRef(false);
 
-  // Fetch user profile on mount to get gender
+  const [alerts, setAlerts] = useState<Record<BodyPartId, boolean>>({
+    brain: false,
+    heart: false,
+    lungs: false,
+    legs: false,
+  });
+
+  // Poll each body part for alerts (metric status !== 'good')
   useEffect(() => {
-    fetch("/api/v1/settings", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.gender === "female") setAvatarType("female");
-      })
-      .catch(console.error);
+    const date = new Date().toISOString().split("T")[0];
+    let cancelled = false;
+
+    async function fetchSummary() {
+      try {
+        const res = await fetch(`/api/v1/home?date=${date}&part=summary`, {
+          credentials: "include",
+        });
+        if (!res.ok) return;
+        const json = await res.json().catch(() => ({}));
+
+        if (cancelled) return;
+
+        const alertsResp = json.alerts ?? {};
+        setAlerts({
+          brain: !!alertsResp.brain,
+          heart: !!alertsResp.heart,
+          lungs: !!alertsResp.lungs,
+          legs: !!alertsResp.legs,
+        });
+
+        const gender = json.user?.gender;
+        if (gender && !genderLoaded.current) {
+          setAvatarType(gender === "female" ? "female" : "male");
+          genderLoaded.current = true;
+        }
+      } catch (err) {
+        console.error("fetchSummary", err);
+      }
+    }
+
+    fetchSummary();
+    const id = setInterval(fetchSummary, 1000 * 60 * 5);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, []);
 
   const isFemale = avatarType === "female";
@@ -68,8 +111,11 @@ export default function Home() {
                     background:
                       selected === id
                         ? "rgba(10, 33, 90, 0.7)"
-                        : "rgba(203, 215, 249, 0.8)",
+                        : alerts[id]
+                          ? "rgba(220, 38, 38, 0.95)"
+                          : "rgba(203, 215, 249, 0.8)",
                   }}
+                  className={alerts[id] ? "animate-pulse" : undefined}
                   aria-label={id}
                   title={BODY_PARTS.find((bp) => bp.id === id)?.label}
                 />
@@ -84,12 +130,10 @@ export default function Home() {
               )}
 
               {selected && (
-                <div className="w-full">
-                  <HealthStatsPanel
-                    selected={selected}
-                    onClose={() => setSelected(null)}
-                  />
-                </div>
+                <HealthStatsPanel
+                  selected={selected}
+                  onClose={() => setSelected(null)}
+                />
               )}
             </div>
           </div>
