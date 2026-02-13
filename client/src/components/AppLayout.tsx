@@ -4,7 +4,6 @@ import Navbar from "./NavBar/Navbar";
 
 export default function AppLayout({
   children,
-  hideSidebar,
 }: {
   children: ReactNode;
   hideSidebar?: boolean;

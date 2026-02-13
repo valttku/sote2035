@@ -8,6 +8,7 @@ import ActivitiesList, { ActivitiesResponse} from "./components/ActivitiesList";
 import ManualActivityForm from "./components/ActivityForm";
 
 import { useTranslation } from "@/i18n/LanguageProvider";
+import { Translations } from "@/i18n/types";
 
 
 
@@ -25,7 +26,7 @@ function daysInMonth(year: number, month1to12: number) {
   return new Date(year, month1to12, 0).getDate();
 }
 
-function getDaysOfWeek(t: any) {
+function getDaysOfWeek(t: Translations) {
   return [
     t.calendar.weekdays.mon,
     t.calendar.weekdays.tue,

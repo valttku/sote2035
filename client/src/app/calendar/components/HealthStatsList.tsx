@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/i18n/LanguageProvider";
+import { Translations } from "@/i18n/types";
 
 // One health entry from the backend
 export type HealthStatsEntry = {
@@ -18,7 +19,7 @@ export type HealthStatsResponse = {
 };
 
 // Convert backend kind to a readable label with translation
-function labelForKind(kind: string, t?: any) {
+function labelForKind(kind: string, t?: Translations) {
   switch (kind) {
     case "heart_daily":
       return t?.calendar.heart ?? "Heart";

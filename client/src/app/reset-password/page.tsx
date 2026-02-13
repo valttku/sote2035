@@ -4,6 +4,16 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo, useRef, useState, Suspense } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
+
+ // Password requirements
+  const PASSWORD_REQUIREMENTS = [
+    { regex: /.{8,}/, text: "At least 8 characters" },
+    { regex: /[0-9]/, text: "At least 1 number" },
+    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
+    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
+  ];
+  
 function ResetPasswordForm() {
   const params = useSearchParams();
   const token = params.get("token");
@@ -19,14 +29,7 @@ function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  // Password requirements
-  const PASSWORD_REQUIREMENTS = [
-    { regex: /.{8,}/, text: "At least 8 characters" },
-    { regex: /[0-9]/, text: "At least 1 number" },
-    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
-    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
-    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
-  ];
+ 
 
   // Calculate strength score
   const strengthScore = useMemo(() => {

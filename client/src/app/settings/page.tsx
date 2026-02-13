@@ -21,6 +21,15 @@ type SettingsData = {
   garminLinked?: boolean;
 };
 
+ // ---------------- PASSWORD STRENGTH ----------------
+  const PASSWORD_REQUIREMENTS = [
+    /.{8,}/, // min 8 chars
+    /[0-9]/, // number
+    /[a-z]/, // lowercase
+    /[A-Z]/, // uppercase
+    /[^A-Za-z0-9]/, // special char
+  ];
+
 export default function SettingsPage() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -49,14 +58,7 @@ export default function SettingsPage() {
   const [polarBusy, setPolarBusy] = useState(false);
   const [garminBusy, setGarminBusy] = useState(false);
 
-  // ---------------- PASSWORD STRENGTH ----------------
-  const PASSWORD_REQUIREMENTS = [
-    /.{8,}/, // min 8 chars
-    /[0-9]/, // number
-    /[a-z]/, // lowercase
-    /[A-Z]/, // uppercase
-    /[^A-Za-z0-9]/, // special char
-  ];
+ 
 
   const strengthScore = useMemo(
     () => PASSWORD_REQUIREMENTS.filter((r) => r.test(newPassword)).length,

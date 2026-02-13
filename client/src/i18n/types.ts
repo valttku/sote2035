@@ -134,6 +134,11 @@ fields: {
   brain: string;
   legs: string;
   lungs: string;
+  sleep: string;
+  stress: string;
+  activity: string;
+  respiratory: string;
+  skinTemp: string;
   manualActivity: string;
   deleteButton: string;
   unknown: string;
