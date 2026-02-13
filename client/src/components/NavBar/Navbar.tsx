@@ -4,6 +4,12 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import DarkModeToggle from "./DarkModeToggle";
 import LogoutButton from "./LogoutButton";
+
+//  Import your translation hook and types
+import { useTranslation } from "@/i18n/LanguageProvider";
+import { LanguageCode } from "@/i18n/types";
+
+
 import {
   FaHome,
   FaCalendarAlt,
@@ -11,7 +17,7 @@ import {
   FaCog,
   FaGlobe,
 } from "react-icons/fa";
-import { translations, LanguageCode } from "../../i18n/languages";
+
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -27,7 +33,8 @@ export default function Navbar() {
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
-  const t = translations[language];
+   //  Get translations and current language from LanguageProvider
+  const { t, setLang } = useTranslation();
 
   const navItems = [
     { label: t.navbar.home, path: "/", icon: <FaHome /> },
@@ -92,26 +99,34 @@ export default function Navbar() {
               shadow-sm"
             >
               <FaGlobe />
-              Language
+              {t.navbar.language}
             </button>
             {langOpen && (
               <div className="absolute right-0 mt-2 w-20 bg-gray-800 text-white rounded shadow-lg z-50">
                 <button
-                  onClick={() => setLanguage("en")}
+                  onClick={() => {
+                    setLanguage("en"); // update local state
+                    setLang("en");     // update translation context
+                  }}
                   className={`block w-full px-4 py-2 hover:bg-gray-700 ${
                     language === "en" ? "font-bold" : ""
                   }`}
                 >
                   EN
                 </button>
+
                 <button
-                  onClick={() => setLanguage("fi")}
+                  onClick={() => {
+                    setLanguage("fi");
+                    setLang("fi");
+                  }}
                   className={`block w-full px-4 py-2 hover:bg-gray-700 ${
                     language === "fi" ? "font-bold" : ""
                   }`}
                 >
                   FI
                 </button>
+
               </div>
             )}
           </div>

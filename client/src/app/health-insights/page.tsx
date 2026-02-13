@@ -7,8 +7,14 @@ import { UserProfileSection, UserProfile } from "./sections/UserProfileSection";
 import { SleepSection, Sleep } from "./sections/SleepSection";
 import { StressSection, Stress } from "./sections/StressSection";
 import { useHealthData } from "./hooks/useHealthDataGarmin";
+import { useTranslation } from "@/i18n/LanguageProvider";
+import { HealthInsightsTranslations } from "@/i18n/types";
 
-type Section = "profile" | "dailies" | "activities" | "sleep" | "stress";
+
+
+// Section keys type
+type Section = keyof HealthInsightsTranslations["sections"];
+
 
 type HealthDataToAnalyze = {
   profile?: UserProfile;
@@ -19,7 +25,9 @@ type HealthDataToAnalyze = {
 };
 
 export default function HealthInsightsPage() {
-  const [activeSection, setActiveSection] = useState<Section>("dailies");
+  const { t } = useTranslation();
+
+  const [activeSection, setActiveSection] = useState<Section>("activities");
   const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -82,33 +90,39 @@ export default function HealthInsightsPage() {
       setShowResult(true);
     } catch (err) {
       console.error(err);
-      setResult("Failed to get AI insights. Try again.");
+      setResult(t.healthInsights.failedInsights);
       setShowResult(true);
     } finally {
       setLoading(false);
     }
   };
 
+//type Section = keyof HealthInsightsTranslations["sections"];
+
+
   const sections: { id: Section; label: string; disabled?: boolean }[] = [
-    { id: "profile", label: "Profile" },
-    { id: "dailies", label: "Dailies" },
-    { id: "activities", label: "Activities" },
-    { id: "sleep", label: "Sleep" },
-    { id: "stress", label: "Stress" },
-  ];
+    {id: "profile", label:t.healthInsights.sections.profile},
+
+  { id: "dailies", label: t.healthInsights.sections.dailies },
+  { id: "activities", label: t.healthInsights.sections.activities },
+  { id: "sleep", label: t.healthInsights.sections.sleep },
+  { id: "stress", label: t.healthInsights.sections.stress },
+  { id: "cardiovascular", label: t.healthInsights.sections.cardiovascular },
+  
+];
 
   return (
     <AppLayout>
       <div className="w-full flex justify-center">
         <div className="ui-component-styles p-6 w-full max-w-5xl space-y-6 mx-auto flex flex-col flex-1">
-          <h1 className="text-4xl">Health Insights</h1>
+          <h1 className="text-4xl">{t.healthInsights.title}</h1>
 
           {/* Navigation */}
           <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 ">
             <div className="flex flex-wrap gap-2">
               {sections.map((section) => (
                 <button
-                  key={section.id}
+                  key={String(section.id)} //Fix key prop
                   onClick={() =>
                     !section.disabled && setActiveSection(section.id)
                   }
@@ -147,30 +161,28 @@ export default function HealthInsightsPage() {
               {/* Activities */}
               <div className="flex-1 min-w-0 overflow-y-auto">
                 {loadingData ? (
-                  <p>Loading health data...</p>
+                  <p>{t.healthInsights.loading}</p>
                 ) : (
                   <>
-                    {activeSection === "profile" && (
-                      <UserProfileSection profile={healthData?.profile} />
+                   {activeSection === "dailies" && (
+                      healthData?.dailies?.[0] ? (
+                        <DailiesSection dailies={healthData.dailies[0]} />
+                      ) : (
+                        <div className="p-4">{t.healthInsights.noDailies}</div>
+                      )
                     )}
-                    {activeSection === "dailies" && (
-                      <DailiesSection dailies={healthData?.dailies?.[0]} />
-                    )}
-                    {activeSection === "activities" && (
-                      <ActivitiesSection
-                        activities={
-                          healthData?.activities as Activity[] | undefined
-                        }
-                        onActivitiesSelected={setSelectedActivityIds}
-                        selectedActivityIds={selectedActivityIds}
-                      />
-                    )}
+
                     {activeSection === "sleep" && (
-                      <SleepSection sleep={healthData?.sleep?.[0]} />
+                      <div className="p-4">{t.healthInsights.sleepComingSoon}</div>
                     )}
                     {activeSection === "stress" && (
-                      <StressSection stress={healthData?.stress?.[0]} />
+                      <div className="p-4">{t.healthInsights.stressComingSoon}</div>
                     )}
+                    {activeSection === "cardiovascular" && (
+                      <div className="p-4">{t.healthInsights.cardioComingSoon}</div>
+                    )}
+
+
                   </>
                 )}
               </div>
@@ -179,15 +191,14 @@ export default function HealthInsightsPage() {
               <div className="flex-[0_0_40%] min-w-[200px] flex flex-col overflow-hidden mt-4 md:mt-0">
                 <div className="bg-[#1e1c4f]/20 border-2 border-[#31c2d5] rounded-lg flex flex-col h-full">
                   <p className="sticky text-white top-0 z-10 text-lg p-1 pl-5 bg-[#31c2d5]">
-                    AI Analysis
+                    {t.healthInsights.aiTitle}
                   </p>
                   <div className="flex-1 overflow-y-auto p-5">
                     {showResult && result ? (
                       <p className="whitespace-pre-wrap text-sm">{result}</p>
                     ) : (
                       <p className="italic text-sm">
-                        Select data and click &quot;Analyze&quot; to get
-                        insights and suggestions from the AI.
+                        {t.healthInsights.aiPlaceholder}
                       </p>
                     )}
                   </div>
@@ -205,12 +216,17 @@ export default function HealthInsightsPage() {
               disabled={loading || loadingData}
             >
               {loading
-                ? "Analyzing..."
+                ? t.healthInsights.analyzing
                 : showResult
-                  ? "Clear Analysis"
-                  : selectedActivityIds.size > 0
-                    ? `Analyze ${activeSection}`
-                    : "Analyze all data"}
+                ? t.healthInsights.clearAnalysis
+                : selectedActivityIds.size > 0
+                ? t.healthInsights.analyzeSection.replace(
+                    "{{section}}",
+                    t.healthInsights.sections[
+                      activeSection as keyof HealthInsightsTranslations["sections"]
+                    ]
+                  )
+                : t.healthInsights.analyzeAll}
             </button>
           </div>
         </div>

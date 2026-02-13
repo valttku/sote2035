@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import AppLayout from "../../components/AppLayout";
-import Modal from "../../components/Modal";
-import { translations, LanguageCode } from "../../i18n/languages";
+import AppLayout from "@/components/AppLayout";
+import Modal from "@/components/Modal";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 type SettingsData = {
   id: number;
@@ -21,8 +21,18 @@ type SettingsData = {
   garminLinked?: boolean;
 };
 
+ // ---------------- PASSWORD STRENGTH ----------------
+  const PASSWORD_REQUIREMENTS = [
+    /.{8,}/, // min 8 chars
+    /[0-9]/, // number
+    /[a-z]/, // lowercase
+    /[A-Z]/, // uppercase
+    /[^A-Za-z0-9]/, // special char
+  ];
+
 export default function SettingsPage() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   // ---------------- STATE ----------------
   const [data, setData] = useState<SettingsData | null>(null);
@@ -42,66 +52,34 @@ export default function SettingsPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
-  const [language, setLanguage] = useState<LanguageCode>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("lang") as LanguageCode) || "en";
-    }
-    return "en";
-  });
-
-  const t = translations[language];
-
-  // Listen for language changes from other components
-  useEffect(() => {
-    const handleLanguageChange = (e: Event) => {
-      const customEvent = e as CustomEvent<LanguageCode>;
-      setLanguage(customEvent.detail);
-    };
-
-    window.addEventListener("languageChange", handleLanguageChange);
-    return () =>
-      window.removeEventListener("languageChange", handleLanguageChange);
-  }, []);
-
   // Providers
   const [polarLinked, setPolarLinked] = useState(false);
   const [garminLinked, setGarminLinked] = useState(false);
   const [polarBusy, setPolarBusy] = useState(false);
   const [garminBusy, setGarminBusy] = useState(false);
 
-  // ---------------- PASSWORD ----------------
-  const PASSWORD_REQUIREMENTS = [
-    /.{8,}/,
-    /[0-9]/,
-    /[a-z]/,
-    /[A-Z]/,
-    /[^A-Za-z0-9]/,
-  ];
+ 
 
   const strengthScore = useMemo(
     () => PASSWORD_REQUIREMENTS.filter((r) => r.test(newPassword)).length,
-    [newPassword],
+    [newPassword]
   );
 
   const strengthColor =
     strengthScore <= 2
       ? "bg-red-500"
       : strengthScore <= 4
-        ? "bg-amber-500"
-        : "bg-emerald-500";
+      ? "bg-amber-500"
+      : "bg-emerald-500";
 
   const strengthText =
     strengthScore <= 2
-      ? t.weak_password
+      ? t.common.weak_password
       : strengthScore <= 4
-        ? t.medium_password
-        : t.strong_password;
+      ? t.common.medium_password
+      : t.common.strong_password;
 
   // ---------------- EFFECTS ----------------
-  useEffect(() => {
-    localStorage.setItem("lang", language);
-  }, [language]);
-
   useEffect(() => {
     async function loadSettings() {
       try {
@@ -117,7 +95,7 @@ export default function SettingsPage() {
         setPolarLinked(json.polarLinked ?? false);
         setGarminLinked(json.garminLinked ?? false);
       } catch {
-        setError(t.failed_load_settings);
+        setError(t.settings.failed_load_settings);
       }
     }
     loadSettings();
@@ -140,14 +118,14 @@ export default function SettingsPage() {
 
       setShowEditProfile(false);
     } catch {
-      alert(t.failed_update_profile);
+      alert(t.settings.failed_update_profile);
     } finally {
       setSavingProfile(false);
     }
   }
 
   async function changePassword() {
-    if (!oldPassword || !newPassword) return alert(t.fill_both_fields);
+    if (!oldPassword || !newPassword) return alert(t.common.fill_both_fields);
     setChangingPassword(true);
     try {
       const res = await fetch(`/api/v1/settings/password`, {
@@ -158,19 +136,19 @@ export default function SettingsPage() {
       });
       if (!res.ok) throw new Error();
 
-      alert(t.password_changed);
+      alert(t.settings.password_changed);
       setOldPassword("");
       setNewPassword("");
       setShowChangePassword(false);
     } catch {
-      alert(t.failed_connect_server);
+      alert(t.settings.failed_connect_server);
     } finally {
       setChangingPassword(false);
     }
   }
 
   async function deleteAccount() {
-    if (!confirm(t.delete_account_confirm)) return;
+    if (!confirm(t.settings.delete_account_confirm)) return;
     try {
       await fetch(`/api/v1/settings/delete-account`, {
         method: "DELETE",
@@ -178,7 +156,7 @@ export default function SettingsPage() {
       });
       router.replace("/");
     } catch {
-      alert(t.failed_delete_account);
+      alert(t.settings.failed_connect_server);
     }
   }
 
@@ -186,8 +164,9 @@ export default function SettingsPage() {
   function linkPolar() {
     window.location.href = `/api/v1/integrations/polar/connect`;
   }
+
   async function unlinkPolar() {
-    if (!confirm(t.unlink_polar_confirm)) return;
+    if (!confirm(t.settings.unlink_polar_confirm)) return;
     setPolarBusy(true);
     try {
       await fetch(`/api/v1/integrations/polar/unlink`, {
@@ -203,8 +182,9 @@ export default function SettingsPage() {
   function linkGarmin() {
     window.location.href = `/api/v1/integrations/garmin/connect`;
   }
+
   async function unlinkGarmin() {
-    if (!confirm(t.unlink_garmin_confirm)) return;
+    if (!confirm(t.settings.unlink_garmin_confirm)) return;
     setGarminBusy(true);
     try {
       await fetch(`/api/v1/integrations/garmin/unlink`, {
@@ -220,48 +200,39 @@ export default function SettingsPage() {
   if (error) return <p className="text-red-600">{error}</p>;
   if (!data) return null;
 
+  // ---------------- RENDER ----------------
   return (
     <AppLayout>
       <main className="w-full flex justify-center">
         <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6">
-          {/* PROFILE */}
+          {/* PROFILE SECTION */}
           <section className="ui-component-styles p-4 w-full space-y-2">
-            <h2 className="text-xl font-semibold">{t.profile_section_title}</h2>
-            <p>
-              {t.email_label}: {data.email}
-            </p>
-            <p>
-              {t.username_label}: {data.display_name ?? "-"}
-            </p>
-            <p>
-              {t.gender_label}: {data.gender ?? "-"}
-            </p>
-            <p>
-              {t.height_label}: {data.height ?? "-"} cm
-            </p>
-            <p>
-              {t.weight_label}: {data.weight ?? "-"} kg
-            </p>
+            <h2 className="text-xl font-semibold">{t.settings.profile_section_title}</h2>
+            <p>{t.settings.email_label}: {data.email}</p>
+            <p>{t.settings.username_label}: {data.display_name ?? "-"}</p>
+            <p>{t.settings.gender_label}: {data.gender ?? "-"}</p>
+            <p>{t.settings.height_label}: {data.height ?? "-"} cm</p>
+            <p>{t.settings.weight_label}: {data.weight ?? "-"} kg</p>
 
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setShowEditProfile(true)}
                 className="button-style-blue min-w-[120px]"
               >
-                {t.edit_profile}
+                {t.settings.edit_profile}
               </button>
               <button
                 onClick={() => setShowChangePassword(true)}
                 className="button-style-blue min-w-[120px]"
               >
-                {t.change_password}
+                {t.settings.change_password}
               </button>
             </div>
           </section>
 
-          {/* PROVIDERS */}
+          {/* PROVIDER ACCOUNTS */}
           <section className="ui-component-styles p-4 w-full space-y-3">
-            <h2 className="text-xl font-semibold">{t.profileAccount}</h2>
+            <h2 className="text-xl font-semibold">{t.settings.profileAccount}</h2>
 
             <div className="flex justify-between items-center">
               <p>Polar</p>
@@ -271,14 +242,14 @@ export default function SettingsPage() {
                   disabled={polarBusy}
                   className="button-style-blue min-w-[120px]"
                 >
-                  {polarBusy ? "Unlinking..." : t.unlink_polar}
+                  {polarBusy ? "Unlinking..." : t.settings.unlink_polar}
                 </button>
               ) : (
                 <button
                   onClick={linkPolar}
                   className="button-style-blue min-w-[120px]"
                 >
-                  {t.link_polar}
+                  {t.settings.link_polar}
                 </button>
               )}
             </div>
@@ -291,45 +262,41 @@ export default function SettingsPage() {
                   disabled={garminBusy}
                   className="button-style-blue min-w-[120px]"
                 >
-                  {garminBusy ? "Unlinking..." : t.unlink_garmin}
+                  {garminBusy ? "Unlinking..." : t.settings.unlink_garmin}
                 </button>
               ) : (
                 <button
                   onClick={linkGarmin}
                   className="button-style-blue min-w-[120px]"
                 >
-                  {t.link_garmin}
+                  {t.settings.link_garmin}
                 </button>
               )}
             </div>
           </section>
 
-          {/* ACCOUNT */}
+          {/* ACCOUNT MANAGEMENT */}
           <section className="ui-component-styles p-4 w-full">
-            <h2 className="text-xl font-semibold mb-2">
-              {t.providerAccountManagement}
-            </h2>
+            <h2 className="text-xl font-semibold mb-2">{t.settings.providerAccountManagement}</h2>
             <button
               onClick={deleteAccount}
               className="cancel-button-style w-full"
             >
-              {t.delete_account}
+              {t.settings.delete_account}
             </button>
           </section>
         </div>
 
-        {/* MODALS */}
+        {/* EDIT PROFILE MODAL */}
         {showEditProfile && (
           <Modal onClose={() => setShowEditProfile(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">
-              {t.edit_profile}
-            </h2>
+            <h2 className="text-lg font-bold mb-4 text-center">{t.settings.edit_profile}</h2>
 
             <input
               className="block w-full mb-2"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder={t.display_name_placeholder}
+              placeholder={t.settings.display_name_placeholder}
             />
 
             <select
@@ -337,11 +304,11 @@ export default function SettingsPage() {
               value={gender ?? ""}
               onChange={(e) => setGender(e.target.value)}
             >
-              <option value="">{t.select_gender}</option>
-              <option value="male">{t.male}</option>
-              <option value="female">{t.female}</option>
-              <option value="other">{t.other}</option>
-              <option value="unknown">{t.unknown}</option>
+              <option value="">{t.settings.select_gender}</option>
+              <option value="male">{t.settings.male}</option>
+              <option value="female">{t.settings.female}</option>
+              <option value="other">{t.settings.other}</option>
+              <option value="unknown">{t.settings.unknown}</option>
             </select>
 
             <input
@@ -349,7 +316,7 @@ export default function SettingsPage() {
               className="block w-full mb-2"
               value={height ?? ""}
               onChange={(e) => setHeight(Number(e.target.value || 0))}
-              placeholder={t.height_placeholder}
+              placeholder={t.settings.height_placeholder}
             />
 
             <input
@@ -357,7 +324,7 @@ export default function SettingsPage() {
               className="block w-full mb-2"
               value={weight ?? ""}
               onChange={(e) => setWeight(Number(e.target.value || 0))}
-              placeholder={t.weight_placeholder}
+              placeholder={t.settings.weight_placeholder}
             />
 
             <div className="flex gap-2">
@@ -366,29 +333,28 @@ export default function SettingsPage() {
                 disabled={savingProfile}
                 className="button-style-blue w-full"
               >
-                {savingProfile ? "Saving..." : t.save}
+                {savingProfile ? "Saving..." : t.common.save}
               </button>
               <button
                 onClick={() => setShowEditProfile(false)}
                 className="cancel-button-style w-full"
               >
-                {t.cancel}
+                {t.common.cancel}
               </button>
             </div>
           </Modal>
         )}
 
+        {/* CHANGE PASSWORD MODAL */}
         {showChangePassword && (
           <Modal onClose={() => setShowChangePassword(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">
-              {t.change_password}
-            </h2>
+            <h2 className="text-lg font-bold mb-4 text-center">{t.settings.change_password}</h2>
 
             <div className="relative mb-2">
               <input
                 type={showOldPassword ? "text" : "password"}
                 className="block w-full"
-                placeholder={t.old_password_placeholder}
+                placeholder={t.settings.old_password_placeholder}
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
               />
@@ -404,7 +370,7 @@ export default function SettingsPage() {
               <input
                 type={showNewPassword ? "text" : "password"}
                 className="block w-full"
-                placeholder={t.new_password_placeholder}
+                placeholder={t.settings.new_password_placeholder}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
@@ -430,7 +396,7 @@ export default function SettingsPage() {
               disabled={changingPassword}
               className="button-style-blue w-full"
             >
-              {changingPassword ? "Changing..." : t.change_password}
+              {changingPassword ? "Changing..." : t.settings.change_password}
             </button>
           </Modal>
         )}

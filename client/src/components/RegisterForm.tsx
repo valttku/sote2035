@@ -1,7 +1,11 @@
 "use client";
 import { useState, useRef, useMemo } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
+
+
+ 
 export default function RegisterForm({
   onSubmit,
 }: {
@@ -23,15 +27,20 @@ export default function RegisterForm({
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
+  const { t } = useTranslation();
+
+   const PASSWORD_REQUIREMENTS = [
+     { regex: /.{8,}/, text: t.register.requirements.characters },
+  { regex: /[0-9]/, text: t.register.requirements.number },
+  { regex: /[a-z]/, text: t.register.requirements.lowercase },
+  { regex: /[A-Z]/, text: t.register.requirements.uppercase },
+  { regex: /[^A-Za-z0-9]/, text: t.register.requirements.special },
+  ];
+
+
   const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-  const PASSWORD_REQUIREMENTS = [
-    { regex: /.{8,}/, text: "At least 8 characters" },
-    { regex: /[0-9]/, text: "At least 1 number" },
-    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
-    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
-    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
-  ];
+
 
   const strengthScore = useMemo(
     () =>
@@ -40,10 +49,10 @@ export default function RegisterForm({
   );
 
   const getStrengthColor = (score: number) => {
-    if (score === 0) return "bg-gray-200";
-    if (score <= 2) return "bg-red-500";
-    if (score <= 4) return "bg-amber-500";
-    return "bg-emerald-500";
+    if (score === 0) return t.register.passwordStrength.enter;
+  if (score <= 2) return t.register.passwordStrength.weak;
+  if (score <= 4) return t.register.passwordStrength.medium;
+  return t.register.passwordStrength.strong;
   };
 
   const getStrengthText = (score: number) => {
@@ -55,7 +64,7 @@ export default function RegisterForm({
 
   function validate(): boolean {
     if (!emailOk(email)) {
-      alert("Enter a valid email address");
+      alert(t.register.validEmail);
       emailRef.current?.focus();
       return false;
     }
@@ -64,13 +73,13 @@ export default function RegisterForm({
       (req) => !req.regex.test(password),
     );
     if (failedReqs.length > 0) {
-      alert("Password is too weak");
+      alert(t.register.weakPassword);
       passwordRef.current?.focus();
       return false;
     }
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      alert(t.register.passwordsDontMatch);
       return false;
     }
 
@@ -89,10 +98,10 @@ export default function RegisterForm({
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-2">
-        <h2 className="text-2xl sm:text-3xl mb-8 text-center">REGISTER</h2>
+        <h2 className="text-2xl sm:text-3xl mb-8 text-center">{t.register.title}</h2>
 
         {/* Email */}
-        <label htmlFor="reg-email">Email</label>
+        <label htmlFor="reg-email">{t.register.email}</label>
         <input
           id="reg-email"
           ref={emailRef}
@@ -104,7 +113,7 @@ export default function RegisterForm({
         />
 
         {/* Display Name */}
-        <label htmlFor="reg-displayname">Display Name</label>
+        <label htmlFor="reg-displayname">{t.register.displayName}</label>
         <input
           type="text"
           value={displayName}
@@ -113,7 +122,7 @@ export default function RegisterForm({
         />
 
         {/* Password */}
-        <label htmlFor="reg-password">Password</label>
+        <label htmlFor="reg-password">{t.register.password}</label>
         <div className="relative">
           <input
             id="reg-password"
@@ -127,7 +136,7 @@ export default function RegisterForm({
             type="button"
             className="fa-eye"
             onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? t.register.hidePassword: t.register.showPassword}
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
@@ -148,7 +157,7 @@ export default function RegisterForm({
         </div>
 
         <p id="password-strength" className="text-sm font-medium mb-2">
-          {getStrengthText(strengthScore)}. Password must contain:
+          {getStrengthText(strengthScore)}. {t.register.passwordMustContain}:
         </p>
 
         <ul className="space-y-1" aria-label="Password requirements">
@@ -165,7 +174,7 @@ export default function RegisterForm({
         </ul>
 
         {/* Confirm Password */}
-        <label htmlFor="reg-confirm">Confirm Password</label>
+        <label htmlFor="reg-confirm">{t.register.confirmPassword}</label>
         <div className="relative">
           <input
             id="reg-confirm"
@@ -179,7 +188,7 @@ export default function RegisterForm({
             type="button"
             className="fa-eye"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            aria-label={showConfirmPassword ? t.register.hidePassword : t.register.showPassword}
           >
             {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
@@ -190,7 +199,7 @@ export default function RegisterForm({
           disabled={loading}
           className="button-style-blue w-full mt-2 disabled:opacity-50"
         >
-          {loading ? "Loading..." : "Register"}
+          {loading ? t.register.loading: t.register.registerButton}
         </button>
       </form>
     </div>

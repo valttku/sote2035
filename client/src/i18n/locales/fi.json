@@ -1,0 +1,246 @@
+
+{
+
+ 
+
+  "navbar": {
+    "home": "Koti",
+    "calendar": "Kalenteri",
+    "health": "Terveysanalyysit",
+    "settings": "Asetukset", 
+    "language": "Kieli"
+    
+  },
+
+  "home": {
+  "title": "Tänään",
+  "selectBodyPart": "Valitse kehon osa napsauttamalla valkoista pistettä kehossa",
+
+"bodyParts": {
+  "brain": "Aivot",
+  "heart": "Sydän",
+  "lungs": "Keuhkot",
+  "legs": "Jalat"
+}
+},
+
+  "common": {
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "fill_both_fields": "Täytä molemmat kentät",
+    "weak_password": "Heikko salasana",
+    "medium_password": "Keskivahva salasana",
+    "strong_password": "Vahva salasana"
+  },
+  "settings": {
+    "profile_section_title": "Profiili",
+    "email_label": "Sähköposti",
+    "username_label": "Käyttäjänimi",
+    "gender_label": "Sukupuoli",
+    "height_label": "Pituus",
+    "weight_label": "Paino",
+    "edit_profile": "Muokkaa profiilia",
+    "change_password": "Vaihda salasana",
+    "profileAccount": "Palveluntarjoajan tilit",
+    "link_polar": "Yhdistä Polar",
+    "unlink_polar": "Poista Polar",
+    "unlink_polar_confirm": "Haluatko varmasti poistaa Polar-tunnuksen?",
+    "link_garmin": "Yhdistä Garmin",
+    "unlink_garmin": "Poista Garmin",
+    "unlink_garmin_confirm": "Haluatko varmasti poistaa Garmin-tunnuksen?",
+    "providerAccountManagement": "Tilinhallinta",
+    "delete_account": "Poista tili",
+    "delete_account_confirm": "Haluatko varmasti poistaa tilisi?",
+    "failed_load_settings": "Asetusten lataaminen epäonnistui",
+    "failed_update_profile": "Profiilin päivitys epäonnistui",
+    "password_changed": "Salasana vaihdettu onnistuneesti",
+    "failed_connect_server": "Yhteys palvelimeen epäonnistui",
+    "display_name_placeholder": "Anna näyttönimi",
+    "select_gender": "Valitse sukupuoli",
+    "male": "Mies",
+    "female": "Nainen",
+    "other": "Muu",
+    "unknown": "Tuntematon",
+    "height_placeholder": "Anna pituus cm",
+    "weight_placeholder": "Anna paino kg",
+    "old_password_placeholder": "Vanha salasana",
+    "new_password_placeholder": "Uusi salasana"
+  },
+  "startup": {
+    "patient": "Potilas",
+    "page_title": "Potilaan Digitaalinen Kaksonen",
+    "login": "KIRJAUDU SISÄÄN",
+    "register": "REKISTERÖIDY",
+    "forgot_password": "Unohtuiko salasana?",
+    "login_failed_session": "Kirjautuminen epäonnistui: istuntoa ei luotu",
+    "general_error": "Tapahtui virhe. Yritä uudelleen."
+  },
+
+  "locale": "fi",
+ 
+  "calendar": {
+     "title": "Kalenteri",
+    "prev": "Edellinen",
+    "next": "Seuraava",
+    "weekdays":{
+    "mon": "Ma",
+    "tue": "Ti",
+    "wed": "Ke",
+    "thu": "To",
+    "fri": "Pe",
+    "sat": "La",
+    "sun": "Su"},
+    "hasData": "Tiedoilla varustettu",
+    "noData": "Ei tietoja",
+    "healthStats": "Terveystiedot",
+    "activities": "Aktiviteetit",
+    "loading":"Ladataan...",
+    "manualActivities": "Manuaalisesti lisätyt aktiviteetit",
+
+    "fields": {
+  "type": "Tyyppi",
+  "notes": "Muistiinpanot",
+  "steps": "Askeleet",
+  "title": "Otsikko",
+  "calories": "Kalorit",
+  "duration": "Kesto"
+},
+    "noManualActivities": "Ei manuaalisesti lisättyjä aktiviteetteja",
+    "loadMonthError": "Kuukauden lataus epäonnistui",
+    "connectError": "Yhteyden muodostaminen epäonnistui",
+    "loadStatsError": "Terveystietojen lataus epäonnistui",
+    "loadActivitiesError": "Aktiviteettien lataus epäonnistui",
+    "loadManualError": "Manuaalisten aktiviteettien lataus epäonnistui",
+    "deleteManualError": "Manuaalisen aktiviteetin poisto epäonnistui",
+     "locale": "fi-FI",
+    "durationPlaceholder": "Kesto (minuuttia)",
+    "caloriesPlaceholder": "Kalorit",
+    "stepsPlaceholder": "Askeleet",
+
+  "submitting": "Tallennetaan...",
+  "activityTypes": {
+    "run": "Juoksu",
+    "walk": "Kävely",
+    "gym": "Kuntosali",
+    "cycling": "Pyöräily"
+  },
+    
+
+    "addActivityButton": "Lisää aktiviteetti",
+    "activityTitlePlaceholder": "Aktiviteetin nimi (esim. Aamulenkin)",
+    "activityTypePlaceholder": "Tyyppi (esim. Juoksu)",
+    "activityDurationPlaceholder": "Kesto (minuuttia)",
+    "activityCaloriesPlaceholder": "Kalorit",
+    "activityStepsPlaceholder": "Askeleet",
+    "submitButton": "Lähetä",
+    "cancelButton": "Peruuta",
+
+    "noActivities": "Ei aktiviteetteja tältä päivältä.",
+    "manuallyAdded": "Manuaalisesti lisätty aktiviteetti",
+    "duration": "Kesto",
+    "startTime": "Aloitusaika",
+    "avgHeartRate": "Keskisyke",
+    "activeCalories": "Aktiiviset kalorit",
+    "stepsLabel": "Askeleet",
+    "noHealthStats": "Ei terveystietoja tältä päivältä.",
+    "heart": "Sydän",
+    "brain": "Aivot",
+    "sleep": "Uni",
+    "stress": "Stressi",
+    "activity": "Aktiivisuus",
+    "respiratory": "Hengitys",
+    "skinTemp": "Ihon lämpötila",
+    "legs": "Jalat",
+    "lungs": "Keuhkot",
+    "manualActivity": "Manuaalinen aktiviteetti",
+    "deleteButton": "Poista",
+    "unknown": "tuntematon",
+    "minutesShort": "min"
+  
+  },
+
+  "login": {
+  "title": "Kirjaudu sisään",
+  "email": "Sähköposti",
+  "password": "Salasana",
+  "emailError": "Anna kelvollinen sähköpostiosoite",
+  "showPassword": "Näytä salasana",
+  "hidePassword": "Piilota salasana",
+  "loginButton": "Kirjaudu",
+  "loading": "Ladataan..."
+}
+,
+ "register": {
+  "title": "Rekisteröidy",
+  "email": "Sähköposti",
+  "displayName": "Näyttönimi",
+  "password": "Salasana",
+  "confirmPassword": "Vahvista salasana",
+
+  "validEmail": "Anna kelvollinen sähköpostiosoite",
+  "weakPassword": "Salasana on liian heikko",
+  "passwordsDontMatch": "Salasanat eivät täsmää",
+
+  "showPassword": "Näytä salasana",
+  "hidePassword": "Piilota salasana",
+
+  "loading": "Ladataan...",
+  "registerButton": "Rekisteröidy",
+
+  "passwordMustContain": "Salasanan tulee sisältää:",
+
+  "passwordStrength": {
+    "enter": "Syötä salasana",
+    "weak": "Heikko salasana",
+    "medium": "Keskivahva salasana",
+    "strong": "Vahva salasana"
+  },
+
+  "requirements": {
+    "characters": "Vähintään 8 merkkiä",
+    "number": "Vähintään 1 numero",
+    "lowercase": "Vähintään 1 pieni kirjain",
+    "uppercase": "Vähintään 1 iso kirjain",
+    "special": "Vähintään 1 erikoismerkki"
+  }
+},
+
+"darkmodetoggle":{
+  "darkMode": "Tumma tila",
+  "lightMode": "Vaalea tila"
+},
+
+"auth": {
+  "logout": "Kirjaudu ulos"
+},
+
+
+
+
+  "healthInsights": {
+  "title": "Terveysanalyysit",
+  "sections": {
+    "profile": "Profiili",
+    "dailies": "Päivittäiset tiedot",
+    "activities": "Aktiviteetit",
+    "sleep": "Uni",
+    "stress": "Stressi",
+    "cardiovascular": "Sydämen terveys",
+    "bodyComposition": "Kehon koostumus"
+
+  },
+  "loading": "Terveystietoja ladataan...",
+  "aiTitle": "Tekoälyanalyysi",
+  "aiPlaceholder": "Valitse tiedot ja napsauta \"Analysoi\" saadaksesi tekoälyn ehdotuksia.",
+  "comingSoon": "Osio tulossa pian...",
+  "analyzing": "Analysoidaan...",
+  "clearAnalysis": "Tyhjennä analyysi",
+  "analyzeAll": "Analysoi kaikki tiedot",
+  "analyzeSection": "Analysoi {{section}}",
+  "failedInsights": "Tekoälyanalyysi epäonnistui. Yritä uudelleen.",
+   "noDailies": "Tälle päivämäärälle ei ole päivittäisiä tietoja.",     
+  "sleepComingSoon": "Uni-osio tulossa pian...",                        
+  "stressComingSoon": "Stressi-osio tulossa pian...",                  
+  "cardioComingSoon": "Sydänterveys-osio tulossa pian..."           
+}}
+

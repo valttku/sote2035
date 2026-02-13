@@ -1,12 +1,15 @@
 "use client";
 import { useState, useRef } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function LoginForm({
   onSubmit,
 }: {
   onSubmit: (email: string, password: string) => void;
 }) {
+
+    const { t } = useTranslation(); // ⭐ translation hook
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +22,7 @@ export default function LoginForm({
 
   function validate(): boolean {
     if (!emailOk(email)) {
-      setEmailError("Enter a valid email address");
+      setEmailError(t.login.emailError);
       emailRef.current?.focus();
       return false;
     }
@@ -37,10 +40,10 @@ export default function LoginForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
-      <h1 className="text-2xl sm:text-3xl mb-8 text-center">LOGIN</h1>
+      <h1 className="text-2xl sm:text-3xl mb-8 text-center">{t.login.title}</h1>
 
       <label htmlFor="login-email">
-        Email
+        {t.login.email}
       </label>
       <input
         id="login-email"
@@ -62,7 +65,7 @@ export default function LoginForm({
       )}
 
       <label htmlFor="login-password">
-        Password
+        {t.login.password}
       </label>
       <div className="relative">
         <input
@@ -78,7 +81,7 @@ export default function LoginForm({
           type="button"
           className="fa-eye"
           onClick={() => setShowPassword(!showPassword)}
-          aria-label={showPassword ? "Hide password" : "Show password"}
+          aria-label={showPassword ? t.login.hidePassword: t.login.showPassword}
         >
           {showPassword ? <FaEyeSlash /> : <FaEye />}
         </button>
@@ -89,7 +92,7 @@ export default function LoginForm({
         disabled={loading}
         className="button-style-blue w-full p-2 mt-2 disabled:opacity-50"
       >
-        {loading ? "Loading..." : "Login"}
+        {loading ? t.login.loading : t.login.loginButton}
       </button>
     </form>
   );

@@ -1,24 +1,19 @@
 "use client";
 
-import { languages, LanguageCode } from "./languages";
+import { useTranslation } from "./LanguageProvider";
+import { LanguageCode } from "./types";
 
-interface Props {
-  currentLang: LanguageCode;
-  onChange: (lang: LanguageCode) => void;
-}
+export default function LanguageSelector() {
+  const { lang, setLang } = useTranslation();
 
-export default function LanguageSelector({ currentLang, onChange }: Props) {
   return (
     <select
-      className="border rounded p-2"
-      value={currentLang}
-      onChange={(e) => onChange(e.target.value as LanguageCode)}
+      value={lang}
+      onChange={(e) => setLang(e.target.value as LanguageCode)}
+      className="border rounded p-1"
     >
-      {languages.map((lang) => (
-        <option key={lang} value={lang}>
-          {lang.toUpperCase()} {/* Just show "EN" / "FI" */}
-        </option>
-      ))}
+      <option value="en">English</option>
+      <option value="fi">Finnish</option>
     </select>
   );
 }
