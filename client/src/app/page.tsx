@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Image from "next/image";
 import AppLayout from "../components/AppLayout";
 import HealthStatsPanel, { type BodyPartId } from "../components/healthStatsPanel";
@@ -9,21 +9,65 @@ import { useTranslation } from "@/i18n/LanguageProvider";
 export default function Home() {
   const { t } = useTranslation();
 
+  // --- States ---
   const [selected, setSelected] = useState<BodyPartId | null>(null);
   const [avatarType, setAvatarType] = useState<"male" | "female">("male");
+  const [alerts, setAlerts] = useState<Record<BodyPartId, boolean>>({
+    brain: false,
+    heart: false,
+    lungs: false,
+    legs: false,
+  });
 
-  // Fetch user profile on mount to get gender
+  const genderLoaded = useRef(false);
+
+  // --- Fetch health alerts and user gender ---
   useEffect(() => {
-    fetch("/api/v1/settings", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.gender === "female") setAvatarType("female");
-      })
-      .catch(console.error);
+    const date = new Date().toISOString().split("T")[0];
+    let cancelled = false;
+
+    async function fetchSummary() {
+      try {
+        const res = await fetch(`/api/v1/home?date=${date}&part=summary`, {
+          credentials: "include",
+        });
+        if (!res.ok) return;
+
+        const json = await res.json().catch(() => ({}));
+        if (cancelled) return;
+
+        // Set alerts for body parts
+        const alertsResp = json.alerts ?? {};
+        setAlerts({
+          brain: !!alertsResp.brain,
+          heart: !!alertsResp.heart,
+          lungs: !!alertsResp.lungs,
+          legs: !!alertsResp.legs,
+        });
+
+        // Set avatar gender
+        const gender = json.user?.gender;
+        if (gender && !genderLoaded.current) {
+          setAvatarType(gender === "female" ? "female" : "male");
+          genderLoaded.current = true;
+        }
+      } catch (err) {
+        console.error("fetchSummary", err);
+      }
+    }
+
+    fetchSummary();
+    const id = setInterval(fetchSummary, 1000 * 60 * 5); // every 5 min
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, []);
 
   const isFemale = avatarType === "female";
 
+  // --- Body parts positions ---
   const BODY_PARTS: Array<{ id: BodyPartId; label: string; top: string; left: string }> =
     useMemo(
       () => [
@@ -39,18 +83,19 @@ export default function Home() {
     <AppLayout>
       <div className="w-full flex justify-center">
         <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
+          {/* Page Title */}
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
-          <div className="flex flex-row items-start justify-center gap-70">
+          <div className="flex flex-row items-start justify-center gap-10 md:gap-20">
             {/* Avatar + body part dots */}
             <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-50">
               <Image
                 src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
                 alt="Digital twin"
-                width={400} // set a realistic width
-                height={600} // set a realistic height
+                width={400}
+                height={600}
                 className="w-full max-h-[60vh] object-contain"
-                priority // optional: loads immediately for LCP
+                priority
               />
 
               {BODY_PARTS.map(({ id, top, left }) => (
@@ -68,28 +113,28 @@ export default function Home() {
                     background:
                       selected === id
                         ? "rgba(10, 33, 90, 0.7)"
+                        : alerts[id]
+                        ? "rgba(220, 38, 38, 0.95)"
                         : "rgba(203, 215, 249, 0.8)",
                   }}
+                  className={alerts[id] ? "animate-pulse" : undefined}
                   aria-label={id}
                   title={BODY_PARTS.find((bp) => bp.id === id)?.label}
                 />
               ))}
             </div>
 
+            {/* Health Stats Panel */}
             <div className="w-1/2 max-w-[400px] p-4 md:p-6 flex flex-col justify-start text-left">
               {!selected && (
-                <div className="mb-2">
-                  <p className="text-sm md:text-base">{t.home.selectBodyPart}</p>
-                </div>
+                <p className="text-sm md:text-base">{t.home.selectBodyPart}</p>
               )}
 
               {selected && (
-                <div className="w-full">
-                  <HealthStatsPanel
-                    selected={selected}
-                    onClose={() => setSelected(null)}
-                  />
-                </div>
+                <HealthStatsPanel
+                  selected={selected}
+                  onClose={() => setSelected(null)}
+                />
               )}
             </div>
           </div>
