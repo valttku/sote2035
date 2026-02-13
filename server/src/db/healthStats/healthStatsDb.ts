@@ -1,162 +1,201 @@
-import { db } from "../db.js";
-import { formatHealthEntry } from "./formatHealthStats.js";
-import {
-  evaluateMetric,
-  evaluateStandardRange,
-  evaluateGoal,
-} from "./evaluateMetrics.js";
-import { GoalMetric, HealthData, RawMetric } from "./evaluateMetrics.js";
+import { db } from "../db";
+import { formatHealthEntry } from "./formatHealthStats";
 
-// This file contains queries related to the health_stat_entries and user_dailies_garmin table
+export type MetricStatus = "low" | "good" | "high" | undefined;
 
-// Main function
+type MetricGoal = { min?: number; max?: number };
+
+export type MetricObject = {
+  value: number | string;
+  goal?: MetricGoal;
+  status?: MetricStatus;
+};
+
+export type HealthData = Record<string, number | MetricObject>;
+
+function parseNumeric(value: string | number): number | null {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const num = parseFloat(value.split("/")[0].trim());
+    if (!isNaN(num)) return num;
+  }
+  return null;
+}
+
+function formatMinutesHM(totalMinutes: number) {
+  const mins = Math.round(totalMinutes);
+  const hours = Math.floor(mins / 60);
+  const minutes = mins % 60;
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
+
 export async function getHealthStatEntriesData(
   userId: number,
   date: string,
   part: "heart" | "brain" | "legs" | "lungs",
 ): Promise<HealthData> {
-  const kindByPart: Record<typeof part, string[]> = {
+  const kindsByPart: Record<typeof part, string[]> = {
     heart: ["heart_daily"],
     brain: ["sleep_daily", "stress_daily"],
     legs: ["activity_daily"],
     lungs: ["resp_daily"],
   };
-  const kinds = kindByPart[part];
+
+  const kinds = kindsByPart[part];
   if (!kinds) return {};
 
-  // Fetch today's data
-  const result = await db.query(
-    `
-    SELECT kind, data
-    FROM app.health_stat_entries
-    WHERE user_id = $1
-      AND day_date = $2::date
-      AND kind = ANY($3::text[])
-    `,
+  // Fetch today's metrics
+  const { rows: todayRows } = await db.query(
+    `SELECT kind, data
+     FROM app.health_stat_entries
+     WHERE user_id = $1
+       AND day_date = $2::date
+       AND kind = ANY($3::text[])`,
     [userId, date, kinds],
   );
 
-  // Fetch past 7 days for baseline metrics
-  const historyRows = await db.query(
-    `
-    SELECT kind, data
-    FROM app.health_stat_entries
-    WHERE user_id = $1
-      AND day_date < $2::date
-      AND day_date >= ($2::date - INTERVAL '7 days')
-      AND kind = ANY($3::text[])
-    `,
+  // Fetch last 7 days for historical comparison
+  const { rows: historyRows } = await db.query(
+    `SELECT kind, data
+     FROM app.health_stat_entries
+     WHERE user_id = $1
+       AND day_date < $2::date
+       AND day_date >= ($2::date - INTERVAL '7 days')
+       AND kind = ANY($3::text[])`,
     [userId, date, kinds],
   );
 
-  // Build historical map for numeric metrics
   const historyMap: Record<string, number[]> = {};
-  for (const row of historyRows.rows) {
-    const formatted = formatHealthEntry(row.kind, row.data);
-    for (const [key, value] of Object.entries(formatted)) {
-      if (typeof value === "number") {
-        if (!historyMap[key]) historyMap[key] = [];
-        historyMap[key].push(value);
+  for (const row of historyRows) {
+    const metrics = formatHealthEntry(row.kind, row.data);
+    for (const [key, value] of Object.entries(metrics)) {
+      const num = parseNumeric(value);
+      if (num != null) {
+        (historyMap[key] ??= []).push(num);
       }
     }
   }
 
-  const enhancedMetrics: HealthData = {};
+  const result: HealthData = {};
 
-  for (const row of result.rows) {
-    const formatted = formatHealthEntry(row.kind, row.data);
+  for (const row of todayRows) {
+    const metrics = formatHealthEntry(row.kind, row.data);
 
-    for (const [key, value] of Object.entries(formatted)) {
-      if (typeof value !== "number") {
-        enhancedMetrics[key] = value;
+    for (const [key, value] of Object.entries(metrics)) {
+      const numericValue = parseNumeric(value);
+      if (numericValue == null) {
+        result[key] = value;
         continue;
       }
 
-      // HRV → baseline evaluation (add later)
+      const historical = historyMap[key] ?? [];
 
-      // Sleep → standard range evaluation (7-10h)
-      if (row.kind === "sleep_daily") {
-        if (key === "Total sleep (h)") {
-          enhancedMetrics[key] = {
-            value,
-            status: evaluateStandardRange(value, 7, 10),
-          } as GoalMetric;
-        } else {
-          enhancedMetrics[key] = { value } as RawMetric;
+      let min: number | undefined;
+      let max: number | undefined;
+
+      if (historical.length) {
+        const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
+        const stdDev =
+          Math.sqrt(
+            historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
+              historical.length,
+          ) || 0;
+
+        min = avg - stdDev;
+        max = avg + stdDev;
+      }
+
+      let status: MetricStatus | undefined;
+      let goal: MetricGoal | undefined;
+
+      // Activity goals
+      if (row.kind === "activity_daily") {
+        if (key === "Steps" && row.data.steps_goal != null) {
+          const min = row.data.steps_goal;
+          goal = { min };
+          status = numericValue >= min ? "good" : "low";
+          result[key] = { value: numericValue, goal, status };
         }
-        continue;
-      }
 
-      // COMPARE METRICS WITH GOALS FOR GARMIN USERS
-      // Activity → compare to daily goal / weekly goal
-      if (
-        ["Steps", "Intensity duration (min)", "Floors climbed"].includes(key)
-      ) {
-        // Fetch goals from user_dailies_garmin
-        const daily = await db.query(
-          `
-          SELECT steps_goal, intensity_duration_goal_in_seconds, floors_climbed_goal
-          FROM app.user_dailies_garmin
-          WHERE user_id = $1 AND day_date = $2::date
-          `,
-          [userId, date],
-        );
-        const goalRow = daily.rows[0] ?? {};
-
-        // Map daily goals
-        const goalMap: Record<string, number> = {
-          Steps: goalRow.steps_goal ?? 0,
-          "Floors climbed": goalRow.floors_climbed_goal ?? 0,
-        };
-
-        if (key === "Intensity duration (min)") {
-          // Weekly intensity logic
-          const weekData = await db.query(
-            `SELECT COALESCE(SUM(moderate_intensity_duration_in_seconds + (vigorous_intensity_duration_in_seconds * 2)),0) as total_seconds
-            FROM app.user_dailies_garmin
-            WHERE user_id = $1
-              AND day_date >= date_trunc('week', $2::date)
-              AND day_date <= $2::date
-            `,
-            [userId, date],
-          );
-          const weeklyTotalMin = (weekData.rows[0]?.total_seconds ?? 0) / 60;
-
-          const weekly_intensity_duration_goal = await db.query(
-            `SELECT intensity_duration_goal_in_seconds
-            FROM app.user_dailies_garmin
-            WHERE user_id = $1
-              AND day_date >= date_trunc('week', $2::date)
-              AND day_date <= $2::date
-            `,
-            [userId, date],
-          );
-
-          const weeklyGoalMin =
-            (weekly_intensity_duration_goal.rows[0]
-              ?.intensity_duration_goal_in_seconds ?? 0) / 60;
-
-          enhancedMetrics[key] = {
-            value,
-            weeklyTotal: weeklyTotalMin,
-            weeklyGoal: weeklyGoalMin,
-            status: evaluateGoal(weeklyTotalMin, weeklyGoalMin),
-          } as GoalMetric;
-        } else {
-          // daily goals
-          enhancedMetrics[key] = {
-            value,
-            goal: goalMap[key] ?? 0,
-            status: evaluateGoal(value, goalMap[key] ?? 0),
-          } as GoalMetric;
+        if (key === "Floors climbed" && row.data.floors_climbed_goal != null) {
+          const min = row.data.floors_climbed_goal;
+          goal = { min };
+          status = numericValue >= min ? "good" : "low";
+          result[key] = { value: numericValue, goal, status };
         }
-        continue;
+
+        // Intensity duration this week
+        if (
+          key === "Intensity duration this week (min)" &&
+          row.data.intensity_duration_goal_in_seconds != null
+        ) {
+          const min = row.data.intensity_duration_goal_in_seconds / 60;
+          goal = { min };
+          status = numericValue >= min ? "good" : "low";
+          result[key] = { value: numericValue, goal, status };
+        }
       }
 
-      // fallback: raw value
-      enhancedMetrics[key] = { value } as RawMetric;
+      // Sleep: 7–10 hours in minutes
+      if (row.kind === "sleep_daily" && key === "Total sleep") {
+        goal = { min: 7 * 60, max: 10 * 60 };
+      }
+
+      // Stress: high if above 75, otherwise good
+      if (row.kind === "stress_daily" && key === "Average stress") {
+        goal = { max: 75 };
+      }
+
+      // Resting heart rate personalized range
+      if (row.kind === "heart_daily" && key === "Resting heart rate") {
+        if (historical.length >= 7) {
+          const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
+          const stdDev = Math.sqrt(
+            historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
+              historical.length,
+          );
+          goal = { min: avg - stdDev, max: avg + stdDev };
+        } else {
+          goal = { min: 60, max: 100 };
+        }
+      }
+
+      // Calculate status
+      if (goal) {
+        if (goal.min !== undefined && numericValue < goal.min) status = "low";
+        else if (goal.max !== undefined && numericValue > goal.max)
+          status = "high";
+        else status = "good";
+      }
+
+      let displayValue: number | string;
+
+      if (key === "Total sleep") {
+        const valueHM = formatMinutesHM(numericValue);
+        if (goal?.min !== undefined && goal?.max !== undefined) {
+          displayValue = `${valueHM}`;
+        } else {
+          displayValue = valueHM;
+        }
+      } else if (key === "Resting heart rate") {
+        displayValue = +numericValue.toFixed(2);
+      } else if (goal && goal.min !== undefined) {
+        displayValue = `${numericValue} / ${goal.min}`;
+      } else {
+        displayValue = numericValue;
+      }
+
+      result[key] = { value: displayValue, goal, status };
+
+      console.log({
+        key,
+        numericValue,
+        goal,
+        historicalLength: historical.length,
+        statusBefore: status,
+      });
     }
   }
 
-  return enhancedMetrics;
+  return result;
 }
