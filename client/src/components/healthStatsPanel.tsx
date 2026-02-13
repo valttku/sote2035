@@ -17,7 +17,21 @@ const TITLE: Record<BodyPartId, string> = {
 };
 
 /*Get health data from database */
-type HealthMetrics = Record<string, string | number>;
+type MetricValue =
+  | string
+  | number
+  | {
+      value?: number;
+      goal?: number;
+      status?: "low" | "normal" | "high" | string;
+      avg?: number;
+      min?: number;
+      max?: number;
+      deviationPercent?: number;
+      [key: string]: any;
+    };
+
+type HealthMetrics = Record<string, MetricValue>;
 
 export default function HealthStatsPanel({
   selected,
@@ -39,10 +53,9 @@ export default function HealthStatsPanel({
       try {
         const date = selectedDate || new Date().toISOString().split("T")[0];
 
-        const res = await fetch(
-          `/api/v1/home?date=${date}&part=${selected}`,
-          { credentials: "include" },
-        );
+        const res = await fetch(`/api/v1/home?date=${date}&part=${selected}`, {
+          credentials: "include",
+        });
 
         if (!res.ok) {
           // Read body ONCE only in the error case
@@ -88,20 +101,86 @@ export default function HealthStatsPanel({
         </button>
       </div>
 
+      {/* Loading / error / no data states */}
       {loading && <p className="opacity-80">Loading…</p>}
       {error && <p className="text-red-400">{error}</p>}
-
       {!loading && !error && Object.keys(metrics).length === 0 && (
         <p className="opacity-80 text-sm">No metrics for this day.</p>
       )}
 
-      <ul className="min-h-[170px] pl-5">
-        {Object.entries(metrics).map(([k, v]) => (
-          <li className="list-disc" key={k}>
-            <span>{k}: </span>
-            {v}
-          </li>
-        ))}
+      {/* Metrics list */}
+      <ul className="min-h-[170px]">
+        {Object.entries(metrics).map(([k, v]) => {
+          const isObj = typeof v === "object" && v !== null;
+
+          function statusBadge(status?: string) {
+            if (status === "low")
+              return "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800";
+            if (status === "high")
+              return "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800";
+            return "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800";
+          }
+
+          const vAny = v as any;
+
+          const valueDisplay = (() => {
+            if (
+              isObj &&
+              typeof vAny.value === "number" &&
+              typeof vAny.goal === "number"
+            ) {
+              return `${vAny.value} / ${vAny.goal}`;
+            }
+            if (isObj && typeof vAny.value === "number") return vAny.value;
+            if (!isObj) return v;
+            return vAny.value ?? "—";
+          })();
+
+          return (
+            <li className="mb-3" key={k}>
+              <div className="flex items-start justify-between">
+                <div className="w-40 font-medium">
+                  {k}
+                  {typeof vAny.weeklyTotal === "number" &&
+                    vAny.weeklyTotal > 0 && (
+                      <div className="mt-1">
+                        Intensity minutes (weekly total):{" "}
+                        {Math.round(vAny.weeklyTotal)} min
+                      </div>
+                    )}
+                  {typeof vAny.weeklyGoal === "number" &&
+                    vAny.weeklyGoal > 0 && (
+                      <div className="mt-1">
+                        Intensity minutes (weekly goal):{" "}
+                        {Math.round(vAny.weeklyGoal)} min
+                      </div>
+                    )}
+                </div>
+
+                <div className="flex-1">
+                  {/* Value + status badge */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-baseline gap-3">
+                      <div className="text-lg font-semibold">
+                        {typeof valueDisplay === "number"
+                          ? valueDisplay
+                          : String(valueDisplay)}
+                      </div>
+                    </div>
+
+                    {isObj && typeof vAny.status === "string" && (
+                      <div className="ml-2">
+                        <span className={statusBadge(vAny.status)}>
+                          {vAny.status}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       {/* animation for panel */}
