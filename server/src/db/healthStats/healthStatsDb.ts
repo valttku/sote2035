@@ -4,8 +4,8 @@ import {
   evaluateMetric,
   evaluateStandardRange,
   evaluateGoal,
-} from "./evaluateMetrics";
-import { GoalMetric, HealthData, RawMetric } from "./evaluateMetrics";
+} from "./evaluateMetrics.js";
+import { GoalMetric, HealthData, RawMetric } from "./evaluateMetrics.js";
 
 // This file contains queries related to the health_stat_entries and user_dailies_garmin table
 
