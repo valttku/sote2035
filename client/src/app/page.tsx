@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import Image from "next/image";
 import AppLayout from "../components/AppLayout";
 import HealthStatsPanel, { type BodyPartId } from "../components/healthStatsPanel";
 import { useTranslation } from "@/i18n/LanguageProvider";
@@ -9,7 +10,7 @@ export default function Home() {
   const { t } = useTranslation();
 
   const [selected, setSelected] = useState<BodyPartId | null>(null);
-  const [avatarType, setAvatarType] = useState<"male" | "female">("male"); // default male
+  const [avatarType, setAvatarType] = useState<"male" | "female">("male");
 
   // Fetch user profile on mount to get gender
   useEffect(() => {
@@ -23,7 +24,6 @@ export default function Home() {
 
   const isFemale = avatarType === "female";
 
-  // Memoize BODY_PARTS to use translated labels
   const BODY_PARTS: Array<{ id: BodyPartId; label: string; top: string; left: string }> =
     useMemo(
       () => [
@@ -39,17 +39,18 @@ export default function Home() {
     <AppLayout>
       <div className="w-full flex justify-center">
         <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
-          {/* Page title */}
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
-          {/* Main content: avatar + info panel */}
           <div className="flex flex-row items-start justify-center gap-70">
             {/* Avatar + body part dots */}
             <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-50">
-              <img
+              <Image
                 src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
                 alt="Digital twin"
-                className="w-full max-h-[60vh] object-contain block"
+                width={400} // set a realistic width
+                height={600} // set a realistic height
+                className="w-full max-h-[60vh] object-contain"
+                priority // optional: loads immediately for LCP
               />
 
               {BODY_PARTS.map(({ id, top, left }) => (
@@ -70,12 +71,11 @@ export default function Home() {
                         : "rgba(203, 215, 249, 0.8)",
                   }}
                   aria-label={id}
-                  title={BODY_PARTS.find((bp) => bp.id === id)?.label} // show label on hover
+                  title={BODY_PARTS.find((bp) => bp.id === id)?.label}
                 />
               ))}
             </div>
 
-            {/* Right panel */}
             <div className="w-1/2 max-w-[400px] p-4 md:p-6 flex flex-col justify-start text-left">
               {!selected && (
                 <div className="mb-2">

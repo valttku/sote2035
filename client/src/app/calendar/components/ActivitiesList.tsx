@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/i18n/LanguageProvider";
+import { Translations } from "@/i18n/types";
 
 // One activity entry
 export type ActivitiesEntry = {
@@ -24,7 +25,7 @@ export type ActivitiesResponse = {
 };
 
 // Convert seconds to "Xm Ys" format
-function formatDuration(seconds?: number | null, t?: any): string {
+function formatDuration(seconds?: number | null, t?: Translations): string {
   if (!seconds) return `0 ${t?.calendar.minutesShort ?? "min"}`;
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
@@ -34,11 +35,12 @@ function formatDuration(seconds?: number | null, t?: any): string {
 }
 
 // Convert unix timestamp to "HH:MM"
-function formatTime(unixSeconds?: number | null, offset?: number | null): string {
+function formatTime(unixSeconds?: number | null, offsetSeconds?: number | null): string {
   if (unixSeconds == null) return "N/A";
-  const date = new Date(unixSeconds * 1000);
+  const date = new Date((unixSeconds + (offsetSeconds ?? 0)) * 1000);
   return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
+
 
 // Show list of activities
 export default function ActivitiesList({ entries }: { entries: ActivitiesEntry[] }) {

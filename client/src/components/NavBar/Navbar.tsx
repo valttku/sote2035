@@ -34,7 +34,7 @@ export default function Navbar() {
   const langRef = useRef<HTMLDivElement>(null);
 
    //  Get translations and current language from LanguageProvider
-  const { t, lang, setLang } = useTranslation();
+  const { t, setLang } = useTranslation();
 
   const navItems = [
     { label: t.navbar.home, path: "/", icon: <FaHome /> },
@@ -104,21 +104,29 @@ export default function Navbar() {
             {langOpen && (
               <div className="absolute right-0 mt-2 w-20 bg-gray-800 text-white rounded shadow-lg z-50">
                 <button
-                  onClick={() => setLang("en")}
+                  onClick={() => {
+                    setLanguage("en"); // update local state
+                    setLang("en");     // update translation context
+                  }}
                   className={`block w-full px-4 py-2 hover:bg-gray-700 ${
                     language === "en" ? "font-bold" : ""
                   }`}
                 >
                   EN
                 </button>
+
                 <button
-                  onClick={() => setLang("fi")}
+                  onClick={() => {
+                    setLanguage("fi");
+                    setLang("fi");
+                  }}
                   className={`block w-full px-4 py-2 hover:bg-gray-700 ${
                     language === "fi" ? "font-bold" : ""
                   }`}
                 >
                   FI
                 </button>
+
               </div>
             )}
           </div>

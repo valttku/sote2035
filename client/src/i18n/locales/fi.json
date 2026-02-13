@@ -89,6 +89,7 @@
     "noData": "Ei tietoja",
     "healthStats": "Terveystiedot",
     "activities": "Aktiviteetit",
+    "loading":"Ladataan...",
     "manualActivities": "Manuaalisesti lisätyt aktiviteetit",
 
     "fields": {

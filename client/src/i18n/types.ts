@@ -97,6 +97,7 @@ export type CalendarTranslations = {
     loadManualError: string;
     deleteManualError: string;
     locale: string;
+    loading:string;
 
     //  Add these for the forms/lists
   addActivityButton: string;

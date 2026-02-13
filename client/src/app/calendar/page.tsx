@@ -3,17 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import AppLayout from "../../components/AppLayout";
 import Modal from "../../components/Modal";
-import HealthStatsList, { HealthStatsResponse} from "./components/HealthStatsList";
-import ActivitiesList, { ActivitiesResponse} from "./components/ActivitiesList";
+import HealthStatsList, { HealthStatsResponse, HealthStatsEntry } from "./components/HealthStatsList";
+import ActivitiesList, { ActivitiesEntry, ActivitiesResponse } from "./components/ActivitiesList";
 import ManualActivityForm from "./components/ActivityForm";
 
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { Translations } from "@/i18n/types";
 
-
-
-type MonthDaysResponse = string[]; // ["YYYY-MM-DD", ...]
-
+// ----------------- Helper functions -----------------
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
@@ -38,6 +35,7 @@ function getDaysOfWeek(t: Translations) {
   ];
 }
 
+// ----------------- Component -----------------
 export default function CalendarPage() {
   const { t } = useTranslation();
 
@@ -47,14 +45,15 @@ export default function CalendarPage() {
 
   const [daysWithData, setDaysWithData] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
-  const [loadingDay, setLoadingDay] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [healthStats, setHealthStats] = useState<HealthStatsResponse | null>(null);
   const [activities, setActivities] = useState<ActivitiesResponse | null>(null);
   const [manualActivities, setManualActivities] = useState<HealthStatsResponse | null>(null);
 
-  // Load month data
+  const [loading, setLoading] = useState(false); // unified loading state
+
+  // ----------------- Load month -----------------
   useEffect(() => {
     async function loadMonth() {
       setError(null);
@@ -68,7 +67,7 @@ export default function CalendarPage() {
           setDaysWithData(new Set());
           return;
         }
-        const days = Array.isArray(json) ? (json.map((d) => String(d)) as MonthDaysResponse) : [];
+        const days = Array.isArray(json) ? (json.map(String) as string[]) : [];
         setDaysWithData(new Set(days));
       } catch {
         setError(t.calendar.connectError);
@@ -78,90 +77,13 @@ export default function CalendarPage() {
     loadMonth();
   }, [year, month, t]);
 
+  // ----------------- Open/Close day -----------------
   function openDay(date: string) {
     setSelectedDate(date);
     setHealthStats(null);
     setActivities(null);
     setManualActivities(null);
     setError(null);
-    setLoadingDay(false);
-  }
-
-  async function loadHealthStats(date: string) {
-    setLoadingDay(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`, {
-        credentials: "include",
-      });
-      const json: unknown = await res.json();
-      if (!res.ok) {
-        setError(t.calendar.loadStatsError);
-        setHealthStats(null);
-        return;
-      }
-      if (typeof json === "object" && json !== null && "date" in json && "entries" in json && Array.isArray((json as { entries: unknown }).entries)) {
-        setHealthStats(json as HealthStatsResponse);
-      }
-    } catch {
-      setError(t.calendar.connectError);
-      setHealthStats(null);
-    } finally {
-      setLoadingDay(false);
-    }
-  }
-
-  async function loadActivities(date: string) {
-    setLoadingDay(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/v1/calendar/activities?date=${encodeURIComponent(date)}`, {
-        credentials: "include",
-      });
-      const json: unknown = await res.json();
-      if (!res.ok) {
-        setError(t.calendar.loadActivitiesError);
-        setActivities(null);
-        return;
-      }
-      if (typeof json === "object" && json !== null && "date" in json && "entries" in json && Array.isArray((json as { entries: unknown }).entries)) {
-        setActivities(json as ActivitiesResponse);
-      }
-    } catch {
-      setError(t.calendar.connectError);
-      setActivities(null);
-    } finally {
-      setLoadingDay(false);
-    }
-  }
-
-  async function loadManualActivities(date: string) {
-    setLoadingDay(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`, {
-        credentials: "include",
-      });
-      const json: unknown = await res.json();
-      if (!res.ok) {
-        setError(t.calendar.loadManualError);
-        setManualActivities(null);
-        return;
-      }
-      if (typeof json === "object" && json !== null && "date" in json && "entries" in json && Array.isArray((json as { entries: unknown }).entries)) {
-        const stats = json as HealthStatsResponse;
-        const manualEntries = stats.entries.filter((e) => e.kind === "manual_activity");
-        setManualActivities({
-          date: stats.date,
-          entries: manualEntries,
-        });
-      }
-    } catch {
-      setError(t.calendar.connectError);
-      setManualActivities(null);
-    } finally {
-      setLoadingDay(false);
-    }
   }
 
   function closeModal() {
@@ -169,14 +91,52 @@ export default function CalendarPage() {
     setHealthStats(null);
     setActivities(null);
     setManualActivities(null);
-    setLoadingDay(false);
   }
 
+  // ----------------- Load data for a day -----------------
+  async function fetchJson<T>(url: string): Promise<T | null> {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(url, { credentials: "include" });
+      const json: unknown = await res.json();
+      if (!res.ok) throw new Error();
+      return json as T;
+    } catch {
+      setError(t.calendar.connectError);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadHealthStats(date: string) {
+    const data = await fetchJson<HealthStatsResponse>(
+      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`
+    );
+    setHealthStats(data);
+  }
+
+  async function loadActivities(date: string) {
+    const data = await fetchJson<ActivitiesResponse>(
+      `/api/v1/calendar/activities?date=${encodeURIComponent(date)}`
+    );
+    setActivities(data);
+  }
+
+  async function loadManualActivities(date: string) {
+    const data = await fetchJson<HealthStatsResponse>(
+      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`
+    );
+    if (data) {
+      const manual = data.entries.filter((e) => e.kind === "manual_activity");
+      setManualActivities({ date: data.date, entries: manual });
+    }
+  }
+
+  // ----------------- Month navigation -----------------
   function prevMonth() {
-    setHealthStats(null);
-    setActivities(null);
-    setManualActivities(null);
-    setSelectedDate(null);
+    closeModal();
     if (month === 1) {
       setMonth(12);
       setYear((y) => y - 1);
@@ -184,10 +144,7 @@ export default function CalendarPage() {
   }
 
   function nextMonth() {
-    setHealthStats(null);
-    setActivities(null);
-    setManualActivities(null);
-    setSelectedDate(null);
+    closeModal();
     if (month === 12) {
       setMonth(1);
       setYear((y) => y + 1);
@@ -196,8 +153,9 @@ export default function CalendarPage() {
 
   const totalDays = daysInMonth(year, month);
   const firstDay = new Date(year, month - 1, 1).getDay();
-  const offset = (firstDay + 6) % 7;
+  const offset = (firstDay + 6) % 7; // Mon-start
 
+  // ----------------- Render -----------------
   return (
     <AppLayout>
       <div className="w-full flex justify-center">
@@ -315,6 +273,8 @@ export default function CalendarPage() {
               <ManualActivityForm selectedDate={selectedDate} onActivityAdded={() => loadManualActivities(selectedDate)} />
             </Modal>
           )}
+
+          {loading && <p className="text-sm opacity-70">{t.calendar.loading}...</p>}
         </div>
       </div>
     </AppLayout>

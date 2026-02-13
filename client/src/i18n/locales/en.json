@@ -95,6 +95,7 @@
     "loadManualError": "Failed to load manually added activities",
     "deleteManualError": "Failed to delete manual activity",
      "locale": "en-US",
+     "loading": "Loading health data...",
 
     "addActivityButton": "Add Activity",
     "activityTitlePlaceholder": "Activity title (e.g., Morning Run)",
