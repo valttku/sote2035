@@ -1,5 +1,5 @@
-import { db } from "../db";
-import { formatHealthEntry } from "./formatHealthStats";
+import { db } from "../db.js";
+import { formatHealthEntry } from "./formatHealthStats.js";
 
 export type MetricStatus = "low" | "good" | "high" | undefined;
 
