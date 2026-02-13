@@ -6,10 +6,10 @@ import Modal from "../../components/Modal";
 import HealthStatsList, { HealthStatsResponse} from "./components/HealthStatsList";
 import ActivitiesList, { ActivitiesResponse} from "./components/ActivitiesList";
 import ManualActivityForm from "./components/ActivityForm";
-import ActivitiesList from "./components/ActivitiesList";
+
 import { useTranslation } from "@/i18n/LanguageProvider";
 
-import type { ActivitiesResponse, HealthStatsResponse } from "./types";
+
 
 type MonthDaysResponse = string[]; // ["YYYY-MM-DD", ...]
 

@@ -111,8 +111,6 @@ export default function HealthInsightsPage() {
   
 ];
 
-  
-
   return (
     <AppLayout>
       <div className="w-full flex justify-center">

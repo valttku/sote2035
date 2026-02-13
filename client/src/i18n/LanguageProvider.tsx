@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { useEffect, createContext, useContext, useState, ReactNode } from "react";
 import { translations } from "./languages";
 import { LanguageCode, Translations } from "./types";
 
@@ -13,18 +13,17 @@ type LanguageContextType = {
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<LanguageCode>("en"); // same on server + client
+  // Lazy initialization reads localStorage only on first render
+  const [lang, setLang] = useState<LanguageCode>(() => {
+    if (typeof window === "undefined") return "en"; // SSR safe
+    return (localStorage.getItem("lang") as LanguageCode) ?? "en";
+  });
 
-useEffect(() => {
-  const storedLang = localStorage.getItem("lang") as LanguageCode | null;
-  if (storedLang) {
-    setLang(storedLang);
-  }
-}, []);
-
-
+  // Sync lang to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem("lang", lang);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lang", lang);
+    }
   }, [lang]);
 
   const t = translations[lang];
@@ -38,6 +37,7 @@ useEffect(() => {
 
 export function useTranslation() {
   const context = useContext(LanguageContext);
-  if (!context) throw new Error("useTranslation must be used inside LanguageProvider");
+  if (!context)
+    throw new Error("useTranslation must be used inside LanguageProvider");
   return context;
 }

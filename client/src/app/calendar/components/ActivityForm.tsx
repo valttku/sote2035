@@ -14,7 +14,7 @@ export default function ManualActivityForm({
 }: ManualActivityFormProps) {
   const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(false); 
+  const [loading] = useState(false); 
 
 
   return (
