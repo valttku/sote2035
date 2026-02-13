@@ -16,7 +16,6 @@ const TITLE: Record<BodyPartId, string> = {
   legs: "Legs",
 };
 
-/*Get health data from database */
 type MetricValue =
   | string
   | number
@@ -28,10 +27,27 @@ type MetricValue =
       min?: number;
       max?: number;
       deviationPercent?: number;
-      [key: string]: any;
+      [key: string]: unknown;
     };
 
+type MetricObject = {
+  value?: number;
+  goal?: number;
+  status?: string;
+  avg?: number;
+  min?: number;
+  max?: number;
+  deviationPercent?: number;
+  weeklyTotal?: number;
+  weeklyGoal?: number;
+  [key: string]: unknown;
+};
+
 type HealthMetrics = Record<string, MetricValue>;
+
+function isMetricObject(x: unknown): x is MetricObject {
+  return typeof x === "object" && x !== null;
+}
 
 export default function HealthStatsPanel({
   selected,
@@ -111,7 +127,7 @@ export default function HealthStatsPanel({
       {/* Metrics list */}
       <ul className="min-h-[170px]">
         {Object.entries(metrics).map(([k, v]) => {
-          const isObj = typeof v === "object" && v !== null;
+          const isObj = isMetricObject(v);
 
           function statusBadge(status?: string) {
             if (status === "low")
@@ -121,19 +137,13 @@ export default function HealthStatsPanel({
             return "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800";
           }
 
-          const vAny = v as any;
-
           const valueDisplay = (() => {
-            if (
-              isObj &&
-              typeof vAny.value === "number" &&
-              typeof vAny.goal === "number"
-            ) {
-              return `${vAny.value} / ${vAny.goal}`;
+            if (isObj && typeof v.value === "number" && typeof v.goal === "number") {
+              return `${v.value} / ${v.goal}`;
             }
-            if (isObj && typeof vAny.value === "number") return vAny.value;
+            if (isObj && typeof v.value === "number") return v.value;
             if (!isObj) return v;
-            return vAny.value ?? "—";
+            return v.value ?? "—";
           })();
 
           return (
@@ -141,20 +151,12 @@ export default function HealthStatsPanel({
               <div className="flex items-start justify-between">
                 <div className="w-40 font-medium">
                   {k}
-                  {typeof vAny.weeklyTotal === "number" &&
-                    vAny.weeklyTotal > 0 && (
-                      <div className="mt-1">
-                        Intensity minutes (weekly total):{" "}
-                        {Math.round(vAny.weeklyTotal)} min
-                      </div>
-                    )}
-                  {typeof vAny.weeklyGoal === "number" &&
-                    vAny.weeklyGoal > 0 && (
-                      <div className="mt-1">
-                        Intensity minutes (weekly goal):{" "}
-                        {Math.round(vAny.weeklyGoal)} min
-                      </div>
-                    )}
+                  {isObj && typeof v.weeklyTotal === "number" && v.weeklyTotal > 0 && (
+                    <div className="mt-1">Intensity minutes (weekly total): {Math.round(v.weeklyTotal)} min</div>
+                  )}
+                  {isObj && typeof v.weeklyGoal === "number" && v.weeklyGoal > 0 && (
+                    <div className="mt-1">Intensity minutes (weekly goal): {Math.round(v.weeklyGoal)} min</div>
+                  )}
                 </div>
 
                 <div className="flex-1">
@@ -168,11 +170,9 @@ export default function HealthStatsPanel({
                       </div>
                     </div>
 
-                    {isObj && typeof vAny.status === "string" && (
+                    {isObj && typeof v.status === "string" && (
                       <div className="ml-2">
-                        <span className={statusBadge(vAny.status)}>
-                          {vAny.status}
-                        </span>
+                        <span className={statusBadge(v.status)}>{v.status}</span>
                       </div>
                     )}
                   </div>
