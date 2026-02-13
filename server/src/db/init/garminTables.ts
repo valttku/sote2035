@@ -333,8 +333,6 @@ export async function createGarminTables() {
       select new.user_id, new.day_date, 'garmin', 'heart_daily',
         jsonb_build_object(
           'hr_avg', new.avg_heart_rate,
-          'hr_min', new.min_heart_rate,
-          'hr_max', new.max_heart_rate,
           'rhr', new.resting_heart_rate
         )
       on conflict (user_id, day_date, kind)
@@ -344,11 +342,23 @@ export async function createGarminTables() {
       select new.user_id, new.day_date, 'garmin', 'activity_daily',
         jsonb_build_object(
           'steps', new.steps,
+          'steps_goal', new.steps_goal,
+          'floors_climbed', new.floors_climbed,
+          'floors_climbed_goal', new.floors_climbed_goal,
           'distance_meters', new.distance_in_meters,
-          'active_kcal', new.active_kilocalories,
           'total_kcal', new.active_kilocalories + new.bmr_kilocalories,
           'intensity_duration_seconds', new.moderate_intensity_duration_in_seconds + (new.vigorous_intensity_duration_in_seconds * 2),
-          'floors_climbed', new.floors_climbed
+          'intensity_duration_goal_in_seconds', new.intensity_duration_goal_in_seconds,
+
+          -- weekly total (seconds), weighting vigorous = 2x
+          'weekly_intensity_total_seconds',
+            (
+                SELECT COALESCE(SUM(moderate_intensity_duration_in_seconds + (vigorous_intensity_duration_in_seconds * 2)), 0)
+                FROM app.user_dailies_garmin
+                WHERE user_id = new.user_id
+                  AND day_date >= date_trunc('week', new.day_date)::date
+                  AND day_date <= new.day_date
+            )
         )
       on conflict (user_id, day_date, kind)
       do update set data = EXCLUDED.data, updated_at = now();
@@ -357,7 +367,7 @@ export async function createGarminTables() {
       select new.user_id, new.day_date, 'garmin', 'stress_daily',
         jsonb_build_object(
           'stress_avg', new.avg_stress_level,
-          'stress_max', new.max_stress_level
+          'stress_qualifier', new.stress_qualifier
         )
       on conflict (user_id, day_date, kind)
       do update set data = EXCLUDED.data, updated_at = now();
@@ -415,11 +425,7 @@ export async function createGarminTables() {
         'garmin',
         'sleep_daily',
         jsonb_build_object(
-          'duration_seconds', new.duration_in_seconds,
-          'deep_seconds', new.deep_sleep_in_seconds,
-          'light_seconds', new.light_sleep_in_seconds,
-          'rem_seconds', new.rem_sleep_in_seconds,
-          'awake_seconds', new.awake_duration_in_seconds
+          'duration_seconds', new.duration_in_seconds
         )
       )
       on conflict (user_id, day_date, kind)
