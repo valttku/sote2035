@@ -89,7 +89,7 @@ export default function HealthStatsPanel({
           const isMetricObject =
             typeof value === "object" && value !== null && "value" in value;
 
-          let displayKey = key;
+          const displayKey = key;
           let displayValue = "";
           let status: "low" | "good" | "high" | undefined;
 
