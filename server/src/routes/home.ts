@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getHealthData } from "../db/healthStatEntriesDb.js";
+import { getHealthStatEntriesData } from "../db/healthStats/healthStatsDb.js";
 import { authRequired } from "../middleware/authRequired.js";
 
 export const homeRouter = Router();
@@ -17,7 +17,7 @@ homeRouter.get("/", authRequired, async (req, res) => {
   if (!userId) return res.status(401).json({ error: "not authenticated" });
 
   try {
-    const metrics = await getHealthData(userId, date, part as any);
+    const metrics = await getHealthStatEntriesData(userId, date, part as any);
     res.json({ metrics });
   } catch (e) {
     console.error(e);

@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import type { HealthStatsEntry } from "../types";
 import { useTranslation } from "@/i18n/LanguageProvider";
 
@@ -20,25 +21,62 @@ function labelForKind(kind: string, t?: any) {
       return t?.calendar.skinTemp ?? "Skin Temp";
     case "manual_activity":
       return t?.calendar.manualActivity ?? "Manual Activity";
+=======
+// One health entry from the backend
+export type HealthStatsEntry = {
+  id: string;
+  kind: string;
+  source: string | null;
+  data: unknown;
+  created_at: string;
+};
+
+// API response for a day
+export type HealthStatsResponse = {
+  date: string;
+  entries: HealthStatsEntry[];
+};
+
+// Convert backend kind to a readable label
+function labelForKind(kind: string) {
+  switch (kind) {
+    case "heart_daily":
+      return "Heart Data";
+    case "sleep_daily":
+      return "Sleep Data";
+    case "stress_daily":
+      return "Stress Data";
+    case "activity_daily":
+      return "Activity Data";
+    case "resp_daily":
+      return "Respiration Data";
+    case "manual_activity":
+      return "Manual Activity Entry";
+>>>>>>> dc764b6c70d141879343c1e7c48bc3b0e64ce559
     default:
       return kind;
   }
 }
 
+<<<<<<< HEAD
 // Pretty-print unknown values
+=======
+// Convert value to string for display
+>>>>>>> dc764b6c70d141879343c1e7c48bc3b0e64ce559
 function prettyValue(v: unknown) {
   if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
     return String(v);
   }
-  return JSON.stringify(v);
+  return JSON.stringify(v); // fallback for objects
 }
 
+// Show a list of health entries
 export default function HealthStatsList({
   entries,
   onDelete,
 }: {
   entries: HealthStatsEntry[];
-  onDelete?: (id: string) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>; // optional delete function
 }) {
   const { t } = useTranslation(); // Get translation object
 
@@ -53,6 +91,7 @@ export default function HealthStatsList({
 
   return (
     <div className="space-y-3 overflow-y-auto max-h-96">
+      {/* Header: kind label + source + optional delete for manual activities */}
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           {/* Header: Health stat label + source */}
@@ -60,6 +99,7 @@ export default function HealthStatsList({
             <h3 className="font-semibold text-lg text-[#31c2d5]">
               {labelForKind(e.kind, t)}
             </h3>
+
             <div className="flex items-center gap-2">
               <span className="text-xs opacity-70">
                 {e.source ?? t.calendar.unknown ?? "unknown"}
@@ -75,7 +115,11 @@ export default function HealthStatsList({
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* Health stat data */}
+=======
+          {/* Data rows */}
+>>>>>>> dc764b6c70d141879343c1e7c48bc3b0e64ce559
           <div className="text-sm space-y-1">
             {typeof e.data === "object" && e.data !== null ? (
               Object.entries(e.data as Record<string, unknown>).map(([k, v]) => (

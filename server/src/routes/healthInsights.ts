@@ -31,26 +31,38 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
 
     console.log(`[health-insights] user=${userId} date=${date}`);
 
-    // Fetch activities
-    const activitiesResult = await db.query(
-      `SELECT * FROM app.user_activities_garmin 
-       WHERE user_id = $1 
-       AND DATE(to_timestamp(start_time_in_seconds)) = $2::date
-       ORDER BY start_time_in_seconds DESC`,
-      [userId, date],
-    );
-    console.log(`[health-insights] Activities fetched:`, activitiesResult.rows);
+    // Fetch profile and metrics in parallel
+    const [profileResult, metricsResult] = await Promise.all([
+      db.query(
+        `SELECT id, gender, height, weight
+         FROM app.users
+         WHERE id = $1`,
+        [userId],
+      ),
+      db.query(
+        `SELECT vo2_max, vo2_max_cycling, fitness_age
+         FROM app.user_metrics_garmin
+         WHERE user_id = $1 AND day_date = (
+           SELECT MAX(day_date)
+           FROM app.user_metrics_garmin
+           WHERE user_id = $1 AND day_date <= $2::date
+         )`,
+        [userId, date],
+      ),
+    ]);
 
-    // Fetch sleep data
+    // Merge metrics into profile
+    const profile = {
+      ...profileResult.rows[0],
+      ...metricsResult.rows[0],
+    };
 
-    // Fetch stress data
+    console.log(`[health-insights] User profile and metrics fetched:`, profile);
 
-    // Fetch heart rate data
-
-    // Fetch dailies data
+    // Fetch data from dailies table
     const dailiesResult = await db.query(
       `SELECT id, user_id, day_date, summary_id, active_kilocalories, 
-           bmr_kilocalories, steps, distance_in_meters,  
+          bmr_kilocalories, steps, distance_in_meters,  
           active_time_in_seconds, floors_climbed,  
           avg_heart_rate, resting_heart_rate, avg_stress_level, 
           body_battery_charged, body_battery_drained, steps_goal, 
@@ -66,20 +78,49 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       dailiesResult.rows,
     );
 
-    // Fetch user profile
-    const profileResult = await db.query(
-      `SELECT id, height, weight, gender
-      FROM app.users
-      WHERE id = $1`,
-      [userId],
+    // Fetch stress data separately from dailies table
+    const stressResult = await db.query(
+      `SELECT id,
+          avg_stress_level,
+          max_stress_level,
+          stress_duration_in_seconds,
+          rest_stress_duration_in_seconds,
+          activity_stress_duration_in_seconds,
+          low_stress_duration_in_seconds,
+          medium_stress_duration_in_seconds,
+          high_stress_duration_in_seconds,
+          stress_qualifier
+      FROM app.user_dailies_garmin
+      WHERE user_id = $1 AND day_date = $2::date`,
+      [userId, date],
     );
-    console.log(`[health-insights] User profile fetched:`, profileResult.rows);
+    console.log(`[health-insights] Stress data fetched:`, stressResult.rows);
+
+    // Fetch activities
+    const activitiesResult = await db.query(
+      `SELECT * FROM app.user_activities_garmin 
+       WHERE user_id = $1 
+       AND DATE(to_timestamp(start_time_in_seconds)) = $2::date
+       ORDER BY start_time_in_seconds DESC`,
+      [userId, date],
+    );
+    console.log(`[health-insights] Activities fetched:`, activitiesResult.rows);
+
+    // Fetch sleep data
+    const sleepResult = await db.query(
+      `SELECT * FROM app.user_sleeps_garmin
+      WHERE user_id = $1 AND day_date = $2::date`,
+      [userId, date],
+    );
+    console.log(`[health-insights] Sleep data fetched:`, sleepResult.rows);
 
     const insights = {
       date,
+      profile,
       activities: activitiesResult.rows,
       dailies: dailiesResult.rows,
-      profile: profileResult.rows[0],
+      sleep: sleepResult.rows,
+      stress: stressResult.rows,
     };
 
     res.json(insights);

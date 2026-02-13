@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
 import { Activity } from "../sections/ActivitiesSection";
 import { Dailies } from "../sections/DailiesSection";
-
-export type UserProfile = {
-  id: number;
-  height: number;
-  weight: number;
-  gender: string;
-};
+import { UserProfile } from "../sections/UserProfileSection";
+import { Sleep } from "../sections/SleepSection";
+import { Stress } from "../sections/StressSection";
 
 export type HealthData = {
-  activities?: Activity[];
-  dailies?: Dailies[];
-  sleep?: unknown;
-  stress?: unknown;
-  heartRate?: unknown;
-  bodyComposition?: unknown;
   profile?: UserProfile;
+  dailies?: Dailies[];
+  activities?: Activity[];
+  sleep?: Sleep[];
+  stress?: Stress[];
 };
 
 export function useHealthData(date?: string) {

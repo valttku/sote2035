@@ -3,6 +3,9 @@ import { useState } from "react";
 import AppLayout from "../../components/AppLayout";
 import { ActivitiesSection, Activity } from "./sections/ActivitiesSection";
 import { DailiesSection, Dailies } from "./sections/DailiesSection";
+import { UserProfileSection, UserProfile } from "./sections/UserProfileSection";
+import { SleepSection, Sleep } from "./sections/SleepSection";
+import { StressSection, Stress } from "./sections/StressSection";
 import { useHealthData } from "./hooks/useHealthDataGarmin";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
@@ -14,13 +17,11 @@ type Section = keyof HealthInsightsTranslations["sections"];
 
 
 type HealthDataToAnalyze = {
-  activities?: Activity[];
+  profile?: UserProfile;
   dailies?: Dailies;
-  profile?: {
-    height: number;
-    weight: number;
-    gender: string;
-  };
+  activities?: Activity[];
+  sleep?: Sleep;
+  stress?: Stress;
 };
 
 export default function HealthInsightsPage() {
@@ -46,27 +47,28 @@ export default function HealthInsightsPage() {
     try {
       const dataToAnalyze: HealthDataToAnalyze = {};
 
-      // Include profile
-      if (healthData?.profile) {
-        dataToAnalyze.profile = {
-          height: healthData.profile.height,
-          weight: healthData.profile.weight,
-          gender: healthData.profile.gender,
-        };
-      }
-
-      if (activeSection === "activities") {
-        if (selectedActivityIds.size > 0 && healthData?.activities) {
-          dataToAnalyze.activities = healthData.activities.filter((activity) =>
-            selectedActivityIds.has(activity.id),
-          );
-        } else {
-          dataToAnalyze.activities = healthData?.activities;
-        }
-      }
-
-      if (activeSection === "dailies") {
-        dataToAnalyze.dailies = healthData?.dailies?.[0];
+      switch (activeSection) {
+        case "profile":
+          dataToAnalyze.profile = healthData?.profile;
+          break;
+        case "dailies":
+          dataToAnalyze.dailies = healthData?.dailies?.[0];
+          break;
+        case "sleep":
+          dataToAnalyze.sleep = healthData?.sleep?.[0];
+          break;
+        case "stress":
+          dataToAnalyze.stress = healthData?.stress?.[0];
+          break;
+        case "activities":
+          if (selectedActivityIds.size > 0 && healthData?.activities) {
+            dataToAnalyze.activities = healthData.activities.filter(
+              (activity) => selectedActivityIds.has(activity.id),
+            );
+          } else {
+            dataToAnalyze.activities = healthData?.activities;
+          }
+          break;
       }
 
       console.log("Data sent to AI:", dataToAnalyze);
@@ -99,6 +101,7 @@ export default function HealthInsightsPage() {
 
 
   const sections: { id: Section; label: string; disabled?: boolean }[] = [
+    {id: "profile", label:t.healthInsights.sections.profile},
 
   { id: "dailies", label: t.healthInsights.sections.dailies },
   { id: "activities", label: t.healthInsights.sections.activities },

@@ -209,6 +209,7 @@
   "healthInsights": {
   "title": "Terveysanalyysit",
   "sections": {
+    "profile": "Profiili",
     "dailies": "Päivittäiset tiedot",
     "activities": "Aktiviteetit",
     "sleep": "Uni",

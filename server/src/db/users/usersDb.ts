@@ -1,4 +1,4 @@
-import { db } from "./db.js";
+import { db } from "../db.js";
 
 //add here
 export type Gender = "male" | "female" | "other" | "unknown";

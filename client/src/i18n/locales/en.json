@@ -207,6 +207,7 @@
   "healthInsights": {
   "title": "Health Insights",
   "sections": {
+    "profile": "Profile",
     "dailies": "Dailies",
     "activities": "Activities",
     "sleep": "Sleep",

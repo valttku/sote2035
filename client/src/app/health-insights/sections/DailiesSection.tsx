@@ -50,40 +50,35 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
           value={`${dailies.steps} / ${dailies.steps_goal}`}
           icon="👟"
         />
-
         <StatCard
           label="Distance"
           value={`${(dailies.distance_in_meters / 1000).toFixed(2)} km`}
           icon="🛣"
         />
-
         <StatCard
           label="Active Calories"
           value={`${dailies.active_kilocalories} kcal`}
           icon="🔥"
         />
-
         <StatCard
           label="BMR Calories"
           value={`${dailies.bmr_kilocalories} kcal`}
           icon="⚡"
         />
-
         <StatCard
           label="Total Calories"
           value={`${dailies.active_kilocalories + dailies.bmr_kilocalories} kcal`}
           icon="⚡"
         />
-
         <StatCard
           label="Active Time"
           value={`${(dailies.active_time_in_seconds / 60).toFixed(0)} min`}
           icon="⏱"
         />
-
         <StatCard
           label="Intensity Minutes"
-          value={`M: ${((dailies.moderate_intensity_duration_in_seconds ?? 0) / 60).toFixed(0)} | V: ${((dailies.vigorous_intensity_duration_in_seconds ?? 0) / 60).toFixed(0)}`}
+          value={`M: ${((dailies.moderate_intensity_duration_in_seconds ?? 0) / 60).toFixed(0)} 
+          | V: ${((dailies.vigorous_intensity_duration_in_seconds ?? 0) / 60).toFixed(0)}`}
           icon="⏱"
         />
         <StatCard
@@ -91,7 +86,6 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
           value={`${dailies.resting_heart_rate} bpm`}
           icon="❤️"
         />
-
         <StatCard
           label="Avg Heart Rate"
           value={`${dailies.avg_heart_rate} bpm`}

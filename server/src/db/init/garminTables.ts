@@ -271,6 +271,57 @@ export async function createGarminTables() {
   `);
 
   // ----------------------------
+  // user_sleeps_garmin table
+  // ----------------------------
+  await db.query(`
+  create table if not exists app.user_sleeps_garmin (
+    id uuid primary key default gen_random_uuid(),
+    user_id integer not null references app.users(id) on delete cascade,
+    day_date date not null,
+    summary_id varchar(100),
+    
+    duration_in_seconds integer,
+    total_nap_duration_in_seconds integer,
+    start_time_in_seconds bigint,
+    start_time_offset_in_seconds integer,
+    unmeasurable_sleep_in_seconds integer,
+    deep_sleep_in_seconds integer,
+    light_sleep_in_seconds integer,
+    rem_sleep_in_seconds integer,
+    awake_duration_in_seconds integer,
+
+    sleep_levels_map jsonb,
+    time_offset_sleep_spo2 jsonb,
+    time_offset_sleep_respiration jsonb,
+    overall_sleep_score jsonb,
+    sleep_scores jsonb,
+    naps jsonb,
+    validation varchar(50),
+
+    source varchar(50) not null default 'garmin',
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+
+    unique (user_id, day_date, summary_id)
+  );
+
+  create index if not exists idx_user_sleeps_garmin_user_day
+    on app.user_sleeps_garmin(user_id, day_date);
+`);
+
+  await db.query(`
+  drop trigger if exists trg_ensure_health_day_for_sleeps on app.user_sleeps_garmin;
+  create trigger trg_ensure_health_day_for_sleeps
+  after insert or update on app.user_sleeps_garmin
+  for each row execute function app.ensure_health_day_exists();
+
+  drop trigger if exists update_user_sleeps_garmin_updated_at on app.user_sleeps_garmin;
+  create trigger update_user_sleeps_garmin_updated_at
+  before update on app.user_sleeps_garmin
+  for each row execute function app.update_updated_at_column();
+`);
+
+  // ----------------------------
   // Health stat triggers
   // ----------------------------
   // dailies -> heart_daily, activity_daily, stress_daily
@@ -296,7 +347,7 @@ export async function createGarminTables() {
           'distance_meters', new.distance_in_meters,
           'active_kcal', new.active_kilocalories,
           'total_kcal', new.active_kilocalories + new.bmr_kilocalories,
-          'intensity_duration_seconds', new.moderate_intensity_duration_in_seconds + new.vigorous_intensity_duration_in_seconds,
+          'intensity_duration_seconds', new.moderate_intensity_duration_in_seconds + (new.vigorous_intensity_duration_in_seconds * 2),
           'floors_climbed', new.floors_climbed
         )
       on conflict (user_id, day_date, kind)
@@ -350,5 +401,37 @@ export async function createGarminTables() {
     create trigger trg_update_health_stats_on_respiration
     after insert or update on app.user_respiration_garmin
     for each row execute function app.update_health_stats_on_respiration();
+  `);
+
+  // sleeps -> sleep_daily
+  await db.query(`
+    create or replace function app.update_health_stats_on_sleeps()
+    returns trigger as $$
+    begin
+      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
+      values (
+        new.user_id,
+        new.day_date,
+        'garmin',
+        'sleep_daily',
+        jsonb_build_object(
+          'duration_seconds', new.duration_in_seconds,
+          'deep_seconds', new.deep_sleep_in_seconds,
+          'light_seconds', new.light_sleep_in_seconds,
+          'rem_seconds', new.rem_sleep_in_seconds,
+          'awake_seconds', new.awake_duration_in_seconds
+        )
+      )
+      on conflict (user_id, day_date, kind)
+      do update set data = EXCLUDED.data, updated_at = now();
+
+      return new;
+    end;
+    $$ language plpgsql;
+
+    drop trigger if exists trg_update_health_stats_on_sleeps on app.user_sleeps_garmin;
+    create trigger trg_update_health_stats_on_sleeps
+    after insert or update on app.user_sleeps_garmin
+    for each row execute function app.update_health_stats_on_sleeps();
   `);
 }

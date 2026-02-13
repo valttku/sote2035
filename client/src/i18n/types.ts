@@ -159,6 +159,7 @@ fields: {
 export type HealthInsightsTranslations = {
   title: string;
   sections: {
+    profile: string;
     dailies: string;
     activities: string;
     sleep: string;
