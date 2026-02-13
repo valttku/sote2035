@@ -1,13 +1,14 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import Modal from "../../components/Modal";
+import Button from "@/components/Button/Button";
 import LoginForm from "../../components/LoginForm";
 import RegisterForm from "../../components/RegisterForm";
-import logo from "../../../public/logo.svg";
-import Image from "next/image";
-import Button from "@/components/Button/Button";
 
+import logo from "../../../public/logo.svg";
 import mainBg from "../../../public/main-bg.svg";
 
 export default function LoginPage() {
@@ -59,14 +60,17 @@ export default function LoginPage() {
     }
   }
 
+  const toggleLoginForm = () => {
+    setShowLogin((prev) => !prev);
+  };
+
+  const toggleRegisterForm = () => {
+    setShowRegister((prev) => !prev);
+  };
+
   return (
     <main className="main-page">
-      <Image
-        src={mainBg}
-        alt="Authentication background"
-        fill
-        className="object-cover"
-      />
+      <Image fill src={mainBg} alt="background" className="object-cover" />
       <Image src={logo} alt="Logo" className="logo" priority />
 
       {!showLogin && !showRegister && (
@@ -74,15 +78,14 @@ export default function LoginPage() {
           <Button
             size="large"
             label="Get Started"
-            onClick={() => setShowRegister(true)}
+            onClick={toggleRegisterForm}
             className="absolute bottom-[200px] right-120 w-72 text-white font-semibold"
           />
 
           <Button
             size="large"
-            borderColor="border-white"
+            onClick={toggleLoginForm}
             label="I already have an account"
-            onClick={() => setShowLogin(true)}
             className="absolute bottom-[120px] right-120 w-72 text-white font-semibold bg-transparent"
           />
         </>
@@ -90,8 +93,10 @@ export default function LoginPage() {
 
       {/* Login modal */}
       {showLogin && (
-        <Modal onClose={() => setShowLogin(false)}>
+        <Modal onClose={toggleLoginForm}>
           <LoginForm
+            toggleLoginForm={toggleLoginForm}
+            toggleRegisterForm={toggleRegisterForm}
             onSubmit={(email, password) =>
               handleSubmit("login", email, password)
             }
@@ -110,8 +115,10 @@ export default function LoginPage() {
       )}
       {/* Registration modal */}
       {showRegister && (
-        <Modal onClose={() => setShowRegister(false)}>
+        <Modal onClose={toggleRegisterForm}>
           <RegisterForm
+            toggleLoginForm={toggleLoginForm}
+            toggleRegisterForm={toggleRegisterForm}
             onSubmit={(email, password, displayName) =>
               handleSubmit("register", email, password, displayName)
             }

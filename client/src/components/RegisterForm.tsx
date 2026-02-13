@@ -1,16 +1,21 @@
 "use client";
 import { useState, useRef, useMemo } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+
 import Button from "./Button/Button";
 
 export default function RegisterForm({
   onSubmit,
+  toggleLoginForm,
+  toggleRegisterForm,
 }: {
   onSubmit: (
     email: string,
     password: string,
     displayName: string | null,
   ) => void;
+  toggleLoginForm: () => void;
+  toggleRegisterForm: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -240,7 +245,13 @@ export default function RegisterForm({
         className="mt-4 mx-auto block cursor-default"
       >
         Already have an account?{" "}
-        <span onClick={() => {}} className="underline cursor-pointer aqua-blue">
+        <span
+          onClick={() => {
+            toggleLoginForm();
+            toggleRegisterForm();
+          }}
+          className="underline cursor-pointer aqua-blue"
+        >
           Login Here
         </span>
       </Button>
