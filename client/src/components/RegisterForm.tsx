@@ -233,11 +233,11 @@ export default function RegisterForm({
           type="submit"
           size="small"
           disabled={loading}
-          className="mt-2 w-2/5 mx-auto block"
-          label={loading ? "Loading..." : "Register"}
+          label={loading ? "Loading..." : "Create Account"}
+          className="mt-2 w-2/5 mx-auto block text-white font-bold"
         />
       </form>
-      <div className="mt-4 h-[2px] w-[80%] mx-auto bg-white rounded-full" />
+      <div className="mt-5 h-[2px] w-[80%] mx-auto bg-white rounded-full" />
       <Button
         textColor="text-white"
         bgColor="bg-transparent"
@@ -250,7 +250,7 @@ export default function RegisterForm({
             toggleLoginForm();
             toggleRegisterForm();
           }}
-          className="underline cursor-pointer aqua-blue"
+          className="underline cursor-pointer text-[var(--button-blue-bg)]"
         >
           Login Here
         </span>

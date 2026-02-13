@@ -29,7 +29,7 @@ const Button: React.FC<ButtonProps> = ({
   textColor = "text-black",
   cursor = "cursor-pointer",
   borderColor = "border-black",
-  bgColor = "button-style-blue",
+  bgColor = "bg-[var(--button-blue-bg)]",
   ...props
 }) => {
   const sizeClass = sizeClasses[size];

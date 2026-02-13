@@ -81,10 +81,6 @@ button {
   cursor: pointer;
 }
 
-.aqua-blue{
-  color: var(--button-blue-bg)
-}
-
 .button-style-blue {
   background-color: var(--button-blue-bg);
   color: white;

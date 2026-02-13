@@ -86,7 +86,7 @@ export default function LoginPage() {
             size="large"
             onClick={toggleLoginForm}
             label="I already have an account"
-            className="absolute bottom-[120px] right-120 w-72 text-white font-semibold bg-transparent"
+            className="absolute bottom-[120px] right-120 w-72 text-white font-semibold"
           />
         </>
       )}
