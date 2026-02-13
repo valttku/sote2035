@@ -1,54 +1,99 @@
+// Format health stats data into human-friendly metrics for display
+
+// Convert seconds into hours and minutes (e.g. 1h 30m)"
+function formatSecondsHM(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0m";
+  const totalMinutes = Math.round(seconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+// Format raw health stat entry into display metrics
 export function formatHealthEntry(kind: string, data: any) {
   const metrics: Record<string, string | number> = {};
 
   if (!data || typeof data !== "object") return metrics;
 
-  if (kind === "heart_daily") {
-    if (data.hr_avg != null) metrics["Average heart rate"] = data.hr_avg;
-    if (data.rhr != null) metrics["Resting heart rate"] = data.rhr;
-    if (data.hr_max != null) metrics["Max heart rate"] = data.hr_max;
-    if (data.hr_min != null) metrics["Min heart rate"] = data.hr_min;
-  }
+  switch (kind) {
+    case "heart_daily":
+      if (data.hr_avg != null) metrics["Average heart rate"] = data.hr_avg;
+      if (data.rhr != null) metrics["Resting heart rate"] = data.rhr;
+      break;
 
-  if (kind === "sleep_daily") {
-    if (data.duration_seconds != null) {
-      metrics["Total sleep (h)"] = +(data.duration_seconds / 3600).toFixed(1);
-    }
-    if (data.deep_seconds != null) {
-      metrics["Deep sleep (h)"] = +(data.deep_seconds / 3600).toFixed(1);
-    }
-    if (data.light_seconds != null) {
-      metrics["Light sleep (h)"] = +(data.light_seconds / 3600).toFixed(1);
-    }
-    if (data.rem_seconds != null) {
-      metrics["REM sleep (h)"] = +(data.rem_seconds / 3600).toFixed(1);
-    }
-    if (data.awake_seconds != null) {
-      metrics["Awake (h)"] = +(data.awake_seconds / 3600).toFixed(1);
-    }
-  }
+    case "sleep_daily":
+      if (data.duration_seconds != null) {
+        metrics["Total sleep (h)"] = +(data.duration_seconds / 3600).toFixed(1);
+        metrics["Total sleep (h:m)"] = formatSecondsHM(data.duration_seconds);
+      }
+      break;
 
-  if (kind === "activity_daily") {
-    if (data.steps != null) metrics["Steps"] = data.steps;
-    if (data.distance_meters != null)
-      metrics["Distance (km)"] = +(data.distance_meters / 1000).toFixed(2);
-    if (data.active_kcal != null) metrics["Active kcal"] = data.active_kcal;
-    if (data.total_kcal != null) metrics["Total kcal"] = data.total_kcal;
-    if (data.floors_climbed != null)
-      metrics["Floors climbed"] = data.floors_climbed;
-    if (data.intensity_duration_seconds != null)
-      metrics["Intensity minutes"] = +(
-        data.intensity_duration_seconds / 60
-      ).toFixed(1);
-  }
+    case "activity_daily":
+      if (data.steps != null) {
+        if (data.steps_goal != null) {
+          metrics["Steps"] = `${data.steps} / ${data.steps_goal}`;
+        } else {
+          metrics["Steps"] = data.steps;
+        }
+      }
 
-  if (kind === "resp_daily" && data.resp_rate != null) {
-    metrics["Average respiratory rate (awake)"] = data.resp_rate;
-  }
+      if (data.distance_meters != null)
+        metrics["Distance (km)"] = +(data.distance_meters / 1000).toFixed(2);
 
-  if (kind === "stress_daily") {
-    if (data.stress_avg != null) metrics["Average stress"] = data.stress_avg;
-    if (data.stress_max != null) metrics["Max stress"] = data.stress_max;
+      if (data.active_kcal != null) metrics["Active kcal"] = data.active_kcal;
+      if (data.total_kcal != null) metrics["Total kcal"] = data.total_kcal;
+
+      if (data.floors_climbed != null) {
+        if (data.floors_climbed_goal != null) {
+          metrics["Floors climbed"] =
+            `${data.floors_climbed} / ${data.floors_climbed_goal}`;
+        } else {
+          metrics["Floors climbed"] = data.floors_climbed;
+        }
+      }
+
+      if (data.intensity_duration_seconds != null) {
+        metrics["Intensity minutes today"] = +(
+          data.intensity_duration_seconds / 60
+        ).toFixed(1);
+        metrics["Intensity today (h:m)"] = formatSecondsHM(
+          data.intensity_duration_seconds,
+        );
+      }
+
+      if (data.intensity_duration_goal_in_seconds != null) {
+        metrics["Intensity minutes goal"] = +(
+          data.intensity_duration_goal_in_seconds / 60
+        ).toFixed(1);
+        metrics["Intensity goal (h:m)"] = formatSecondsHM(
+          data.intensity_duration_goal_in_seconds,
+        );
+      }
+
+      if (data.weekly_intensity_total_seconds != null) {
+        metrics["Weekly intensity minutes"] = +(
+          data.weekly_intensity_total_seconds / 60
+        ).toFixed(1);
+        metrics["Weekly intensity (h:m)"] = formatSecondsHM(
+          data.weekly_intensity_total_seconds,
+        );
+      }
+      break;
+
+    case "resp_daily":
+      if (data.resp_rate != null)
+        metrics["Average respiratory rate (awake)"] = data.resp_rate;
+      break;
+
+    case "stress_daily":
+      if (data.stress_avg != null) metrics["Average stress"] = data.stress_avg;
+      if (data.stress_qualifier != null)
+        metrics["Stress qualifier"] = data.stress_qualifier;
+      break;
+
+    default:
+      break;
   }
 
   return metrics;
