@@ -69,8 +69,12 @@
     "new_password_placeholder": "Uusi salasana",
     "failed_delete_account": "Tilin poistaminen epäonnistui",
     "unlinking": "Poistetaan...",
-"saving": "Tallennetaan...",
-"changing": "Vaihdetaan..."
+    "saving": "Tallennetaan...",
+    "changing": "Vaihdetaan...",
+    "weak_password": "Heikko",
+    "medium_password": "Keskivahva",
+    "strong_password": "Vahva",
+    "weak_password_alert": "Salasana ei täytä vaatimuksia"
 
 
   },

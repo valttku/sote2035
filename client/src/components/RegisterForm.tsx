@@ -1,25 +1,22 @@
 "use client";
+
 import { useState, useRef, useMemo } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useTranslation } from "@/i18n/LanguageProvider";
 
-
-
- 
 export default function RegisterForm({
   onSubmit,
 }: {
   onSubmit: (
     email: string,
     password: string,
-    displayName: string | null,
+    displayName: string | null
   ) => void;
 }) {
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,39 +26,39 @@ export default function RegisterForm({
 
   const { t } = useTranslation();
 
-   const PASSWORD_REQUIREMENTS = useMemo( () => [
+  // ---------------- PASSWORD REQUIREMENTS ----------------
+  const PASSWORD_REQUIREMENTS = useMemo(
+    () => [
       { regex: /.{8,}/, text: t.register.requirements.characters },
       { regex: /[0-9]/, text: t.register.requirements.number },
       { regex: /[a-z]/, text: t.register.requirements.lowercase },
       { regex: /[A-Z]/, text: t.register.requirements.uppercase },
       { regex: /[^A-Za-z0-9]/, text: t.register.requirements.special },
-      ],
-      [t]
-    );
+    ],
+    [t]
+  );
 
-
+  // ---------------- VALIDATION ----------------
   const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-
-
 
   const strengthScore = useMemo(
     () =>
       PASSWORD_REQUIREMENTS.filter((req) => req.regex.test(password)).length,
-    [password, PASSWORD_REQUIREMENTS], // add dependency to fix the warning
+    [password, PASSWORD_REQUIREMENTS]
   );
 
   const getStrengthColor = (score: number) => {
-    if (score === 0) return t.register.passwordStrength.enter;
-  if (score <= 2) return t.register.passwordStrength.weak;
-  if (score <= 4) return t.register.passwordStrength.medium;
-  return t.register.passwordStrength.strong;
+    if (score === 0) return "bg-gray-300";
+    if (score <= 2) return "bg-red-500";
+    if (score <= 4) return "bg-amber-500";
+    return "bg-emerald-500";
   };
 
   const getStrengthText = (score: number) => {
-    if (score === 0) return "Enter a password";
-    if (score <= 2) return "Weak password";
-    if (score <= 4) return "Medium password";
-    return "Strong password";
+    if (score === 0) return t.register.passwordStrength.enter;
+    if (score <= 2) return t.register.passwordStrength.weak;
+    if (score <= 4) return t.register.passwordStrength.medium;
+    return t.register.passwordStrength.strong;
   };
 
   function validate(): boolean {
@@ -72,7 +69,7 @@ export default function RegisterForm({
     }
 
     const failedReqs = PASSWORD_REQUIREMENTS.filter(
-      (req) => !req.regex.test(password),
+      (req) => !req.regex.test(password)
     );
     if (failedReqs.length > 0) {
       alert(t.register.weakPassword);
@@ -131,49 +128,42 @@ export default function RegisterForm({
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            ref={passwordRef}
             className="block w-full"
             required
           />
           <button
             type="button"
-            className="fa-eye"
+            className="absolute right-2 top-2"
             onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? t.register.hidePassword: t.register.showPassword}
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
         </div>
 
-        {/* Password strength bar */}
-        <div
-          className="progress-bar"
-          role="progressbar"
-          aria-valuenow={strengthScore}
-          aria-valuemin={0}
-          aria-valuemax={5}
-        >
+        {/* Strength bar */}
+        <div className="h-2 bg-gray-200 rounded">
           <div
-            className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500 ease-out`}
+            className={`${getStrengthColor(strengthScore)} h-full rounded transition-all duration-500`}
             style={{ width: `${(strengthScore / 5) * 100}%` }}
           />
         </div>
 
-        <p id="password-strength" className="text-sm font-medium mb-2">
-          {getStrengthText(strengthScore)}. {t.register.passwordMustContain}:
-        </p>
-
-        <ul className="space-y-1" aria-label="Password requirements">
-          {PASSWORD_REQUIREMENTS.map((req) => (
+        {/* Requirements checklist */}
+        <ul className="space-y-1 mb-2">
+          {PASSWORD_REQUIREMENTS.map((req, i) => (
             <li
-              key={req.text}
+              key={i}
               className={`text-sm flex items-center gap-2 ${
                 req.regex.test(password) ? "text-green-500" : "text-red-400"
               }`}
             >
-              {req.text} {req.regex.test(password) ? "✓" : "✕"}
+              {req.regex.test(password) ? "✓" : "✕"} {req.text}
             </li>
           ))}
         </ul>
+
+        <p className="text-sm font-medium mb-2">{getStrengthText(strengthScore)}</p>
 
         {/* Confirm Password */}
         <label htmlFor="reg-confirm">{t.register.confirmPassword}</label>
@@ -188,9 +178,8 @@ export default function RegisterForm({
           />
           <button
             type="button"
-            className="fa-eye"
+            className="absolute right-2 top-2"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            aria-label={showConfirmPassword ? t.register.hidePassword : t.register.showPassword}
           >
             {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
@@ -201,7 +190,7 @@ export default function RegisterForm({
           disabled={loading}
           className="button-style-blue w-full mt-2 disabled:opacity-50"
         >
-          {loading ? t.register.loading: t.register.registerButton}
+          {loading ? t.register.loading : t.register.registerButton}
         </button>
       </form>
     </div>

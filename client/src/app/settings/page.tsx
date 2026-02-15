@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import AppLayout from "@/components/AppLayout";
-import Modal from "@/components/Modal";
+import AppLayout from "../../components/AppLayout";
+import Modal from "../../components/Modal";
+import { useTranslation } from "../../i18n/LanguageProvider";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useTranslation } from "@/i18n/LanguageProvider";
 
 type SettingsData = {
   id: number;
@@ -20,15 +20,6 @@ type SettingsData = {
   polarLinked?: boolean;
   garminLinked?: boolean;
 };
-
- // ---------------- PASSWORD STRENGTH ----------------
-  const PASSWORD_REQUIREMENTS = [
-    /.{8,}/, // min 8 chars
-    /[0-9]/, // number
-    /[a-z]/, // lowercase
-    /[A-Z]/, // uppercase
-    /[^A-Za-z0-9]/, // special char
-  ];
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -58,26 +49,33 @@ export default function SettingsPage() {
   const [polarBusy, setPolarBusy] = useState(false);
   const [garminBusy, setGarminBusy] = useState(false);
 
- 
+  // ---------------- PASSWORD REQUIREMENTS ----------------
+  const PASSWORD_REQUIREMENTS = [
+    { regex: /.{8,}/, text: "At least 8 characters" },
+    { regex: /[0-9]/, text: "At least 1 number" },
+    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
+    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
+  ];
 
   const strengthScore = useMemo(
-    () => PASSWORD_REQUIREMENTS.filter((r) => r.test(newPassword)).length,
+    () => PASSWORD_REQUIREMENTS.filter((r) => r.regex.test(newPassword)).length,
     [newPassword]
   );
 
-  const strengthColor =
-    strengthScore <= 2
-      ? "bg-red-500"
-      : strengthScore <= 4
-      ? "bg-amber-500"
-      : "bg-emerald-500";
+  const getStrengthColor = (score: number) => {
+    if (score === 0) return "bg-gray-300";
+    if (score <= 2) return "bg-red-500";
+    if (score <= 4) return "bg-amber-500";
+    return "bg-emerald-500";
+  };
 
-  const strengthText =
-    strengthScore <= 2
-      ? t.common.weak_password
-      : strengthScore <= 4
-      ? t.common.medium_password
-      : t.common.strong_password;
+  const getStrengthText = (score: number) => {
+    if (score === 0) return "Enter password";
+    if (score <= 2) return "Weak";
+    if (score <= 4) return "Medium";
+    return "Strong";
+  };
 
   // ---------------- EFFECTS ----------------
   useEffect(() => {
@@ -112,10 +110,8 @@ export default function SettingsPage() {
         body: JSON.stringify({ displayName, gender, height, weight }),
       });
       if (!res.ok) throw new Error();
-
       if (data)
         setData({ ...data, display_name: displayName, gender, height, weight });
-
       setShowEditProfile(false);
     } catch {
       alert(t.settings.failed_update_profile);
@@ -125,7 +121,11 @@ export default function SettingsPage() {
   }
 
   async function changePassword() {
-    if (!oldPassword || !newPassword) return alert(t.common.fill_both_fields);
+    if (!oldPassword || !newPassword)
+      return alert(t.common.fill_both_fields || "Fill both fields");
+    if (strengthScore < 5)
+      return alert("Password does not meet requirements");
+
     setChangingPassword(true);
     try {
       const res = await fetch(`/api/v1/settings/password`, {
@@ -156,7 +156,7 @@ export default function SettingsPage() {
       });
       router.replace("/");
     } catch {
-      alert(t.settings.failed_connect_server);
+      alert(t.settings.failed_delete_account);
     }
   }
 
@@ -164,7 +164,6 @@ export default function SettingsPage() {
   function linkPolar() {
     window.location.href = `/api/v1/integrations/polar/connect`;
   }
-
   async function unlinkPolar() {
     if (!confirm(t.settings.unlink_polar_confirm)) return;
     setPolarBusy(true);
@@ -182,7 +181,6 @@ export default function SettingsPage() {
   function linkGarmin() {
     window.location.href = `/api/v1/integrations/garmin/connect`;
   }
-
   async function unlinkGarmin() {
     if (!confirm(t.settings.unlink_garmin_confirm)) return;
     setGarminBusy(true);
@@ -200,12 +198,12 @@ export default function SettingsPage() {
   if (error) return <p className="text-red-600">{error}</p>;
   if (!data) return null;
 
-  // ---------------- RENDER ----------------
   return (
     <AppLayout>
-      <main className="w-full flex justify-center">
-        <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6">
-          {/* PROFILE SECTION */}
+      <main className="w-full flex justify-center h-dvh overflow-y-auto">
+        <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6 p-4">
+
+          {/* PROFILE */}
           <section className="ui-component-styles p-4 w-full space-y-2">
             <h2 className="text-xl font-semibold">{t.settings.profile_section_title}</h2>
             <p>{t.settings.email_label}: {data.email}</p>
@@ -230,25 +228,18 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          {/* PROVIDER ACCOUNTS */}
+          {/* PROVIDERS */}
           <section className="ui-component-styles p-4 w-full space-y-3">
             <h2 className="text-xl font-semibold">{t.settings.profileAccount}</h2>
 
             <div className="flex justify-between items-center">
               <p>Polar</p>
               {polarLinked ? (
-                <button
-                  onClick={unlinkPolar}
-                  disabled={polarBusy}
-                  className="button-style-blue min-w-[120px]"
-                >
-                  {polarBusy ? "Unlinking..." : t.settings.unlink_polar}
+                <button onClick={unlinkPolar} disabled={polarBusy} className="button-style-blue min-w-[120px]">
+                  {polarBusy ? t.settings.unlinking : t.settings.unlink_polar}
                 </button>
               ) : (
-                <button
-                  onClick={linkPolar}
-                  className="button-style-blue min-w-[120px]"
-                >
+                <button onClick={linkPolar} className="button-style-blue min-w-[120px]">
                   {t.settings.link_polar}
                 </button>
               )}
@@ -257,18 +248,11 @@ export default function SettingsPage() {
             <div className="flex justify-between items-center">
               <p>Garmin</p>
               {garminLinked ? (
-                <button
-                  onClick={unlinkGarmin}
-                  disabled={garminBusy}
-                  className="button-style-blue min-w-[120px]"
-                >
-                  {garminBusy ? "Unlinking..." : t.settings.unlink_garmin}
+                <button onClick={unlinkGarmin} disabled={garminBusy} className="button-style-blue min-w-[120px]">
+                  {garminBusy ? t.settings.unlinking : t.settings.unlink_garmin}
                 </button>
               ) : (
-                <button
-                  onClick={linkGarmin}
-                  className="button-style-blue min-w-[120px]"
-                >
+                <button onClick={linkGarmin} className="button-style-blue min-w-[120px]">
                   {t.settings.link_garmin}
                 </button>
               )}
@@ -278,130 +262,78 @@ export default function SettingsPage() {
           {/* ACCOUNT MANAGEMENT */}
           <section className="ui-component-styles p-4 w-full">
             <h2 className="text-xl font-semibold mb-2">{t.settings.providerAccountManagement}</h2>
-            <button
-              onClick={deleteAccount}
-              className="cancel-button-style w-full"
-            >
+            <button onClick={deleteAccount} className="cancel-button-style w-full">
               {t.settings.delete_account}
             </button>
           </section>
-        </div>
 
-        {/* EDIT PROFILE MODAL */}
-        {showEditProfile && (
-          <Modal onClose={() => setShowEditProfile(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">{t.settings.edit_profile}</h2>
+          {/* PASSWORD MODAL */}
+          {showChangePassword && (
+            <Modal onClose={() => setShowChangePassword(false)}>
+              <h2 className="text-lg font-bold mb-4 text-center">{t.settings.change_password}</h2>
 
-            <input
-              className="block w-full mb-2"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder={t.settings.display_name_placeholder}
-            />
+              <div className="relative mb-2">
+                <input
+                  type={showOldPassword ? "text" : "password"}
+                  className="block w-full"
+                  placeholder={t.settings.old_password_placeholder}
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                />
+                <button onClick={() => setShowOldPassword(!showOldPassword)} className="absolute right-2 top-2">
+                  <FaEyeSlash />
+                </button>
+              </div>
 
-            <select
-              className="block w-full mb-2"
-              value={gender ?? ""}
-              onChange={(e) => setGender(e.target.value)}
-            >
-              <option value="">{t.settings.select_gender}</option>
-              <option value="male">{t.settings.male}</option>
-              <option value="female">{t.settings.female}</option>
-              <option value="other">{t.settings.other}</option>
-              <option value="unknown">{t.settings.unknown}</option>
-            </select>
+              <div className="relative mb-2">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  className="block w-full"
+                  placeholder={t.settings.new_password_placeholder}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <button onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-2 top-2">
+                  <FaEye />
+                </button>
+              </div>
 
-            <input
-              type="number"
-              className="block w-full mb-2"
-              value={height ?? ""}
-              onChange={(e) => setHeight(Number(e.target.value || 0))}
-              placeholder={t.settings.height_placeholder}
-            />
+              {/* Password strength bar */}
+              <div className="h-2 bg-gray-200 rounded mb-2">
+                <div
+                  className={`${getStrengthColor(strengthScore)} h-full rounded`}
+                  style={{ width: `${(strengthScore / 5) * 100}%` }}
+                />
+              </div>
 
-            <input
-              type="number"
-              className="block w-full mb-2"
-              value={weight ?? ""}
-              onChange={(e) => setWeight(Number(e.target.value || 0))}
-              placeholder={t.settings.weight_placeholder}
-            />
+              {/* Requirements checklist */}
+              <ul className="space-y-1 mb-2">
+                {PASSWORD_REQUIREMENTS.map((req, i) => (
+                  <li
+                    key={i}
+                    className={`text-sm flex items-center gap-2 ${
+                      req.regex.test(newPassword) ? "text-green-500" : "text-red-400"
+                    }`}
+                  >
+                    {req.regex.test(newPassword) ? "✓" : "✕"} {req.text}
+                  </li>
+                ))}
+              </ul>
 
-            <div className="flex gap-2">
+              <p className="text-sm font-medium mb-4">{getStrengthText(strengthScore)}</p>
+
               <button
-                onClick={saveProfile}
-                disabled={savingProfile}
+                onClick={changePassword}
+                disabled={changingPassword}
                 className="button-style-blue w-full"
               >
-                {savingProfile ? "Saving..." : t.common.save}
+                {changingPassword ? t.settings.changing : t.settings.change_password}
               </button>
-              <button
-                onClick={() => setShowEditProfile(false)}
-                className="cancel-button-style w-full"
-              >
-                {t.common.cancel}
-              </button>
-            </div>
-          </Modal>
-        )}
+            </Modal>
+          )}
 
-        {/* CHANGE PASSWORD MODAL */}
-        {showChangePassword && (
-          <Modal onClose={() => setShowChangePassword(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">{t.settings.change_password}</h2>
-
-            <div className="relative mb-2">
-              <input
-                type={showOldPassword ? "text" : "password"}
-                className="block w-full"
-                placeholder={t.settings.old_password_placeholder}
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-              />
-              <button
-                onClick={() => setShowOldPassword(!showOldPassword)}
-                className="absolute right-2 top-2"
-              >
-                <FaEyeSlash />
-              </button>
-            </div>
-
-            <div className="relative mb-4">
-              <input
-                type={showNewPassword ? "text" : "password"}
-                className="block w-full"
-                placeholder={t.settings.new_password_placeholder}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <button
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-2 top-2"
-              >
-                <FaEye />
-              </button>
-            </div>
-
-            <div className="h-2 bg-gray-200 rounded mb-2">
-              <div
-                className={`${strengthColor} h-full rounded`}
-                style={{ width: `${(strengthScore / 5) * 100}%` }}
-              />
-            </div>
-
-            <p className="text-sm mb-2">{strengthText}</p>
-
-            <button
-              onClick={changePassword}
-              disabled={changingPassword}
-              className="button-style-blue w-full"
-            >
-              {changingPassword ? "Changing..." : t.settings.change_password}
-            </button>
-          </Modal>
-        )}
+        </div>
       </main>
     </AppLayout>
   );
 }
-
