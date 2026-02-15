@@ -18,11 +18,7 @@ export default function Home() {
     legs: false,
   });
 
-  // Hydration-safe: only render translation-dependent content on client
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  
 
   // Poll each body part for alerts (metric status !== 'good')
   useEffect(() => {
@@ -67,20 +63,17 @@ export default function Home() {
 
   const isFemale = avatarType === "female";
 
-  // Only create BODY_PARTS after mounted (hydration-safe)
+ 
   const BODY_PARTS: Array<{ id: BodyPartId; label: string; top: string; left: string }> =
-    useMemo(() => {
-      if (!mounted) return [];
-      return [
+    useMemo(() =>  [
         { id: "brain", label: t.home.bodyParts.brain, top: "3%", left: "50%" },
         { id: "heart", label: t.home.bodyParts.heart, top: "25%", left: "50%" },
         { id: "lungs", label: t.home.bodyParts.lungs, top: "22%", left: "35%" },
         { id: "legs", label: t.home.bodyParts.legs, top: "75%", left: "60%" },
-      ];
-    }, [t, mounted]);
+      ],
+     [t]);
 
-  // Do not render until mounted
-  if (!mounted) return null;
+ 
 
   return (
     <AppLayout>
