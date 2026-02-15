@@ -65,9 +65,17 @@ body {
   background-attachment: fixed;
 }
 
+.main-page {
+  width: 100%;
+  min-height: 100dvh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url("/main-bg.svg");
+}
 
 .logo {
-  position: fixed;     
+  position: fixed;
   top: 1px;
   left: 50px;
   width: auto;
@@ -110,7 +118,6 @@ button {
   color: var(--foreground);
   border: 1px solid var(--ui-border);
   border-radius: 1rem;
-
 }
 
 /* Inputs, textareas, selects */

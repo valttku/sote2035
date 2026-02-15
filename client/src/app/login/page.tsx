@@ -8,9 +8,6 @@ import Button from "@/components/Button/Button";
 import LoginForm from "../../components/LoginForm";
 import RegisterForm from "../../components/RegisterForm";
 
-import logo from "../../../public/logo.svg";
-import mainBg from "../../../public/main-bg.svg";
-
 export default function LoginPage() {
   // States to track if login and registration modal visibility
   const [showLogin, setShowLogin] = useState(false);
@@ -70,9 +67,14 @@ export default function LoginPage() {
 
   return (
     <main className="main-page">
-      <Image fill src={mainBg} alt="background" className="object-cover" />
-      <Image src={logo} alt="Logo" className="logo" priority />
-
+      <Image
+        priority
+        alt="Logo"
+        width={120}
+        height={10}
+        src="/logo.svg"
+        className="logo"
+      />
       {!showLogin && !showRegister && (
         <>
           <Button

@@ -11,7 +11,9 @@ export default function proxy(request: NextRequest) {
     pathname.startsWith("/favicon.ico") ||
     pathname.startsWith("/assets") ||
     pathname.startsWith("/public") ||
-    pathname.startsWith("/static")
+    pathname.startsWith("/static") ||
+    pathname === "/logo.svg" ||
+    pathname === "/main-bg.svg"
   ) {
     return NextResponse.next();
   }
