@@ -60,6 +60,10 @@ export type SettingsTranslations = {
   unlinking: string;
 saving: string;
 changing: string;
+weak_password: string;
+medium_password: string;
+strong_password: string;
+weak_password_alert: string;
  
 };
 

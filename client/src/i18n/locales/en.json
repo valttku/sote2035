@@ -67,7 +67,11 @@
     "failed_delete_account": "Failed Delete Account",
     "unlinking": "Unlinking",
     "saving": "Saving....",
-"changing": "Changing...."
+    "changing": "Changing....",
+    "weak_password": "Weak",
+    "medium_password": "Medium",
+    "strong_password": "Strong",
+    "weak_password_alert": "Password does not meet requirements"
   },
 
   "startup": {
