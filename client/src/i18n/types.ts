@@ -56,6 +56,11 @@ export type SettingsTranslations = {
   weight_placeholder: string;
   old_password_placeholder: string;
   new_password_placeholder: string;
+  failed_delete_account: string;
+  unlinking: string;
+saving: string;
+changing: string;
+ 
 };
 
 // Startup page
@@ -185,6 +190,9 @@ export type HealthInsightsTranslations = {
   sleepComingSoon: string;
   stressComingSoon: string;
   cardioComingSoon: string;
+  noProfileData: string;
+  noActivitiesForDate: string;
+
   
 };
 
@@ -193,6 +201,8 @@ export type HealthInsightsTranslations = {
 export type HomeTranslations = {
   title: string;
   selectBodyPart: string;
+  noMetrics: string;     // ← new
+  loading: string;       // ← new
 
   bodyParts:{
     brain: string;

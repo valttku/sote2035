@@ -15,6 +15,8 @@
   "home": {
   "title": "Tänään",
   "selectBodyPart": "Valitse kehon osa napsauttamalla valkoista pistettä kehossa",
+   "noMetrics": "Ei mittaustietoja tältä päivältä", 
+    "loading": "Ladataan…", 
 
 "bodyParts": {
   "brain": "Aivot",
@@ -64,7 +66,13 @@
     "height_placeholder": "Anna pituus cm",
     "weight_placeholder": "Anna paino kg",
     "old_password_placeholder": "Vanha salasana",
-    "new_password_placeholder": "Uusi salasana"
+    "new_password_placeholder": "Uusi salasana",
+    "failed_delete_account": "Tilin poistaminen epäonnistui",
+    "unlinking": "Poistetaan...",
+"saving": "Tallennetaan...",
+"changing": "Vaihdetaan..."
+
+
   },
   "startup": {
     "patient": "Potilas",
@@ -241,6 +249,8 @@
    "noDailies": "Tälle päivämäärälle ei ole päivittäisiä tietoja.",     
   "sleepComingSoon": "Uni-osio tulossa pian...",                        
   "stressComingSoon": "Stressi-osio tulossa pian...",                  
-  "cardioComingSoon": "Sydänterveys-osio tulossa pian..."           
+  "cardioComingSoon": "Sydänterveys-osio tulossa pian..." ,
+  "noProfileData": "Ei tietoja tästä käyttäjästä",
+  "noActivitiesForDate": "Ei aktiviteetteja tälle päivälle"        
 }}
 

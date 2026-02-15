@@ -101,7 +101,7 @@ export default function HealthInsightsPage() {
 
 
   const sections: { id: Section; label: string; disabled?: boolean }[] = [
-    {id: "profile", label:t.healthInsights.sections.profile},
+  {id: "profile", label:t.healthInsights.sections.profile},
 
   { id: "dailies", label: t.healthInsights.sections.dailies },
   { id: "activities", label: t.healthInsights.sections.activities },
