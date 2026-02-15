@@ -29,13 +29,15 @@ export default function RegisterForm({
 
   const { t } = useTranslation();
 
-   const PASSWORD_REQUIREMENTS = [
-     { regex: /.{8,}/, text: t.register.requirements.characters },
-  { regex: /[0-9]/, text: t.register.requirements.number },
-  { regex: /[a-z]/, text: t.register.requirements.lowercase },
-  { regex: /[A-Z]/, text: t.register.requirements.uppercase },
-  { regex: /[^A-Za-z0-9]/, text: t.register.requirements.special },
-  ];
+   const PASSWORD_REQUIREMENTS = useMemo( () => [
+      { regex: /.{8,}/, text: t.register.requirements.characters },
+      { regex: /[0-9]/, text: t.register.requirements.number },
+      { regex: /[a-z]/, text: t.register.requirements.lowercase },
+      { regex: /[A-Z]/, text: t.register.requirements.uppercase },
+      { regex: /[^A-Za-z0-9]/, text: t.register.requirements.special },
+      ],
+      [t]
+    );
 
 
   const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);

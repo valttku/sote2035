@@ -1,39 +1,79 @@
 "use client";
-
-import { useEffect, useState, useMemo } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState, useMemo } from "react";
 import AppLayout from "../components/AppLayout";
 import HealthStatsPanel, { type BodyPartId } from "../components/healthStatsPanel";
 import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function Home() {
   const { t } = useTranslation();
-
   const [selected, setSelected] = useState<BodyPartId | null>(null);
-  const [avatarType, setAvatarType] = useState<"male" | "female">("male");
 
-  // Fetch user profile on mount to get gender
+  const [avatarType, setAvatarType] = useState<"male" | "female">("male"); // default male
+  const genderLoaded = useRef(false);
+
+  const [alerts, setAlerts] = useState<Record<BodyPartId, boolean>>({
+    brain: false,
+    heart: false,
+    lungs: false,
+    legs: false,
+  });
+
+  
+
+  // Poll each body part for alerts (metric status !== 'good')
   useEffect(() => {
-    fetch("/api/v1/settings", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.gender === "female") setAvatarType("female");
-      })
-      .catch(console.error);
+    const date = new Date().toISOString().split("T")[0];
+    let cancelled = false;
+
+    async function fetchSummary() {
+      try {
+        const res = await fetch(`/api/v1/home?date=${date}&part=summary`, {
+          credentials: "include",
+        });
+        if (!res.ok) return;
+        const json = await res.json().catch(() => ({}));
+
+        if (cancelled) return;
+
+        const alertsResp = json.alerts ?? {};
+        setAlerts({
+          brain: !!alertsResp.brain,
+          heart: !!alertsResp.heart,
+          lungs: !!alertsResp.lungs,
+          legs: !!alertsResp.legs,
+        });
+
+        const gender = json.user?.gender;
+        if (gender && !genderLoaded.current) {
+          setAvatarType(gender === "female" ? "female" : "male");
+          genderLoaded.current = true;
+        }
+      } catch (err) {
+        console.error("fetchSummary", err);
+      }
+    }
+
+    fetchSummary();
+    const id = setInterval(fetchSummary, 1000 * 60 * 5);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, []);
 
   const isFemale = avatarType === "female";
 
+ 
   const BODY_PARTS: Array<{ id: BodyPartId; label: string; top: string; left: string }> =
-    useMemo(
-      () => [
+    useMemo(() =>  [
         { id: "brain", label: t.home.bodyParts.brain, top: "3%", left: "50%" },
         { id: "heart", label: t.home.bodyParts.heart, top: "25%", left: "50%" },
         { id: "lungs", label: t.home.bodyParts.lungs, top: "22%", left: "35%" },
         { id: "legs", label: t.home.bodyParts.legs, top: "75%", left: "60%" },
       ],
-      [t]
-    );
+     [t]);
+
+ 
 
   return (
     <AppLayout>
@@ -42,15 +82,11 @@ export default function Home() {
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
           <div className="flex flex-row items-start justify-center gap-70">
-            {/* Avatar + body part dots */}
             <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-50">
-              <Image
+              <img
                 src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
                 alt="Digital twin"
-                width={400} // set a realistic width
-                height={600} // set a realistic height
-                className="w-full max-h-[60vh] object-contain"
-                priority // optional: loads immediately for LCP
+                className="w-full max-h-[60vh] object-contain block"
               />
 
               {BODY_PARTS.map(({ id, top, left }) => (
@@ -68,10 +104,12 @@ export default function Home() {
                     background:
                       selected === id
                         ? "rgba(10, 33, 90, 0.7)"
+                        : alerts[id]
+                        ? "rgba(220, 38, 38, 0.95)"
                         : "rgba(203, 215, 249, 0.8)",
                   }}
+                  className={alerts[id] ? "animate-pulse" : undefined}
                   aria-label={id}
-                  title={BODY_PARTS.find((bp) => bp.id === id)?.label}
                 />
               ))}
             </div>
@@ -83,14 +121,7 @@ export default function Home() {
                 </div>
               )}
 
-              {selected && (
-                <div className="w-full">
-                  <HealthStatsPanel
-                    selected={selected}
-                    onClose={() => setSelected(null)}
-                  />
-                </div>
-              )}
+              {selected && <HealthStatsPanel selected={selected} onClose={() => setSelected(null)} />}
             </div>
           </div>
         </div>

@@ -12,6 +12,8 @@
   "home": {
     "title": "Today",
     "selectBodyPart": "Select a body part by clicking on a white dot on the body",
+      "noMetrics": "No metrics for this day",   
+    "loading": "Loading…",                    
     "bodyParts": {
       "brain": "Brain",
       "heart": "Heart",
@@ -61,7 +63,11 @@
     "height_placeholder": "Enter height in cm",
     "weight_placeholder": "Enter weight in kg",
     "old_password_placeholder": "Old Password",
-    "new_password_placeholder": "New Password"
+    "new_password_placeholder": "New Password",
+    "failed_delete_account": "Failed Delete Account",
+    "unlinking": "Unlinking",
+    "saving": "Saving....",
+"changing": "Changing...."
   },
 
   "startup": {
@@ -234,6 +240,8 @@
     "analyzeSection": "Analyze {{section}}",
     "failedInsights": "Failed to get AI insights. Try again.",
     "noDailies": "No daily data available for this date.",
+    "noProfileData": "No data for this user",
+    "noActivitiesForDate": "No activities for this date",
     "sleepComingSoon": "Sleep section coming soon...",
     "stressComingSoon": "Stress section coming soon...",
     "cardioComingSoon": "Cardio section coming soon...",

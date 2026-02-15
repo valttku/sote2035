@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
 import AppLayout from "../../components/AppLayout";
-import { ActivitiesSection, Activity } from "./sections/ActivitiesSection";
+import {  Activity } from "./sections/ActivitiesSection";
 import { DailiesSection, Dailies } from "./sections/DailiesSection";
-import { UserProfileSection, UserProfile } from "./sections/UserProfileSection";
-import { SleepSection, Sleep } from "./sections/SleepSection";
-import { StressSection, Stress } from "./sections/StressSection";
+import {  UserProfile } from "./sections/UserProfileSection";
+import {  Sleep } from "./sections/SleepSection";
+import {  Stress } from "./sections/StressSection";
 import { useHealthData } from "./hooks/useHealthDataGarmin";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
@@ -101,7 +101,7 @@ export default function HealthInsightsPage() {
 
 
   const sections: { id: Section; label: string; disabled?: boolean }[] = [
-    {id: "profile", label:t.healthInsights.sections.profile},
+  {id: "profile", label:t.healthInsights.sections.profile},
 
   { id: "dailies", label: t.healthInsights.sections.dailies },
   { id: "activities", label: t.healthInsights.sections.activities },

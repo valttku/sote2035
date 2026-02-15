@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import AppLayout from "../../components/AppLayout";
 import Modal from "../../components/Modal";
-import HealthStatsList, { HealthStatsResponse, HealthStatsEntry } from "./components/HealthStatsList";
-import ActivitiesList, { ActivitiesEntry, ActivitiesResponse } from "./components/ActivitiesList";
+import HealthStatsList, { HealthStatsResponse } from "./components/HealthStatsList";
+import ActivitiesList, {  ActivitiesResponse } from "./components/ActivitiesList";
 import ManualActivityForm from "./components/ActivityForm";
 
 import { useTranslation } from "@/i18n/LanguageProvider";
