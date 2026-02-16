@@ -5,15 +5,15 @@ export type GarminSleepRow = {
   day_date: string; // from calendarDate
   summary_id: string;
 
-  duration_in_seconds?: number;
-  total_nap_duration_in_seconds?: number;
-  start_time_in_seconds?: number;
-  start_time_offset_in_seconds?: number;
-  unmeasurable_sleep_in_seconds?: number;
-  deep_sleep_in_seconds?: number;
-  light_sleep_in_seconds?: number;
-  rem_sleep_in_seconds?: number;
-  awake_duration_in_seconds?: number;
+  duration_in_seconds?: number | null;
+  total_nap_duration_in_seconds?: number | null;
+  start_time_in_seconds?: number | null;
+  start_time_offset_in_seconds?: number | null;
+  unmeasurable_sleep_in_seconds?: number | null;
+  deep_sleep_in_seconds?: number | null;
+  light_sleep_in_seconds?: number | null;
+  rem_sleep_in_seconds?: number | null;
+  awake_duration_in_seconds?: number | null;
 
   //sleep_levels_map?: any;
   //time_offset_sleep_spo2?: any;
@@ -30,7 +30,7 @@ export function mapGarminSleepToRow(user_id: number, s: any): GarminSleepRow {
   return {
     user_id,
     day_date: s.calendarDate,
-    summary_id: s.summaryId,
+    summary_id: s.summaryId ?? null,
     duration_in_seconds: s.durationInSeconds ?? null,
     total_nap_duration_in_seconds: s.totalNapDurationInSeconds ?? null,
     start_time_in_seconds: s.startTimeInSeconds ?? null,
@@ -109,8 +109,9 @@ export async function upsertGarminSleep(row: GarminSleepRow) {
     `
     INSERT INTO app.user_sleeps_garmin (${columns.join(",")})
     VALUES (${columns.map((_, i) => `$${i + 1}`).join(",")})
-    ON CONFLICT (user_id, day_date, summary_id)
+    ON CONFLICT (user_id, day_date)
     DO UPDATE SET
+      summary_id = EXCLUDED.summary_id,
       duration_in_seconds = EXCLUDED.duration_in_seconds,
       total_nap_duration_in_seconds = EXCLUDED.total_nap_duration_in_seconds,
       start_time_in_seconds = EXCLUDED.start_time_in_seconds,

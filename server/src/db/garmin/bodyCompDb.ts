@@ -11,6 +11,7 @@ export type GarminBodyCompRow = {
   weight_in_grams?: number | null;
   measurement_time_in_seconds?: number | null;
   measurement_time_offset_in_seconds?: number | null;
+  source?: string | null;
 };
 
 export function mapGarminBodyCompToRow(
@@ -28,7 +29,8 @@ export function mapGarminBodyCompToRow(
     weight_in_grams: b.weightInGrams ?? null,
     measurement_time_in_seconds: b.measurementTimeInSeconds ?? null,
     measurement_time_offset_in_seconds:
-      b.measurementTimeOffsetInSeconds ?? null,
+    b.measurementTimeOffsetInSeconds ?? null,
+    source: b.source ?? "garmin",
   };
 }
 
@@ -38,10 +40,11 @@ export async function upsertGarminBodyComp(row: GarminBodyCompRow) {
   await db.query(
     `INSERT INTO app.user_body_comp_garmin
        (user_id, summary_id, muscle_mass_in_grams, bone_mass_in_grams, body_water_in_percent,
-        body_fat_in_percent, body_mass_index, weight_in_grams, measurement_time_in_seconds, measurement_time_offset_in_seconds)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-     ON CONFLICT (user_id, summary_id)
+        body_fat_in_percent, body_mass_index, weight_in_grams, measurement_time_in_seconds, measurement_time_offset_in_seconds, source)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+     ON CONFLICT (user_id)
      DO UPDATE SET
+      summary_id = EXCLUDED.summary_id,
        muscle_mass_in_grams = EXCLUDED.muscle_mass_in_grams,
        bone_mass_in_grams = EXCLUDED.bone_mass_in_grams,
        body_water_in_percent = EXCLUDED.body_water_in_percent,
@@ -50,6 +53,7 @@ export async function upsertGarminBodyComp(row: GarminBodyCompRow) {
        weight_in_grams = EXCLUDED.weight_in_grams,
        measurement_time_in_seconds = EXCLUDED.measurement_time_in_seconds,
        measurement_time_offset_in_seconds = EXCLUDED.measurement_time_offset_in_seconds,
+      source = EXCLUDED.source,
        updated_at = now()`,
     [
       row.user_id,
@@ -62,6 +66,7 @@ export async function upsertGarminBodyComp(row: GarminBodyCompRow) {
       row.weight_in_grams,
       row.measurement_time_in_seconds,
       row.measurement_time_offset_in_seconds,
+      row.source,
     ],
   );
 }

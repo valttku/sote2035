@@ -20,15 +20,16 @@ import {
   mapGarminBodyCompToRow,
   upsertGarminBodyComp,
 } from "../../db/garmin/bodyCompDb.js";
-
 import {
   mapGarminSleepToRow,
   upsertGarminSleep,
 } from "../../db/garmin/sleepDb.js";
+import { mapGarminHRVToRows, upsertGarminHRV } from "../../db/garmin/hrvDb.js";
 
 // Router for Garmin webhooks
 export const garminWebhookRouter = express.Router();
 
+// https://sote2035-server.onrender.com/api/v1/webhooks/garmin/user-metrics
 // POST /api/v1/webhooks/garmin/user-metrics
 garminWebhookRouter.post("/user-metrics", async (req, res) => {
   console.log("Webhook received at:", new Date().toISOString());
@@ -93,6 +94,7 @@ garminWebhookRouter.post("/user-metrics", async (req, res) => {
   }
 });
 
+// https://sote2035-server.onrender.com/api/v1/webhooks/garmin/dailies
 // POST /api/v1/webhooks/garmin/dailies
 garminWebhookRouter.post("/dailies", async (req, res) => {
   console.log("Webhook received at:", new Date().toISOString());
@@ -141,6 +143,7 @@ garminWebhookRouter.post("/dailies", async (req, res) => {
   }
 });
 
+// https://sote2035-server.onrender.com/api/v1/webhooks/garmin/respiration
 // POST /api/v1/webhooks/garmin/respiration
 garminWebhookRouter.post("/respiration", async (req, res) => {
   console.log("Respiration Webhook received at:", new Date().toISOString());
@@ -204,6 +207,7 @@ garminWebhookRouter.post("/respiration", async (req, res) => {
   }
 });
 
+// https://sote2035-server.onrender.com/api/v1/webhooks/garmin/body_comp
 // POST /api/v1/webhooks/garmin/body_comp
 garminWebhookRouter.post("/body_comp", async (req, res) => {
   console.log("Body Comp Webhook received at:", new Date().toISOString());
@@ -266,6 +270,7 @@ garminWebhookRouter.post("/body_comp", async (req, res) => {
   }
 });
 
+// https://sote2035-server.onrender.com/api/v1/webhooks/garmin/activities
 // POST /api/v1/webhooks/garmin/activities
 garminWebhookRouter.post("/activities", async (req, res) => {
   console.log("Activities Webhook received at:", new Date().toISOString());
@@ -330,6 +335,7 @@ garminWebhookRouter.post("/activities", async (req, res) => {
   }
 });
 
+// https://sote2035-server.onrender.com/api/v1/webhooks/garmin/sleeps
 // POST /api/v1/webhooks/garmin/sleeps
 garminWebhookRouter.post("/sleeps", async (req, res) => {
   console.log("Sleep Webhook received at:", new Date().toISOString());
@@ -391,6 +397,55 @@ garminWebhookRouter.post("/sleeps", async (req, res) => {
       err instanceof Error ? err.stack : "No stack trace",
     );
     res.sendStatus(200); // Garmin still expects 200
+  }
+});
+
+// https://sote2035-server.onrender.com/api/v1/webhooks/garmin/hrv
+// POST /api/v1/webhooks/garmin/hrv
+garminWebhookRouter.post("/hrv", async (req, res) => {
+  console.log("Webhook received at:", new Date().toISOString());
+  console.log("Payload:", JSON.stringify(req.body, null, 2));
+
+  try {
+    // Handle array wrapped by summary type
+    const payload =
+      req.body.dailies || (Array.isArray(req.body) ? req.body : [req.body]);
+
+    for (const item of payload) {
+      const providerUserId = item.userId;
+      console.log("Processing Garmin user:", providerUserId);
+      if (!providerUserId) continue;
+
+      const r = await db.query(
+        `
+        SELECT user_id
+        FROM app.user_integrations
+        WHERE provider = 'garmin' AND provider_user_id = $1
+        `,
+        [providerUserId],
+      );
+
+      console.log("Found internal user:", r.rows[0]?.user_id);
+
+      if (r.rowCount === 0) {
+        console.warn("Garmin user not linked:", providerUserId);
+        continue;
+      }
+
+      const user_id = r.rows[0].user_id;
+      const rows = mapGarminHRVToRows(user_id, item);
+      console.log("Mapped row:", rows);
+
+      // Upsert into DB
+      if (rows) {
+        await upsertGarminHRV(rows);
+        console.log("Inserted HRV data");
+      }
+    }
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Garmin hrv webhook failed:", err);
+    res.sendStatus(200);
   }
 });
 
