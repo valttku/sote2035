@@ -25,7 +25,7 @@ homeRouter.get("/", authRequired, async (req, res) => {
     );
     const gender = userRow.rows?.[0]?.gender ?? null;
 
-    // if part=summary, return alert status for each body part instead of detailed metrics
+    // return alert status for each body part instead of detailed metrics
     if (part === "summary") {
       const parts: Array<"heart" | "brain" | "legs" | "lungs"> = [
         "brain",
@@ -38,17 +38,23 @@ homeRouter.get("/", authRequired, async (req, res) => {
         parts.map((p) => getHealthStatEntriesData(userId, date, p)),
       );
 
+      // alert if any metric for the part has status 'low' or 'high'
       const alerts: Record<string, boolean> = {};
       for (let i = 0; i < parts.length; i++) {
         const metrics = metricsByPart[i] ?? {};
-        alerts[parts[i]] = Object.values(metrics).some((v: any) =>
-          typeof v === "object" && v != null && "status" in v && v.status !== "good",
+        alerts[parts[i]] = Object.values(metrics).some(
+          (v: any) =>
+            typeof v === "object" &&
+            v != null &&
+            "status" in v &&
+            (v.status === "low" || v.status === "high"),
         );
       }
 
       return res.json({ alerts, user: { gender } });
     }
 
+    // fetch detailed metrics for the selected body part and date
     const metrics = await getHealthStatEntriesData(userId, date, part as any);
     res.json({ metrics, user: { gender } });
     console.log("Fetched metrics for user", userId, "part", part, "date", date, ":", metrics);

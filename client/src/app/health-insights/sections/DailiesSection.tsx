@@ -22,9 +22,7 @@ export type Dailies = {
 };
 
 export function DailiesSection({ dailies }: { dailies?: Dailies }) {
-  if (!dailies) {
-    return <div className="p-4">No daily data for this date</div>;
-  }
+  if (!dailies) return null;
 
   return (
     <div className="space-y-4">

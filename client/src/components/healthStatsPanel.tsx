@@ -35,7 +35,6 @@ export default function HealthStatsPanel({
 
         const res = await fetch(`/api/v1/home?date=${date}&part=${selected}`, {
           credentials: "include",
-        
         });
 
         if (!res.ok) {
@@ -95,31 +94,51 @@ export default function HealthStatsPanel({
 
           let displayValue = "";
           let status: "low" | "good" | "high" | undefined;
+          let goalText = ""; // for tooltip
 
           if (isMetricObject) {
             const metric = value as {
               value: number;
               status?: string;
+              goal?: { min: number; max: number };
             };
             displayValue = String(metric.value);
             status = metric.status as "low" | "good" | "high" | undefined;
+            if (metric.goal?.min !== undefined && metric.goal?.max !== undefined) {
+              goalText = `Range: ${metric.goal.min} - ${metric.goal.max}`;
+            } else if (metric.goal?.min !== undefined) {
+              goalText = `Min: ${metric.goal.min}`;
+            } else if (metric.goal?.max !== undefined) {
+              goalText = `Max: ${metric.goal.max}`;
+            }
           } else {
             displayValue = String(value ?? "");
           }
 
           return (
-            <li key={key} className="flex justify-between items-center pb-1">
+            <li
+              key={key}
+              className="flex justify-between items-center pb-1 relative group"
+            >
               <span className="font-medium">{key}</span>
               <div className="flex items-center gap-2">
-                <span>{displayValue}</span>
+                <span className="relative">
+                  {displayValue}
+                  {goalText && (
+                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 w-max max-w-xs rounded bg-gray-700 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-pre-line z-10">
+                      {goalText}
+                    </span>
+                  )}
+                </span>
+
                 {status && (
                   <span
                     className={`px-2 py-0.5 text-xs rounded-full ${
                       status === "good"
                         ? "bg-green-500/20 text-green-400"
-                        : status === "low"
-                        ? "bg-blue-500/20 text-blue-400"
-                        : "bg-red-500/20 text-red-400"
+                        : status === "low" || status === "high"
+                          ? "bg-blue-500/20 text-blue-400"
+                          : "bg-red-500/20 text-red-400"
                     }`}
                   >
                     {status}

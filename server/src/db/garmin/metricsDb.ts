@@ -8,6 +8,7 @@ export type GarminUserMetricRow = {
   vo2_max_cycling?: number | null;
   fitness_age?: number | null;
   enhanced?: boolean | null;
+  source?: string | null;
 };
 
 export function mapGarminUserMetricsToRows(
@@ -22,6 +23,7 @@ export function mapGarminUserMetricsToRows(
     vo2_max_cycling: m.vo2MaxCycling ?? null,
     fitness_age: m.fitnessAge ?? null,
     enhanced: m.enhanced ?? null,
+    source: m.source ?? "garmin",
   };
 }
 
@@ -31,14 +33,17 @@ export async function upsertGarminUserMetrics(row: GarminUserMetricRow) {
   // Insert or update user metrics
   await db.query(
     `INSERT INTO app.user_metrics_garmin
-       (user_id, day_date, summary_id, vo2_max, vo2_max_cycling, fitness_age, enhanced)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
-     ON CONFLICT (user_id, day_date, summary_id)
+       (user_id, day_date, summary_id, vo2_max, vo2_max_cycling, fitness_age, enhanced, source)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     ON CONFLICT (user_id, day_date)
      DO UPDATE SET
+        summary_id = EXCLUDED.summary_id,
        vo2_max = EXCLUDED.vo2_max,
        vo2_max_cycling = EXCLUDED.vo2_max_cycling,
        fitness_age = EXCLUDED.fitness_age,
-       enhanced = EXCLUDED.enhanced`,
+       enhanced = EXCLUDED.enhanced,
+       source = EXCLUDED.source,
+       updated_at = now()`,
     [
       row.user_id,
       row.day_date,
@@ -47,6 +52,7 @@ export async function upsertGarminUserMetrics(row: GarminUserMetricRow) {
       row.vo2_max_cycling,
       row.fitness_age,
       row.enhanced,
+      row.source,
     ],
   );
 }
