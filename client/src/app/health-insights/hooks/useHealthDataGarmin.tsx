@@ -37,9 +37,45 @@ export function useHealthData(date?: string) {
           setHealthData(null);
           return;
         }
+        type RawHealthData = {
+          profile?: UserProfile | UserProfile[];
+          dailies?: Dailies | Dailies[];
+          activities?: Activity | Activity[];
+          sleep?: Sleep | Sleep[];
+          stress?: Stress | Stress[];
+        };
 
-        const data: HealthData = await response.json();
-        setHealthData(data);
+        const raw = (await response.json()) as RawHealthData;
+
+        const normalized: HealthData = {
+          profile: raw.profile
+            ? Array.isArray(raw.profile)
+              ? raw.profile[0]
+              : raw.profile
+            : undefined,
+          dailies: raw.dailies
+            ? Array.isArray(raw.dailies)
+              ? raw.dailies
+              : [raw.dailies]
+            : [],
+          activities: raw.activities
+            ? Array.isArray(raw.activities)
+              ? raw.activities
+              : [raw.activities]
+            : [],
+          sleep: raw.sleep
+            ? Array.isArray(raw.sleep)
+              ? raw.sleep
+              : [raw.sleep]
+            : [],
+          stress: raw.stress
+            ? Array.isArray(raw.stress)
+              ? raw.stress
+              : [raw.stress]
+            : [],
+        };
+
+        setHealthData(normalized);
       } catch (err) {
         console.error("Failed to load health data:", err);
         setError(String(err));
