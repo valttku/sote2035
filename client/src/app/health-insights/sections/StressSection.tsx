@@ -25,9 +25,7 @@ function formatSecondsToHoursMinutes(seconds: number): string {
 }
 
 export function StressSection({ stress }: { stress?: Stress }) {
-  if (!stress) {
-    return <div className="p-4">No stress data for this date</div>;
-  }
+  if (!stress) return null;
 
   return (
     <div className="space-y-4">

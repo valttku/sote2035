@@ -89,9 +89,7 @@ export function ActivitiesSection({
             </div>
           ))}
         </div>
-      ) : (
-        <div>No activities for this date</div>
-      )}
+      ) : null}
     </div>
   );
 }

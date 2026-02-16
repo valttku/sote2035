@@ -12,9 +12,7 @@ export type UserProfile = {
 };
 
 export function UserProfileSection({ profile }: { profile?: UserProfile }) {
-  if (!profile) {
-    return <div className="p-4">Nodata for this user</div>;
-  }
+  if (!profile) return null;
   return (
     <div className="space-y-4">
       <h2 className="text-2xl mb-4">User profile</h2>

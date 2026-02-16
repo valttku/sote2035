@@ -37,8 +37,15 @@ export function useHealthData(date?: string) {
           setHealthData(null);
           return;
         }
+        type RawHealthData = {
+          profile?: UserProfile | UserProfile[];
+          dailies?: Dailies | Dailies[];
+          activities?: Activity | Activity[];
+          sleep?: Sleep | Sleep[];
+          stress?: Stress | Stress[];
+        };
 
-        const raw: any = await response.json();
+        const raw = (await response.json()) as RawHealthData;
 
         const normalized: HealthData = {
           profile: raw.profile

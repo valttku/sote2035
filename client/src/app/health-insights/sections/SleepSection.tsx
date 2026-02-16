@@ -42,9 +42,7 @@ function formatSecondsToHoursMinutes(seconds: number): string {
 }
 
 export function SleepSection({ sleep }: { sleep?: Sleep }) {
-  if (!sleep) {
-    return <div className="p-4">No sleep data for this date</div>;
-  }
+  if (!sleep) return null;
 
   return (
     <div className="space-y-4">

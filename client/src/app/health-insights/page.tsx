@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
 import AppLayout from "../../components/AppLayout";
-import {  ActivitiesSection, Activity } from "./sections/ActivitiesSection";
+import { ActivitiesSection, Activity } from "./sections/ActivitiesSection";
 import { DailiesSection, Dailies } from "./sections/DailiesSection";
-import {  UserProfile, UserProfileSection } from "./sections/UserProfileSection";
-import {  Sleep, SleepSection } from "./sections/SleepSection";
-import {  Stress, StressSection } from "./sections/StressSection";
+import { UserProfile, UserProfileSection } from "./sections/UserProfileSection";
+import { Sleep, SleepSection } from "./sections/SleepSection";
+import { Stress, StressSection } from "./sections/StressSection";
 import { useHealthData } from "./hooks/useHealthDataGarmin";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
@@ -94,15 +94,15 @@ export default function HealthInsightsPage() {
     }
   };
 
-//type Section = keyof HealthInsightsTranslations["sections"];
+  //type Section = keyof HealthInsightsTranslations["sections"];
 
   const sections: { id: Section; label: string; disabled?: boolean }[] = [
-  {id: "profile", label:t.healthInsights.sections.profile},
-  { id: "dailies", label: t.healthInsights.sections.dailies },
-  { id: "activities", label: t.healthInsights.sections.activities },
-  { id: "sleep", label: t.healthInsights.sections.sleep },
-  { id: "stress", label: t.healthInsights.sections.stress },
-];
+    { id: "profile", label: t.healthInsights.sections.profile },
+    { id: "dailies", label: t.healthInsights.sections.dailies },
+    { id: "activities", label: t.healthInsights.sections.activities },
+    { id: "sleep", label: t.healthInsights.sections.sleep },
+    { id: "stress", label: t.healthInsights.sections.stress },
+  ];
 
   return (
     <AppLayout>
@@ -157,30 +157,50 @@ export default function HealthInsightsPage() {
                   <p>{t.healthInsights.loading}</p>
                 ) : (
                   <>
-                   {activeSection === "dailies" && (
-                      healthData?.dailies?.[0] ? (
+                    {activeSection === "dailies" &&
+                      (healthData?.dailies?.[0] ? (
                         <DailiesSection dailies={healthData.dailies[0]} />
                       ) : (
                         <div className="p-4">{t.healthInsights.noDailies}</div>
+                      ))}
+
+                    {activeSection === "sleep" && (
+                      healthData?.sleep?.[0] ? (
+                        <SleepSection sleep={healthData.sleep[0]} />
+                      ) : (
+                        <div className="p-4">No sleep data for this date</div>
                       )
                     )}
 
-                    {activeSection === "sleep" && healthData?.sleep?.[0] && (
-                      <SleepSection sleep={healthData.sleep[0]} />
+                    {activeSection === "stress" && (
+                      healthData?.stress?.[0] ? (
+                        <StressSection stress={healthData.stress[0]} />
+                      ) : (
+                        <div className="p-4">No stress data for this date</div>
+                      )
                     )}
-                    {activeSection === "stress" && healthData?.stress?.[0] && (
-                      <StressSection stress={healthData.stress[0]} />
+
+                    {activeSection === "profile" && (
+                      healthData?.profile ? (
+                        <UserProfileSection profile={healthData.profile} />
+                      ) : (
+                        <div className="p-4">No profile data for this user</div>
+                      )
                     )}
-                    {activeSection === "profile" && healthData?.profile && (
-                      <UserProfileSection profile={healthData.profile} />
-                    )}
-                    {activeSection === "activities" && healthData?.activities && healthData.activities.length > 0 && (
-                      <ActivitiesSection
-                        activities={healthData.activities}
-                        selectedActivityIds={selectedActivityIds}
-                        onActivitiesSelected={setSelectedActivityIds}
-                      />
-                    )}
+                    
+                    {activeSection === "activities" &&
+                      (healthData?.activities &&
+                      healthData.activities.length > 0 ? (
+                        <ActivitiesSection
+                          activities={healthData.activities}
+                          selectedActivityIds={selectedActivityIds}
+                          onActivitiesSelected={setSelectedActivityIds}
+                        />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noActivitiesForDate}
+                        </div>
+                      ))}
                   </>
                 )}
               </div>
@@ -216,15 +236,15 @@ export default function HealthInsightsPage() {
               {loading
                 ? t.healthInsights.analyzing
                 : showResult
-                ? t.healthInsights.clearAnalysis
-                : selectedActivityIds.size > 0
-                ? t.healthInsights.analyzeSection.replace(
-                    "{{section}}",
-                    t.healthInsights.sections[
-                      activeSection as keyof HealthInsightsTranslations["sections"]
-                    ]
-                  )
-                : t.healthInsights.analyzeAll}
+                  ? t.healthInsights.clearAnalysis
+                  : selectedActivityIds.size > 0
+                    ? t.healthInsights.analyzeSection.replace(
+                        "{{section}}",
+                        t.healthInsights.sections[
+                          activeSection as keyof HealthInsightsTranslations["sections"]
+                        ],
+                      )
+                    : t.healthInsights.analyzeAll}
             </button>
           </div>
         </div>
