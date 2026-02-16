@@ -137,7 +137,7 @@ export async function getHealthStatEntriesData(
 
       // Sleep: if total sleep is between 7-10 hours, status = good, otherwise low or high
       if (row.kind === "sleep_daily" && key === "Total sleep") {
-        goal = { min: 7 * 60, max: 10 * 60 };
+        goal = { min: 7, max: 10 };
       }
 
       // Stress: high if above 75, otherwise good
@@ -154,7 +154,10 @@ export async function getHealthStatEntriesData(
             historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
               historical.length,
           );
-          goal = { min: avg - stdDev, max: avg + stdDev };
+          goal = {
+            min: +(avg - stdDev).toFixed(2),
+            max: +(avg + stdDev).toFixed(2),
+          };
         } else {
           goal = { min: 55, max: 80 };
         }
@@ -162,7 +165,10 @@ export async function getHealthStatEntriesData(
 
       // Respiratory rate: if we have enough historical data, use personalized range,
       // otherwise use general range of 12-20 breaths/min
-      if (row.kind === "resp_daily" && key === "Average respiratory rate (breaths/min)") {
+      if (
+        row.kind === "resp_daily" &&
+        key === "Average respiratory rate (breaths/min)"
+      ) {
         if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
           const stdDev = Math.sqrt(
@@ -170,7 +176,10 @@ export async function getHealthStatEntriesData(
               historical.length,
           );
 
-          goal = { min: Math.max(8, avg - 2 * stdDev), max: Math.min(25, avg + 2 * stdDev)};
+          goal = {
+            min: Math.max(8, avg - 2 * stdDev),
+            max: Math.min(25, avg + 2 * stdDev),
+          };
         } else {
           goal = { min: 12, max: 20 };
         }
@@ -189,23 +198,20 @@ export async function getHealthStatEntriesData(
 
       // Format display value
       let displayValue: number | string;
+
       if (key === "Total sleep") {
-        const valueHM = formatMinutesHM(numericValue);
-        if (goal?.min !== undefined && goal?.max !== undefined) {
-          displayValue = `${valueHM}`;
-        } else {
-          displayValue = valueHM;
-        }
+        displayValue = formatMinutesHM(numericValue);
       } else if (key === "Average respiratory rate (breaths/min)") {
         displayValue = +numericValue.toFixed(2);
       } else if (key === "Resting heart rate") {
         displayValue = +numericValue.toFixed(2);
-      } else if (goal && goal.min !== undefined) {
+      } else if (goal?.min !== undefined) {
         displayValue = `${numericValue} / ${goal.min}`;
       } else {
         displayValue = numericValue;
       }
 
+      // goal object stays numeric only
       result[key] = { value: displayValue, goal, status };
 
       console.log({
