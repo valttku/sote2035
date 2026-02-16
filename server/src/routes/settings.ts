@@ -226,3 +226,6 @@ settingsRouter.delete("/delete-account", authRequired, async (req, res, next) =>
     next(e);
   }
 });
+
+
+
