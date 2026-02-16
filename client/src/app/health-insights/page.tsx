@@ -184,10 +184,10 @@ export default function HealthInsightsPage() {
                       healthData?.profile ? (
                         <UserProfileSection profile={healthData.profile} />
                       ) : (
-                        <div className="p-4">No profile data for this user</div>
+                        <div className="p-4">{t.healthInsights.noProfileData}</div>
                       )
                     )}
-                    
+
                     {activeSection === "activities" &&
                       (healthData?.activities &&
                       healthData.activities.length > 0 ? (
