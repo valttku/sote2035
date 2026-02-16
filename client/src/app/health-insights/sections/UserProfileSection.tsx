@@ -1,7 +1,6 @@
 "use client";
 import { StatCard } from "../components/StatCard";
 
-
 export type UserProfile = {
   id: string;
   gender?: string;
@@ -13,8 +12,6 @@ export type UserProfile = {
 };
 
 export function UserProfileSection({ profile }: { profile?: UserProfile }) {
-
-  
   if (!profile) {
     return <div className="p-4">Nodata for this user</div>;
   }

@@ -1,33 +1,30 @@
 "use client";
 import { useState } from "react";
 import AppLayout from "../../components/AppLayout";
-import {  Activity } from "./sections/ActivitiesSection";
+import {  ActivitiesSection, Activity } from "./sections/ActivitiesSection";
 import { DailiesSection, Dailies } from "./sections/DailiesSection";
-import {  UserProfile } from "./sections/UserProfileSection";
-import {  Sleep } from "./sections/SleepSection";
-import {  Stress } from "./sections/StressSection";
+import {  UserProfile, UserProfileSection } from "./sections/UserProfileSection";
+import {  Sleep, SleepSection } from "./sections/SleepSection";
+import {  Stress, StressSection } from "./sections/StressSection";
 import { useHealthData } from "./hooks/useHealthDataGarmin";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
 
-
-
 // Section keys type
 type Section = keyof HealthInsightsTranslations["sections"];
 
-
 type HealthDataToAnalyze = {
   profile?: UserProfile;
-  dailies?: Dailies;
+  dailies?: Dailies[];
   activities?: Activity[];
-  sleep?: Sleep;
-  stress?: Stress;
+  sleep?: Sleep[];
+  stress?: Stress[];
 };
 
 export default function HealthInsightsPage() {
   const { t } = useTranslation();
 
-  const [activeSection, setActiveSection] = useState<Section>("activities");
+  const [activeSection, setActiveSection] = useState<Section>("dailies");
   const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -52,13 +49,13 @@ export default function HealthInsightsPage() {
           dataToAnalyze.profile = healthData?.profile;
           break;
         case "dailies":
-          dataToAnalyze.dailies = healthData?.dailies?.[0];
+          dataToAnalyze.dailies = healthData?.dailies;
           break;
         case "sleep":
-          dataToAnalyze.sleep = healthData?.sleep?.[0];
+          dataToAnalyze.sleep = healthData?.sleep;
           break;
         case "stress":
-          dataToAnalyze.stress = healthData?.stress?.[0];
+          dataToAnalyze.stress = healthData?.stress;
           break;
         case "activities":
           if (selectedActivityIds.size > 0 && healthData?.activities) {
@@ -99,16 +96,12 @@ export default function HealthInsightsPage() {
 
 //type Section = keyof HealthInsightsTranslations["sections"];
 
-
   const sections: { id: Section; label: string; disabled?: boolean }[] = [
   {id: "profile", label:t.healthInsights.sections.profile},
-
   { id: "dailies", label: t.healthInsights.sections.dailies },
   { id: "activities", label: t.healthInsights.sections.activities },
   { id: "sleep", label: t.healthInsights.sections.sleep },
   { id: "stress", label: t.healthInsights.sections.stress },
-  { id: "cardiovascular", label: t.healthInsights.sections.cardiovascular },
-  
 ];
 
   return (
@@ -172,17 +165,22 @@ export default function HealthInsightsPage() {
                       )
                     )}
 
-                    {activeSection === "sleep" && (
-                      <div className="p-4">{t.healthInsights.sleepComingSoon}</div>
+                    {activeSection === "sleep" && healthData?.sleep?.[0] && (
+                      <SleepSection sleep={healthData.sleep[0]} />
                     )}
-                    {activeSection === "stress" && (
-                      <div className="p-4">{t.healthInsights.stressComingSoon}</div>
+                    {activeSection === "stress" && healthData?.stress?.[0] && (
+                      <StressSection stress={healthData.stress[0]} />
                     )}
-                    {activeSection === "cardiovascular" && (
-                      <div className="p-4">{t.healthInsights.cardioComingSoon}</div>
+                    {activeSection === "profile" && healthData?.profile && (
+                      <UserProfileSection profile={healthData.profile} />
                     )}
-
-
+                    {activeSection === "activities" && healthData?.activities && healthData.activities.length > 0 && (
+                      <ActivitiesSection
+                        activities={healthData.activities}
+                        selectedActivityIds={selectedActivityIds}
+                        onActivitiesSelected={setSelectedActivityIds}
+                      />
+                    )}
                   </>
                 )}
               </div>
