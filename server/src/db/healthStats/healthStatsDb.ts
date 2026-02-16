@@ -108,7 +108,7 @@ export async function getHealthStatEntriesData(
       let status: MetricStatus | undefined;
       let goal: MetricGoal | undefined;
 
-      // Activity goals
+      // Activity goals: if minimum goal is achieved, status = good, otherwise low
       if (row.kind === "activity_daily") {
         if (key === "Steps" && row.data.steps_goal != null) {
           const min = row.data.steps_goal;
@@ -124,7 +124,6 @@ export async function getHealthStatEntriesData(
           result[key] = { value: numericValue, goal, status };
         }
 
-        // Intensity duration this week
         if (
           key === "Intensity duration this week (min)" &&
           row.data.intensity_duration_goal_in_seconds != null
@@ -136,7 +135,7 @@ export async function getHealthStatEntriesData(
         }
       }
 
-      // Sleep: 7–10 hours in minutes
+      // Sleep: if total sleep is between 7-10 hours, status = good, otherwise low or high
       if (row.kind === "sleep_daily" && key === "Total sleep") {
         goal = { min: 7 * 60, max: 10 * 60 };
       }
@@ -146,7 +145,8 @@ export async function getHealthStatEntriesData(
         goal = { max: 75 };
       }
 
-      // Resting heart rate personalized range
+      // Resting heart rate range is personalized if we have enough historical data,
+      // otherwise a general range is used (55-80 bpm)
       if (row.kind === "heart_daily" && key === "Resting heart rate") {
         if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
@@ -156,20 +156,39 @@ export async function getHealthStatEntriesData(
           );
           goal = { min: avg - stdDev, max: avg + stdDev };
         } else {
-          goal = { min: 60, max: 100 };
+          goal = { min: 55, max: 80 };
+        }
+      }
+
+      // Respiratory rate: if we have enough historical data, use personalized range,
+      // otherwise use general range of 12-20 breaths/min
+      if (row.kind === "resp_daily" && key === "Average respiratory rate (breaths/min)") {
+        if (historical.length >= 7) {
+          const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
+          const stdDev = Math.sqrt(
+            historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
+              historical.length,
+          );
+
+          goal = { min: Math.max(8, avg - 2 * stdDev), max: Math.min(25, avg + 2 * stdDev)};
+        } else {
+          goal = { min: 12, max: 20 };
         }
       }
 
       // Calculate status
       if (goal) {
+        // if min is defined and value is below min, status = low
         if (goal.min !== undefined && numericValue < goal.min) status = "low";
+        // if max is defined and value is above max, status = high
         else if (goal.max !== undefined && numericValue > goal.max)
           status = "high";
+        // if value is within range, status = good
         else status = "good";
       }
 
+      // Format display value
       let displayValue: number | string;
-
       if (key === "Total sleep") {
         const valueHM = formatMinutesHM(numericValue);
         if (goal?.min !== undefined && goal?.max !== undefined) {
@@ -177,6 +196,8 @@ export async function getHealthStatEntriesData(
         } else {
           displayValue = valueHM;
         }
+      } else if (key === "Average respiratory rate (breaths/min)") {
+        displayValue = +numericValue.toFixed(2);
       } else if (key === "Resting heart rate") {
         displayValue = +numericValue.toFixed(2);
       } else if (goal && goal.min !== undefined) {
