@@ -2,6 +2,7 @@ import { db } from "../db.js";
 
 export type GarminBodyCompRow = {
   user_id: number;
+  day_date?: string | null;
   summary_id?: string | null;
   muscle_mass_in_grams?: number | null;
   bone_mass_in_grams?: number | null;
@@ -20,6 +21,7 @@ export function mapGarminBodyCompToRow(
 ): GarminBodyCompRow {
   return {
     user_id,
+    day_date: new Date().toISOString().split("T")[0],
     summary_id: b.summaryId ?? null,
     muscle_mass_in_grams: b.muscleMassInGrams ?? null,
     bone_mass_in_grams: b.boneMassInGrams ?? null,
@@ -29,7 +31,7 @@ export function mapGarminBodyCompToRow(
     weight_in_grams: b.weightInGrams ?? null,
     measurement_time_in_seconds: b.measurementTimeInSeconds ?? null,
     measurement_time_offset_in_seconds:
-    b.measurementTimeOffsetInSeconds ?? null,
+      b.measurementTimeOffsetInSeconds ?? null,
     source: b.source ?? "garmin",
   };
 }
@@ -39,10 +41,10 @@ export async function upsertGarminBodyComp(row: GarminBodyCompRow) {
 
   await db.query(
     `INSERT INTO app.user_body_comp_garmin
-       (user_id, summary_id, muscle_mass_in_grams, bone_mass_in_grams, body_water_in_percent,
+       (user_id, day_date, summary_id, muscle_mass_in_grams, bone_mass_in_grams, body_water_in_percent,
         body_fat_in_percent, body_mass_index, weight_in_grams, measurement_time_in_seconds, measurement_time_offset_in_seconds, source)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-     ON CONFLICT (user_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+     ON CONFLICT (user_id, day_date)
      DO UPDATE SET
       summary_id = EXCLUDED.summary_id,
        muscle_mass_in_grams = EXCLUDED.muscle_mass_in_grams,
@@ -57,6 +59,7 @@ export async function upsertGarminBodyComp(row: GarminBodyCompRow) {
        updated_at = now()`,
     [
       row.user_id,
+      row.day_date,
       row.summary_id,
       row.muscle_mass_in_grams,
       row.bone_mass_in_grams,

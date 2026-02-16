@@ -102,8 +102,11 @@ garminWebhookRouter.post("/dailies", async (req, res) => {
 
   try {
     // Handle array wrapped by summary type
+    // Expect HRV payload under `hrv` or `hrvSummaries`; fall back to raw body
     const payload =
-      req.body.dailies || (Array.isArray(req.body) ? req.body : [req.body]);
+      req.body.hrv ||
+      req.body.hrvSummaries ||
+      (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {
       const providerUserId = item.userId;
@@ -409,7 +412,7 @@ garminWebhookRouter.post("/hrv", async (req, res) => {
   try {
     // Handle array wrapped by summary type
     const payload =
-      req.body.dailies || (Array.isArray(req.body) ? req.body : [req.body]);
+      req.body.hrv || (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {
       const providerUserId = item.userId;

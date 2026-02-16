@@ -173,6 +173,7 @@ export async function createGarminTables() {
     create table if not exists app.user_body_comp_garmin (
       id uuid primary key default gen_random_uuid(),
       user_id integer not null references app.users(id) on delete cascade,
+      day_date date not null,
       summary_id varchar(100),
       muscle_mass_in_grams integer,
       bone_mass_in_grams integer,
@@ -185,11 +186,11 @@ export async function createGarminTables() {
       source varchar(50) not null default 'garmin',
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
-      unique (user_id, summary_id)
+      unique (user_id, day_date)
     );
 
     create index if not exists idx_user_body_comp_garmin_user_id
-      on app.user_body_comp_garmin (user_id);
+      on app.user_body_comp_garmin (user_id, day_date);
   `);
 
   await db.query(`
@@ -307,7 +308,7 @@ export async function createGarminTables() {
   );
 
   create index if not exists idx_user_sleeps_garmin_user_day
-    on app.user_sleeps_garmin(user_id, day_date);
+    on app.user_sleeps_garmin(user_id, day_date, summary_id);
 `);
 
   await db.query(`

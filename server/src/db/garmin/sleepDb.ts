@@ -109,9 +109,8 @@ export async function upsertGarminSleep(row: GarminSleepRow) {
     `
     INSERT INTO app.user_sleeps_garmin (${columns.join(",")})
     VALUES (${columns.map((_, i) => `$${i + 1}`).join(",")})
-    ON CONFLICT (user_id, day_date)
+    ON CONFLICT (user_id, day_date, summary_id)
     DO UPDATE SET
-      summary_id = EXCLUDED.summary_id,
       duration_in_seconds = EXCLUDED.duration_in_seconds,
       total_nap_duration_in_seconds = EXCLUDED.total_nap_duration_in_seconds,
       start_time_in_seconds = EXCLUDED.start_time_in_seconds,
