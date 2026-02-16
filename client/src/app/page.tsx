@@ -18,8 +18,6 @@ export default function Home() {
     legs: false,
   });
 
-  
-
   // Poll each body part for alerts (metric status !== 'good')
   useEffect(() => {
     const date = new Date().toISOString().split("T")[0];
@@ -63,7 +61,6 @@ export default function Home() {
 
   const isFemale = avatarType === "female";
 
- 
   const BODY_PARTS: Array<{ id: BodyPartId; label: string; top: string; left: string }> =
     useMemo(() =>  [
         { id: "brain", label: t.home.bodyParts.brain, top: "3%", left: "50%" },
@@ -72,8 +69,6 @@ export default function Home() {
         { id: "legs", label: t.home.bodyParts.legs, top: "75%", left: "60%" },
       ],
      [t]);
-
- 
 
   return (
     <AppLayout>
@@ -105,7 +100,7 @@ export default function Home() {
                       selected === id
                         ? "rgba(10, 33, 90, 0.7)"
                         : alerts[id]
-                        ? "rgba(220, 38, 38, 0.95)"
+                        ? "rgba(220, 38, 81, 0.95)"
                         : "rgba(203, 215, 249, 0.8)",
                   }}
                   className={alerts[id] ? "animate-pulse" : undefined}

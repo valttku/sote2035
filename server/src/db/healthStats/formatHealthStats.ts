@@ -44,7 +44,7 @@ export function formatHealthEntry(kind: string, data: any) {
 
     case "resp_daily":
       if (data.resp_rate != null)
-        metrics["Average respiratory rate (awake)"] = data.resp_rate;
+        metrics["Average respiratory rate (breaths/min)"] = data.resp_rate;
       break;
 
     case "stress_daily":

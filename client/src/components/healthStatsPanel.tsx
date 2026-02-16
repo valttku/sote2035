@@ -117,7 +117,7 @@ export default function HealthStatsPanel({
                     className={`px-2 py-0.5 text-xs rounded-full ${
                       status === "good"
                         ? "bg-green-500/20 text-green-400"
-                        : status === "low"
+                        : status === "low" || status === "high"
                         ? "bg-blue-500/20 text-blue-400"
                         : "bg-red-500/20 text-red-400"
                     }`}
