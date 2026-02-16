@@ -109,7 +109,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="w-1/2 max-w-[400px] p-4 md:p-6 flex flex-col justify-start text-left">
+            <div className="w-1/2 max-w-[450px] p-4 md:p-6 flex flex-col justify-start text-left">
               {!selected && (
                 <div className="mb-2">
                   <p className="text-sm md:text-base">{t.home.selectBodyPart}</p>

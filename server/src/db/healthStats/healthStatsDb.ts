@@ -162,7 +162,7 @@ export async function getHealthStatEntriesData(
 
       // Respiratory rate: if we have enough historical data, use personalized range,
       // otherwise use general range of 12-20 breaths/min
-      if (row.kind === "resp_daily" && key === "Average respiratory rate awake (breaths/min)") {
+      if (row.kind === "resp_daily" && key === "Average respiratory rate (breaths/min)") {
         if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
           const stdDev = Math.sqrt(
