@@ -39,6 +39,7 @@ export async function createGarminTables() {
       user_id integer not null references app.users(id) on delete cascade,
       day_date date not null,
       summary_id varchar(100),
+
       vo2_max double precision,
       vo2_max_cycling double precision,
       fitness_age integer,
@@ -46,7 +47,7 @@ export async function createGarminTables() {
       source varchar(50) not null default 'garmin',
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
-      unique (user_id, day_date, summary_id)
+      unique (user_id, day_date)
     );
 
     create index if not exists idx_user_metrics_garmin_user_day
@@ -146,7 +147,7 @@ export async function createGarminTables() {
       source varchar(50) not null default 'garmin',
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
-      unique (user_id, day_date, summary_id)
+      unique (user_id, day_date)
     );
 
     create index if not exists idx_user_respiration_garmin_user_day
@@ -172,6 +173,7 @@ export async function createGarminTables() {
     create table if not exists app.user_body_comp_garmin (
       id uuid primary key default gen_random_uuid(),
       user_id integer not null references app.users(id) on delete cascade,
+      day_date date not null,
       summary_id varchar(100),
       muscle_mass_in_grams integer,
       bone_mass_in_grams integer,
@@ -184,11 +186,11 @@ export async function createGarminTables() {
       source varchar(50) not null default 'garmin',
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now(),
-      unique (user_id, summary_id)
+      unique (user_id, day_date)
     );
 
     create index if not exists idx_user_body_comp_garmin_user_id
-      on app.user_body_comp_garmin (user_id);
+      on app.user_body_comp_garmin (user_id, day_date);
   `);
 
   await db.query(`
@@ -306,7 +308,7 @@ export async function createGarminTables() {
   );
 
   create index if not exists idx_user_sleeps_garmin_user_day
-    on app.user_sleeps_garmin(user_id, day_date);
+    on app.user_sleeps_garmin(user_id, day_date, summary_id);
 `);
 
   await db.query(`
@@ -318,6 +320,44 @@ export async function createGarminTables() {
   drop trigger if exists update_user_sleeps_garmin_updated_at on app.user_sleeps_garmin;
   create trigger update_user_sleeps_garmin_updated_at
   before update on app.user_sleeps_garmin
+  for each row execute function app.update_updated_at_column();
+`);
+
+  // ----------------------------
+  // user_hrv_garmin table
+  // ----------------------------
+  await db.query(`
+    create table if not exists app.user_hrv_garmin (
+      id uuid primary key default gen_random_uuid(),
+      user_id integer not null references app.users(id) on delete cascade,
+      day_date date not null,
+      summary_id varchar(100),
+
+      last_night_avg double precision,
+      last_night_5min_high double precision,
+      start_time_offset_in_seconds integer,
+      duration_in_seconds integer,
+      hrv_values jsonb,
+
+      source varchar(50) not null default 'garmin',
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      unique (user_id, day_date)
+    );
+
+    create index if not exists idx_user_hrv_garmin_user_day
+      on app.user_hrv_garmin (user_id, day_date);
+  `);
+
+  await db.query(`
+  drop trigger if exists trg_ensure_health_day_for_hrv on app.user_hrv_garmin;
+  create trigger trg_ensure_health_day_for_hrv
+  after insert or update on app.user_hrv_garmin
+  for each row execute function app.ensure_health_day_exists();
+
+  drop trigger if exists update_user_hrv_garmin_updated_at on app.user_hrv_garmin;
+  create trigger update_user_hrv_garmin_updated_at
+  before update on app.user_hrv_garmin
   for each row execute function app.update_updated_at_column();
 `);
 
