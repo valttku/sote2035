@@ -4,6 +4,7 @@ import { Dailies } from "../sections/DailiesSection";
 import { UserProfile } from "../sections/UserProfileSection";
 import { Sleep } from "../sections/SleepSection";
 import { Stress } from "../sections/StressSection";
+import { Respiration } from "../sections/RespirationSection";
 
 export type HealthData = {
   profile?: UserProfile;
@@ -11,6 +12,7 @@ export type HealthData = {
   activities?: Activity[];
   sleep?: Sleep[];
   stress?: Stress[];
+  respiration?: Respiration[];
 };
 
 export function useHealthData(date?: string) {
@@ -43,6 +45,7 @@ export function useHealthData(date?: string) {
           activities?: Activity | Activity[];
           sleep?: Sleep | Sleep[];
           stress?: Stress | Stress[];
+          respiration?: Respiration | Respiration[];
         };
 
         const raw = (await response.json()) as RawHealthData;
@@ -72,6 +75,11 @@ export function useHealthData(date?: string) {
             ? Array.isArray(raw.stress)
               ? raw.stress
               : [raw.stress]
+            : [],
+          respiration: raw.respiration
+            ? Array.isArray(raw.respiration)
+              ? raw.respiration
+              : [raw.respiration]
             : [],
         };
 
