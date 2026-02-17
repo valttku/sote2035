@@ -4,15 +4,11 @@ import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
-type Props = {
-  selected: BodyPartId;
-  onClose: () => void;
-  selectedDate?: string;
-};
+type Props = {selected: BodyPartId; onClose: () => void; selectedDate?: string;};
 
 type HealthMetrics = Record<string, string | number>;
 
-export default function HealthStatsPanel({selected, onClose, selectedDate}: Props) {
+export default function HealthStatsPanel({ selected, onClose, selectedDate}: Props) {
   const { t } = useTranslation();
   const [metrics, setMetrics] = useState<HealthMetrics>({});
   const [error, setError] = useState<string | null>(null);
@@ -65,14 +61,11 @@ export default function HealthStatsPanel({selected, onClose, selectedDate}: Prop
 
   return (
     <div className="panel-animation ui-component-styles p-4 pt-2">
+
+      {/* Header with close button */}
       <div className="flex justify-between items-center">
-        {/* Use translation for body part name */}
-        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">
-          {t.home.bodyParts[selected]}
-        </h1>
-        <button className="mb-5" onClick={onClose}>
-          ✕
-        </button>
+        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">{t.home.bodyParts[selected]}</h1>
+        <button className="mb-5" onClick={onClose}>✕</button>
       </div>
 
       {/* Status messages */}
@@ -100,23 +93,27 @@ export default function HealthStatsPanel({selected, onClose, selectedDate}: Prop
             };
             displayValue = String(metric.value);
             status = metric.status as "low" | "good" | "high" | undefined;
-            if (metric.goal?.min !== undefined && metric.goal?.max !== undefined) {
-              goalText = `Range: ${metric.goal.min} - ${metric.goal.max}`;
-            } else if (metric.goal?.min !== undefined) {
-              goalText = `Min: ${metric.goal.min}`;
-            } else if (metric.goal?.max !== undefined) {
-              goalText = `Max: ${metric.goal.max}`;
+
+            if (metric.goal) {
+              if (key === "Total sleep") {
+                goalText = `Range: ${metric.goal.min / 60}h - ${metric.goal.max / 60}h`;
+              } else if (metric.goal.min !== undefined && metric.goal.max !== undefined) {
+                goalText = `Range: ${metric.goal.min} - ${metric.goal.max}`;
+              } else if (metric.goal.min !== undefined) {
+                goalText = `Min: ${metric.goal.min}`;
+              } else if (metric.goal.max !== undefined) {
+                goalText = `Max: ${metric.goal.max}`;
+              }
             }
           } else {
             displayValue = String(value ?? "");
           }
 
           return (
-            <li
-              key={key}
-              className="flex justify-between items-center pb-1 relative group"
-            >
+            <li key={key} className="flex justify-between items-center pb-1 relative group">
+
               <span className="font-medium">{key}</span>
+              
               <div className="flex items-center gap-2">
                 <span className="relative">
                   {displayValue}
