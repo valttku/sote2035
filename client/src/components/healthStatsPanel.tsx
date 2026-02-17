@@ -111,9 +111,8 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
 
           return (
             <li key={key} className="flex justify-between items-center pb-1 relative group">
-
-              <span className="font-medium">{key}</span>
               
+              <span className="font-medium">{key}</span>
               <div className="flex items-center gap-2">
                 <span className="relative">
                   {displayValue}
@@ -129,7 +128,7 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
                     className={`px-2 py-0.5 text-xs rounded-full ${
                       status === "good"
                         ? "bg-green-500/20 text-green-400"
-                        : status === "low" || status === "high"
+                        : status === "low"
                           ? "bg-blue-500/20 text-blue-400"
                           : "bg-red-500/20 text-red-400"
                     }`}
