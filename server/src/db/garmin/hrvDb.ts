@@ -31,7 +31,7 @@ export async function upsertGarminHRV(row: GarminHRVRow) {
 
   // Insert or update user metrics
   await db.query(
-    `INSERT INTO app.user_metrics_garmin
+    `INSERT INTO app.user_hrv_garmin
        (user_id, day_date, summary_id, last_night_avg, last_night_5min_high, start_time_offset_in_seconds, duration_in_seconds, hrv_values, source)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      ON CONFLICT (user_id, day_date)
