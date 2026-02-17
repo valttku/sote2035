@@ -213,16 +213,27 @@ garminRouter.post("/sync-now", authRequired, async (req, res) => {
       headers: { Authorization: `Bearer ${access_token}` },
     });
 
+    const rawBody = await response.text().catch(() => "");
+
     if (!response.ok && response.status !== 409) {
-      const text = await response.text().catch(() => "");
-      console.error("Garmin backfill failed:", text);
-      return res.status(502).json({ error: "Backfill failed" });
+      console.error("Garmin backfill failed:", rawBody);
+      return res
+        .status(502)
+        .json({ error: "Backfill failed", details: rawBody });
+    }
+
+    let backfillStatus = "";
+    if (response.status === 200) {
+      backfillStatus = "Backfill accepted by Garmin";
+    } else if (response.status === 409) {
+      backfillStatus = "Backfill already exists / duplicate";
     }
 
     return res.json({
-      message: "Backfill triggered",
+      message: backfillStatus,
       window: { startSeconds, endSeconds },
       status: response.status,
+      responseBody: rawBody, // optional, for testing
     });
   } catch (err) {
     console.error("Garmin sync-now failed:", err);
