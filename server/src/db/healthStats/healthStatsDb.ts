@@ -2,7 +2,6 @@ import { db } from "../db.js";
 import { formatHealthEntry } from "./formatHealthStats.js";
 
 export type MetricStatus = "low" | "good" | "high" | undefined;
-
 type MetricGoal = { min?: number; max?: number };
 
 export type MetricObject = {
@@ -13,6 +12,7 @@ export type MetricObject = {
 
 export type HealthData = Record<string, number | MetricObject>;
 
+// Helper to parse numeric values from the formatted metrics.
 function parseNumeric(value: string | number): number | null {
   if (typeof value === "number") return value;
   if (typeof value === "string") {
@@ -22,6 +22,7 @@ function parseNumeric(value: string | number): number | null {
   return null;
 }
 
+// Helper to format total sleep minutes into "Xh Ym" format for display
 function formatMinutesHM(totalMinutes: number) {
   const mins = Math.round(totalMinutes);
   const hours = Math.floor(mins / 60);
@@ -29,6 +30,7 @@ function formatMinutesHM(totalMinutes: number) {
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
+// Main function: fetch today's health stat entries for the specified user and part (heart, brain, legs, lungs),
 export async function getHealthStatEntriesData(
   userId: number,
   date: string,
@@ -65,6 +67,9 @@ export async function getHealthStatEntriesData(
     [userId, date, kinds],
   );
 
+  // `historyMap` now holds arrays of historical numeric values keyed by metric name.
+  // Example: { "Resting heart rate": [60, 62, 61], "Steps": [7000, 8000] }
+  // We use this map below to compute personalized goals / ranges per metric.
   const historyMap: Record<string, number[]> = {};
   for (const row of historyRows) {
     const metrics = formatHealthEntry(row.kind, row.data);
@@ -88,23 +93,12 @@ export async function getHealthStatEntriesData(
         continue;
       }
 
+      // `historical` contains recent values for this metric (last 7 days)
+      // If empty, we fall back to sensible defaults per metric below.
       const historical = historyMap[key] ?? [];
 
-      let min: number | undefined;
-      let max: number | undefined;
-
-      if (historical.length) {
-        const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
-        const stdDev =
-          Math.sqrt(
-            historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
-              historical.length,
-          ) || 0;
-
-        min = avg - stdDev;
-        max = avg + stdDev;
-      }
-
+      // `goal` and `status` are computed per-metric. `goal` is an optional
+      // numeric range used to derive the `status` (low/good/high).
       let status: MetricStatus | undefined;
       let goal: MetricGoal | undefined;
 
@@ -145,8 +139,8 @@ export async function getHealthStatEntriesData(
         goal = { max: 75 };
       }
 
-      // Resting heart rate range is personalized if we have enough historical data,
-      // otherwise a general range is used (55-80 bpm)
+      // Resting heart rate: prefer personalized ranges when
+      // enough history exists, otherwise use a standard healthy range.
       if (row.kind === "heart_daily" && key === "Resting heart rate") {
         if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
@@ -154,17 +148,18 @@ export async function getHealthStatEntriesData(
             historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
               historical.length,
           );
+          const spread = Math.max(stdDev, 4); // minimum ±4 bpm
           goal = {
-            min: +(avg - stdDev).toFixed(2),
-            max: +(avg + stdDev).toFixed(2),
+            min: +(avg - spread).toFixed(1),
+            max: +(avg + spread).toFixed(1),
           };
         } else {
           goal = { min: 55, max: 80 };
         }
       }
 
-      // Respiratory rate: if we have enough historical data, use personalized range,
-      // otherwise use general range of 12-20 breaths/min
+      // Respiratory rate: prefer personalized ranges when
+      // enough history exists, otherwise use a standard healthy range.
       if (
         row.kind === "resp_daily" &&
         key === "Average respiratory rate (breaths/min)"
@@ -175,28 +170,28 @@ export async function getHealthStatEntriesData(
             historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
               historical.length,
           );
-
+          const spread = Math.max(stdDev, 2);
           goal = {
-            min: Math.max(8, avg - 2 * stdDev),
-            max: Math.min(25, avg + 2 * stdDev),
+            min: Math.max(8, avg - 2 * spread),
+            max: Math.min(25, avg + 2 * spread),
           };
         } else {
           goal = { min: 12, max: 20 };
         }
       }
 
-      // Calculate status
+      // Calculate status: if min is defined and value is below min, status = low
+      // if max is defined and value is above max, status = high
+      // if value is within range, status = good
       if (goal) {
-        // if min is defined and value is below min, status = low
         if (goal.min !== undefined && numericValue < goal.min) status = "low";
-        // if max is defined and value is above max, status = high
         else if (goal.max !== undefined && numericValue > goal.max)
           status = "high";
-        // if value is within range, status = good
         else status = "good";
       }
 
-      // Format display value
+      // Format display value for the UI. We present some metrics in human-
+      // friendly formats (e.g., sleep as hours/minutes) and round others.
       let displayValue: number | string;
 
       if (key === "Total sleep") {
@@ -211,12 +206,12 @@ export async function getHealthStatEntriesData(
         displayValue = numericValue;
       }
 
-      // goal object stays numeric only
+      // Store the final value object for this metric, including the display value, goal, and status.
       result[key] = { value: displayValue, goal, status };
 
       console.log({
         key,
-        numericValue,
+        value,
         goal,
         historicalLength: historical.length,
         statusBefore: status,
