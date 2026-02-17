@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export function StatCard({
   label,
   value,
@@ -5,7 +7,7 @@ export function StatCard({
 }: {
   label: string;
   value: string;
-  icon?: string;
+  icon?: ReactNode;
 }) {
   return (
     <div
