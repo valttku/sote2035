@@ -232,7 +232,8 @@
       "sleep": "Sleep",
       "stress": "Stress",
       "cardiovascular": "Heart Health",
-      "bodyComposition": "Body Composition"
+      "bodyComposition": "Body Composition",
+      "respiration": "Respiration"
     },
     "loading": "Loading health data...",
     "aiTitle": "AI Analysis",
@@ -246,9 +247,9 @@
     "noDailies": "No daily data available for this date.",
     "noProfileData": "No data for this user",
     "noActivitiesForDate": "No activities for this date",
-    "sleepComingSoon": "Sleep section coming soon...",
-    "stressComingSoon": "Stress section coming soon...",
-    "cardioComingSoon": "Cardio section coming soon...",
-    "bodyCompositionComingSoon": "Body Composition section coming soon..."
+    "noSleepData": "No sleep data for this date",
+    "noStressData": "No stress data for this date",
+    "noCardioData": "No cardiovascular data for this date",
+    "noRespirationData": "No respiration data for this date"
   }
 }

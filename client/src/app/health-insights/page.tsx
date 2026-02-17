@@ -6,6 +6,7 @@ import { DailiesSection, Dailies } from "./sections/DailiesSection";
 import { UserProfile, UserProfileSection } from "./sections/UserProfileSection";
 import { Sleep, SleepSection } from "./sections/SleepSection";
 import { Stress, StressSection } from "./sections/StressSection";
+import { Respiration, RespirationSection } from "./sections/RespirationSection";
 import { useHealthData } from "./hooks/useHealthDataGarmin";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
@@ -19,6 +20,7 @@ type HealthDataToAnalyze = {
   activities?: Activity[];
   sleep?: Sleep[];
   stress?: Stress[];
+  respiration?: Respiration[];
 };
 
 export default function HealthInsightsPage() {
@@ -56,6 +58,9 @@ export default function HealthInsightsPage() {
           break;
         case "stress":
           dataToAnalyze.stress = healthData?.stress;
+          break;
+        case "respiration":
+          dataToAnalyze.respiration = healthData?.respiration;
           break;
         case "activities":
           if (selectedActivityIds.size > 0 && healthData?.activities) {
@@ -102,6 +107,7 @@ export default function HealthInsightsPage() {
     { id: "activities", label: t.healthInsights.sections.activities },
     { id: "sleep", label: t.healthInsights.sections.sleep },
     { id: "stress", label: t.healthInsights.sections.stress },
+    { id: "respiration", label: t.healthInsights.sections.respiration },
   ];
 
   return (
@@ -157,36 +163,21 @@ export default function HealthInsightsPage() {
                   <p>{t.healthInsights.loading}</p>
                 ) : (
                   <>
+                    {activeSection === "profile" &&
+                      (healthData?.profile ? (
+                        <UserProfileSection profile={healthData.profile} />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noProfileData}
+                        </div>
+                      ))}
+
                     {activeSection === "dailies" &&
                       (healthData?.dailies?.[0] ? (
                         <DailiesSection dailies={healthData.dailies[0]} />
                       ) : (
                         <div className="p-4">{t.healthInsights.noDailies}</div>
                       ))}
-
-                    {activeSection === "sleep" && (
-                      healthData?.sleep?.[0] ? (
-                        <SleepSection sleep={healthData.sleep[0]} />
-                      ) : (
-                        <div className="p-4">No sleep data for this date</div>
-                      )
-                    )}
-
-                    {activeSection === "stress" && (
-                      healthData?.stress?.[0] ? (
-                        <StressSection stress={healthData.stress[0]} />
-                      ) : (
-                        <div className="p-4">No stress data for this date</div>
-                      )
-                    )}
-
-                    {activeSection === "profile" && (
-                      healthData?.profile ? (
-                        <UserProfileSection profile={healthData.profile} />
-                      ) : (
-                        <div className="p-4">{t.healthInsights.noProfileData}</div>
-                      )
-                    )}
 
                     {activeSection === "activities" &&
                       (healthData?.activities &&
@@ -199,6 +190,35 @@ export default function HealthInsightsPage() {
                       ) : (
                         <div className="p-4">
                           {t.healthInsights.noActivitiesForDate}
+                        </div>
+                      ))}
+
+                    {activeSection === "sleep" &&
+                      (healthData?.sleep?.[0] ? (
+                        <SleepSection sleep={healthData.sleep[0]} />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noSleepData}
+                        </div>
+                      ))}
+
+                    {activeSection === "stress" &&
+                      (healthData?.stress?.[0] ? (
+                        <StressSection stress={healthData.stress[0]} />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noStressData}
+                        </div>
+                      ))}
+
+                    {activeSection === "respiration" &&
+                      (healthData?.respiration?.[0] ? (
+                        <RespirationSection
+                          respiration={healthData.respiration[0]}
+                        />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noRespirationData}
                         </div>
                       ))}
                   </>

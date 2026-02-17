@@ -8,9 +8,7 @@ export type NavbarTranslations = {
   health: string;
   settings: string;
   language: string;
-  
 };
-
 
 // Common translations
 export type CommonTranslations = {
@@ -58,13 +56,12 @@ export type SettingsTranslations = {
   new_password_placeholder: string;
   failed_delete_account: string;
   unlinking: string;
-saving: string;
-changing: string;
-weak_password: string;
-medium_password: string;
-strong_password: string;
-weak_password_alert: string;
- 
+  saving: string;
+  changing: string;
+  weak_password: string;
+  medium_password: string;
+  strong_password: string;
+  weak_password_alert: string;
 };
 
 // Startup page
@@ -81,9 +78,9 @@ export type StartupTranslations = {
 // Calendar page
 export type CalendarTranslations = {
   title: string;
-    prev: string;
-    next: string;
-    weekdays:{
+  prev: string;
+  next: string;
+  weekdays: {
     mon: string;
     tue: string;
     wed: string;
@@ -91,23 +88,23 @@ export type CalendarTranslations = {
     fri: string;
     sat: string;
     sun: string;
-    };
-    hasData: string;
-    noData: string;
-    healthStats: string;
-    activities: string;
-    manualActivities: string;
-    noManualActivities: string;
-    loadMonthError: string;
-    connectError: string;
-    loadStatsError: string;
-    loadActivitiesError: string;
-    loadManualError: string;
-    deleteManualError: string;
-    locale: string;
-    loading:string;
+  };
+  hasData: string;
+  noData: string;
+  healthStats: string;
+  activities: string;
+  manualActivities: string;
+  noManualActivities: string;
+  loadMonthError: string;
+  connectError: string;
+  loadStatsError: string;
+  loadActivitiesError: string;
+  loadManualError: string;
+  deleteManualError: string;
+  locale: string;
+  loading: string;
 
-    //  Add these for the forms/lists
+  //  Add these for the forms/lists
   addActivityButton: string;
   activityTitlePlaceholder: string;
   activityTypePlaceholder: string;
@@ -126,18 +123,14 @@ export type CalendarTranslations = {
   stepsLabel: string; // avoid duplicate 'steps'
   noHealthStats: string;
 
-  
-    
-fields: {
-  type: string;
-  notes: string;
-  steps: string;
-  title: string,
-  calories: string;
-  duration: string
-},
-
-
+  fields: {
+    type: string;
+    notes: string;
+    steps: string;
+    title: string;
+    calories: string;
+    duration: string;
+  };
 
   heart: string;
   brain: string;
@@ -153,21 +146,19 @@ fields: {
   unknown: string;
   minutesShort: string;
 
-    durationPlaceholder: string;
-    caloriesPlaceholder: string;
-    stepsPlaceholder: string;
- 
-    submitting: string;
+  durationPlaceholder: string;
+  caloriesPlaceholder: string;
+  stepsPlaceholder: string;
 
-    activityTypes: {
-      run: string;
-      walk: string;
-      gym: string;
-      cycling: string;
-    };
+  submitting: string;
+
+  activityTypes: {
+    run: string;
+    walk: string;
+    gym: string;
+    cycling: string;
   };
-  
-
+};
 
 // Health Insights page
 export type HealthInsightsTranslations = {
@@ -180,6 +171,7 @@ export type HealthInsightsTranslations = {
     stress: string;
     cardiovascular: string;
     bodyComposition: string;
+    respiration: string;
   };
   loading: string;
   aiTitle: string;
@@ -196,27 +188,27 @@ export type HealthInsightsTranslations = {
   cardioComingSoon: string;
   noProfileData: string;
   noActivitiesForDate: string;
-
-  
+  noSleepData: string;
+  noStressData: string;
+  noCardioData: string;
+  noRespirationData: string;
 };
-
 
 //home
 export type HomeTranslations = {
   title: string;
   selectBodyPart: string;
-  noMetrics: string;     // ← new
-  loading: string;       // ← new
+  noMetrics: string; // ← new
+  loading: string; // ← new
 
-  bodyParts:{
+  bodyParts: {
     brain: string;
     heart: string;
     lungs: string;
-    legs: string
-  }
-
-}
-//Login 
+    legs: string;
+  };
+};
+//Login
 export type LoginTranslations = {
   title: string;
   email: string;
@@ -264,18 +256,14 @@ export type RegisterTranslations = {
   };
 };
 //darkmodetoggle
-export type DarkModeToggle= {
+export type DarkModeToggle = {
   darkMode: string;
   lightMode: string;
-
-
-}
+};
 //logout
 export type AuthTranslations = {
   logout: string;
 };
-
-
 
 // Complete translation type
 export type Translations = {
@@ -284,14 +272,11 @@ export type Translations = {
   startup: StartupTranslations;
   calendar: CalendarTranslations;
   healthInsights: HealthInsightsTranslations;
-  navbar: NavbarTranslations; 
+  navbar: NavbarTranslations;
   locale: string;
   login: LoginTranslations;
   register: RegisterTranslations;
   darkmodetoggle: DarkModeToggle;
   auth: AuthTranslations;
   home: HomeTranslations;
-  
 };
-
-
