@@ -102,10 +102,10 @@ garminWebhookRouter.post("/dailies", async (req, res) => {
 
   try {
     // Handle array wrapped by summary type
-    // Expect HRV payload under `hrv` or `hrvSummaries`; fall back to raw body
+    // Expect dailies payload under `dailySummaries` or `dailies`; fall back to raw body
     const payload =
-      req.body.hrv ||
-      req.body.hrvSummaries ||
+      req.body.dailySummaries ||
+      req.body.dailies ||
       (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {

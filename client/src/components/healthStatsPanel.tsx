@@ -12,11 +12,7 @@ type Props = {
 
 type HealthMetrics = Record<string, string | number>;
 
-export default function HealthStatsPanel({
-  selected,
-  onClose,
-  selectedDate,
-}: Props) {
+export default function HealthStatsPanel({selected, onClose, selectedDate}: Props) {
   const { t } = useTranslation();
   const [metrics, setMetrics] = useState<HealthMetrics>({});
   const [error, setError] = useState<string | null>(null);
