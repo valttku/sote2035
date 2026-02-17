@@ -68,6 +68,15 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
           body_battery_charged, body_battery_drained, steps_goal, 
           moderate_intensity_duration_in_seconds, 
           vigorous_intensity_duration_in_seconds,
+          intensity_duration_goal_in_seconds,
+          -- weekly total (seconds), weighting vigorous = 2x
+          (
+            SELECT COALESCE(SUM(moderate_intensity_duration_in_seconds + (vigorous_intensity_duration_in_seconds * 2)), 0)::int
+            FROM app.user_dailies_garmin
+            WHERE user_id = $1
+              AND day_date >= date_trunc('week', $2::date)::date
+              AND day_date <= $2::date
+          ) AS weekly_intensity_total_seconds,
           floors_climbed_goal, source, created_at, updated_at
         FROM app.user_dailies_garmin 
         WHERE user_id = $1 AND day_date = $2::date`,

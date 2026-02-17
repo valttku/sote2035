@@ -10,6 +10,8 @@ export type Dailies = {
   active_time_in_seconds: number;
   moderate_intensity_duration_in_seconds: number;
   vigorous_intensity_duration_in_seconds: number;
+  weekly_intensity_total_seconds: number;
+  intensity_duration_goal_in_seconds: number;
   distance_in_meters: number;
   avg_heart_rate: number;
   resting_heart_rate: number;
@@ -75,12 +77,17 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
         />
         <StatCard
           label="Intensity Minutes"
-          value={`M: ${((dailies.moderate_intensity_duration_in_seconds ?? 0) / 60).toFixed(0)} 
-          | V: ${((dailies.vigorous_intensity_duration_in_seconds ?? 0) / 60).toFixed(0)}`}
+          value={`Moderate: ${(dailies.moderate_intensity_duration_in_seconds / 60).toFixed(0)} Vigorous: ${(dailies.vigorous_intensity_duration_in_seconds / 60).toFixed(0)}`} 
           icon="⏱"
         />
         <StatCard
-          label="Rest Heart Rate"
+          label="Weekly Intensity Minutes"
+          value={`${(dailies.weekly_intensity_total_seconds / 60).toFixed(0)} 
+          / ${(dailies.intensity_duration_goal_in_seconds / 60).toFixed(0)} min`}
+          icon="⏱"
+        />
+        <StatCard
+          label="Resting Heart Rate"
           value={`${dailies.resting_heart_rate} bpm`}
           icon="❤️"
         />
