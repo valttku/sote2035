@@ -137,7 +137,7 @@ export async function getHealthStatEntriesData(
 
       // Sleep: if total sleep is between 7-10 hours, status = good, otherwise low or high
       if (row.kind === "sleep_daily" && key === "Total sleep") {
-        goal = { min: 7, max: 10 };
+        goal = { min: 7 * 60, max: 10 * 60 };
       }
 
       // Stress: high if above 75, otherwise good
