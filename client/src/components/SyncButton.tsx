@@ -1,10 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function SyncButton() {
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [garminLinked, setGarminLinked] = useState<boolean | null>(null);
+
+  // fetch integration status on mount
+  useEffect(() => {
+    const checkGarminLinked = async () => {
+      try {
+        const res = await fetch("/api/v1/integrations/garmin/status", {
+          credentials: "include",
+        });
+        const data = await res.json();
+        setGarminLinked(data.linked ?? false);
+      } catch {
+        setGarminLinked(false);
+      }
+    };
+    checkGarminLinked();
+  }, []);
 
   const handleSync = async () => {
+    if (!garminLinked) {
+      setSyncMessage("✗ Garmin account not linked");
+      return;
+    }
+
     setSyncing(true);
     setSyncMessage(null);
     try {
@@ -15,7 +37,7 @@ export default function SyncButton() {
       const data = await response.json();
       if (response.ok) {
         setSyncMessage(
-          `✓ Synced: ${Object.entries(data.results || {})
+          `✓ Garmin synced: ${Object.entries(data.results || {})
             .filter(([key]) => key !== "errors")
             .map(([key, count]) => `${key}: ${count}`)
             .join(", ")}`,
@@ -33,14 +55,13 @@ export default function SyncButton() {
 
   return (
     <>
-    
-      {/* Sync Button - Bottom Right Corner */}
       <button
         onClick={handleSync}
         disabled={syncing}
-        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-full p-4 shadow-lg transition-all duration-200 hover:scale-110 disabled:cursor-not-allowed z-50"
+        className="flex fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-full p-4 shadow-lg transition-all duration-200 hover:scale-110 disabled:cursor-not-allowed z-50"
         title="Sync Garmin data"
       >
+        Sync Garmin Data
         <svg
           className={`w-6 h-6 ${syncing ? "animate-spin" : ""}`}
           fill="none"
@@ -56,7 +77,6 @@ export default function SyncButton() {
         </svg>
       </button>
 
-      {/* Sync Status Message */}
       {syncMessage && (
         <div className="fixed bottom-24 right-6 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg text-sm max-w-xs z-50">
           {syncMessage}
