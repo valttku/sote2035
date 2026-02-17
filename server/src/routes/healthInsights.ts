@@ -61,7 +61,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
 
     // Fetch data from dailies table
     const dailiesResult = await db.query(
-      `SELECT id, user_id, day_date, summary_id, active_kilocalories, 
+      `SELECT id, user_id, day_date, active_kilocalories, 
           bmr_kilocalories, steps, distance_in_meters,  
           active_time_in_seconds, floors_climbed,  
           avg_heart_rate, resting_heart_rate, avg_stress_level, 
@@ -123,6 +123,29 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     );
     console.log(`[health-insights] Sleep data fetched:`, sleepResult.rows);
 
+    // Fetch respiration data
+    const respResult = await db.query(
+      `SELECT 
+          id, user_id, day_date,
+          (
+            SELECT MIN((value)::float)
+            FROM jsonb_each_text(time_offset_epoch_to_breaths)
+          ) AS min_respiration,
+          (
+            SELECT MAX((value)::float)
+            FROM jsonb_each_text(time_offset_epoch_to_breaths)
+          ) AS max_respiration,
+          (
+            SELECT AVG((value)::float)
+            FROM jsonb_each_text(time_offset_epoch_to_breaths)
+          ) AS avg_respiration
+      FROM app.user_respiration_garmin
+      WHERE user_id = $1 AND day_date = $2::date;
+    `,
+      [userId, date],
+    );
+    console.log(`[health-insights] Respiration data fetched:`, respResult.rows);
+
     const insights = {
       date,
       profile,
@@ -130,6 +153,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       dailies: dailiesResult.rows,
       sleep: sleepResult.rows,
       stress: stressResult.rows,
+      respiration: respResult.rows,
     };
 
     res.json(insights);
