@@ -6,14 +6,6 @@ import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
 import { refreshGarminToken } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
-import {
-  mapGarminDailiesToRows,
-  upsertGarminDailies,
-} from "../../db/garmin/dailiesDb.js";
-import {
-  mapGarminActivityToRow,
-  upsertGarminActivity,
-} from "../../db/garmin/activitiesDb.js";
 
 // Router for Garmin integration endpoints
 
