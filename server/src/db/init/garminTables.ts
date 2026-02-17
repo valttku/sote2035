@@ -8,10 +8,42 @@ export async function createGarminTables() {
   await db.query(`
     create or replace function app.ensure_health_day_exists()
     returns trigger as $$
+    declare
+      v_json jsonb;
+      v_user integer;
+      v_day date;
+      v_start_text text;
+      v_start_num double precision;
     begin
-      insert into app.health_days (user_id, day_date)
-      values (new.user_id, new.day_date)
-      on conflict (user_id, day_date) do nothing;
+      -- Use row_to_json to safely inspect NEW without assuming specific columns
+      v_json := row_to_json(NEW)::jsonb;
+
+      -- extract user_id if present
+      if v_json ? 'user_id' then
+        v_user := (v_json ->> 'user_id')::integer;
+      end if;
+
+      if v_user is null then
+        return new;
+      end if;
+
+      -- prefer explicit day_date, otherwise fall back to start_time_in_seconds
+      if v_json ? 'day_date' then
+        v_day := (v_json ->> 'day_date')::date;
+      elsif v_json ? 'start_time_in_seconds' then
+        v_start_text := v_json ->> 'start_time_in_seconds';
+        if v_start_text is not null and v_start_text <> '' then
+          v_start_num := v_start_text::double precision;
+          v_day := to_timestamp(v_start_num)::date;
+        end if;
+      end if;
+
+      if v_day is not null then
+        insert into app.health_days (user_id, day_date)
+        values (v_user, v_day)
+        on conflict (user_id, day_date) do nothing;
+      end if;
+
       return new;
     end;
     $$ language plpgsql;
