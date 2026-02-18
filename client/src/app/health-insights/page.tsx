@@ -7,7 +7,7 @@ import { UserProfile, UserProfileSection } from "./sections/UserProfileSection";
 import { Sleep, SleepSection } from "./sections/SleepSection";
 import { Stress, StressSection } from "./sections/StressSection";
 import { Respiration, RespirationSection } from "./sections/RespirationSection";
-import { useHealthData } from "./hooks/useHealthDataGarmin";
+import { useHealthData } from "../../hooks/useHealthDataGarmin";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
 

@@ -1,5 +1,5 @@
 "use client";
-import { StatCard } from "../components/StatCard";
+import { StatCard } from "../../../components/StatCard";
 
 export type UserProfile = {
   id: string;

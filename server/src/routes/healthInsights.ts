@@ -40,13 +40,35 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
         [userId],
       ),
       db.query(
-        `SELECT vo2_max, vo2_max_cycling, fitness_age
-         FROM app.user_metrics_garmin
-         WHERE user_id = $1 AND day_date = (
-           SELECT MAX(day_date)
-           FROM app.user_metrics_garmin
-           WHERE user_id = $1 AND day_date <= $2::date
-         )`,
+        `SELECT
+           (
+             SELECT vo2_max
+             FROM app.user_metrics_garmin
+             WHERE user_id = $1
+               AND vo2_max IS NOT NULL
+               AND day_date <= $2::date
+             ORDER BY day_date DESC
+             LIMIT 1
+           ) AS vo2_max,
+           (
+             SELECT vo2_max_cycling
+             FROM app.user_metrics_garmin
+             WHERE user_id = $1
+               AND vo2_max_cycling IS NOT NULL
+               AND day_date <= $2::date
+             ORDER BY day_date DESC
+             LIMIT 1
+           ) AS vo2_max_cycling,
+           (
+             SELECT fitness_age
+             FROM app.user_metrics_garmin
+             WHERE user_id = $1
+               AND fitness_age IS NOT NULL
+               AND day_date <= $2::date
+             ORDER BY day_date DESC
+             LIMIT 1
+           ) AS fitness_age
+        `,
         [userId, date],
       ),
     ]);
