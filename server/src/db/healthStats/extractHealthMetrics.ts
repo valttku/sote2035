@@ -1,6 +1,6 @@
 // Format health stats data into human-friendly metrics for display
 
-export function formatHealthEntry(kind: string, data: any) {
+export function extractHealthMetrics(kind: string, data: any) {
   const metrics: Record<string, number> = {};
 
   if (!data || typeof data !== "object") return metrics;
@@ -12,11 +12,7 @@ export function formatHealthEntry(kind: string, data: any) {
       break;
 
     case "sleep_daily":
-      if (data.duration_seconds != null) {
-        metrics["Total sleep"] = +(
-          data.duration_seconds / 60
-        ).toFixed(0);
-      }
+      if (data.duration_seconds != null) {metrics["Total sleep"] = +(data.duration_seconds / 60).toFixed(0);}
       break;
 
     case "activity_daily":
@@ -31,15 +27,10 @@ export function formatHealthEntry(kind: string, data: any) {
         metrics["Floors climbed"] = data.floors_climbed;
 
       if (data.intensity_duration_seconds != null)
-        metrics["Intensity duration today"] = +(
-          data.intensity_duration_seconds / 60
-        ).toFixed(0);
+        metrics["Intensity duration today"] = +(data.intensity_duration_seconds / 60).toFixed(0);
 
       if (data.weekly_intensity_total_seconds != null)
-        metrics["Intensity duration this week"] = +(
-          data.weekly_intensity_total_seconds / 60
-        ).toFixed(0);
-
+        metrics["Intensity duration this week"] = +(data.weekly_intensity_total_seconds / 60).toFixed(0);
       break;
 
     case "resp_daily":
