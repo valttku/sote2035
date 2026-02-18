@@ -85,7 +85,7 @@ export default function Home() {
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
           <div className="flex flex-row items-start justify-center sm:gap-20 md:gap-70 w-full text-xs sm:text-sm md:text-lg">
-            <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-50">
+            <div className="relative w-1/2 max-w-[200px] min-w-[200px] flex-shrink-0 md:translate-x-50">
               <img
                 src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
                 alt="Digital twin"
@@ -117,7 +117,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="w-1/2 max-w-[450px] p-4 md:p-6 flex flex-col justify-start text-left">
+            <div className="w-1/2 max-w-[480px] min-w-[200px] md:p-6 flex flex-col justify-start text-left">
               {!selected && (
                 <div className="mb-2">
                   <p className="text-xs sm:text-sm md:text-base">

@@ -119,7 +119,7 @@ export async function getHealthStatEntriesData(
         }
 
         if (
-          key === "Intensity duration this week (min)" &&
+          key === "Intensity duration this week" &&
           row.data.intensity_duration_goal_in_seconds != null
         ) {
           const min = row.data.intensity_duration_goal_in_seconds / 60;
@@ -162,7 +162,7 @@ export async function getHealthStatEntriesData(
       // enough history exists, otherwise use a standard healthy range.
       if (
         row.kind === "resp_daily" &&
-        key === "Average respiratory rate (breaths/min)"
+        key === "Average respiratory rate"
       ) {
         if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
@@ -190,16 +190,21 @@ export async function getHealthStatEntriesData(
         else status = "good";
       }
 
-      // Format display value for the UI. We present some metrics in human-
-      // friendly formats (e.g., sleep as hours/minutes) and round others.
+      // Format display value for the UI.
       let displayValue: number | string;
 
       if (key === "Total sleep") {
         displayValue = formatMinutesHM(numericValue);
-      } else if (key === "Average respiratory rate (breaths/min)") {
-        displayValue = +numericValue.toFixed(2);
-      } else if (key === "Resting heart rate") {
-        displayValue = +numericValue.toFixed(2);
+      }else if (key ===  "Distance") {
+        displayValue = `${numericValue} km`;
+      } else if (key === "Intensity duration today") {
+        displayValue = `${numericValue} min`;
+      } else if (key === "Intensity duration this week") {
+        displayValue = `${value} / ${goal?.min} min`;
+      } else if (key === "Average respiratory rate") {
+        displayValue = +numericValue.toFixed(2) + " breaths/min";
+      } else if (key === "Resting heart rate" || key === "Average heart rate") {
+        displayValue = +numericValue.toFixed(2) + " bpm";
       } else if (goal?.min !== undefined) {
         displayValue = `${numericValue} / ${goal.min}`;
       } else {
