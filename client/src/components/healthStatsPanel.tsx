@@ -63,31 +63,21 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
   }
 
   return (
-    <li className="grid grid-cols-1 sm:grid-cols-[1fr_200px] items-start pb-2 gap-4 overflow-hidden">
+    <li className="grid grid-cols-[40%_40%_min-content] items-start pb-2 gap-2">
       <span>{label}</span>
-
-      <div className="flex items-center justify-between w-full">
-        {/* LEFT: value */}
-        <span>{displayValue}</span>
-
-        {/* RIGHT: badge + tooltip */}
-        {status && (
-          <span className="relative group/badge">
-            <StatusBadge status={status} />
-
-            {tooltip && (
-              <span
-                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1
-                       w-max rounded bg-gray-700 text-white text-xs
-                       px-2 py-1 opacity-0 group-hover/badge:opacity-100
-                       transition-opacity whitespace-pre-line z-10"
-              >
-                {tooltip}
-              </span>
-            )}
-          </span>
-        )}
-      </div>
+      <span>{displayValue}</span>
+      {status ? (
+        <span className="relative group/badge pr-0">
+          <StatusBadge status={status} />
+          {tooltip && (
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-max rounded bg-gray-700 text-white text-xs px-2 py-1 opacity-0 group-hover/badge:opacity-100 transition-opacity whitespace-pre-line z-10">
+              {tooltip}
+            </span>
+          )}
+        </span>
+      ) : (
+        <span />
+      )}
     </li>
   );
 }
@@ -165,7 +155,7 @@ export default function HealthStatsPanel({
       )}
 
       {/* Metrics list */}
-      <ul className="min-h-[170px] space-y-2">
+      <ul className="min-h-[170px] space-y-2  w-auto">
         {Object.entries(metrics).map(([key, value]) => (
           <MetricRow key={key} label={key} value={value} />
         ))}

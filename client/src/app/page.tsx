@@ -117,7 +117,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="w-1/2 max-w-[480px] min-w-[200px] md:p-6 flex flex-col justify-start text-left">
+            <div className="w-1/2 max-w-[auto] min-w-[200px] flex flex-col justify-start text-left">
               {!selected && (
                 <div className="mb-2">
                   <p className="text-xs sm:text-sm md:text-base">
