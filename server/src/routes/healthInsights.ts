@@ -113,14 +113,13 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     const stressResult = await db.query(
       `SELECT id,
           avg_stress_level,
-          max_stress_level,
-          stress_duration_in_seconds,
           rest_stress_duration_in_seconds,
-          activity_stress_duration_in_seconds,
           low_stress_duration_in_seconds,
           medium_stress_duration_in_seconds,
           high_stress_duration_in_seconds,
-          stress_qualifier
+          stress_duration_in_seconds,
+          stress_qualifier,
+          updated_at
       FROM app.user_dailies_garmin
       WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],
@@ -148,7 +147,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     // Fetch respiration data
     const respResult = await db.query(
       `SELECT 
-          id, user_id, day_date,
+          id, user_id, day_date, updated_at,
           (
             SELECT MIN((value)::float)
             FROM jsonb_each_text(time_offset_epoch_to_breaths)
