@@ -27,10 +27,10 @@ export function extractHealthMetrics(kind: string, data: any) {
         metrics["Floors climbed"] = data.floors_climbed;
 
       if (data.intensity_duration_seconds != null)
-        metrics["Intensity duration today"] = +(data.intensity_duration_seconds / 60).toFixed(0);
+        metrics["Exercise today"] = +(data.intensity_duration_seconds / 60).toFixed(0);
 
       if (data.weekly_intensity_total_seconds != null)
-        metrics["Intensity duration this week"] = +(data.weekly_intensity_total_seconds / 60).toFixed(0);
+        metrics["Exercise this week"] = +(data.weekly_intensity_total_seconds / 60).toFixed(0);
       break;
 
     case "resp_daily":

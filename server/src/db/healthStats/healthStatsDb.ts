@@ -119,7 +119,7 @@ export async function getHealthStatEntriesData(
         }
 
         if (
-          key === "Intensity duration this week" &&
+          key === "Exercise this week" &&
           row.data.intensity_duration_goal_in_seconds != null
         ) {
           const min = row.data.intensity_duration_goal_in_seconds / 60;
@@ -196,10 +196,10 @@ export async function getHealthStatEntriesData(
         displayValue = formatMinutesHM(numericValue);
       } else if (key === "Distance") {
         displayValue = `${numericValue} km`;
-      } else if (key === "Intensity duration today") {
-        displayValue = `${numericValue} min`;
-      } else if (key === "Intensity duration this week") {
+      } else if (key === "Exercise this week") {
         displayValue = `${value} / ${goal?.min} min`;
+      } else if (key === "Exercise today") {
+        displayValue = `${numericValue} min`;
       } else if (key === "Average respiratory rate") {
         displayValue = +numericValue.toFixed(2) + " breaths/min";
       } else if (key === "Resting heart rate" || key === "Average heart rate") {
