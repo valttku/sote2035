@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
 import AppLayout from "../components/AppLayout";
-import HealthStatsPanel, { type BodyPartId } from "../components/HealthStatsPanel";
+import HealthStatsPanel, {
+  type BodyPartId,
+} from "../components/HealthStatsPanel";
 import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function Home() {
@@ -61,14 +63,20 @@ export default function Home() {
 
   const isFemale = avatarType === "female";
 
-  const BODY_PARTS: Array<{ id: BodyPartId; label: string; top: string; left: string }> =
-    useMemo(() =>  [
-        { id: "brain", label: t.home.bodyParts.brain, top: "3%", left: "50%" },
-        { id: "heart", label: t.home.bodyParts.heart, top: "25%", left: "50%" },
-        { id: "lungs", label: t.home.bodyParts.lungs, top: "22%", left: "35%" },
-        { id: "legs", label: t.home.bodyParts.legs, top: "75%", left: "60%" },
-      ],
-     [t]);
+  const BODY_PARTS: Array<{
+    id: BodyPartId;
+    label: string;
+    top: string;
+    left: string;
+  }> = useMemo(
+    () => [
+      { id: "brain", label: t.home.bodyParts.brain, top: "3%", left: "50%" },
+      { id: "heart", label: t.home.bodyParts.heart, top: "25%", left: "50%" },
+      { id: "lungs", label: t.home.bodyParts.lungs, top: "22%", left: "35%" },
+      { id: "legs", label: t.home.bodyParts.legs, top: "75%", left: "60%" },
+    ],
+    [t],
+  );
 
   return (
     <AppLayout>
@@ -76,7 +84,7 @@ export default function Home() {
         <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
-          <div className="flex flex-row items-start justify-center gap-70">
+          <div className="flex flex-row items-start justify-center sm:gap-20 md:gap-70 w-full text-xs sm:text-sm md:text-lg">
             <div className="relative w-1/2 max-w-[200px] sm:w-[45vw] flex-shrink-0 md:translate-x-50">
               <img
                 src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
@@ -100,8 +108,8 @@ export default function Home() {
                       selected === id
                         ? "rgba(10, 33, 90, 0.7)"
                         : alerts[id]
-                        ? "rgba(220, 38, 81, 0.95)"
-                        : "rgba(203, 215, 249, 0.8)",
+                          ? "rgba(220, 38, 81, 0.95)"
+                          : "rgba(203, 215, 249, 0.8)",
                   }}
                   className={alerts[id] ? "animate-pulse" : undefined}
                   aria-label={id}
@@ -112,11 +120,18 @@ export default function Home() {
             <div className="w-1/2 max-w-[450px] p-4 md:p-6 flex flex-col justify-start text-left">
               {!selected && (
                 <div className="mb-2">
-                  <p className="text-sm md:text-base">{t.home.selectBodyPart}</p>
+                  <p className="text-xs sm:text-sm md:text-base">
+                    {t.home.selectBodyPart}
+                  </p>
                 </div>
               )}
 
-              {selected && <HealthStatsPanel selected={selected} onClose={() => setSelected(null)} />}
+              {selected && (
+                <HealthStatsPanel
+                  selected={selected}
+                  onClose={() => setSelected(null)}
+                />
+              )}
             </div>
           </div>
         </div>

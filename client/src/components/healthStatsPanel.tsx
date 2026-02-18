@@ -4,11 +4,19 @@ import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
-type Props = {selected: BodyPartId; onClose: () => void; selectedDate?: string;};
+type Props = {
+  selected: BodyPartId;
+  onClose: () => void;
+  selectedDate?: string;
+};
 
 type HealthMetrics = Record<string, string | number>;
 
-export default function HealthStatsPanel({ selected, onClose, selectedDate}: Props) {
+export default function HealthStatsPanel({
+  selected,
+  onClose,
+  selectedDate,
+}: Props) {
   const { t } = useTranslation();
   const [metrics, setMetrics] = useState<HealthMetrics>({});
   const [error, setError] = useState<string | null>(null);
@@ -61,11 +69,14 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
 
   return (
     <div className="panel-animation ui-component-styles p-4 pt-2">
-
       {/* Header with close button */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">{t.home.bodyParts[selected]}</h1>
-        <button className="mb-5" onClick={onClose}>✕</button>
+        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">
+          {t.home.bodyParts[selected]}
+        </h1>
+        <button className="mb-5" onClick={onClose}>
+          ✕
+        </button>
       </div>
 
       {/* Status messages */}
@@ -83,7 +94,7 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
 
           let displayValue = "";
           let status: "low" | "good" | "high" | undefined;
-          let goalText = ""; // for tooltip
+          let tooltip = "";
 
           if (isMetricObject) {
             const metric = value as {
@@ -96,13 +107,16 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
 
             if (metric.goal) {
               if (key === "Total sleep") {
-                goalText = `Range: ${metric.goal.min / 60}h - ${metric.goal.max / 60}h`;
-              } else if (metric.goal.min !== undefined && metric.goal.max !== undefined) {
-                goalText = `Range: ${metric.goal.min} - ${metric.goal.max}`;
+                tooltip = `Range: ${metric.goal.min / 60}h - ${metric.goal.max / 60}h`;
+              } else if (
+                metric.goal.min !== undefined &&
+                metric.goal.max !== undefined
+              ) {
+                tooltip = `Range: ${metric.goal.min} - ${metric.goal.max}`;
               } else if (metric.goal.min !== undefined) {
-                goalText = `Min: ${metric.goal.min}`;
+                tooltip = `Min: ${metric.goal.min}`;
               } else if (metric.goal.max !== undefined) {
-                goalText = `Max: ${metric.goal.max}`;
+                tooltip = `Max: ${metric.goal.max}`;
               }
             }
           } else {
@@ -110,15 +124,17 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
           }
 
           return (
-            <li key={key} className="flex justify-between items-center pb-1 relative group">
-              
+            <li
+              key={key}
+              className="flex justify-between items-center pb-1 relative group"
+            >
               <span className="font-medium">{key}</span>
               <div className="flex items-center gap-2">
                 <span className="relative">
                   {displayValue}
-                  {goalText && (
-                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 w-max max-w-xs rounded bg-gray-700 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-pre-line z-10">
-                      {goalText}
+                  {tooltip && (
+                    <span className="absolute w-max bottom-full rounded bg-gray-700 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-pre-line z-10">
+                      {tooltip}
                     </span>
                   )}
                 </span>
