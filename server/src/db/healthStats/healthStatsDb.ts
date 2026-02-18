@@ -1,5 +1,5 @@
 import { db } from "../db.js";
-import { formatHealthEntry } from "./formatHealthStats.js";
+import { extractHealthMetrics } from "./extractHealthMetrics.js";
 
 export type MetricStatus = "low" | "good" | "high" | undefined;
 type MetricGoal = { min?: number; max?: number };
@@ -72,7 +72,7 @@ export async function getHealthStatEntriesData(
   // We use this map below to compute personalized goals / ranges per metric.
   const historyMap: Record<string, number[]> = {};
   for (const row of historyRows) {
-    const metrics = formatHealthEntry(row.kind, row.data);
+    const metrics = extractHealthMetrics(row.kind, row.data);
     for (const [key, value] of Object.entries(metrics)) {
       const num = parseNumeric(value);
       if (num != null) {
@@ -84,7 +84,7 @@ export async function getHealthStatEntriesData(
   const result: HealthData = {};
 
   for (const row of todayRows) {
-    const metrics = formatHealthEntry(row.kind, row.data);
+    const metrics = extractHealthMetrics(row.kind, row.data);
 
     for (const [key, value] of Object.entries(metrics)) {
       const numericValue = parseNumeric(value);
@@ -119,7 +119,7 @@ export async function getHealthStatEntriesData(
         }
 
         if (
-          key === "Intensity duration this week" &&
+          key === "Exercise this week" &&
           row.data.intensity_duration_goal_in_seconds != null
         ) {
           const min = row.data.intensity_duration_goal_in_seconds / 60;
@@ -129,7 +129,8 @@ export async function getHealthStatEntriesData(
         }
       }
 
-      // Sleep: if total sleep is between 7-10 hours, status = good, otherwise low or high
+      // Sleep: if total sleep is between 7-10 hours, status = good,
+      // otherwise low or high
       if (row.kind === "sleep_daily" && key === "Total sleep") {
         goal = { min: 7 * 60, max: 10 * 60 };
       }
@@ -139,8 +140,8 @@ export async function getHealthStatEntriesData(
         goal = { max: 75 };
       }
 
-      // Resting heart rate: prefer personalized ranges when
-      // enough history exists, otherwise use a standard healthy range.
+      // Resting heart rate: prefer personalized ranges when enough history exists,
+      // otherwise use a standard healthy range.
       if (row.kind === "heart_daily" && key === "Resting heart rate") {
         if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
@@ -158,12 +159,9 @@ export async function getHealthStatEntriesData(
         }
       }
 
-      // Respiratory rate: prefer personalized ranges when
-      // enough history exists, otherwise use a standard healthy range.
-      if (
-        row.kind === "resp_daily" &&
-        key === "Average respiratory rate"
-      ) {
+      // Respiratory rate: prefer personalized ranges when enough history exists,
+      // otherwise use a standard healthy range.
+      if (row.kind === "resp_daily" && key === "Average respiratory rate") {
         if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
           const stdDev = Math.sqrt(
@@ -180,7 +178,8 @@ export async function getHealthStatEntriesData(
         }
       }
 
-      // Calculate status: if min is defined and value is below min, status = low
+      // Calculate status:
+      // if min is defined and value is below min, status = low
       // if max is defined and value is above max, status = high
       // if value is within range, status = good
       if (goal) {
@@ -195,12 +194,12 @@ export async function getHealthStatEntriesData(
 
       if (key === "Total sleep") {
         displayValue = formatMinutesHM(numericValue);
-      }else if (key ===  "Distance") {
+      } else if (key === "Distance") {
         displayValue = `${numericValue} km`;
-      } else if (key === "Intensity duration today") {
-        displayValue = `${numericValue} min`;
-      } else if (key === "Intensity duration this week") {
+      } else if (key === "Exercise this week") {
         displayValue = `${value} / ${goal?.min} min`;
+      } else if (key === "Exercise today") {
+        displayValue = `${numericValue} min`;
       } else if (key === "Average respiratory rate") {
         displayValue = +numericValue.toFixed(2) + " breaths/min";
       } else if (key === "Resting heart rate" || key === "Average heart rate") {

@@ -46,7 +46,21 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl">Sleep Summary </h2>
+      <h2 className="text-2xl">
+        Sleep Summary{" "}
+        <span className="text-sm font-normal">
+          (updated at{" "}
+          {new Date(sleep.updated_at).toLocaleString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour12: false,
+          })}
+          )
+        </span>
+      </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard

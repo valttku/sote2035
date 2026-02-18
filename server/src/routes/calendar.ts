@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "../db/db.js";
 import { authRequired } from "../middleware/authRequired.js";
-import { formatHealthEntry } from "../db/healthStats/formatHealthStats.js";
+import { extractHealthMetrics } from "../db/healthStats/extractHealthMetrics.js";
 
 export const calendarRouter = Router();
 
@@ -66,13 +66,13 @@ calendarRouter.get("/health-stats", authRequired, async (req, res, next) => {
       [userId, date],
     );
 
-    // Format entries based on kind
+    // Extract health metrics for each entry
     const formattedEntries = entries.rows.map((row) => ({
       ...row,
       data:
         row.kind === "manual_activity"
           ? row.data
-          : formatHealthEntry(row.kind, row.data),
+          : extractHealthMetrics(row.kind, row.data),
     }));
 
     res.json({ date, entries: formattedEntries });
@@ -116,12 +116,9 @@ calendarRouter.get("/activities", authRequired, async (req, res, next) => {
   }
 });
 
-// Add a manual activity entry for a given date and user (adds manual_activity to health_stat_entries)
+// Add a manual_activity to health_stat_entries
 // POST /api/v1/calendar/manual-activities
-calendarRouter.post(
-  "/manual-activities",
-  authRequired,
-  async (req, res, next) => {
+calendarRouter.post("/manual-activities", authRequired, async (req, res, next) => {
     try {
       const userId = (req as any).userId as number;
       const { date, title, type, duration, calories, steps } = req.body;
@@ -148,10 +145,7 @@ calendarRouter.post(
 
 // Delete a manual activity entry from health_stat_entries by id
 // DELETE /api/v1/calendar/manual-activities/:id
-calendarRouter.delete(
-  "/manual-activities/:id",
-  authRequired,
-  async (req, res, next) => {
+calendarRouter.delete("/manual-activities/:id", authRequired, async (req, res, next) => {
     try {
       const userId = (req as any).userId as number;
       const entryId = req.params.id;
