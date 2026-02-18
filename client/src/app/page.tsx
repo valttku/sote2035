@@ -1,9 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
 import AppLayout from "../components/AppLayout";
-import HealthStatsPanel, {
-  type BodyPartId,
-} from "../components/HealthStatsPanel";
+import HealthStatsPanel, { type BodyPartId } from "../components/HealthStatsPanel";
 import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function Home() {
