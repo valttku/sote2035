@@ -7,6 +7,7 @@ export type Respiration = {
   min_respiration: number;
   max_respiration: number;
   avg_respiration: number;
+  updated_at: string;
 };
 
 export function RespirationSection({
@@ -18,7 +19,21 @@ export function RespirationSection({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl">Respiration Summary</h2>
+      <h2 className="text-2xl">
+        Respiration Summary{" "}
+        <span className="text-sm font-normal">
+          (updated at{" "}
+          {new Date(respiration.updated_at).toLocaleString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour12: false,
+          })}
+          )
+        </span>
+      </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard

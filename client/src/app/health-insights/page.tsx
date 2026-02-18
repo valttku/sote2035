@@ -83,7 +83,9 @@ export default function HealthInsightsPage() {
             dataToAnalyze,
             null,
             2,
-          )}'Provide insights and suggestions based on the data for me. Max 10 sentences.`,
+          )}'If the updated_at date is today, use present tense ("so far today you have...").If the date is in the past, use past tense ("on x date you had..."). 
+          Provide insights TO ME in a concise manner, max 5 sentences. Focus on the most interesting or unusual aspects of the data. 
+          If possible, provide actionable advice based on the data. If the data looks normal, say that everything looks good!`,
         }),
       });
 

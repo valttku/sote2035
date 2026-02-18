@@ -34,7 +34,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     // Fetch profile and metrics in parallel
     const [profileResult, metricsResult] = await Promise.all([
       db.query(
-        `SELECT id, gender, height, weight
+        `SELECT id, gender, height, weight, updated_at
          FROM app.users
          WHERE id = $1`,
         [userId],
@@ -85,9 +85,9 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     const dailiesResult = await db.query(
       `SELECT id, user_id, day_date, active_kilocalories, 
           bmr_kilocalories, steps, distance_in_meters,  
-          active_time_in_seconds, floors_climbed,  
-          avg_heart_rate, resting_heart_rate, avg_stress_level, 
-          body_battery_charged, body_battery_drained, steps_goal, 
+          floors_climbed, avg_heart_rate, resting_heart_rate, 
+          ax_heart_rate, avg_stress_level, steps_goal,
+          body_battery_charged, body_battery_drained,
           moderate_intensity_duration_in_seconds, 
           vigorous_intensity_duration_in_seconds,
           intensity_duration_goal_in_seconds,
@@ -138,7 +138,16 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
 
     // Fetch sleep data
     const sleepResult = await db.query(
-      `SELECT * FROM app.user_sleeps_garmin
+      `SELECT id, user_id, day_date, updated_at,
+        duration_in_seconds,
+        total_nap_duration_in_seconds,
+        start_time_in_seconds,
+        unmeasurable_sleep_in_seconds,
+        deep_sleep_in_seconds,
+        light_sleep_in_seconds,
+        rem_sleep_in_seconds,
+        awake_duration_in_seconds
+      FROM app.user_sleeps_garmin
       WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],
     );
