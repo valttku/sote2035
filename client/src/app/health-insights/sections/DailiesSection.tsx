@@ -1,5 +1,5 @@
 "use client";
-import { StatCard } from "../components/StatCard";
+import { StatCard } from "../../../components/StatCard";
 
 export type Dailies = {
   id: string;
@@ -77,7 +77,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
         />
         <StatCard
           label="Intensity Minutes"
-          value={`Moderate: ${(dailies.moderate_intensity_duration_in_seconds / 60).toFixed(0)} Vigorous: ${(dailies.vigorous_intensity_duration_in_seconds / 60).toFixed(0)}`} 
+          value={`Moderate: ${(dailies.moderate_intensity_duration_in_seconds / 60).toFixed(0)} Vigorous: ${(dailies.vigorous_intensity_duration_in_seconds / 60).toFixed(0)}`}
           icon="⏱"
         />
         <StatCard

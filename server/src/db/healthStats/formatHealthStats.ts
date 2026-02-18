@@ -23,7 +23,7 @@ export function formatHealthEntry(kind: string, data: any) {
       if (data.steps != null) metrics["Steps"] = data.steps;
 
       if (data.distance_meters != null)
-        metrics["Distance (km)"] = +(data.distance_meters / 1000).toFixed(3);
+        metrics["Distance"] = +(data.distance_meters / 1000).toFixed(3);
 
       if (data.total_kcal != null) metrics["Total kcal"] = data.total_kcal;
 
@@ -31,12 +31,12 @@ export function formatHealthEntry(kind: string, data: any) {
         metrics["Floors climbed"] = data.floors_climbed;
 
       if (data.intensity_duration_seconds != null)
-        metrics["Intensity duration today (min)"] = +(
+        metrics["Intensity duration today"] = +(
           data.intensity_duration_seconds / 60
         ).toFixed(0);
 
       if (data.weekly_intensity_total_seconds != null)
-        metrics["Intensity duration this week (min)"] = +(
+        metrics["Intensity duration this week"] = +(
           data.weekly_intensity_total_seconds / 60
         ).toFixed(0);
 
@@ -44,7 +44,7 @@ export function formatHealthEntry(kind: string, data: any) {
 
     case "resp_daily":
       if (data.resp_rate != null)
-        metrics["Average respiratory rate (breaths/min)"] = data.resp_rate;
+        metrics["Average respiratory rate"] = data.resp_rate;
       break;
 
     case "stress_daily":

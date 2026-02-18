@@ -1,5 +1,5 @@
 "use client";
-import { StatCard } from "../components/StatCard";
+import { StatCard } from "../../../components/StatCard";
 import { FaBed, FaLeaf, FaExclamationTriangle, FaFire } from "react-icons/fa";
 
 export type Stress = {

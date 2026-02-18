@@ -4,11 +4,90 @@ import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type BodyPartId = "brain" | "heart" | "lungs" | "legs";
 
-type Props = {selected: BodyPartId; onClose: () => void; selectedDate?: string;};
+type Props = {
+  selected: BodyPartId;
+  onClose: () => void;
+  selectedDate?: string;
+};
 
-type HealthMetrics = Record<string, string | number>;
+type MetricValue =
+  | string
+  | number
+  | {
+      value: number;
+      status?: "low" | "good" | "high";
+      goal?: { min?: number; max?: number };
+    };
 
-export default function HealthStatsPanel({ selected, onClose, selectedDate}: Props) {
+type HealthMetrics = Record<string, MetricValue>;
+
+function StatusBadge({ status }: { status: "low" | "good" | "high" }) {
+  const styles = {
+    good: "bg-green-500/20 text-green-400",
+    low: "bg-blue-700/30 text-blue-300",
+    high: "bg-red-500/20 text-red-400",
+  };
+
+  return (
+    <span className={`px-2 py-0.5 text-xs rounded-full ${styles[status]}`}>
+      {status}
+    </span>
+  );
+}
+
+function MetricRow({ label, value }: { label: string; value: MetricValue }) {
+  const isObject =
+    typeof value === "object" && value !== null && "value" in value;
+
+  let displayValue = "";
+  let status: "low" | "good" | "high" | undefined;
+  let tooltip = "";
+
+  if (isObject) {
+    displayValue = String(value.value);
+    status = value.status;
+
+    if (value.goal) {
+      if (label === "Total sleep" && value.goal.min && value.goal.max) {
+        tooltip = `Range: ${value.goal.min / 60}h - ${value.goal.max / 60}h`;
+      } else if (value.goal.min && value.goal.max) {
+        tooltip = `Range: ${value.goal.min} - ${value.goal.max}`;
+      } else if (value.goal.min) {
+        tooltip = `Min: ${value.goal.min}`;
+      } else if (value.goal.max) {
+        tooltip = `Max: ${value.goal.max}`;
+      }
+    }
+  } else {
+    displayValue = String(value ?? "");
+  }
+
+  return (
+    <li className="grid grid-cols-[40%_40%_min-content] items-start pb-2 gap-2">
+      <span>{label}</span>
+      <span>{displayValue}</span>
+      {status ? (
+        <span className="relative group/badge pr-0">
+          <StatusBadge status={status} />
+          {tooltip && (
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-max rounded bg-gray-700 text-white text-xs px-2 py-1 opacity-0 group-hover/badge:opacity-100 transition-opacity whitespace-pre-line z-10">
+              {tooltip}
+            </span>
+          )}
+        </span>
+      ) : (
+        <span />
+      )}
+    </li>
+  );
+}
+
+// Main component
+export default function HealthStatsPanel({
+  selected,
+  onClose,
+  selectedDate,
+}: Props) {
   const { t } = useTranslation();
   const [metrics, setMetrics] = useState<HealthMetrics>({});
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +95,6 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
 
   // Fetch metrics
   useEffect(() => {
-    const controller = new AbortController();
     async function fetchHealthMetrics() {
       setMetrics({});
       setError(null);
@@ -24,7 +102,6 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
 
       try {
         const date = selectedDate || new Date().toISOString().split("T")[0];
-
         const res = await fetch(`/api/v1/home?date=${date}&part=${selected}`, {
           credentials: "include",
         });
@@ -56,90 +133,32 @@ export default function HealthStatsPanel({ selected, onClose, selectedDate}: Pro
     }
 
     fetchHealthMetrics();
-    return () => controller.abort();
   }, [selected, selectedDate]);
 
   return (
     <div className="panel-animation ui-component-styles p-4 pt-2">
-
       {/* Header with close button */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">{t.home.bodyParts[selected]}</h1>
-        <button className="mb-5" onClick={onClose}>✕</button>
+        <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">
+          {t.home.bodyParts[selected]}
+        </h1>
+        <button className="mb-5" onClick={onClose}>
+          ✕
+        </button>
       </div>
 
       {/* Status messages */}
       {loading && <p className="opacity-80">{t.home.loading}</p>}
       {error && <p className="text-red-400">{error}</p>}
       {!loading && !error && Object.keys(metrics).length === 0 && (
-        <p className="opacity-80 text-sm">{t.home.noMetrics}</p>
+        <p className="opacity-80">{t.home.noMetrics}</p>
       )}
 
       {/* Metrics list */}
-      <ul className="min-h-[170px] space-y-2 pr-5">
-        {Object.entries(metrics).map(([key, value]) => {
-          const isMetricObject =
-            typeof value === "object" && value !== null && "value" in value;
-
-          let displayValue = "";
-          let status: "low" | "good" | "high" | undefined;
-          let goalText = ""; // for tooltip
-
-          if (isMetricObject) {
-            const metric = value as {
-              value: number;
-              status?: string;
-              goal?: { min: number; max: number };
-            };
-            displayValue = String(metric.value);
-            status = metric.status as "low" | "good" | "high" | undefined;
-
-            if (metric.goal) {
-              if (key === "Total sleep") {
-                goalText = `Range: ${metric.goal.min / 60}h - ${metric.goal.max / 60}h`;
-              } else if (metric.goal.min !== undefined && metric.goal.max !== undefined) {
-                goalText = `Range: ${metric.goal.min} - ${metric.goal.max}`;
-              } else if (metric.goal.min !== undefined) {
-                goalText = `Min: ${metric.goal.min}`;
-              } else if (metric.goal.max !== undefined) {
-                goalText = `Max: ${metric.goal.max}`;
-              }
-            }
-          } else {
-            displayValue = String(value ?? "");
-          }
-
-          return (
-            <li key={key} className="flex justify-between items-center pb-1 relative group">
-              
-              <span className="font-medium">{key}</span>
-              <div className="flex items-center gap-2">
-                <span className="relative">
-                  {displayValue}
-                  {goalText && (
-                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 w-max max-w-xs rounded bg-gray-700 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-pre-line z-10">
-                      {goalText}
-                    </span>
-                  )}
-                </span>
-
-                {status && (
-                  <span
-                    className={`px-2 py-0.5 text-xs rounded-full ${
-                      status === "good"
-                        ? "bg-green-500/20 text-green-400"
-                        : status === "low"
-                          ? "bg-blue-500/20 text-blue-400"
-                          : "bg-red-500/20 text-red-400"
-                    }`}
-                  >
-                    {status}
-                  </span>
-                )}
-              </div>
-            </li>
-          );
-        })}
+      <ul className="min-h-[170px] space-y-2  w-auto">
+        {Object.entries(metrics).map(([key, value]) => (
+          <MetricRow key={key} label={key} value={value} />
+        ))}
       </ul>
 
       {/* animation for panel */}
