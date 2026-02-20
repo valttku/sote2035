@@ -7,7 +7,7 @@ import { UserProfile, UserProfileSection } from "./sections/UserProfileSection";
 import { Sleep, SleepSection } from "./sections/SleepSection";
 import { Stress, StressSection } from "./sections/StressSection";
 import { Respiration, RespirationSection } from "./sections/RespirationSection";
-import { useHealthData } from "../../hooks/useHealthDataGarmin";
+import { useGarminHealthInsights } from "../../hooks/useGarminHealthInsights";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
 
@@ -36,7 +36,7 @@ export default function HealthInsightsPage() {
   const [selectedActivityIds, setSelectedActivityIds] = useState<Set<string>>(
     new Set(),
   );
-  const { healthData, loading: loadingData } = useHealthData(selectedDate);
+  const { healthData, loading: loadingData } = useGarminHealthInsights(selectedDate);
 
   const handleAnalyzeClick = async () => {
     setLoading(true);

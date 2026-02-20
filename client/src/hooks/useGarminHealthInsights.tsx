@@ -15,7 +15,7 @@ export type HealthData = {
   respiration?: Respiration[];
 };
 
-export function useHealthData(date?: string) {
+export function useGarminHealthInsights(date?: string) {
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

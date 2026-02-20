@@ -86,7 +86,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       `SELECT id, user_id, day_date, active_kilocalories, 
           bmr_kilocalories, steps, distance_in_meters,  
           floors_climbed, avg_heart_rate, resting_heart_rate, 
-          ax_heart_rate, avg_stress_level, steps_goal,
+          max_heart_rate, avg_stress_level, steps_goal,
           body_battery_charged, body_battery_drained,
           moderate_intensity_duration_in_seconds, 
           vigorous_intensity_duration_in_seconds,
