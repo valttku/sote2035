@@ -36,7 +36,7 @@ export function extractHealthMetrics(kind: string, data: any) {
       if (data.distance_meters != null)
         metrics["Distance"] = +(data.distance_meters / 1000).toFixed(3);
 
-      if (data.total_kcal != null) metrics["Total kcal"] = data.total_kcal;
+      if (data.total_kcal != null) metrics["Total energy expenditure"] = data.total_kcal;
       break;
 
     case "resp_daily":
