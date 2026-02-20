@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { getAICompletion } from "../services/openAIService";
+import { getAICompletion } from "../services/openAIService.js";
 
 const openAIRouter = express.Router();
 
