@@ -119,7 +119,7 @@ export async function getHealthStatEntriesData(
         }
 
         if (
-          key === "Exercise this week" &&
+          key === "Intense exercise this week" &&
           row.data.intensity_duration_goal_in_seconds != null
         ) {
           const min = row.data.intensity_duration_goal_in_seconds / 60;

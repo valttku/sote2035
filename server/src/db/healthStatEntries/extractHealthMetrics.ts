@@ -12,25 +12,31 @@ export function extractHealthMetrics(kind: string, data: any) {
       break;
 
     case "sleep_daily":
-      if (data.duration_seconds != null) {metrics["Total sleep"] = +(data.duration_seconds / 60).toFixed(0);}
+      if (data.duration_seconds != null) {
+        metrics["Total sleep"] = +(data.duration_seconds / 60).toFixed(0);
+      }
       break;
 
     case "activity_daily":
       if (data.steps != null) metrics["Steps"] = data.steps;
 
+      if (data.floors_climbed != null)
+        metrics["Floors climbed"] = data.floors_climbed;
+
+      if (data.weekly_intensity_total_seconds != null)
+        metrics["Intense exercise this week"] = +(
+          data.weekly_intensity_total_seconds / 60
+        ).toFixed(0);
+
+      if (data.intensity_duration_seconds != null)
+        metrics["Intense exercise today"] = +(
+          data.intensity_duration_seconds / 60
+        ).toFixed(0);
+
       if (data.distance_meters != null)
         metrics["Distance"] = +(data.distance_meters / 1000).toFixed(3);
 
       if (data.total_kcal != null) metrics["Total kcal"] = data.total_kcal;
-
-      if (data.floors_climbed != null)
-        metrics["Floors climbed"] = data.floors_climbed;
-
-      if (data.intensity_duration_seconds != null)
-        metrics["Exercise today"] = +(data.intensity_duration_seconds / 60).toFixed(0);
-
-      if (data.weekly_intensity_total_seconds != null)
-        metrics["Exercise this week"] = +(data.weekly_intensity_total_seconds / 60).toFixed(0);
       break;
 
     case "resp_daily":
