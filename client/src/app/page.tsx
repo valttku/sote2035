@@ -4,7 +4,11 @@ import AppLayout from "../components/AppLayout";
 import AIMessageWindow from "../components/home/AIMessageWindow";
 import DigitalTwin from "../components/home/DigitalTwin";
 import AIMessageButton from "../components/home/AIMessageButton";
-import HealthStatsPanel, { BodyPartId } from "../components/home/healthStatsPanel";
+import InfoWindow from "../components/home/InfoWindow";
+import InfoButton from "../components/home/InfoButton";
+import HealthStatsPanel, {
+  BodyPartId,
+} from "../components/home/healthStatsPanel";
 import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function Home() {
@@ -24,6 +28,7 @@ export default function Home() {
   const [aiMessage, setAIMessage] = useState<string | null>(null);
   const [loadingAI, setLoadingAI] = useState(true);
   const [showAIWindow, setShowAIWindow] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   // Poll each body part for alerts (metric status !== 'good')
   useEffect(() => {
@@ -101,14 +106,6 @@ export default function Home() {
             />
 
             <div className="w-1/2 max-w-[auto] min-w-[200px] flex flex-col justify-start text-left">
-              {!selected && (
-                <div className="mb-2">
-                  <p className="text-xs sm:text-sm md:text-base">
-                    {t.home.selectBodyPart}
-                  </p>
-                </div>
-              )}
-
               {selected && (
                 <HealthStatsPanel
                   selected={selected}
@@ -120,12 +117,37 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Floating AI icon with new message indicator as a separate component */}
-      <AIMessageButton
-        hasNewMessage={!!aiMessage && !showAIWindow}
-        onClick={() => setShowAIWindow((v) => !v)}
+      {/* Info + AI buttons in bottom right */}
+      <div className="fixed bottom-6 right-25 z-50 pointer-events-auto">
+        <InfoButton
+          onClick={() => {
+            setShowInfo((prev) => {
+              if (!prev) setShowAIWindow(false);
+              return !prev;
+            });
+          }}
+        />
+      </div>
+      <div className="fixed bottom-6 right-6 z-50 pointer-events-auto">
+        <AIMessageButton
+          hasNewMessage={!!aiMessage && !showAIWindow}
+          onClick={() => {
+            setShowAIWindow((prev) => {
+              if (!prev) setShowInfo(false);
+              return !prev;
+            });
+          }}
+        />
+      </div>
+
+      {/* Info window with homepage guide */}
+      <InfoWindow
+        info={t.home.selectBodyPart}
+        open={showInfo}
+        onClose={() => setShowInfo(false)}
       />
 
+      {/* AI message window */}
       <AIMessageWindow
         message={aiMessage || ""}
         loading={loadingAI}

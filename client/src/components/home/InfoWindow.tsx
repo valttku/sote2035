@@ -1,24 +1,18 @@
 import React from "react";
-interface AIMessageWindowProps {
-  message: string;
-  loading?: boolean;
+
+interface InfoWindowProps {
   open: boolean;
   onClose: () => void;
+  info: string;
 }
-
-const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
-  message,
-  loading,
-  open,
-  onClose,
-}) => {
+const InfoWindow: React.FC<InfoWindowProps> = ({ open, onClose, info }) => {
   if (!open) return null;
   return (
-    <div className="fixed bottom-20 right-0 z-50 flex items-end justify-center px-2 lg:bottom-24 lg:right-2 lg:left-auto lg:justify-end">
+    <div className="fixed bottom-20 right-0 z-50 flex items-end justify-center px-2 lg:bottom-24 lg:right-20 lg:left-auto lg:justify-end">
       <div className="ui-component-styles relative mb-2 p-2 shadow-md min-w-[140px] max-w-[90vw] text-xs sm:min-w-[320px] sm:max-w-[400px] sm:p-4 sm:text-base">
         <button
           className="absolute top-2 right-2 text-white p-1"
-          aria-label="Close AI Message"
+          aria-label="Close Info"
           onClick={onClose}
         >
           <svg
@@ -35,23 +29,13 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
-
         <h3 className="font-bold mb-2 text-[#31c2d5] text-sm sm:text-lg">
-          AI Health Assistant
+          Info
         </h3>
-
-        {loading ? (
-          <p className="italic text-xs sm:text-base">
-            Generating your AI message...
-          </p>
-        ) : message ? (
-          <p className="whitespace-pre-line text-xs sm:text-base">{message}</p>
-        ) : (
-          <p className="text-xs sm:text-base">No message available.</p>
-        )}
+        <p className="text-xs sm:text-base whitespace-pre-line">{info}</p>
       </div>
     </div>
   );
 };
 
-export default AIMessageWindow;
+export default InfoWindow;
