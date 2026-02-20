@@ -21,7 +21,7 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({
   alerts,
   isFemale,
 }) => (
-  <div className="relative w-1/2 max-w-[200px] min-w-[200px] flex-shrink-0 md:translate-x-50">
+  <div className="relative w-1/2 max-w-[200px] min-w-[200px] flex-shrink-0">
     <img
       src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
       alt="Digital twin"

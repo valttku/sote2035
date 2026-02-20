@@ -96,21 +96,28 @@ export default function Home() {
         <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
-          <div className="flex flex-row items-start justify-center sm:gap-20 md:gap-70 w-full text-xs sm:text-sm md:text-lg">
-            <DigitalTwin
-              BODY_PARTS={BODY_PARTS}
-              selected={selected}
-              setSelected={setSelected}
-              alerts={alerts}
-              isFemale={isFemale}
-            />
+          <div className="flex justify-center w-full">
+            <div className="relative flex flex-col md:flex-row items-center md:items-start">
+              <DigitalTwin
+                BODY_PARTS={BODY_PARTS}
+                selected={selected}
+                setSelected={setSelected}
+                alerts={alerts}
+                isFemale={isFemale}
+              />
 
-            <div className="w-1/2 max-w-[auto] min-w-[200px] flex flex-col justify-start text-left">
               {selected && (
-                <HealthStatsPanel
-                  selected={selected}
-                  onClose={() => setSelected(null)}
-                />
+                <div
+                  className="
+                    w-full mt-6
+                    md:absolute md:left-full md:ml-8 md:top-0 md:w-[420px]
+                  "
+                >
+                  <HealthStatsPanel
+                    selected={selected}
+                    onClose={() => setSelected(null)}
+                  />
+                </div>
               )}
             </div>
           </div>

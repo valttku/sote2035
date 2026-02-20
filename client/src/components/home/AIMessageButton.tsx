@@ -27,7 +27,7 @@ const AIMessageButton: React.FC<AIMessageButtonProps> = ({ hasNewMessage, onClic
     {/* Red dot indicator for new AI message */}
     {hasNewMessage && (
       <span
-        className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse"
+        className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse"
         style={{ pointerEvents: "none" }}
         aria-label="New AI message"
       />

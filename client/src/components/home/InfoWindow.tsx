@@ -29,8 +29,8 @@ const InfoWindow: React.FC<InfoWindowProps> = ({ open, onClose, info }) => {
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
-        <h3 className="font-bold mb-2 text-[#31c2d5] text-sm sm:text-lg">
-          Info
+        <h3 className="text-center mb-2 text-sm sm:text-lg border-b pb-1">
+          Guide
         </h3>
         <p className="text-xs sm:text-base whitespace-pre-line">{info}</p>
       </div>

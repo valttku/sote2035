@@ -36,7 +36,7 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
           </svg>
         </button>
 
-        <h3 className="font-bold mb-2 text-[#31c2d5] text-sm sm:text-lg">
+        <h3 className="text-center mb-2 text-sm sm:text-lg border-b pb-1">
           AI Health Assistant
         </h3>
 

@@ -155,7 +155,7 @@ export default function HealthStatsPanel({
       )}
 
       {/* Metrics list */}
-      <ul className="min-h-[170px] space-y-2  w-auto">
+      <ul className="min-h-[170px] space-y-2 w-auto">
         {Object.entries(metrics).map(([key, value]) => (
           <MetricRow key={key} label={key} value={value} />
         ))}
