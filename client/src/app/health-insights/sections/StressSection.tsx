@@ -155,22 +155,13 @@ export function StressSection({ stress }: { stress?: Stress }) {
           <StressWheelSVG stress={stress} />
 
           <StatCard
-            label="Stress duration"
-            value={formatSecondsToHoursMinutes(
-              stress.stress_duration_in_seconds,
-            )}
-          />
-
-          <StatCard label="Stress qualifier" value={stress.stress_qualifier} />
-        </div>
-        <div className="flex flex-col gap-2 w-full">
-          <StatCard
             label="Rest stress duration"
             value={formatSecondsToHoursMinutes(
               stress.rest_stress_duration_in_seconds,
             )}
             icon={<FaCircle color="#3b82f6" size={16} />}
           />
+
           <StatCard
             label="Low stress duration"
             value={formatSecondsToHoursMinutes(
@@ -178,6 +169,17 @@ export function StressSection({ stress }: { stress?: Stress }) {
             )}
             icon={<FaCircle color="#10b981" size={16} />}
           />
+        </div>
+        <div className="flex flex-col gap-2 w-full">
+          <StatCard
+            label="Stress duration"
+            value={formatSecondsToHoursMinutes(
+              stress.stress_duration_in_seconds,
+            )}
+          />
+
+          <StatCard label="Stress qualifier" value={stress.stress_qualifier} />
+
           <StatCard
             label="Medium stress duration"
             value={formatSecondsToHoursMinutes(
@@ -185,6 +187,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
             )}
             icon={<FaCircle color="#f59e0b" size={16} />}
           />
+          
           <StatCard
             label="High stress duration"
             value={formatSecondsToHoursMinutes(
