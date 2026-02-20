@@ -1,5 +1,5 @@
 "use client";
-import { StatCard } from "../../../components/StatCard";
+import { StatCard } from "../../../components/health-insights/StatCard";
 
 export type UserProfile = {
   id: string;
@@ -16,7 +16,8 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
   if (!profile) return null;
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl mb-4">User profile{" "}
+      <h2 className="text-2xl mb-4">
+        User profile{" "}
         <span className="text-sm font-normal">
           (updated at{" "}
           {new Date(profile.updated_at).toLocaleString(undefined, {

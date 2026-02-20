@@ -1,5 +1,5 @@
 "use client";
-import { StatCard } from "../../../components/StatCard";
+import { StatCard } from "../../../components/health-insights/StatCard";
 import { FaCircle } from "react-icons/fa";
 
 export type Stress = {

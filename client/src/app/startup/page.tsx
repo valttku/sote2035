@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Modal from "../../components/Modal";
-import LoginForm from "../../components/LoginForm";
-import RegisterForm from "../../components/RegisterForm";
+import LoginForm from "../../components/startup/LoginForm";
+import RegisterForm from "../../components/startup/RegisterForm";
 import { useTranslation } from "../../i18n/LanguageProvider";
 
 
