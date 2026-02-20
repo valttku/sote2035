@@ -6,7 +6,7 @@ interface InfoButtonProps {
 
 const InfoButton: React.FC<InfoButtonProps> = ({ onClick }) => (
   <button
-    className="fixed bottom-6 right-25 z-50 bg-[#31c2d5] hover:bg-[#28a0b0] text-white rounded-full shadow-lg p-4 flex items-center justify-center"
+    className="fixed bottom-6 right-25 bg-[#31c2d5] hover:bg-[#28a0b0] text-white rounded-full shadow-lg p-4 flex items-center justify-center"
     style={{ width: 56, height: 56 }}
     aria-label="Show Info Guide"
     onClick={onClick}

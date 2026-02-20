@@ -125,7 +125,7 @@ export default function Home() {
       </div>
 
       {/* Info + AI buttons in bottom right */}
-      <div className="fixed bottom-6 right-25 z-50 pointer-events-auto">
+      <div className="fixed bottom-6 right-25 pointer-events-auto">
         <InfoButton
           onClick={() => {
             setShowInfo((prev) => {
@@ -135,7 +135,7 @@ export default function Home() {
           }}
         />
       </div>
-      <div className="fixed bottom-6 right-6 z-50 pointer-events-auto">
+      <div className="fixed bottom-6 right-6 pointer-events-auto">
         <AIMessageButton
           hasNewMessage={!!aiMessage && !showAIWindow}
           onClick={() => {
