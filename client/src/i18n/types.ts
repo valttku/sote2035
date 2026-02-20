@@ -197,9 +197,13 @@ export type HealthInsightsTranslations = {
 //home
 export type HomeTranslations = {
   title: string;
-  selectBodyPart: string;
-  noMetrics: string; // ← new
-  loading: string; // ← new
+  info: string;
+  noMetrics: string;
+  loading: string;
+  guideTitle: string;
+  aiTitle: string;
+  noMessage: string;
+  generatingMessage: string;
 
   bodyParts: {
     brain: string;

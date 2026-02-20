@@ -149,7 +149,8 @@ export default function Home() {
 
       {/* Info window with homepage guide */}
       <InfoWindow
-        info={t.home.selectBodyPart}
+        info={t.home.info}
+        title={t.home.guideTitle}
         open={showInfo}
         onClose={() => setShowInfo(false)}
       />
@@ -157,6 +158,9 @@ export default function Home() {
       {/* AI message window */}
       <AIMessageWindow
         message={aiMessage || ""}
+        title={t.home.aiTitle}
+        generatingMessage={t.home.generatingMessage}
+        placeholder={t.home.noMessage}
         loading={loadingAI}
         open={showAIWindow}
         onClose={() => setShowAIWindow(false)}

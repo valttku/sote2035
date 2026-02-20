@@ -4,8 +4,9 @@ interface InfoWindowProps {
   open: boolean;
   onClose: () => void;
   info: string;
+  title: string;
 }
-const InfoWindow: React.FC<InfoWindowProps> = ({ open, onClose, info }) => {
+const InfoWindow: React.FC<InfoWindowProps> = ({ open, onClose, info, title }) => {
   if (!open) return null;
   return (
     <div className="fixed bottom-20 right-0 z-50 flex items-end justify-center px-2 lg:bottom-24 lg:right-20 lg:left-auto lg:justify-end">
@@ -30,7 +31,7 @@ const InfoWindow: React.FC<InfoWindowProps> = ({ open, onClose, info }) => {
           </svg>
         </button>
         <h3 className="text-center mb-2 text-sm sm:text-lg border-b pb-1">
-          Guide
+          {title}
         </h3>
         <p className="text-xs sm:text-base whitespace-pre-line">{info}</p>
       </div>

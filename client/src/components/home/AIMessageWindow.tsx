@@ -1,6 +1,9 @@
 import React from "react";
 interface AIMessageWindowProps {
   message: string;
+  title: string;
+  generatingMessage?: string;
+  placeholder?: string;
   loading?: boolean;
   open: boolean;
   onClose: () => void;
@@ -8,6 +11,9 @@ interface AIMessageWindowProps {
 
 const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
   message,
+  title,
+  generatingMessage,
+  placeholder,
   loading,
   open,
   onClose,
@@ -37,17 +43,15 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
         </button>
 
         <h3 className="text-center mb-2 text-sm sm:text-lg border-b pb-1">
-          AI Health Assistant
+          {title}
         </h3>
 
         {loading ? (
-          <p className="italic text-xs sm:text-base">
-            Generating your AI message...
-          </p>
+          <p className="italic text-xs sm:text-base">{generatingMessage}</p>
         ) : message ? (
           <p className="whitespace-pre-line text-xs sm:text-base">{message}</p>
         ) : (
-          <p className="text-xs sm:text-base">No message available.</p>
+          <p className="text-xs sm:text-base">{placeholder}</p>
         )}
       </div>
     </div>
