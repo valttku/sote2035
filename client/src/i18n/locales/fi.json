@@ -9,7 +9,7 @@
 
   "home": {
     "title": "Tänään",
-    "info": "Valitse kehon osa napsauttamalla valkoista pistettä kehossa",
+    "info": "Terveystietojen tarkasteluun valitse kehon osa klikkaamalla valkoista pistettä kehon kuvassa.\n\nJos jokin mittari on normaalialueen ulkopuolella, kehon osa korostetaan punaisella.",
     "noMetrics": "Ei mittaustietoja tältä päivältä",
     "loading": "Ladataan…",
     "guideTitle": "Ohje",
