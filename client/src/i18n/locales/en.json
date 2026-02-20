@@ -11,7 +11,7 @@
 
   "home": {
     "title": "Today",
-    "info": "Select a body part by clicking on a white dot on the body",
+    "info": "To see your health information, select a body part by clicking on a white dot on the body. \n\nIf any metric is outside the normal range, the body part will be highlighted in red.",
     "noMetrics": "No metrics for this day",
     "loading": "Loading…",
     "guideTitle": "Guide",
