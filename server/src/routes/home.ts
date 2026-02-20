@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getHealthStatEntriesData } from "../db/healthStats/healthStatsDb.js";
+import { getHealthStatEntriesData } from "../db/healthStatEntries/healthStatEntriesDb.js";
 import { db } from "../db/db.js";
 import { authRequired } from "../middleware/authRequired.js";
 
@@ -57,7 +57,16 @@ homeRouter.get("/", authRequired, async (req, res) => {
     // fetch detailed metrics for the selected body part and date
     const metrics = await getHealthStatEntriesData(userId, date, part as any);
     res.json({ metrics, user: { gender } });
-    console.log("Fetched metrics for user", userId, "part", part, "date", date, ":", metrics);
+    console.log(
+      "Fetched metrics for user",
+      userId,
+      "part",
+      part,
+      "date",
+      date,
+      ":",
+      metrics,
+    );
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "failed to load metrics" });
