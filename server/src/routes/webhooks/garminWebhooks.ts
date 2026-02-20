@@ -24,7 +24,10 @@ import {
   mapGarminSleepToRow,
   upsertGarminSleep,
 } from "../../db/garminTables/sleepDb.js";
-import { mapGarminHRVToRows, upsertGarminHRV } from "../../db/garminTables/hrvDb.js";
+import {
+  mapGarminHRVToRows,
+  upsertGarminHRV,
+} from "../../db/garminTables/hrvDb.js";
 
 // Router for Garmin webhooks
 export const garminWebhookRouter = express.Router();
@@ -412,7 +415,10 @@ garminWebhookRouter.post("/hrv", async (req, res) => {
   try {
     // Handle array wrapped by summary type
     const payload =
-      req.body.hrv || (Array.isArray(req.body) ? req.body : [req.body]);
+      req.body.hrvSummary ||
+      req.body.hrvSummaries ||
+      req.body.hrv ||
+      (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {
       const providerUserId = item.userId;
@@ -448,6 +454,10 @@ garminWebhookRouter.post("/hrv", async (req, res) => {
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin hrv webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });
