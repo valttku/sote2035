@@ -10,7 +10,6 @@ export default function DarkModeToggle() {
   const [darkMode, setDarkMode] = useState(false);
   const { t } = useTranslation();
 
-
   useEffect(() => {
     // wrap in setTimeout to avoid calling setState synchronously in the effect body
     setTimeout(() => {
@@ -54,7 +53,7 @@ export default function DarkModeToggle() {
         shadow-sm
       "
     >
-      {darkMode ? <FaSun /> : <FaMoon />}
+      {darkMode ? <FaMoon /> : <FaSun />}
      {darkMode
   ? t?.darkmodetoggle?.darkMode ?? "Dark Mode"
   : t?.darkmodetoggle?.lightMode ?? "Light Mode"}

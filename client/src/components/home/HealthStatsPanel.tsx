@@ -63,7 +63,7 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
   }
 
   return (
-    <li className="grid grid-cols-[40%_40%_min-content] items-start pb-2 gap-2">
+    <li className="grid grid-cols-[50%_30%_1fr] items-start pb-2 gap-2">
       <span>{label}</span>
       <span>{displayValue}</span>
       {status ? (
@@ -155,7 +155,7 @@ export default function HealthStatsPanel({
       )}
 
       {/* Metrics list */}
-      <ul className="min-h-[170px] space-y-2  w-auto">
+      <ul className="min-h-[170px] space-y-2">
         {Object.entries(metrics).map(([key, value]) => (
           <MetricRow key={key} label={key} value={value} />
         ))}

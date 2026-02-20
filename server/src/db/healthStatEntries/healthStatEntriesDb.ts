@@ -196,14 +196,16 @@ export async function getHealthStatEntriesData(
         displayValue = formatMinutesHM(numericValue);
       } else if (key === "Distance") {
         displayValue = `${numericValue} km`;
-      } else if (key === "Exercise this week") {
+      } else if (key === "Intense exercise this week") {
         displayValue = `${value} / ${goal?.min} min`;
-      } else if (key === "Exercise today") {
+      } else if (key === "Intense exercise today") {
         displayValue = `${numericValue} min`;
       } else if (key === "Average respiratory rate") {
-        displayValue = +numericValue.toFixed(2) + " breaths/min";
+        displayValue = +numericValue.toFixed(2) + " brpm";
       } else if (key === "Resting heart rate" || key === "Average heart rate") {
         displayValue = +numericValue.toFixed(2) + " bpm";
+      } else if (key === "Total energy expenditure") {
+        displayValue = `${numericValue} kcal`;
       } else if (goal?.min !== undefined) {
         displayValue = `${numericValue} / ${goal.min}`;
       } else {

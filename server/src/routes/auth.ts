@@ -1,8 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { transporter } from "../services/emailService";
-
+import { transporter } from "../services/emailService.js";
 import {
   createUser,
   findUserByEmail,

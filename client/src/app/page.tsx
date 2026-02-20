@@ -1,7 +1,14 @@
 "use client";
 import { useEffect, useRef, useState, useMemo } from "react";
 import AppLayout from "../components/AppLayout";
-import HealthStatsPanel, { BodyPartId } from "../components/home/HealthStatsPanel";
+import AIMessageWindow from "../components/home/AIMessageWindow";
+import DigitalTwin from "../components/home/DigitalTwin";
+import AIMessageButton from "../components/home/AIMessageButton";
+import InfoWindow from "../components/home/InfoWindow";
+import InfoButton from "../components/home/InfoButton";
+import HealthStatsPanel, {
+  BodyPartId,
+} from "../components/home/HealthStatsPanel";
 import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function Home() {
@@ -17,6 +24,11 @@ export default function Home() {
     lungs: false,
     legs: false,
   });
+
+  const [aiMessage, setAIMessage] = useState<string | null>(null);
+  const [loadingAI, setLoadingAI] = useState(true);
+  const [showAIWindow, setShowAIWindow] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   // Poll each body part for alerts (metric status !== 'good')
   useEffect(() => {
@@ -40,6 +52,8 @@ export default function Home() {
           lungs: !!alertsResp.lungs,
           legs: !!alertsResp.legs,
         });
+        setAIMessage(json.aiMessage || "");
+        setLoadingAI(false);
 
         const gender = json.user?.gender;
         if (gender && !genderLoaded.current) {
@@ -82,58 +96,75 @@ export default function Home() {
         <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
-          <div className="flex flex-row items-start justify-center sm:gap-20 md:gap-70 w-full text-xs sm:text-sm md:text-lg">
-            <div className="relative w-1/2 max-w-[200px] min-w-[200px] flex-shrink-0 md:translate-x-50">
-              <img
-                src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
-                alt="Digital twin"
-                className="w-full max-h-[60vh] object-contain block"
+          <div className="flex justify-center w-full">
+            <div className="relative flex flex-col md:flex-row items-center md:items-start">
+              <DigitalTwin
+                BODY_PARTS={BODY_PARTS}
+                selected={selected}
+                setSelected={setSelected}
+                alerts={alerts}
+                isFemale={isFemale}
               />
 
-              {BODY_PARTS.map(({ id, top, left }) => (
-                <div
-                  key={id}
-                  onClick={() => setSelected(id)}
-                  style={{
-                    position: "absolute",
-                    width: "8%",
-                    height: "3%",
-                    borderRadius: "50%",
-                    cursor: "pointer",
-                    top,
-                    left,
-                    background:
-                      selected === id
-                        ? "rgba(10, 33, 90, 0.7)"
-                        : alerts[id]
-                          ? "rgba(220, 38, 81, 0.95)"
-                          : "rgba(203, 215, 249, 0.8)",
-                  }}
-                  className={alerts[id] ? "animate-pulse" : undefined}
-                  aria-label={id}
-                />
-              ))}
-            </div>
-
-            <div className="w-1/2 max-w-[auto] min-w-[200px] flex flex-col justify-start text-left">
-              {!selected && (
-                <div className="mb-2">
-                  <p className="text-xs sm:text-sm md:text-base">
-                    {t.home.selectBodyPart}
-                  </p>
-                </div>
-              )}
-
               {selected && (
-                <HealthStatsPanel
-                  selected={selected}
-                  onClose={() => setSelected(null)}
-                />
+                <div
+                  className="
+                    w-full mt-6
+                    md:absolute md:left-full md:ml-8 md:top-0 md:w-[420px]
+                  "
+                >
+                  <HealthStatsPanel
+                    selected={selected}
+                    onClose={() => setSelected(null)}
+                  />
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Info + AI buttons in bottom right */}
+      <div className="fixed bottom-6 right-25 pointer-events-auto">
+        <InfoButton
+          onClick={() => {
+            setShowInfo((prev) => {
+              if (!prev) setShowAIWindow(false);
+              return !prev;
+            });
+          }}
+        />
+      </div>
+      <div className="fixed bottom-6 right-6 pointer-events-auto">
+        <AIMessageButton
+          hasNewMessage={!!aiMessage && !showAIWindow}
+          onClick={() => {
+            setShowAIWindow((prev) => {
+              if (!prev) setShowInfo(false);
+              return !prev;
+            });
+          }}
+        />
+      </div>
+
+      {/* Info window with homepage guide */}
+      <InfoWindow
+        info={t.home.info}
+        title={t.home.guideTitle}
+        open={showInfo}
+        onClose={() => setShowInfo(false)}
+      />
+
+      {/* AI message window */}
+      <AIMessageWindow
+        message={aiMessage || ""}
+        title={t.home.aiTitle}
+        generatingMessage={t.home.generatingMessage}
+        placeholder={t.home.noMessage}
+        loading={loadingAI}
+        open={showAIWindow}
+        onClose={() => setShowAIWindow(false)}
+      />
     </AppLayout>
   );
 }

@@ -9,10 +9,13 @@
 
   "home": {
     "title": "Tänään",
-    "selectBodyPart": "Valitse kehon osa napsauttamalla valkoista pistettä kehossa",
+    "info": "Valitse kehon osa napsauttamalla valkoista pistettä kehossa",
     "noMetrics": "Ei mittaustietoja tältä päivältä",
     "loading": "Ladataan…",
-
+    "guideTitle": "Ohje",
+    "aiTitle": "AI-analyysi",
+    "noMessage": "Ei viestejä saatavilla.",
+    "generatingMessage": "Luodaan AI-viestiä...",
     "bodyParts": {
       "brain": "Aivot",
       "heart": "Sydän",
