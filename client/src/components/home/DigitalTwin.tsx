@@ -1,5 +1,5 @@
 import React from "react";
-import { BodyPartId } from "./healthStatsPanel";
+import { BodyPartId } from "./HealthStatsPanel";
 
 interface DigitalTwinProps {
   BODY_PARTS: Array<{
@@ -43,8 +43,8 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({
             selected === id
               ? "rgba(10, 33, 90, 0.7)"
               : alerts[id]
-              ? "rgba(220, 38, 81, 0.95)"
-              : "rgba(203, 215, 249, 0.8)",
+                ? "rgba(220, 38, 81, 0.95)"
+                : "rgba(203, 215, 249, 0.8)",
         }}
         className={alerts[id] ? "animate-pulse" : undefined}
         aria-label={id}

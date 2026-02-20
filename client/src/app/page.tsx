@@ -8,7 +8,7 @@ import InfoWindow from "../components/home/InfoWindow";
 import InfoButton from "../components/home/InfoButton";
 import HealthStatsPanel, {
   BodyPartId,
-} from "../components/home/healthStatsPanel";
+} from "../components/home/HealthStatsPanel";
 import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function Home() {
