@@ -16,9 +16,9 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
   if (!open) return null;
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-end justify-end">
-      <div className="relative p-4 rounded-lg bg-[#1e1c4f]/20 border-[2px] border-[#31c2d5] shadow-md min-w-[320px] max-w-[400px]">
+      <div className=" ui-component-styles relative p-4 shadow-md min-w-[320px] max-w-[400px]">
         <button
-          className="absolute top-2 right-2 text-[#31c2d5] hover:text-[#28a0b0]"
+          className="absolute top-2 right-2 text-white p-1"
           aria-label="Close AI Message"
           onClick={onClose}
         >
@@ -36,13 +36,15 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
+
         <h3 className="font-bold mb-2 text-[#31c2d5]">AI Health Assistant</h3>
+        
         {loading ? (
-          <div className="text-white">Generating your AI message...</div>
+          <p>Generating your AI message...</p>
         ) : message ? (
-          <div className="text-white whitespace-pre-line">{message}</div>
+          <p className="whitespace-pre-line">{message}</p>
         ) : (
-          <div className="text-white">No message available.</div>
+          <p className="">No message available.</p>
         )}
       </div>
     </div>
