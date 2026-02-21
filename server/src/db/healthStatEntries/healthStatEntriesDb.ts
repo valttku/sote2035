@@ -253,28 +253,6 @@ export async function getHealthStatEntriesData(
         }
       }
 
-      // For sleep goal display in hours only
-      function formatGoal(key: string, goal: MetricGoal) {
-        if (!goal) return "";
-
-        if (key === "Total sleep") {
-          const minHours = goal.min ? goal.min / 60 : undefined;
-          const maxHours = goal.max ? goal.max / 60 : undefined;
-
-          if (minHours && maxHours) return `Range: ${minHours}-${maxHours}h`;
-          if (minHours) return `Min: ${minHours}h`;
-          if (maxHours) return `Max: ${maxHours}h`;
-        }
-
-        // For other metrics
-        const min = goal.min !== undefined ? Math.round(goal.min) : undefined;
-        const max = goal.max !== undefined ? Math.round(goal.max) : undefined;
-
-        if (min != null && max != null) return `Range: ${min} - ${max}`;
-        if (min != null) return `Min: ${min}`;
-        if (max != null) return `Max: ${max}`;
-        return "";
-      }
       const displayValue = formatMetric(key, numericValue);
 
       const formattedAvg7 =

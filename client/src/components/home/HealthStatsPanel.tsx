@@ -69,9 +69,11 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
         tooltip = "No defined goal";
       }
     }
-    tooltip += tooltip
-      ? `\n7-day avg: ${value.avg7?.formatted ?? "N/A"}`
-      : `7-day avg: ${value.avg7?.formatted ?? "N/A"}`;
+    if (tooltip) {
+      tooltip += `\n7-day avg: ${value.avg7?.formatted ?? "N/A"}`;
+    } else {
+      tooltip = `7-day avg: ${value.avg7?.formatted ?? "N/A"}`;
+    }
   } else {
     displayValue = String(value);
   }
