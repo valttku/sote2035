@@ -4,12 +4,16 @@ import { extractHealthMetrics } from "./extractHealthMetrics.js";
 export type MetricStatus = "low" | "good" | "high" | undefined;
 type MetricGoal = { min?: number; max?: number };
 
-export type MetricObject = {
-  value: number | string;
+type MetricObject = {
+  value: string; // formatted
+  rawValue: number; // numeric
   goal?: MetricGoal;
   status?: MetricStatus;
+  avg7?: {
+    raw: number;
+    formatted: string;
+  };
 };
-
 export type HealthData = Record<string, number | MetricObject>;
 
 // Helper to parse numeric values from the formatted metrics.
@@ -20,14 +24,6 @@ function parseNumeric(value: string | number): number | null {
     if (!isNaN(num)) return num;
   }
   return null;
-}
-
-// Helper to format total sleep minutes into "Xh Ym" format for display
-function formatMinutesHM(totalMinutes: number) {
-  const mins = Math.round(totalMinutes);
-  const hours = Math.floor(mins / 60);
-  const minutes = mins % 60;
-  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
 // Main function: fetch today's health stat entries for the specified user and part (heart, brain, legs, lungs),
@@ -94,8 +90,15 @@ export async function getHealthStatEntriesData(
       }
 
       // `historical` contains recent values for this metric (last 7 days)
-      // If empty, we fall back to sensible defaults per metric below.
       const historical = historyMap[key] ?? [];
+
+      // Calculate 7-day average including today's value for trend analysis.
+      // if no historical data exists, avg7 will be undefined
+      const avg7 =
+        historical.length > 0
+          ? (historical.reduce((a, b) => a + b, 0) + numericValue) /
+            (historical.length + 1)
+          : undefined;
 
       // `goal` and `status` are computed per-metric. `goal` is an optional
       // numeric range used to derive the `status` (low/good/high).
@@ -103,19 +106,18 @@ export async function getHealthStatEntriesData(
       let goal: MetricGoal | undefined;
 
       // Activity goals: if minimum goal is achieved, status = good, otherwise low
+      // goals are defined from the user's Garmin data when available.
       if (row.kind === "activity_daily") {
         if (key === "Steps" && row.data.steps_goal != null) {
           const min = row.data.steps_goal;
           goal = { min };
           status = numericValue >= min ? "good" : "low";
-          result[key] = { value: numericValue, goal, status };
         }
 
         if (key === "Floors climbed" && row.data.floors_climbed_goal != null) {
           const min = row.data.floors_climbed_goal;
           goal = { min };
           status = numericValue >= min ? "good" : "low";
-          result[key] = { value: numericValue, goal, status };
         }
 
         if (
@@ -125,14 +127,13 @@ export async function getHealthStatEntriesData(
           const min = row.data.intensity_duration_goal_in_seconds / 60;
           goal = { min };
           status = numericValue >= min ? "good" : "low";
-          result[key] = { value: numericValue, goal, status };
         }
       }
 
       // Sleep: if total sleep is between 7-10 hours, status = good,
       // otherwise low or high
       if (row.kind === "sleep_daily" && key === "Total sleep") {
-        goal = { min: 7 * 60, max: 10 * 60 };
+        goal = { min: 7, max: 10 };
       }
 
       // Stress: high if above 75, otherwise good
@@ -140,10 +141,9 @@ export async function getHealthStatEntriesData(
         goal = { max: 75 };
       }
 
-      // Resting heart rate: prefer personalized ranges when enough history exists,
-      // otherwise use a standard healthy range.
+      // Resting heart rate: personalized ranges when enough history exists
       if (row.kind === "heart_daily" && key === "Resting heart rate") {
-        if (historical.length >= 7) {
+        if (historical.length >= 5) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
           const stdDev = Math.sqrt(
             historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
@@ -155,27 +155,53 @@ export async function getHealthStatEntriesData(
             max: +(avg + spread).toFixed(1),
           };
         } else {
-          goal = { min: 55, max: 80 };
+          goal = { min: 50, max: 90 };
+        }
+      }
+
+      // Overnight average HRV: personalized ranges when enough history exists
+      // HRV can be highly individual, so we use a wide spread if variability is high
+      if (row.kind === "heart_daily" && key === "Overnight average HRV") {
+        if (historical.length >= 5) {
+          const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
+          const stdDev = Math.sqrt(
+            historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
+              historical.length,
+          );
+          const spread = Math.max(stdDev, 8);
+          goal = {
+            min: Math.max(15, avg - 1.5 * spread),
+            max: Math.min(180, avg + 1.5 * spread),
+          };
+        } else {
+          goal = { min: 20, max: 120 };
         }
       }
 
       // Respiratory rate: prefer personalized ranges when enough history exists,
       // otherwise use a standard healthy range.
       if (row.kind === "resp_daily" && key === "Average respiratory rate") {
-        if (historical.length >= 7) {
+        if (historical.length >= 5) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
           const stdDev = Math.sqrt(
             historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
               historical.length,
           );
           const spread = Math.max(stdDev, 2);
+
           goal = {
-            min: Math.max(8, avg - 2 * spread),
-            max: Math.min(25, avg + 2 * spread),
+            min: +Math.max(8, avg - 2 * spread).toFixed(2),
+            max: +Math.min(25, avg + 2 * spread).toFixed(2),
           };
         } else {
           goal = { min: 12, max: 20 };
         }
+      }
+
+      // Convert numericValue to hours for comparison (numericValue is in seconds)
+      let valueForGoal = numericValue;
+      if (row.kind === "sleep_daily" && key === "Total sleep") {
+        valueForGoal = numericValue / 3600; // seconds → hours
       }
 
       // Calculate status:
@@ -183,37 +209,87 @@ export async function getHealthStatEntriesData(
       // if max is defined and value is above max, status = high
       // if value is within range, status = good
       if (goal) {
-        if (goal.min !== undefined && numericValue < goal.min) status = "low";
-        else if (goal.max !== undefined && numericValue > goal.max)
+        if (goal.min !== undefined && valueForGoal < goal.min) status = "low";
+        else if (goal.max !== undefined && valueForGoal > goal.max)
           status = "high";
         else status = "good";
       }
 
-      // Format display value for the UI.
-      let displayValue: number | string;
-
-      if (key === "Total sleep") {
-        displayValue = formatMinutesHM(numericValue);
-      } else if (key === "Distance") {
-        displayValue = `${numericValue} km`;
-      } else if (key === "Intense exercise this week") {
-        displayValue = `${value} / ${goal?.min} min`;
-      } else if (key === "Intense exercise today") {
-        displayValue = `${numericValue} min`;
-      } else if (key === "Average respiratory rate") {
-        displayValue = +numericValue.toFixed(2) + " brpm";
-      } else if (key === "Resting heart rate" || key === "Average heart rate") {
-        displayValue = +numericValue.toFixed(2) + " bpm";
-      } else if (key === "Total energy expenditure") {
-        displayValue = `${numericValue} kcal`;
-      } else if (goal?.min !== undefined) {
-        displayValue = `${numericValue} / ${goal.min}`;
-      } else {
-        displayValue = numericValue;
+      function formatMinutesHM(totalMinutes: number) {
+        const mins = Math.round(totalMinutes);
+        const hours = Math.floor(mins / 60);
+        const minutes = mins % 60;
+        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
       }
 
-      // Store the final value object for this metric, including the display value, goal, and status.
-      result[key] = { value: displayValue, goal, status };
+      function formatMetric(key: string, raw: number) {
+        switch (key) {
+          case "Total sleep":
+            const totalMinutes = Math.round(raw / 60); // seconds → minutes
+            return formatMinutesHM(totalMinutes);
+
+          case "Distance":
+            return (raw / 1000).toFixed(2) + " km";
+
+          case "Intense exercise this week":
+          case "Intense exercise today":
+            return Math.round(raw / 60) + " min";
+
+          case "Average respiratory rate":
+            return raw.toFixed(2) + " brpm";
+
+          case "Resting heart rate":
+          case "Average heart rate":
+            return Math.round(raw) + " bpm";
+
+          case "Overnight average HRV":
+            return Math.round(raw) + " ms";
+
+          case "Total energy expenditure":
+            return Math.round(raw) + " kcal";
+
+          default:
+            return Math.round(raw).toString();
+        }
+      }
+
+      // For sleep goal display in hours only
+      function formatGoal(key: string, goal: MetricGoal) {
+        if (!goal) return "";
+
+        if (key === "Total sleep") {
+          const minHours = goal.min ? goal.min / 60 : undefined;
+          const maxHours = goal.max ? goal.max / 60 : undefined;
+
+          if (minHours && maxHours) return `Range: ${minHours}-${maxHours}h`;
+          if (minHours) return `Min: ${minHours}h`;
+          if (maxHours) return `Max: ${maxHours}h`;
+        }
+
+        // For other metrics
+        const min = goal.min !== undefined ? Math.round(goal.min) : undefined;
+        const max = goal.max !== undefined ? Math.round(goal.max) : undefined;
+
+        if (min != null && max != null) return `Range: ${min} - ${max}`;
+        if (min != null) return `Min: ${min}`;
+        if (max != null) return `Max: ${max}`;
+        return "";
+      }
+      const displayValue = formatMetric(key, numericValue);
+
+      const formattedAvg7 =
+        avg7 !== undefined ? formatMetric(key, +avg7.toFixed(2)) : undefined;
+
+      result[key] = {
+        rawValue: numericValue,
+        value: displayValue,
+        goal,
+        status,
+        avg7:
+          formattedAvg7 !== undefined && avg7 !== undefined
+            ? { raw: +avg7.toFixed(2), formatted: formattedAvg7 }
+            : undefined,
+      };
 
       console.log({
         key,
@@ -221,6 +297,7 @@ export async function getHealthStatEntriesData(
         goal,
         historicalLength: historical.length,
         statusBefore: status,
+        avg7,
       });
     }
   }
