@@ -37,7 +37,7 @@ function StatusBadge({
 
   return (
     <span
-      className={`px-2 py-0.5 text-xs rounded-full ${
+      className={`px-2 py-0.5 text-xs rounded-full cursor-pointer ${
         styles[status ?? "undefined"]
       }`}
     >
@@ -88,21 +88,21 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
           {tooltip && (
             <span
               className="
-                absolute 
-                bottom-full 
-                left-1/2 
-                -translate-x-1/2 
-                mb-0 
-                min-w-[max-content] 
-                rounded 
-                bg-gray-700 
-                text-white 
-                text-xs 
-                px-2 py-1 
-                opacity-0 
-                group-hover/badge:opacity-100 
-                transition-opacity 
-                whitespace-pre-line 
+                absolute
+                bottom-full
+                right-0
+                -translate-x-1/4
+                mb-0
+                min-w-[max-content]
+                rounded
+                bg-gray-700
+                text-white
+                text-xs
+                px-2 py-1
+                opacity-0
+                group-hover/badge:opacity-100
+                transition-opacity
+                whitespace-pre-line
                 cursor-pointer
                 z-[1000]"
             >
