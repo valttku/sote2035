@@ -396,7 +396,7 @@ export async function createGarminTables() {
   // ----------------------------
   // Health stat triggers
   // ----------------------------
-  // dailies -> heart_daily, activity_daily, stress_daily
+  // dailies -> heart_daily, activity_daily, stress_daily (overnight_avg_hrv  from user_hrv_garmin also added to heart_daily)
   await db.query(`
     create or replace function app.update_health_stats_on_dailies()
     returns trigger as $$
@@ -405,7 +405,12 @@ export async function createGarminTables() {
       select new.user_id, new.day_date, 'garmin', 'heart_daily',
         jsonb_build_object(
           'hr_avg', new.avg_heart_rate,
-          'rhr', new.resting_heart_rate
+          'rhr', new.resting_heart_rate,
+          'overnight_avg_hrv', (
+            select uhrv.last_night_avg
+            from app.user_hrv_garmin uhrv
+            where uhrv.user_id = new.user_id and uhrv.day_date = new.day_date
+          )
         )
       on conflict (user_id, day_date, kind)
       do update set data = EXCLUDED.data, updated_at = now();

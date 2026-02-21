@@ -14,22 +14,33 @@ type MetricValue =
   | string
   | number
   | {
-      value: number;
+      value: string; // formatted
+      rawValue: number;
       status?: "low" | "good" | "high";
       goal?: { min?: number; max?: number };
+      avg7?: { raw: number; formatted: string };
     };
 
 type HealthMetrics = Record<string, MetricValue>;
 
-function StatusBadge({ status }: { status: "low" | "good" | "high" }) {
+function StatusBadge({
+  status,
+}: {
+  status: "low" | "good" | "high" | "undefined";
+}) {
   const styles = {
-    good: "bg-green-500/20 text-green-400",
-    low: "bg-blue-700/30 text-blue-300",
-    high: "bg-red-500/20 text-red-400",
+    good: "bg-green-400/40 text-green-200",
+    low: "bg-blue-500/50 text-blue-200",
+    high: "bg-red-500/20 text-red-200",
+    undefined: "bg-gray-200/20 text-gray-200",
   };
 
   return (
-    <span className={`px-2 py-0.5 text-xs rounded-full ${styles[status]}`}>
+    <span
+      className={`px-2 py-0.5 text-xs rounded-full ${
+        styles[status ?? "undefined"]
+      }`}
+    >
       {status}
     </span>
   );
@@ -40,26 +51,31 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
     typeof value === "object" && value !== null && "value" in value;
 
   let displayValue = "";
-  let status: "low" | "good" | "high" | undefined;
+  let status: "low" | "good" | "high" | "undefined" = "undefined";
   let tooltip = "";
 
   if (isObject) {
     displayValue = String(value.value);
-    status = value.status;
+    status = value.status ?? "undefined";
 
     if (value.goal) {
-      if (label === "Total sleep" && value.goal.min && value.goal.max) {
-        tooltip = `Range: ${value.goal.min / 60}h - ${value.goal.max / 60}h`;
-      } else if (value.goal.min && value.goal.max) {
+      if (value.goal.min != null && value.goal.max != null) {
         tooltip = `Range: ${value.goal.min} - ${value.goal.max}`;
-      } else if (value.goal.min) {
+      } else if (value.goal.min != null) {
         tooltip = `Min: ${value.goal.min}`;
-      } else if (value.goal.max) {
+      } else if (value.goal.max != null) {
         tooltip = `Max: ${value.goal.max}`;
+      } else {
+        tooltip = "No defined goal";
       }
     }
+    if (tooltip) {
+      tooltip += `\n7-day avg: ${value.avg7?.formatted ?? "N/A"}`;
+    } else {
+      tooltip = `7-day avg: ${value.avg7?.formatted ?? "N/A"}`;
+    }
   } else {
-    displayValue = String(value ?? "");
+    displayValue = String(value);
   }
 
   return (
@@ -70,7 +86,26 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
         <span className="relative group/badge pr-0">
           <StatusBadge status={status} />
           {tooltip && (
-            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-max rounded bg-gray-700 text-white text-xs px-2 py-1 opacity-0 group-hover/badge:opacity-100 transition-opacity whitespace-pre-line z-10">
+            <span
+              className="
+                absolute 
+                bottom-full 
+                left-1/2 
+                -translate-x-1/2 
+                mb-0 
+                min-w-[max-content] 
+                rounded 
+                bg-gray-700 
+                text-white 
+                text-xs 
+                px-2 py-1 
+                opacity-0 
+                group-hover/badge:opacity-100 
+                transition-opacity 
+                whitespace-pre-line 
+                cursor-pointer
+                z-[1000]"
+            >
               {tooltip}
             </span>
           )}
