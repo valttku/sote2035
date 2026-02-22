@@ -75,22 +75,78 @@ export default function LoginPage() {
         src="/logo.svg"
         className="logo"
       />
-      {!showLogin && !showRegister && (
-        <>
-          <Button
-            size="large"
-            label="Get Started"
-            onClick={toggleRegisterForm}
-            className="absolute bottom-[200px] right-120 w-72 text-white font-semibold"
-          />
 
-          <Button
-            size="large"
-            onClick={toggleLoginForm}
-            label="I already have an account"
-            className="absolute bottom-[120px] right-120 w-72 text-white font-semibold"
-          />
-        </>
+      <div className="absolute top-6 right-8 z-50">
+        <div className="flex items-center gap-1 text-white relative group">
+          {/* Static Language Icon + Text */}
+          <span className="text-base">🌐</span>
+          <span className="text-sm font-semibold">EN</span>
+
+          {/* Arrow ONLY clickable */}
+          <details className="relative">
+            <summary className="list-none cursor-pointer select-none text-sm transition-transform open:rotate-180">
+              ▾
+            </summary>
+
+            {/* Dropdown */}
+            <div className="absolute right-0 mt-2 min-w-[120px] rounded-lg border border-white/20 bg-black/80 backdrop-blur-md shadow-lg">
+              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
+                FI
+              </div>
+              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
+                SV
+              </div>
+              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
+                DE
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      {!showLogin && !showRegister && (
+        <div className="absolute top-1/2 left-1/2 -translate-y-1/2 translate-x-[35%] text-white">
+          <div className="flex flex-col items-start max-w-md text-white">
+            {/* Welcome Text Section */}
+            <div className="mb-12 space-y-3">
+              <h1 className="text-5xl font-bold leading-tight">Welcome</h1>
+
+              <h2 className="text-2xl font-semibold text-[#c3dafe]">
+                This is your digital health twin.
+              </h2>
+
+              <p className="text-base leading-relaxed text-[#c3dafe]/90 max-w-sm">
+                A living model of your body built from Garmin & Polar data to
+                help you understand recovery, performance, and long-term health.
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex flex-col gap-4 w-72">
+              <Button
+                size="large"
+                label="Get Started"
+                onClick={toggleRegisterForm}
+                className="text-white font-semibold"
+              />
+
+              <Button
+                size="large"
+                onClick={toggleLoginForm}
+                label="I already have an account"
+                bgColor="bg-transparent"
+                textColor="text-white"
+                borderColor="border-white"
+                className="font-semibold hover:bg-white/10 transition-all duration-300"
+              />
+
+              {/* Security Trust Line */}
+              <div className="flex items-center gap-2 mt-3 text-xs text-white/70 whitespace-nowrap">
+                <p>🔒Encrypted • You control your data • Disconnect anytime</p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Login modal */}
