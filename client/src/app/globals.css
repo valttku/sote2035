@@ -68,6 +68,25 @@ body {
   background-attachment: fixed;
 }
 
+.main-page {
+  width: 100%;
+  min-height: 100dvh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url("/main-bg.svg");
+}
+
+.logo {
+  position: fixed;
+  top: 1px;
+  left: 50px;
+  width: auto;
+  height: auto;
+  z-index: 1000;
+  filter: drop-shadow(0 0 8px rgba(0, 100, 155, 0.6));
+}
+
 /* Buttons */
 button {
   cursor: pointer;

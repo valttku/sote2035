@@ -1,10 +1,13 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import Modal from "../../components/Modal";
 import LoginForm from "../../components/startup/LoginForm";
 import RegisterForm from "../../components/startup/RegisterForm";
 import { useTranslation } from "../../i18n/LanguageProvider";
+import Button from "@/components/Button/Button";
 
 
 export default function StartUpPage() {
@@ -62,35 +65,104 @@ export default function StartUpPage() {
     }
   }
 
-  return (
-    <main className="flex flex-col items-center justify-center min-h-screen">
-      {/* Page title */}
-      <h1 className="text-7xl font-bold mb-10 text-center">
-        {t.startup.patient}
-        <br />
-        {text.page_title}
-      </h1>
+  const toggleLoginForm = () => {
+    setShowLogin((prev) => !prev);
+  };
 
-      {/* Login and Registration buttons */}
-      <div className="flex flex-col gap-4 min-w-80">
-        <button
-          className="text-2xl bg-[#c3dafe]/70 px-4 py-5 rounded-2xl font-bold hover:bg-[#b3c4f3]/50"
-          onClick={() => setShowLogin(true)}
-        >
-          {text.login}
-        </button>
-        <button
-          className="text-2xl bg-[#c3dafe]/70 px-4 py-5 rounded-2xl font-bold hover:bg-[#b3c4f3]/50"
-          onClick={() => setShowRegister(true)}
-        >
-          {text.register}
-        </button>
+  const toggleRegisterForm = () => {
+    setShowRegister((prev) => !prev);
+  };
+
+  return (
+    <main className="main-page">
+      <Image
+        priority
+        alt="Logo"
+        width={120}
+        height={10}
+        src="/logo.svg"
+        className="logo"
+      />
+
+      <div className="absolute top-6 right-8 z-50">
+        <div className="flex items-center gap-1 text-white relative group">
+          {/* Static Language Icon + Text */}
+          <span className="text-base">🌐</span>
+          <span className="text-sm font-semibold">EN</span>
+
+          {/* Arrow ONLY clickable */}
+          <details className="relative">
+            <summary className="list-none cursor-pointer select-none text-sm transition-transform open:rotate-180">
+              ▾
+            </summary>
+
+            {/* Dropdown */}
+            <div className="absolute right-0 mt-2 min-w-[120px] rounded-lg border border-white/20 bg-black/80 backdrop-blur-md shadow-lg">
+              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
+                FI
+              </div>
+              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
+                SV
+              </div>
+              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
+                DE
+              </div>
+            </div>
+          </details>
+        </div>
       </div>
+
+      {!showLogin && !showRegister && (
+        <div className="absolute top-1/2 left-1/2 -translate-y-1/2 translate-x-[35%] text-white">
+          <div className="flex flex-col items-start max-w-md text-white">
+            {/* Welcome Text Section */}
+            <div className="mb-12 space-y-3">
+              <h1 className="text-5xl font-bold leading-tight">Welcome</h1>
+
+              <h2 className="text-2xl font-semibold text-[#c3dafe]">
+                This is your digital health twin.
+              </h2>
+
+              <p className="text-base leading-relaxed text-[#c3dafe]/90 max-w-sm">
+                A living model of your body built from Garmin & Polar data to
+                help you understand recovery, performance, and long-term health.
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex flex-col gap-4 w-72">
+              <Button
+                size="large"
+                label="Get Started"
+                onClick={toggleRegisterForm}
+                className="text-white font-semibold"
+              />
+
+              <Button
+                size="large"
+                onClick={toggleLoginForm}
+                label="I already have an account"
+                bgColor="bg-transparent"
+                textColor="text-white"
+                borderColor="border-white"
+                className="font-semibold hover:bg-white/10 transition-all duration-300"
+              />
+
+              {/* Security Trust Line */}
+              <div className="flex items-center gap-2 mt-3 text-xs text-white/70 whitespace-nowrap">
+                <p>🔒Encrypted • You control your data • Disconnect anytime</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Login modal */}
       {showLogin && (
-        <Modal onClose={() => setShowLogin(false)}>
+        <Modal onClose={toggleLoginForm}>
           <LoginForm
+            toggleLoginForm={toggleLoginForm}
+            toggleRegisterForm={toggleRegisterForm}
             onSubmit={(email, password) =>
               handleSubmit("login", email, password)
             }
@@ -107,11 +179,12 @@ export default function StartUpPage() {
           </div>
         </Modal>
       )}
-
       {/* Registration modal */}
       {showRegister && (
-        <Modal onClose={() => setShowRegister(false)}>
+        <Modal onClose={toggleRegisterForm}>
           <RegisterForm
+            toggleLoginForm={toggleLoginForm}
+            toggleRegisterForm={toggleRegisterForm}
             onSubmit={(email, password, displayName) =>
               handleSubmit("register", email, password, displayName)
             }

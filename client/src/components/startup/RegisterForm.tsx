@@ -3,15 +3,21 @@
 import { useState, useRef, useMemo } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useTranslation } from "@/i18n/LanguageProvider";
+import Button from "../Button/Button";
+
 
 export default function RegisterForm({
   onSubmit,
+  toggleLoginForm,
+  toggleRegisterForm,
 }: {
   onSubmit: (
     email: string,
     password: string,
     displayName: string | null
   ) => void;
+  toggleLoginForm: () => void;
+  toggleRegisterForm: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -97,102 +103,166 @@ export default function RegisterForm({
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-2">
-        <h2 className="text-2xl sm:text-3xl mb-8 text-center">{t.register.title}</h2>
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold !text-white">
+            Create your digital twin
+          </h2>
+          <div className="mt-4 h-[2px] w-[80%] mx-auto bg-white rounded-full" />
+        </div>
 
         {/* Email */}
-        <label htmlFor="reg-email">{t.register.email}</label>
-        <input
-          id="reg-email"
-          ref={emailRef}
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="block w-full"
-          required
-        />
+        <div className="w-4/5 mx-auto">
+          <label htmlFor="reg-email" className="block mb-1">
+            {t.register.email}
+          </label>
+
+          <input
+            id="reg-email"
+            ref={emailRef}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="block w-full"
+            required
+          />
+        </div>
 
         {/* Display Name */}
-        <label htmlFor="reg-displayname">{t.register.displayName}</label>
-        <input
-          type="text"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          className="block w-full"
-        />
+        <div className="w-4/5 mx-auto">
+          <label htmlFor="reg-displayname" className="block mb-1">
+            {t.register.displayName}
+          </label>
+
+          <input
+            id="reg-displayname"
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="Display Name (optional)"
+            className="block w-full"
+          />
+        </div>
 
         {/* Password */}
-        <label htmlFor="reg-password">{t.register.password}</label>
-        <div className="relative">
-          <input
-            id="reg-password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            ref={passwordRef}
-            className="block w-full"
-            required
-          />
-          <button
-            type="button"
-            className="absolute right-2 top-2"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
-        </div>
+        <div className="w-4/5 mx-auto">
+          <label htmlFor="reg-password" className="block mb-1">
+            {t.register.password}
+          </label>
 
-        {/* Strength bar */}
-        <div className="h-2 bg-gray-200 rounded">
-          <div
-            className={`${getStrengthColor(strengthScore)} h-full rounded transition-all duration-500`}
-            style={{ width: `${(strengthScore / 5) * 100}%` }}
-          />
-        </div>
+          <div className="relative">
+            <input
+              id="reg-password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="block w-full"
+              required
+            />
 
-        {/* Requirements checklist */}
-        <ul className="space-y-1 mb-2">
-          {PASSWORD_REQUIREMENTS.map((req, i) => (
-            <li
-              key={i}
-              className={`text-sm flex items-center gap-2 ${
-                req.regex.test(password) ? "text-green-500" : "text-red-400"
-              }`}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="fa-eye absolute inset-y-0 right-3 flex items-center"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {req.regex.test(password) ? "✓" : "✕"} {req.text}
-            </li>
-          ))}
-        </ul>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+        </div>
 
-        <p className="text-sm font-medium mb-2">{getStrengthText(strengthScore)}</p>
+        {/* Password strength bar */}
+        <div className="w-4/5 md:w-4/5 mx-auto">
+          {/* Progress bar */}
+          <div
+            className="h-2 bg-gray-300 rounded-full overflow-hidden mb-2"
+            role="progressbar"
+            aria-valuenow={strengthScore}
+            aria-valuemin={0}
+            aria-valuemax={5}
+          >
+            <div
+              className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500 ease-out`}
+              style={{ width: `${(strengthScore / 5) * 100}%` }}
+            />
+          </div>
+
+          {/* Strength text */}
+          <p id="password-strength" className="text-sm font-medium mb-2">
+            {getStrengthText(strengthScore)}. Password must contain:
+          </p>
+
+          {/* Requirements */}
+          <ul className="space-y-1" aria-label="Password requirements">
+            {PASSWORD_REQUIREMENTS.map((req) => (
+              <li
+                key={req.text}
+                className={`text-sm flex items-center gap-2 ${
+                  req.regex.test(password) ? "text-green-600" : "text-red-500"
+                }`}
+              >
+                {req.text} {req.regex.test(password) ? "✓" : "✕"}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Confirm Password */}
-        <label htmlFor="reg-confirm">{t.register.confirmPassword}</label>
-        <div className="relative">
-          <input
-            id="reg-confirm"
-            type={showConfirmPassword ? "text" : "password"}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="block w-full"
-            required
-          />
-          <button
-            type="button"
-            className="absolute right-2 top-2"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-          >
-            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
-        </div>
+        <div className="w-4/5 mx-auto">
+          <label htmlFor="reg-confirm" className="block mb-1">
+           {t.register.confirmPassword}
+          </label>
 
-        <button
+          <div className="relative">
+            <input
+              id="reg-confirm"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm Password"
+              className="block w-full"
+              required
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="fa-eye absolute inset-y-0 right-3 flex items-center"
+              aria-label={
+                showConfirmPassword ? "Hide password" : "Show password"
+              }
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+        </div>
+        <Button
           type="submit"
+          size="small"
           disabled={loading}
-          className="button-style-blue w-full mt-2 disabled:opacity-50"
-        >
-          {loading ? t.register.loading : t.register.registerButton}
-        </button>
+          label={loading ? "Loading..." : "Create Account"}
+          className="mt-2 w-2/5 mx-auto block text-white font-bold"
+        />
       </form>
+      <div className="mt-5 h-[2px] w-[80%] mx-auto bg-white rounded-full" />
+      <Button
+        textColor="text-white"
+        bgColor="bg-transparent"
+        borderColor="border-transparent"
+        className="mt-4 mx-auto block cursor-default"
+      >
+        Already have an account?{" "}
+        <span
+          onClick={() => {
+            toggleLoginForm();
+            toggleRegisterForm();
+          }}
+          className="underline cursor-pointer text-[var(--button-blue-bg)]"
+        >
+          Login Here
+        </span>
+      </Button>
     </div>
   );
 }
