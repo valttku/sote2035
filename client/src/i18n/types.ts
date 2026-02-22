@@ -68,6 +68,12 @@ export type SettingsTranslations = {
 export type StartupTranslations = {
   patient: string;
   page_title: string;
+  heading: string;
+  sub_heading: string;
+  para_1: string;
+  started: string;
+  already_have_account: string;
+  encrypted: string;
   login: string;
   register: string;
   forgot_password: string;
@@ -216,12 +222,16 @@ export type HomeTranslations = {
 //Login
 export type LoginTranslations = {
   title: string;
+  sub_title: string;
+  or: string;
   email: string;
   password: string;
   emailError: string;
   showPassword: string;
   hidePassword: string;
   loginButton: string;
+  no_account: string;
+  sign_up_now: string;
   loading: string;
 };
 
@@ -230,6 +240,7 @@ export type RegisterTranslations = {
   title: string;
   email: string;
   displayName: string;
+  displayNameOptional: string;
   password: string;
   confirmPassword: string;
 
@@ -244,6 +255,11 @@ export type RegisterTranslations = {
   registerButton: string;
 
   passwordMustContain: string;
+
+  create_account: string;
+
+  alreadyHaveAccount: string;
+  loginHere: string;
 
   passwordStrength: {
     enter: string;

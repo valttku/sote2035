@@ -77,6 +77,12 @@
   "startup": {
     "patient": "Potilas",
     "page_title": "Potilaan Digitaalinen Kaksonen",
+    "heading": "Tervetuloa",
+    "sub_heading": "Tämä on digitaalinen terveyskaksosesi",
+    "para_1": "Elävä malli kehostasi, joka on rakennettu Garmin- ja Polar-datan avulla auttamaan sinua ymmärtämään palautumista, suorituskykyä ja pitkän aikavälin terveyttä",
+    "started": "Aloita",
+    "already_have_account": "Minulla on jo tili",
+    "encrypted": "Salattu • Hallitset tietojasi • Voit katkaista yhteyden milloin tahansa",
     "login": "KIRJAUDU SISÄÄN",
     "register": "REKISTERÖIDY",
     "forgot_password": "Unohtuiko salasana?",
@@ -167,19 +173,25 @@
   },
 
   "login": {
-    "title": "Kirjaudu sisään",
+    "title": "Tervetuloa",
+    "sub_title": "Kirjaudu terveyskaksoseesi jollakin seuraavista vaihtoehdoista",
+    "or": "Tai",
     "email": "Sähköposti",
     "password": "Salasana",
     "emailError": "Anna kelvollinen sähköpostiosoite",
     "showPassword": "Näytä salasana",
     "hidePassword": "Piilota salasana",
     "loginButton": "Kirjaudu",
+    "no_account": "Eikö sinulla ole tiliä",
+    "sign_up_now": "Rekisteröidy nyt",
     "loading": "Ladataan..."
   },
   "register": {
-    "title": "Rekisteröidy",
+    "title": "Luo digitaalinen kaksoseesi",
     "email": "Sähköposti",
     "displayName": "Näyttönimi",
+    "displayNameOptional": "Näyttönimi (valinnainen)",
+
     "password": "Salasana",
     "confirmPassword": "Vahvista salasana",
 
@@ -194,6 +206,11 @@
     "registerButton": "Rekisteröidy",
 
     "passwordMustContain": "Salasanan tulee sisältää:",
+
+    "create_account": "Luo tili",
+
+    "alreadyHaveAccount": "Onko sinulla jo tili",
+    "loginHere": "Kirjaudu sisään täällä",
 
     "passwordStrength": {
       "enter": "Syötä salasana",

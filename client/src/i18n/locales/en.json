@@ -81,6 +81,12 @@
   "startup": {
     "patient": "Patient",
     "page_title": "Patient Digital Twin",
+    "heading": "Welcome",
+    "sub_heading": "This is your didital health twin",
+    "para_1": "A living model of your body built from Garmin & Polar data to help you uderstand recovery, performance, and long-term health",
+    "started": "Get started",
+    "already_have_account": "I already have an account",
+    "encrypted": "Encrypted • You control your data • Disconnect anytime",
     "login": "LOGIN",
     "register": "REGISTER",
     "forgot_password": "Forgot password?",
@@ -173,20 +179,26 @@
   },
 
   "login": {
-    "title": "Login",
+    "title": "Welcome",
+    "sub_title": "Sign in to your health twin with one of the following options:",
+    "or": "Or",
     "email": "Email",
     "password": "Password",
     "emailError": "Enter a valid email address",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "loginButton": "Login",
+    "no_account": "Don't have an account",
+    "sign_up_now": "Sign up now",
     "loading": "Loading..."
   },
 
   "register": {
-    "title": "Register",
+    "title": "Create your digital twin",
     "email": "Email",
     "displayName": "Display Name",
+    "displayNameOptional": "Display Name (optional)",
+
     "password": "Password",
     "confirmPassword": "Confirm Password",
 
@@ -201,6 +213,11 @@
     "registerButton": "Register",
 
     "passwordMustContain": "Password must contain:",
+
+    "create_account": "Create Account",
+
+    "alreadyHaveAccount": "Already have an account",
+    "loginHere": "Login here",
 
     "passwordStrength": {
       "enter": "Enter a password",

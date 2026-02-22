@@ -48,8 +48,8 @@ export default function LoginForm({
     <>
       <form onSubmit={handleSubmit} className="space-y-2">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold !text-white mb-2">Welcome</h2>
-          <p>Sign in to your health twin with one of the following options:</p>
+          <h2 className="text-2xl font-bold !text-white mb-2">{t.login.title}</h2>
+          <p>{t.login.sub_title + ":"}</p>
           <div className="flex justify-center gap-4 mt-4">
             <Button
               disabled
@@ -81,7 +81,7 @@ export default function LoginForm({
 
           <div className="w-4/5 mx-auto flex items-center gap-3 my-4">
             <div className="h-[2px] flex-1 bg-white rounded-full" />
-            <span className="text-sm text-white whitespace-nowrap">Or</span>
+            <span className="text-sm text-white whitespace-nowrap">{t.login.or}</span>
             <div className="h-[2px] flex-1 bg-white rounded-full" />
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function LoginForm({
           type="submit"
           size="small"
           disabled={loading}
-          label={loading ? "Loading..." : "Login"}
+          label={loading ? t.login.loading : t.login.loginButton}
           className="mt-2 w-2/5 mx-auto block text-white font-bold"
         />
       </form>
@@ -155,7 +155,7 @@ export default function LoginForm({
         borderColor="border-transparent"
         className="mt-4 mx-auto block cursor-default"
       >
-        Don&apos;t have an account?{" "}
+        {t.login.no_account + "? "}
         <span
           onClick={() => {
             toggleLoginForm();
@@ -163,7 +163,7 @@ export default function LoginForm({
           }}
           className="underline cursor-pointer text-[var(--button-blue-bg)]"
         >
-          Sign up now
+         {t.login.sign_up_now}
         </span>
       </Button>
     </>

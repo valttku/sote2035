@@ -105,7 +105,7 @@ export default function RegisterForm({
       <form onSubmit={handleSubmit} className="space-y-2">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold !text-white">
-            Create your digital twin
+             {t.register.title}
           </h2>
           <div className="mt-4 h-[2px] w-[80%] mx-auto bg-white rounded-full" />
         </div>
@@ -122,7 +122,7 @@ export default function RegisterForm({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
+            placeholder={t.register.email}
             className="block w-full"
             required
           />
@@ -139,7 +139,7 @@ export default function RegisterForm({
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Display Name (optional)"
+            placeholder={t.register.displayNameOptional}
             className="block w-full"
           />
         </div>
@@ -156,7 +156,7 @@ export default function RegisterForm({
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
+              placeholder= {t.register.password}
               className="block w-full"
               required
             />
@@ -190,7 +190,7 @@ export default function RegisterForm({
 
           {/* Strength text */}
           <p id="password-strength" className="text-sm font-medium mb-2">
-            {getStrengthText(strengthScore)}. Password must contain:
+            {getStrengthText(strengthScore)}. {t.register.passwordMustContain}
           </p>
 
           {/* Requirements */}
@@ -220,7 +220,7 @@ export default function RegisterForm({
               type={showConfirmPassword ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm Password"
+              placeholder={t.register.confirmPassword}
               className="block w-full"
               required
             />
@@ -241,7 +241,7 @@ export default function RegisterForm({
           type="submit"
           size="small"
           disabled={loading}
-          label={loading ? "Loading..." : "Create Account"}
+          label={loading ? t.register.loading : t.register.create_account}
           className="mt-2 w-2/5 mx-auto block text-white font-bold"
         />
       </form>
@@ -252,7 +252,7 @@ export default function RegisterForm({
         borderColor="border-transparent"
         className="mt-4 mx-auto block cursor-default"
       >
-        Already have an account?{" "}
+        {t.register.alreadyHaveAccount + "?" + " "}
         <span
           onClick={() => {
             toggleLoginForm();
@@ -260,7 +260,7 @@ export default function RegisterForm({
           }}
           className="underline cursor-pointer text-[var(--button-blue-bg)]"
         >
-          Login Here
+           {t.register.loginHere}
         </span>
       </Button>
     </div>

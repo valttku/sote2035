@@ -2,8 +2,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
 import Modal from "../../components/Modal";
+import { FcLock } from "react-icons/fc";
 import LoginForm from "../../components/startup/LoginForm";
 import RegisterForm from "../../components/startup/RegisterForm";
 import { useTranslation } from "../../i18n/LanguageProvider";
@@ -82,23 +82,24 @@ export default function StartUpPage() {
           <div className="flex flex-col items-start max-w-md text-white">
             {/* Welcome Text Section */}
             <div className="mb-12 space-y-3">
-              <h1 className="text-5xl font-bold leading-tight">Welcome</h1>
+              <h1 className="text-5xl font-bold leading-tight">
+                {" "}
+                {t.startup.heading}
+              </h1>
 
               <h2 className="text-2xl font-semibold text-[#c3dafe]">
-                This is your digital health twin.
+                {t.startup.sub_heading}
               </h2>
 
               <p className="text-base leading-relaxed text-[#c3dafe]/90 max-w-sm">
-                A living model of your body built from Garmin & Polar data to
-                help you understand recovery, performance, and long-term health.
+                {t.startup.para_1}
               </p>
             </div>
 
-            {/* Buttons */}
             <div className="flex flex-col gap-4 w-72">
               <Button
                 size="large"
-                label="Get Started"
+                label={t.startup.started}
                 onClick={toggleRegisterForm}
                 className="text-white font-semibold"
               />
@@ -106,7 +107,7 @@ export default function StartUpPage() {
               <Button
                 size="large"
                 onClick={toggleLoginForm}
-                label="I already have an account"
+                label={t.startup.already_have_account}
                 bgColor="bg-transparent"
                 textColor="text-white"
                 borderColor="border-white"
@@ -114,8 +115,9 @@ export default function StartUpPage() {
               />
 
               {/* Security Trust Line */}
-              <div className="flex items-center gap-2 mt-3 text-xs text-white/70 whitespace-nowrap">
-                <p>🔒Encrypted • You control your data • Disconnect anytime</p>
+              <div className="flex items-center gap-2 mt-3 whitespace-nowrap">
+                <FcLock className="text-base shrink-0" />
+                <p className="text-xs text-white/70">{t.startup.encrypted}</p>
               </div>
             </div>
           </div>
