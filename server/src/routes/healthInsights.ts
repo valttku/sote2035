@@ -140,7 +140,6 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     const sleepResult = await db.query(
       `SELECT id, user_id, day_date, updated_at,
         duration_in_seconds,
-        total_nap_duration_in_seconds,
         start_time_in_seconds,
         unmeasurable_sleep_in_seconds,
         deep_sleep_in_seconds,

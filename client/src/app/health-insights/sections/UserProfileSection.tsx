@@ -16,10 +16,9 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
   if (!profile) return null;
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl mb-4">
-        User profile{" "}
-        <span className="text-sm font-normal">
-          (updated at{" "}
+      <h2>
+        <span>
+          Updated at: {" "}
           {new Date(profile.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -28,7 +27,6 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
             day: "2-digit",
             hour12: false,
           })}
-          )
         </span>
       </h2>
 

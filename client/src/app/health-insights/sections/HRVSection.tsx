@@ -17,10 +17,9 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl">
-        Heart Rate Variability Summary{" "}
-        <span className="text-sm font-normal">
-          (updated at{" "}
+      <h2>
+        <span>
+          Updated at: {" "}
           {new Date(HRV.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -29,7 +28,6 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
             day: "2-digit",
             hour12: false,
           })}
-          )
         </span>
       </h2>
 
@@ -37,14 +35,19 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
         <StatCard
           label="Last Night's Average HRV"
           value={`${HRV.last_night_avg} ms`}
+          icon="💓"
         />
         <StatCard
           label="Last Night's 5-min High HRV"
           value={`${HRV.last_night_5min_high} ms`}
+          icon="💓"
         />
         <StatCard
           label="Average Day HRV"
-          value={HRV.avg_day_hrv ? `${HRV.avg_day_hrv.toFixed(0)} ms` : "No data"}
+          value={
+            HRV.avg_day_hrv ? `${HRV.avg_day_hrv.toFixed(0)} ms` : "No data"
+          }
+          icon="💓"
         />
         <StatCard
           label="7-Day Average Night HRV"
@@ -55,6 +58,7 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
                 ? `${HRV.avg_7d_night_hrv.toFixed(0)} ms`
                 : "No data"
           }
+          icon="💓"
         />
         <StatCard
           label="7-Day Average HRV"
@@ -65,6 +69,7 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
                 ? `${HRV.avg_7d_hrv.toFixed(0)} ms`
                 : "No data"
           }
+          icon="💓"
         />
       </div>
     </div>

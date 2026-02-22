@@ -19,10 +19,9 @@ export function RespirationSection({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl">
-        Respiration Summary{" "}
-        <span className="text-sm font-normal">
-          (updated at{" "}
+      <h2>
+        <span>
+          Updated at: {" "}
           {new Date(respiration.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -31,7 +30,6 @@ export function RespirationSection({
             day: "2-digit",
             hour12: false,
           })}
-          )
         </span>
       </h2>
 
