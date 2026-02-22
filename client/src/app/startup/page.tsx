@@ -8,7 +8,8 @@ import LoginForm from "../../components/startup/LoginForm";
 import RegisterForm from "../../components/startup/RegisterForm";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import Button from "@/components/Button/Button";
-
+import LanguageSelector from "@/components/language-selector/LanguageSelector";
+import AppLogo from "@/components/app-logo/AppLogo";
 
 export default function StartUpPage() {
   // States to track if login and registration modal visibility
@@ -18,10 +19,9 @@ export default function StartUpPage() {
   // Next.js router for client-side navigation
   const router = useRouter();
 
-  //for translation 
+  //for translation
   const { t } = useTranslation();
   const text = t.startup;
-
 
   //Handles form submission for both login and registration flows
   async function handleSubmit(
@@ -51,7 +51,6 @@ export default function StartUpPage() {
           router.push("/"); // Only redirect if /me confirms login
         } else {
           alert(text.login_failed_session);
-;
         }
       } else {
         // Registration flow
@@ -75,42 +74,8 @@ export default function StartUpPage() {
 
   return (
     <main className="main-page">
-      <Image
-        priority
-        alt="Logo"
-        width={120}
-        height={10}
-        src="/logo.svg"
-        className="logo"
-      />
-
-      <div className="absolute top-6 right-8 z-50">
-        <div className="flex items-center gap-1 text-white relative group">
-          {/* Static Language Icon + Text */}
-          <span className="text-base">🌐</span>
-          <span className="text-sm font-semibold">EN</span>
-
-          {/* Arrow ONLY clickable */}
-          <details className="relative">
-            <summary className="list-none cursor-pointer select-none text-sm transition-transform open:rotate-180">
-              ▾
-            </summary>
-
-            {/* Dropdown */}
-            <div className="absolute right-0 mt-2 min-w-[120px] rounded-lg border border-white/20 bg-black/80 backdrop-blur-md shadow-lg">
-              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
-                FI
-              </div>
-              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
-                SV
-              </div>
-              <div className="px-3 py-2 text-sm text-white/90 hover:bg-white/10 cursor-pointer">
-                DE
-              </div>
-            </div>
-          </details>
-        </div>
-      </div>
+      <AppLogo />
+      <LanguageSelector className="absolute right-6 top-4 z-50" />
 
       {!showLogin && !showRegister && (
         <div className="absolute top-1/2 left-1/2 -translate-y-1/2 translate-x-[35%] text-white">

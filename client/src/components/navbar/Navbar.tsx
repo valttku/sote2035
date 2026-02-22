@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import DarkModeToggle from "./DarkModeToggle";
@@ -7,15 +7,9 @@ import LogoutButton from "./LogoutButton";
 
 //  Import your translation hook and types
 import { useTranslation } from "@/i18n/LanguageProvider";
-import LanguageSelector from "./LanguageSelector";
 
-import {
-  FaHome,
-  FaCalendarAlt,
-  FaHeartbeat,
-  FaCog,
-  FaGlobe,
-} from "react-icons/fa";
+import { FaHome, FaCalendarAlt, FaHeartbeat, FaCog } from "react-icons/fa";
+import LanguageSelector from "../language-selector/LanguageSelector";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -32,37 +26,32 @@ export default function Navbar() {
 
   return (
     <>
-      {/* DESKTOP NAVBAR */}
-      <header className="ui-component-styles hidden md:flex w-full max-w-screen-xl mx-auto mt-6 px-6 h-16 items-center justify-between shadow-sm">
-        {" "}
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-semibold">Digital Twin</h2>
-          {/* <img src="/logo.png" alt="logo" className="h-10 w-auto" /> removed logo for now*/}
-        </div>
-        <nav className="hidden md:flex gap-8">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={`flex items-center gap-2 font-medium ${
-                pathname === item.path ? "text-[#31c2d5]" : ""
-              } hover:text-[#31c2d5] transition-colors duration-200`}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-        <div className="hidden md:flex items-center gap-2">
-          <LanguageSelector />
-          <DarkModeToggle />
-          <LogoutButton />
+      <header className="hidden md:block w-full border-b border-white/15 bg-black/20 backdrop-blur-md">
+        <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Center: Nav links */}
+          <nav className="flex gap-10">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center gap-2 font-medium ${
+                  pathname === item.path ? "text-[#31c2d5]" : ""
+                } hover:text-[#31c2d5] transition-colors duration-200`}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </nav>
+          <div className="hidden md:flex items-center gap-2">
+            <DarkModeToggle />
+          </div>
         </div>
       </header>
 
       {/* MOBILE MENU BUTTON */}
       <button
-        className="md:hidden fixed top-4 right-4 z-50 ui-component-styles px-3 py-2 rounded-xl"
+        className="md:hidden fixed top-4 right-4 z-[70] ui-component-styles px-3 py-2 rounded-xl touch-manipulation"
         onClick={() => setOpen(!open)}
       >
         ☰
@@ -96,10 +85,10 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
+          <LanguageSelector className="absolute right-42 top-50 z-50" />
 
           {/* Bottom section: Language, Dark mode + Logout */}
           <div className="mt-auto pt-6 border-t border-gray-700 flex flex-col gap-2">
-            <LanguageSelector />
             <DarkModeToggle />
             <LogoutButton />
           </div>
