@@ -176,6 +176,49 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     );
     console.log(`[health-insights] Respiration data fetched:`, respResult.rows);
 
+    // Fetch HRV data
+    const hrvResult = await db.query(
+      `SELECT 
+        u.id,
+        u.user_id,
+        u.day_date,
+        u.updated_at,
+        u.last_night_avg,
+        u.last_night_5min_high,
+        (
+          SELECT AVG(last_night_avg)
+          FROM app.user_hrv_garmin
+          WHERE user_id = $1
+            AND day_date >= ($2::date - INTERVAL '6 days')
+            AND day_date <= $2::date
+        ) AS avg_7d_night_hrv,
+        (
+          SELECT AVG((value)::float)
+          FROM app.user_hrv_garmin g,
+              jsonb_each_text(g.hrv_values)
+          WHERE g.user_id = $1
+            AND g.day_date >= ($2::date - INTERVAL '6 days')
+            AND g.day_date <= $2::date
+        ) AS avg_7d_hrv,
+        (
+          SELECT AVG((value)::float)
+          FROM jsonb_each_text(u.hrv_values)
+        ) AS avg_day_hrv,
+        (
+          SELECT COUNT(*)
+          FROM app.user_hrv_garmin
+          WHERE user_id = $1
+            AND day_date >= ($2::date - INTERVAL '6 days')
+            AND day_date <= $2::date
+        ) AS days_in_7d_window
+      FROM app.user_hrv_garmin u
+      WHERE u.user_id = $1
+        AND u.day_date = $2::date;
+    `,
+      [userId, date],
+    );
+    console.log(`[health-insights] HRV data fetched:`, hrvResult.rows);
+
     const insights = {
       date,
       profile,
@@ -184,6 +227,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       sleep: sleepResult.rows,
       stress: stressResult.rows,
       respiration: respResult.rows,
+      hrv: hrvResult.rows,
     };
 
     res.json(insights);
