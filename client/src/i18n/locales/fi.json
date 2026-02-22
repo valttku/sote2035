@@ -228,9 +228,9 @@
       "activities": "Aktiviteetit",
       "sleep": "Uni",
       "stress": "Stressi",
-      "cardiovascular": "Sydämen terveys",
       "bodyComposition": "Kehon koostumus",
-      "respiration": "Hengitys"
+      "respiration": "Hengitys",
+      "hrv": "HRV"
     },
     "loading": "Terveystietoja ladataan...",
     "aiTitle": "Tekoälyanalyysi",
@@ -247,6 +247,7 @@
     "noSleepData": "Ei unidataa tälle päivälle",
     "noStressData": "Ei stressitietoja tälle päivälle",
     "noCardioData": "Ei sydänterveystietoja tälle päivälle",
-    "noRespirationData": "Ei hengitystietoja tälle päivälle"
+    "noRespirationData": "Ei hengitystietoja tälle päivälle",
+    "noHRVData": "Ei HRV-tietoja tälle päivälle"
   }
 }

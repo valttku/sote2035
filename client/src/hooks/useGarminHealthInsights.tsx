@@ -5,6 +5,7 @@ import { UserProfile } from "../app/health-insights/sections/UserProfileSection"
 import { Sleep } from "../app/health-insights/sections/SleepSection";
 import { Stress } from "../app/health-insights/sections/StressSection";
 import { Respiration } from "../app/health-insights/sections/RespirationSection";
+import { HRV } from "../app/health-insights/sections/HRVSection";
 
 export type HealthData = {
   profile?: UserProfile;
@@ -13,6 +14,7 @@ export type HealthData = {
   sleep?: Sleep[];
   stress?: Stress[];
   respiration?: Respiration[];
+  hrv?: HRV[];
 };
 
 export function useGarminHealthInsights(date?: string) {
@@ -46,6 +48,7 @@ export function useGarminHealthInsights(date?: string) {
           sleep?: Sleep | Sleep[];
           stress?: Stress | Stress[];
           respiration?: Respiration | Respiration[];
+          hrv?: HRV | HRV[];
         };
 
         const raw = (await response.json()) as RawHealthData;
@@ -81,6 +84,7 @@ export function useGarminHealthInsights(date?: string) {
               ? raw.respiration
               : [raw.respiration]
             : [],
+          hrv: raw.hrv ? (Array.isArray(raw.hrv) ? raw.hrv : [raw.hrv]) : [],
         };
 
         setHealthData(normalized);

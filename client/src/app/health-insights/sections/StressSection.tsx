@@ -134,10 +134,9 @@ export function StressSection({ stress }: { stress?: Stress }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl">
-        Stress Summary{" "}
-        <span className="text-sm font-normal">
-          (updated at{" "}
+      <h2>
+        <span>
+          Updated at:{" "}
           {new Date(stress.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -146,7 +145,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
             day: "2-digit",
             hour12: false,
           })}
-          )
+
         </span>
       </h2>
 
@@ -187,7 +186,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
             )}
             icon={<FaCircle color="#f59e0b" size={16} />}
           />
-          
+
           <StatCard
             label="High stress duration"
             value={formatSecondsToHoursMinutes(

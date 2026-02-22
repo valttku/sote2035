@@ -169,9 +169,9 @@ export type HealthInsightsTranslations = {
     activities: string;
     sleep: string;
     stress: string;
-    cardiovascular: string;
     bodyComposition: string;
     respiration: string;
+    hrv: string;
   };
   loading: string;
   aiTitle: string;
@@ -192,6 +192,7 @@ export type HealthInsightsTranslations = {
   noStressData: string;
   noCardioData: string;
   noRespirationData: string;
+  noHRVData: string;
 };
 
 //home

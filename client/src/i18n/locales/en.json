@@ -235,9 +235,9 @@
       "activities": "Activities",
       "sleep": "Sleep",
       "stress": "Stress",
-      "cardiovascular": "Heart Health",
       "bodyComposition": "Body Composition",
-      "respiration": "Respiration"
+      "respiration": "Respiration",
+      "hrv": "HRV"
     },
     "loading": "Loading health data...",
     "aiTitle": "AI Analysis",
@@ -254,6 +254,7 @@
     "noSleepData": "No sleep data for this date",
     "noStressData": "No stress data for this date",
     "noCardioData": "No cardiovascular data for this date",
-    "noRespirationData": "No respiration data for this date"
+    "noRespirationData": "No respiration data for this date",
+    "noHRVData": "No HRV data for this date"
   }
 }

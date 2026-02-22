@@ -28,10 +28,9 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl">
-        Daily Summary{" "}
-        <span className="text-sm font-normal">
-          (updated at{" "}
+      <h2>
+        <span>
+          Updated at:{" "}
           {new Date(dailies.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -40,7 +39,6 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
             day: "2-digit",
             hour12: false,
           })}
-          )
         </span>
       </h2>
 
@@ -85,9 +83,8 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
           value={`${(dailies.vigorous_intensity_duration_in_seconds / 60).toFixed(0)} min`}
           icon="⚡"
         />
-
         <StatCard
-          label="Weekly Exercise"
+          label="Weekly Intensity"
           value={`${(dailies.weekly_intensity_total_seconds / 60).toFixed(0)} 
           / ${(dailies.intensity_duration_goal_in_seconds / 60).toFixed(0)} min`}
           icon="⚡"

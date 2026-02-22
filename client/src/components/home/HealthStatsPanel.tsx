@@ -52,7 +52,7 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
 
   let displayValue = "";
   let status: "low" | "good" | "high" | "undefined" = "undefined";
-  let tooltip = "";
+  let tooltip = "No goal defined";
 
   if (isObject) {
     displayValue = String(value.value);
@@ -66,13 +66,13 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
       } else if (value.goal.max != null) {
         tooltip = `Max: ${value.goal.max}`;
       } else {
-        tooltip = "No defined goal";
+        tooltip = tooltip; // keep default
       }
     }
     if (tooltip) {
-      tooltip += `\n7-day avg: ${value.avg7?.formatted ?? "N/A"}`;
+      tooltip += `\n7-day avg: ${value.avg7?.formatted ?? "[insufficient data]"}`;
     } else {
-      tooltip = `7-day avg: ${value.avg7?.formatted ?? "N/A"}`;
+      tooltip = `7-day avg: ${value.avg7?.formatted ?? "[insufficient data]"}`;
     }
   } else {
     displayValue = String(value);

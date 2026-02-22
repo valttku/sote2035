@@ -7,6 +7,7 @@ import { UserProfile, UserProfileSection } from "./sections/UserProfileSection";
 import { Sleep, SleepSection } from "./sections/SleepSection";
 import { Stress, StressSection } from "./sections/StressSection";
 import { Respiration, RespirationSection } from "./sections/RespirationSection";
+import { HRV, HRVSection } from "./sections/HRVSection";
 import { useGarminHealthInsights } from "../../hooks/useGarminHealthInsights";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
@@ -21,6 +22,7 @@ type HealthDataToAnalyze = {
   sleep?: Sleep[];
   stress?: Stress[];
   respiration?: Respiration[];
+  hrv?: HRV[];
 };
 
 export default function HealthInsightsPage() {
@@ -36,7 +38,8 @@ export default function HealthInsightsPage() {
   const [selectedActivityIds, setSelectedActivityIds] = useState<Set<string>>(
     new Set(),
   );
-  const { healthData, loading: loadingData } = useGarminHealthInsights(selectedDate);
+  const { healthData, loading: loadingData } =
+    useGarminHealthInsights(selectedDate);
 
   const handleAnalyzeClick = async () => {
     setLoading(true);
@@ -61,6 +64,9 @@ export default function HealthInsightsPage() {
           break;
         case "respiration":
           dataToAnalyze.respiration = healthData?.respiration;
+          break;
+        case "hrv":
+          dataToAnalyze.hrv = healthData?.hrv;
           break;
         case "activities":
           if (selectedActivityIds.size > 0 && healthData?.activities) {
@@ -110,6 +116,7 @@ export default function HealthInsightsPage() {
     { id: "sleep", label: t.healthInsights.sections.sleep },
     { id: "stress", label: t.healthInsights.sections.stress },
     { id: "respiration", label: t.healthInsights.sections.respiration },
+    { id: "hrv", label: t.healthInsights.sections.hrv },
   ];
 
   return (
@@ -221,6 +228,16 @@ export default function HealthInsightsPage() {
                       ) : (
                         <div className="p-4">
                           {t.healthInsights.noRespirationData}
+                        </div>
+                      ))}
+                    {activeSection === "hrv" &&
+                      (healthData?.hrv?.[0] ? (
+                        <HRVSection
+                          HRV={healthData.hrv[0]}
+                        />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noHRVData}
                         </div>
                       ))}
                   </>
