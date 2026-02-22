@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import DarkModeToggle from "./DarkModeToggle";
@@ -28,27 +28,35 @@ export default function Navbar() {
     <>
       <header className="hidden md:block w-full border-b border-white/15 bg-black/20 backdrop-blur-md">
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Center: Nav links */}
+          <div className="w-40" />
           <nav className="flex gap-10">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                href={item.path}
-                className={`flex items-center gap-2 font-medium ${
-                  pathname === item.path ? "text-[#31c2d5]" : ""
-                } hover:text-[#31c2d5] transition-colors duration-200`}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
+             {navItems.map((item) => {
+              const active = pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`flex items-center gap-2 font-medium transition-colors duration-200 ${
+                    active ? "text-[#31c2d5]" : "text-white/90"
+                  } hover:text-[#31c2d5]`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+ );
+            })}      
+                </nav>
+                
           <div className="hidden md:flex items-center gap-2">
             <DarkModeToggle />
+          </div> 
+
+          <div className="w-40 flex items-center justify-end gap-3">
+            
           </div>
         </div>
       </header>
-
+      
       {/* MOBILE MENU BUTTON */}
       <button
         className="md:hidden fixed top-4 right-4 z-[70] ui-component-styles px-3 py-2 rounded-xl touch-manipulation"
