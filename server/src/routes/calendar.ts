@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "../db/db.js";
 import { authRequired } from "../middleware/authRequired.js";
+import { extractHealthMetrics } from "../db/healthStatEntries/extractHealthMetrics.js";
 
 export const calendarRouter = Router();
 
@@ -65,7 +66,16 @@ calendarRouter.get("/health-stats", authRequired, async (req, res, next) => {
       [userId, date],
     );
 
-    res.json({ date, entries: entries.rows });
+    // Extract health metrics for each entry
+    const formattedEntries = entries.rows.map((row) => ({
+      ...row,
+      data:
+        row.kind === "manual_activity"
+          ? row.data
+          : extractHealthMetrics(row.kind, row.data),
+    }));
+
+    res.json({ date, entries: formattedEntries });
   } catch (e) {
     next(e);
   }
@@ -94,20 +104,6 @@ calendarRouter.get("/activities", authRequired, async (req, res, next) => {
       [userId, date],
     );
 
-    // Get Garmin moveIQ events (add later)
-    //const garminMoveIQEvents = await db.query(
-    //   `
-    //  select id, device_name, activity_type as activity_name, duration_in_seconds,
-    //  start_time_in_seconds, offset_in_seconds as start_time_offset_in_seconds,
-    //  created_at, 'Garmin'::text as source_type
-    //  from app.user_move_iq_garmin
-    //  where user_id = $1 and (to_timestamp(start_time_in_seconds) at time zone 'UTC')::date = $2::date
-    //  `,
-    //  [userId, date],
-    //  );
-
-    // Get polar activities (to be added)
-
     // Combine and sort by created_at
     const allEntries = [...garminActivities.rows].sort(
       (a, b) =>
@@ -120,7 +116,7 @@ calendarRouter.get("/activities", authRequired, async (req, res, next) => {
   }
 });
 
-// Add a manual activity entry for a given date and user (adds manual_activity to health_stat_entries)
+// Add a manual_activity to health_stat_entries
 // POST /api/v1/calendar/manual-activities
 calendarRouter.post(
   "/manual-activities",

@@ -32,23 +32,57 @@ export default function ChooseServicePage() {
   return (
     <main className="flex items-center justify-center min-h-screen">
       <Modal onClose={closeModal}>
-        <h1 className="text-2xl mb-4 text-center">Choose your device</h1>
+        <h1 className="text-2xl md:text-3xl mb-4 text-center">
+          {/* Responsive heading: text-2xl mobile, text-3xl desktop */}
+          Choose your device
+        </h1>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Responsive button container: stacked on mobile, horizontal on desktop */}
+
+          {/* Garmin Button */}
           <button
-            className="button-style-blue w-full"
+            className="
+              button-style-blue 
+              hover: button-blue-hover
+              text-white 
+              rounded-md 
+              px-4 py-2 
+              md:px-6 md:py-3 
+              w-full
+            "
             onClick={() => selectService("garmin")}
           >
             Garmin
           </button>
+
+          {/* Polar Button */}
           <button
-            className="button-style-blue w-full"
+            className="
+              button-style-blue 
+              hover: button-blue-hover
+              text-white 
+              rounded-md 
+              px-4 py-2 
+              md:px-6 md:py-3 
+              w-full
+            "
             onClick={() => selectService("polar")}
           >
             Polar
           </button>
+
+          {/* Skip Button */}
           <button
-            className="button-style-blue w-full"
+            className="
+              cancel-button-style
+              hover:cancel-button-hover
+              text-white 
+              rounded-md 
+              px-4 py-2 
+              md:px-6 md:py-3 
+              w-full
+            "
             onClick={() => selectService("skip")}
           >
             Skip

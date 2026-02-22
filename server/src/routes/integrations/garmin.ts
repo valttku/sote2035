@@ -3,6 +3,7 @@ import { buildGarminAuthUrl } from "./garmin-oauth/garminAuthUrl.js";
 import { consumeOAuthState } from "./garmin-oauth/stateStore.js";
 import { exchangeGarminCodeForToken } from "./garmin-oauth/garminToken.js";
 import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
+import { refreshGarminToken } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
 
@@ -122,38 +123,6 @@ garminRouter.get("/callback", async (req, res) => {
     await db.query("ROLLBACK").catch(() => {});
     console.error("Garmin callback error:", err.message || err);
     res.status(500).json({ error: "Garmin integration failed" });
-  }
-});
-
-//  temporary test route to get user id from Garmin API
-garminRouter.get("/test-profile", async (req, res) => {
-  try {
-    const userId = 7; // test user
-    const r = await db.query(
-      `SELECT access_token FROM app.user_integrations WHERE user_id = $1 AND provider = 'garmin'`,
-      [userId],
-    );
-    if (r.rowCount === 0) return res.status(400).send("No token");
-
-    const accessToken = r.rows[0].access_token;
-
-    const resp = await fetch(
-      "https://apis.garmin.com/wellness-api/rest/user/id",
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    );
-
-    if (!resp.ok) {
-      const text = await resp.text();
-      return res.status(resp.status).send(`Garmin API failed: ${text}`);
-    }
-
-    const data = await resp.json();
-    res.json(data);
-  } catch (err: any) {
-    console.error("Test route error:", err);
-    res.status(500).send(`Server error: ${err.message}`);
   }
 });
 

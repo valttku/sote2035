@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 type ManualActivityFormProps = {
   selectedDate: string;
@@ -11,7 +12,10 @@ export default function ManualActivityForm({
   selectedDate,
   onActivityAdded,
 }: ManualActivityFormProps) {
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
+  const [loading] = useState(false); 
+
 
   return (
     <div className="mt-4">
@@ -21,7 +25,7 @@ export default function ManualActivityForm({
           onClick={() => setShowForm(true)}
           className="button-style-blue w-full"
         >
-          Add Activity
+           {t.calendar.addActivityButton} {/* Add translation key */}
         </button>
       ) : (
         <>
@@ -59,47 +63,67 @@ export default function ManualActivityForm({
             }}
             className="space-y-2"
           >
-            <input
-              type="text"
-              name="title"
-              placeholder="Activity title (e.g., Morning Run)"
-              className="w-full border rounded p-1"
-              required
-            />
-            <input
-              type="text"
-              name="type"
-              placeholder="Type (e.g., Run)"
-              className="w-full border rounded p-1"
-            />
-            <input
-              type="number"
-              name="duration"
-              placeholder="Duration (minutes)"
-              className="w-full border rounded p-1"
-            />
-            <input
-              type="number"
-              name="calories"
-              placeholder="Calories"
-              className="w-full border rounded p-1"
-            />
-            <input
-              type="number"
-              name="steps"
-              placeholder="Steps"
-              className="w-full border rounded p-1"
-            />
-            <div className="flex gap-2">
-              <button type="submit" className="button-style-blue flex-1">
-                Submit
-              </button>
+            {/* Title */}
+          <input
+            type="text"
+            name="title"
+            placeholder={t.calendar.activityTitlePlaceholder}
+            className="w-full border rounded p-2"
+            required
+          />
+
+          {/* Type dropdown (BEST PRACTICE) */}
+          <select
+            name="type"
+            className="w-full border rounded p-2"
+            defaultValue="run"
+          >
+            <option value="run">{t.calendar.activityTypes.run}</option>
+            <option value="walk">{t.calendar.activityTypes.walk}</option>
+            <option value="gym">{t.calendar.activityTypes.gym}</option>
+            <option value="cycling">{t.calendar.activityTypes.cycling}</option>
+          </select>
+
+          {/* Duration */}
+          <input
+            type="number"
+            name="duration"
+            placeholder={t.calendar.durationPlaceholder}
+            className="w-full border rounded p-2"
+          />
+           {/* Calories */}
+          <input
+            type="number"
+            name="calories"
+            placeholder={t.calendar.caloriesPlaceholder}
+            className="w-full border rounded p-2"
+          />
+
+          {/* Steps */}
+          <input
+            type="number"
+            name="steps"
+            placeholder={t.calendar.stepsPlaceholder}
+            className="w-full border rounded p-2"
+          />
+
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="button-style-blue flex-1"
+            >
+              
+                
+                
+               { t.calendar.submitButton}
+            </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
                 className="cancel-button-style flex-1"
               >
-                Cancel
+                {t.calendar.cancelButton}
               </button>
             </div>
           </form>

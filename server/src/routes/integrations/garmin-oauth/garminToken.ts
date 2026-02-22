@@ -58,3 +58,37 @@ export async function fetchGarminUserProfile(accessToken: string) {
   const data = await response.json();
   return data; // contains Garmin userId
 }
+
+export async function refreshGarminToken(refreshToken: string) {
+  const clientId = process.env.GARMIN_CLIENT_ID;
+  const clientSecret = process.env.GARMIN_CLIENT_SECRET;
+  
+  if (!clientId || !clientSecret) {
+    throw new Error("GARMIN_CLIENT_ID and GARMIN_CLIENT_SECRET must be set");
+  }
+
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+    client_id: clientId,
+    client_secret: clientSecret,
+  });
+
+  const response = await fetch(GARMIN_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
+    body: body.toString(),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Garmin token refresh failed:", response.status, text);
+    throw new Error(`Token refresh failed: ${response.status} - ${text}`);
+  }
+
+  const data = await response.json();
+  return data; // Contains new access_token, refresh_token, expires_in
+}
