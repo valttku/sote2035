@@ -94,8 +94,9 @@ export async function getHealthStatEntriesData(
 
       // Calculate 7-day average including today's value for trend analysis.
       // if no historical data exists, avg7 will be undefined
+      // Only show avg7 if there are at least 7 days of history (plus today)
       const avg7 =
-        historical.length > 0
+        historical.length >= 7
           ? (historical.reduce((a, b) => a + b, 0) + numericValue) /
             (historical.length + 1)
           : undefined;
@@ -143,7 +144,7 @@ export async function getHealthStatEntriesData(
 
       // Resting heart rate: personalized ranges when enough history exists
       if (row.kind === "heart_daily" && key === "Resting heart rate") {
-        if (historical.length >= 5) {
+        if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
           const stdDev = Math.sqrt(
             historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
@@ -162,7 +163,7 @@ export async function getHealthStatEntriesData(
       // Overnight average HRV: personalized ranges when enough history exists
       // HRV can be highly individual, so we use a wide spread if variability is high
       if (row.kind === "heart_daily" && key === "Overnight average HRV") {
-        if (historical.length >= 5) {
+        if (historical.length >= 7) {
           const avg = historical.reduce((a, b) => a + b, 0) / historical.length;
           const stdDev = Math.sqrt(
             historical.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
@@ -190,8 +191,8 @@ export async function getHealthStatEntriesData(
           const spread = Math.max(stdDev, 2);
 
           goal = {
-            min: +Math.max(8, avg - 2 * spread).toFixed(2),
-            max: +Math.min(25, avg + 2 * spread).toFixed(2),
+            min: +Math.max(8, avg - 2 * spread).toFixed(0),
+            max: +Math.min(25, avg + 2 * spread).toFixed(0),
           };
         } else {
           goal = { min: 12, max: 20 };
@@ -236,7 +237,7 @@ export async function getHealthStatEntriesData(
             return Math.round(raw / 60) + " min";
 
           case "Average respiratory rate":
-            return raw.toFixed(2) + " brpm";
+            return raw.toFixed() + " brpm";
 
           case "Resting heart rate":
           case "Average heart rate":
