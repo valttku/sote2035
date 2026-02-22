@@ -155,7 +155,7 @@ export default function LoginForm({
         borderColor="border-transparent"
         className="mt-4 mx-auto block cursor-default"
       >
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <span
           onClick={() => {
             toggleLoginForm();
