@@ -87,7 +87,7 @@ export default function LoginForm({
         </div>
         <div className="w-4/5 mx-auto">
           <label htmlFor="login-email" className="block mb-1">
-            Email
+             {t.login.email}
           </label>
 
           <input
@@ -116,7 +116,7 @@ export default function LoginForm({
         </div>
         <div className="w-4/5 mx-auto">
           <label htmlFor="login-password" className="block mb-1">
-            Password
+             {t.login.password}
           </label>
 
           <div className="relative">

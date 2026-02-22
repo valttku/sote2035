@@ -113,7 +113,7 @@ export default function RegisterForm({
         {/* Email */}
         <div className="w-4/5 mx-auto">
           <label htmlFor="reg-email" className="block mb-1">
-            Email
+            {t.register.email}
           </label>
 
           <input
@@ -131,7 +131,7 @@ export default function RegisterForm({
         {/* Display Name */}
         <div className="w-4/5 mx-auto">
           <label htmlFor="reg-displayname" className="block mb-1">
-            Display Name
+            {t.register.displayName}
           </label>
 
           <input
@@ -147,7 +147,7 @@ export default function RegisterForm({
         {/* Password */}
         <div className="w-4/5 mx-auto">
           <label htmlFor="reg-password" className="block mb-1">
-            Password
+            {t.register.password}
           </label>
 
           <div className="relative">
@@ -211,7 +211,7 @@ export default function RegisterForm({
         {/* Confirm Password */}
         <div className="w-4/5 mx-auto">
           <label htmlFor="reg-confirm" className="block mb-1">
-            Confirm Password
+           {t.register.confirmPassword}
           </label>
 
           <div className="relative">
