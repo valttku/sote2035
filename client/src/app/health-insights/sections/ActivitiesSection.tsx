@@ -35,13 +35,11 @@ export function ActivitiesSection({
       <p className="pb-2">Count: {activities?.length || 0}</p>
 
       {activities && activities.length > 0 ? (
-        <div className="space-y-4 w-full">
+        <div className="space-y-4 p-0 md:p-4 w-full">
           {activities.map((activity: Activity) => (
             <div
               key={activity.id}
-              className="border-l-4 border-l-[#31c2d5] bg-[#1e1c4f]/40  rounded-xl 
-              p-4 shadow-md hover:shadow-lg hover:bg-[#2a2a60]/80  
-              transition-all duration-200 cursor-pointer"
+              className="bg-[white]/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
             >
               {/* Title row */}
               <div className="flex justify-between items-center">
@@ -68,20 +66,20 @@ export function ActivitiesSection({
               </div>
 
               {/* Other stats */}
-              <div className="grid grid-cols-3 mt-2 text-sm text-gray-200">
+              <div className="flex flex-row mt-2 text-sm text-gray-200 items-start justify-start gap-4">
                 {activity.distance_in_meters != null && (
-                  <div className="flex items-center gap-1">
+                  <div className="">
                     🛣 Distance:{" "}
                     {(activity.distance_in_meters / 1000).toFixed(2)} km
                   </div>
                 )}
                 {activity.active_kilocalories != null && (
-                  <div className="flex items-center gap-1">
+                  <div className="">
                     🔥 Calories: {activity.active_kilocalories} kcal
                   </div>
                 )}
                 {activity.average_heart_rate != null && (
-                  <div className="flex items-center gap-1">
+                  <div className="">
                     ❤️ Avg HR: {activity.average_heart_rate} bpm
                   </div>
                 )}

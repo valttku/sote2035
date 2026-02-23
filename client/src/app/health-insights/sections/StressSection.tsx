@@ -133,8 +133,8 @@ export function StressSection({ stress }: { stress?: Stress }) {
   if (!stress) return null;
 
   return (
-    <div className="space-y-4">
-      <h2>
+    <div className="space-y-4 p-0 md:p-4 w-full">
+      <h1>
         <span>
           Updated at:{" "}
           {new Date(stress.updated_at).toLocaleString(undefined, {
@@ -147,7 +147,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
           })}
 
         </span>
-      </h2>
+      </h1>
 
       <div className="flex flex-row items-start gap-2">
         <div className="flex flex-col gap-2 w-full">
