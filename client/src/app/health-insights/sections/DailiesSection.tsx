@@ -29,7 +29,7 @@ export type Dailies = {
   body_battery_charged: number;
   body_battery_drained: number;
   heart_rate_samples: any;
-  updated_at: string;
+  updated_at: Record<string, number>;
 };
 
 export function DailiesSection({ dailies }: { dailies?: Dailies }) {
