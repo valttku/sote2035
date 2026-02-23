@@ -3,28 +3,31 @@ import { db } from "../../db/db.js";
 import {
   upsertGarminUserMetrics,
   mapGarminUserMetricsToRows,
-} from "../../db/garmin/metricsDb.js";
+} from "../../db/garminTables/metricsDb.js";
 import {
   upsertGarminDailies,
   mapGarminDailiesToRows,
-} from "../../db/garmin/dailiesDb.js";
+} from "../../db/garminTables/dailiesDb.js";
 import {
   mapGarminRespirationToRow,
   upsertGarminRespiration,
-} from "../../db/garmin/respirationDb.js";
+} from "../../db/garminTables/respirationDb.js";
 import {
   mapGarminActivityToRow,
   upsertGarminActivity,
-} from "../../db/garmin/activitiesDb.js";
+} from "../../db/garminTables/activitiesDb.js";
 import {
   mapGarminBodyCompToRow,
   upsertGarminBodyComp,
-} from "../../db/garmin/bodyCompDb.js";
+} from "../../db/garminTables/bodyCompDb.js";
 import {
   mapGarminSleepToRow,
   upsertGarminSleep,
-} from "../../db/garmin/sleepDb.js";
-import { mapGarminHRVToRows, upsertGarminHRV } from "../../db/garmin/hrvDb.js";
+} from "../../db/garminTables/sleepDb.js";
+import {
+  mapGarminHRVToRows,
+  upsertGarminHRV,
+} from "../../db/garminTables/hrvDb.js";
 
 // Router for Garmin webhooks
 export const garminWebhookRouter = express.Router();
@@ -102,10 +105,10 @@ garminWebhookRouter.post("/dailies", async (req, res) => {
 
   try {
     // Handle array wrapped by summary type
-    // Expect HRV payload under `hrv` or `hrvSummaries`; fall back to raw body
+    // Expect dailies payload under `dailySummaries` or `dailies`; fall back to raw body
     const payload =
-      req.body.hrv ||
-      req.body.hrvSummaries ||
+      req.body.dailySummaries ||
+      req.body.dailies ||
       (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {
@@ -412,7 +415,10 @@ garminWebhookRouter.post("/hrv", async (req, res) => {
   try {
     // Handle array wrapped by summary type
     const payload =
-      req.body.hrv || (Array.isArray(req.body) ? req.body : [req.body]);
+      req.body.hrvSummary ||
+      req.body.hrvSummaries ||
+      req.body.hrv ||
+      (Array.isArray(req.body) ? req.body : [req.body]);
 
     for (const item of payload) {
       const providerUserId = item.userId;
@@ -448,6 +454,10 @@ garminWebhookRouter.post("/hrv", async (req, res) => {
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin hrv webhook failed:", err);
+    console.error(
+      "Error stack:",
+      err instanceof Error ? err.stack : "No stack trace",
+    );
     res.sendStatus(200);
   }
 });

@@ -11,9 +11,13 @@
 
   "home": {
     "title": "Today",
-    "selectBodyPart": "Select a body part by clicking on a white dot on the body",
-      "noMetrics": "No metrics for this day",   
-    "loading": "Loading…",                    
+    "info": "To see your health information, select a body part by clicking on a white dot on the body. \n\nIf any metric is outside the normal range, the body part will be highlighted in red.",
+    "noMetrics": "No metrics for this day",
+    "loading": "Loading…",
+    "guideTitle": "Guide",
+    "aiTitle": "AI Analysis",
+    "noMessage": "No message available.",
+    "generatingMessage": "Generating AI message...",
     "bodyParts": {
       "brain": "Brain",
       "heart": "Heart",
@@ -77,6 +81,12 @@
   "startup": {
     "patient": "Patient",
     "page_title": "Patient Digital Twin",
+    "heading": "Welcome",
+    "sub_heading": "This is your didital health twin",
+    "para_1": "A living model of your body built from Garmin & Polar data to help you uderstand recovery, performance, and long-term health",
+    "started": "Get started",
+    "already_have_account": "I already have an account",
+    "encrypted": "Encrypted • You control your data • Disconnect anytime",
     "login": "LOGIN",
     "register": "REGISTER",
     "forgot_password": "Forgot password?",
@@ -169,20 +179,26 @@
   },
 
   "login": {
-    "title": "Login",
+    "title": "Welcome",
+    "sub_title": "Sign in to your health twin with one of the following options:",
+    "or": "Or",
     "email": "Email",
     "password": "Password",
     "emailError": "Enter a valid email address",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "loginButton": "Login",
+    "no_account": "Don't have an account",
+    "sign_up_now": "Sign up now",
     "loading": "Loading..."
   },
 
   "register": {
-    "title": "Register",
+    "title": "Create your digital twin",
     "email": "Email",
     "displayName": "Display Name",
+    "displayNameOptional": "Display Name (optional)",
+
     "password": "Password",
     "confirmPassword": "Confirm Password",
 
@@ -197,6 +213,11 @@
     "registerButton": "Register",
 
     "passwordMustContain": "Password must contain:",
+
+    "create_account": "Create Account",
+
+    "alreadyHaveAccount": "Already have an account",
+    "loginHere": "Login here",
 
     "passwordStrength": {
       "enter": "Enter a password",
@@ -231,8 +252,9 @@
       "activities": "Activities",
       "sleep": "Sleep",
       "stress": "Stress",
-      "cardiovascular": "Heart Health",
-      "bodyComposition": "Body Composition"
+      "bodyComposition": "Body Composition",
+      "respiration": "Respiration",
+      "hrv": "HRV"
     },
     "loading": "Loading health data...",
     "aiTitle": "AI Analysis",
@@ -246,9 +268,10 @@
     "noDailies": "No daily data available for this date.",
     "noProfileData": "No data for this user",
     "noActivitiesForDate": "No activities for this date",
-    "sleepComingSoon": "Sleep section coming soon...",
-    "stressComingSoon": "Stress section coming soon...",
-    "cardioComingSoon": "Cardio section coming soon...",
-    "bodyCompositionComingSoon": "Body Composition section coming soon..."
+    "noSleepData": "No sleep data for this date",
+    "noStressData": "No stress data for this date",
+    "noCardioData": "No cardiovascular data for this date",
+    "noRespirationData": "No respiration data for this date",
+    "noHRVData": "No HRV data for this date"
   }
 }

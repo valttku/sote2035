@@ -126,9 +126,4 @@ garminRouter.get("/callback", async (req, res) => {
   }
 });
 
-// POST /api/v1/integrations/garmin/sync-now
-garminRouter.post("/sync-now", authRequired, async (req, res) => {
- 
-});
-
 export default garminRouter;

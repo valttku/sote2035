@@ -1,6 +1,6 @@
 // Format health stats data into human-friendly metrics for display
 
-export function formatHealthEntry(kind: string, data: any) {
+export function extractHealthMetrics(kind: string, data: any) {
   const metrics: Record<string, number> = {};
 
   if (!data || typeof data !== "object") return metrics;
@@ -9,42 +9,33 @@ export function formatHealthEntry(kind: string, data: any) {
     case "heart_daily":
       if (data.hr_avg != null) metrics["Average heart rate"] = data.hr_avg;
       if (data.rhr != null) metrics["Resting heart rate"] = data.rhr;
+      if (data.overnight_avg_hrv != null)
+        metrics["Overnight average HRV"] = data.overnight_avg_hrv;
       break;
 
     case "sleep_daily":
-      if (data.duration_seconds != null) {
-        metrics["Total sleep"] = +(
-          data.duration_seconds / 60
-        ).toFixed(0);
-      }
+      if (data.duration_seconds != null)
+        metrics["Total sleep"] = data.duration_seconds;
       break;
 
     case "activity_daily":
       if (data.steps != null) metrics["Steps"] = data.steps;
-
-      if (data.distance_meters != null)
-        metrics["Distance (km)"] = +(data.distance_meters / 1000).toFixed(3);
-
-      if (data.total_kcal != null) metrics["Total kcal"] = data.total_kcal;
-
       if (data.floors_climbed != null)
         metrics["Floors climbed"] = data.floors_climbed;
-
-      if (data.intensity_duration_seconds != null)
-        metrics["Intensity duration today (min)"] = +(
-          data.intensity_duration_seconds / 60
-        ).toFixed(0);
-
       if (data.weekly_intensity_total_seconds != null)
-        metrics["Intensity duration this week (min)"] = +(
-          data.weekly_intensity_total_seconds / 60
-        ).toFixed(0);
-
+        metrics["Intense exercise this week"] =
+          data.weekly_intensity_total_seconds;
+      if (data.intensity_duration_seconds != null)
+        metrics["Intense exercise today"] = data.intensity_duration_seconds;
+      if (data.distance_meters != null)
+        metrics["Distance"] = data.distance_meters;
+      if (data.total_kcal != null)
+        metrics["Total energy expenditure"] = data.total_kcal;
       break;
 
     case "resp_daily":
       if (data.resp_rate != null)
-        metrics["Average respiratory rate (breaths/min)"] = data.resp_rate;
+        metrics["Average respiratory rate"] = data.resp_rate;
       break;
 
     case "stress_daily":

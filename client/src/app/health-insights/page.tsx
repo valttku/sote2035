@@ -6,7 +6,9 @@ import { DailiesSection, Dailies } from "./sections/DailiesSection";
 import { UserProfile, UserProfileSection } from "./sections/UserProfileSection";
 import { Sleep, SleepSection } from "./sections/SleepSection";
 import { Stress, StressSection } from "./sections/StressSection";
-import { useHealthData } from "./hooks/useHealthDataGarmin";
+import { Respiration, RespirationSection } from "./sections/RespirationSection";
+import { HRV, HRVSection } from "./sections/HRVSection";
+import { useGarminHealthInsights } from "../../hooks/useGarminHealthInsights";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
 
@@ -19,6 +21,8 @@ type HealthDataToAnalyze = {
   activities?: Activity[];
   sleep?: Sleep[];
   stress?: Stress[];
+  respiration?: Respiration[];
+  hrv?: HRV[];
 };
 
 export default function HealthInsightsPage() {
@@ -34,7 +38,8 @@ export default function HealthInsightsPage() {
   const [selectedActivityIds, setSelectedActivityIds] = useState<Set<string>>(
     new Set(),
   );
-  const { healthData, loading: loadingData } = useHealthData(selectedDate);
+  const { healthData, loading: loadingData } =
+    useGarminHealthInsights(selectedDate);
 
   const handleAnalyzeClick = async () => {
     setLoading(true);
@@ -57,6 +62,12 @@ export default function HealthInsightsPage() {
         case "stress":
           dataToAnalyze.stress = healthData?.stress;
           break;
+        case "respiration":
+          dataToAnalyze.respiration = healthData?.respiration;
+          break;
+        case "hrv":
+          dataToAnalyze.hrv = healthData?.hrv;
+          break;
         case "activities":
           if (selectedActivityIds.size > 0 && healthData?.activities) {
             dataToAnalyze.activities = healthData.activities.filter(
@@ -78,7 +89,9 @@ export default function HealthInsightsPage() {
             dataToAnalyze,
             null,
             2,
-          )}'Provide insights and suggestions based on the data for me. Max 10 sentences.`,
+          )}'If the updated_at date is today, use present tense ("so far today you have...").If the date is in the past, use past tense ("on x date you had..."). 
+          Provide insights TO ME in a concise manner, max 5 sentences. Focus on the most interesting or unusual aspects of the data. 
+          If possible, provide actionable advice based on the data. If the data looks normal, say that everything looks good!`,
         }),
       });
 
@@ -102,6 +115,8 @@ export default function HealthInsightsPage() {
     { id: "activities", label: t.healthInsights.sections.activities },
     { id: "sleep", label: t.healthInsights.sections.sleep },
     { id: "stress", label: t.healthInsights.sections.stress },
+    { id: "respiration", label: t.healthInsights.sections.respiration },
+    { id: "hrv", label: t.healthInsights.sections.hrv },
   ];
 
   return (
@@ -157,36 +172,21 @@ export default function HealthInsightsPage() {
                   <p>{t.healthInsights.loading}</p>
                 ) : (
                   <>
+                    {activeSection === "profile" &&
+                      (healthData?.profile ? (
+                        <UserProfileSection profile={healthData.profile} />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noProfileData}
+                        </div>
+                      ))}
+
                     {activeSection === "dailies" &&
                       (healthData?.dailies?.[0] ? (
                         <DailiesSection dailies={healthData.dailies[0]} />
                       ) : (
                         <div className="p-4">{t.healthInsights.noDailies}</div>
                       ))}
-
-                    {activeSection === "sleep" && (
-                      healthData?.sleep?.[0] ? (
-                        <SleepSection sleep={healthData.sleep[0]} />
-                      ) : (
-                        <div className="p-4">No sleep data for this date</div>
-                      )
-                    )}
-
-                    {activeSection === "stress" && (
-                      healthData?.stress?.[0] ? (
-                        <StressSection stress={healthData.stress[0]} />
-                      ) : (
-                        <div className="p-4">No stress data for this date</div>
-                      )
-                    )}
-
-                    {activeSection === "profile" && (
-                      healthData?.profile ? (
-                        <UserProfileSection profile={healthData.profile} />
-                      ) : (
-                        <div className="p-4">{t.healthInsights.noProfileData}</div>
-                      )
-                    )}
 
                     {activeSection === "activities" &&
                       (healthData?.activities &&
@@ -199,6 +199,45 @@ export default function HealthInsightsPage() {
                       ) : (
                         <div className="p-4">
                           {t.healthInsights.noActivitiesForDate}
+                        </div>
+                      ))}
+
+                    {activeSection === "sleep" &&
+                      (healthData?.sleep?.[0] ? (
+                        <SleepSection sleep={healthData.sleep[0]} />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noSleepData}
+                        </div>
+                      ))}
+
+                    {activeSection === "stress" &&
+                      (healthData?.stress?.[0] ? (
+                        <StressSection stress={healthData.stress[0]} />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noStressData}
+                        </div>
+                      ))}
+
+                    {activeSection === "respiration" &&
+                      (healthData?.respiration?.[0] ? (
+                        <RespirationSection
+                          respiration={healthData.respiration[0]}
+                        />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noRespirationData}
+                        </div>
+                      ))}
+                    {activeSection === "hrv" &&
+                      (healthData?.hrv?.[0] ? (
+                        <HRVSection
+                          HRV={healthData.hrv[0]}
+                        />
+                      ) : (
+                        <div className="p-4">
+                          {t.healthInsights.noHRVData}
                         </div>
                       ))}
                   </>

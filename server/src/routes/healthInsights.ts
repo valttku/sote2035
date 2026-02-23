@@ -34,19 +34,41 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     // Fetch profile and metrics in parallel
     const [profileResult, metricsResult] = await Promise.all([
       db.query(
-        `SELECT id, gender, height, weight
+        `SELECT id, gender, height, weight, updated_at
          FROM app.users
          WHERE id = $1`,
         [userId],
       ),
       db.query(
-        `SELECT vo2_max, vo2_max_cycling, fitness_age
-         FROM app.user_metrics_garmin
-         WHERE user_id = $1 AND day_date = (
-           SELECT MAX(day_date)
-           FROM app.user_metrics_garmin
-           WHERE user_id = $1 AND day_date <= $2::date
-         )`,
+        `SELECT
+           (
+             SELECT vo2_max
+             FROM app.user_metrics_garmin
+             WHERE user_id = $1
+               AND vo2_max IS NOT NULL
+               AND day_date <= $2::date
+             ORDER BY day_date DESC
+             LIMIT 1
+           ) AS vo2_max,
+           (
+             SELECT vo2_max_cycling
+             FROM app.user_metrics_garmin
+             WHERE user_id = $1
+               AND vo2_max_cycling IS NOT NULL
+               AND day_date <= $2::date
+             ORDER BY day_date DESC
+             LIMIT 1
+           ) AS vo2_max_cycling,
+           (
+             SELECT fitness_age
+             FROM app.user_metrics_garmin
+             WHERE user_id = $1
+               AND fitness_age IS NOT NULL
+               AND day_date <= $2::date
+             ORDER BY day_date DESC
+             LIMIT 1
+           ) AS fitness_age
+        `,
         [userId, date],
       ),
     ]);
@@ -61,13 +83,22 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
 
     // Fetch data from dailies table
     const dailiesResult = await db.query(
-      `SELECT id, user_id, day_date, summary_id, active_kilocalories, 
+      `SELECT id, user_id, day_date, active_kilocalories, 
           bmr_kilocalories, steps, distance_in_meters,  
-          active_time_in_seconds, floors_climbed,  
-          avg_heart_rate, resting_heart_rate, avg_stress_level, 
-          body_battery_charged, body_battery_drained, steps_goal, 
+          floors_climbed, avg_heart_rate, resting_heart_rate, 
+          max_heart_rate, avg_stress_level, steps_goal,
+          body_battery_charged, body_battery_drained,
           moderate_intensity_duration_in_seconds, 
           vigorous_intensity_duration_in_seconds,
+          intensity_duration_goal_in_seconds,
+          -- weekly total (seconds), weighting vigorous = 2x
+          (
+            SELECT COALESCE(SUM(moderate_intensity_duration_in_seconds + (vigorous_intensity_duration_in_seconds * 2)), 0)::int
+            FROM app.user_dailies_garmin
+            WHERE user_id = $1
+              AND day_date >= date_trunc('week', $2::date)::date
+              AND day_date <= $2::date
+          ) AS weekly_intensity_total_seconds,
           floors_climbed_goal, source, created_at, updated_at
         FROM app.user_dailies_garmin 
         WHERE user_id = $1 AND day_date = $2::date`,
@@ -82,14 +113,13 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     const stressResult = await db.query(
       `SELECT id,
           avg_stress_level,
-          max_stress_level,
-          stress_duration_in_seconds,
           rest_stress_duration_in_seconds,
-          activity_stress_duration_in_seconds,
           low_stress_duration_in_seconds,
           medium_stress_duration_in_seconds,
           high_stress_duration_in_seconds,
-          stress_qualifier
+          stress_duration_in_seconds,
+          stress_qualifier,
+          updated_at
       FROM app.user_dailies_garmin
       WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],
@@ -108,11 +138,85 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
 
     // Fetch sleep data
     const sleepResult = await db.query(
-      `SELECT * FROM app.user_sleeps_garmin
+      `SELECT id, user_id, day_date, updated_at,
+        duration_in_seconds,
+        start_time_in_seconds,
+        unmeasurable_sleep_in_seconds,
+        deep_sleep_in_seconds,
+        light_sleep_in_seconds,
+        rem_sleep_in_seconds,
+        awake_duration_in_seconds
+      FROM app.user_sleeps_garmin
       WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],
     );
     console.log(`[health-insights] Sleep data fetched:`, sleepResult.rows);
+
+    // Fetch respiration data
+    const respResult = await db.query(
+      `SELECT 
+          id, user_id, day_date, updated_at,
+          (
+            SELECT MIN((value)::float)
+            FROM jsonb_each_text(time_offset_epoch_to_breaths)
+          ) AS min_respiration,
+          (
+            SELECT MAX((value)::float)
+            FROM jsonb_each_text(time_offset_epoch_to_breaths)
+          ) AS max_respiration,
+          (
+            SELECT AVG((value)::float)
+            FROM jsonb_each_text(time_offset_epoch_to_breaths)
+          ) AS avg_respiration
+      FROM app.user_respiration_garmin
+      WHERE user_id = $1 AND day_date = $2::date;
+    `,
+      [userId, date],
+    );
+    console.log(`[health-insights] Respiration data fetched:`, respResult.rows);
+
+    // Fetch HRV data
+    const hrvResult = await db.query(
+      `SELECT 
+        u.id,
+        u.user_id,
+        u.day_date,
+        u.updated_at,
+        u.last_night_avg,
+        u.last_night_5min_high,
+        (
+          SELECT AVG(last_night_avg)
+          FROM app.user_hrv_garmin
+          WHERE user_id = $1
+            AND day_date >= ($2::date - INTERVAL '6 days')
+            AND day_date <= $2::date
+        ) AS avg_7d_night_hrv,
+        (
+          SELECT AVG((value)::float)
+          FROM app.user_hrv_garmin g,
+              jsonb_each_text(g.hrv_values)
+          WHERE g.user_id = $1
+            AND g.day_date >= ($2::date - INTERVAL '6 days')
+            AND g.day_date <= $2::date
+        ) AS avg_7d_hrv,
+        (
+          SELECT AVG((value)::float)
+          FROM jsonb_each_text(u.hrv_values)
+        ) AS avg_day_hrv,
+        (
+          SELECT COUNT(*)
+          FROM app.user_hrv_garmin
+          WHERE user_id = $1
+            AND day_date >= ($2::date - INTERVAL '6 days')
+            AND day_date <= $2::date
+        ) AS days_in_7d_window
+      FROM app.user_hrv_garmin u
+      WHERE u.user_id = $1
+        AND u.day_date = $2::date;
+    `,
+      [userId, date],
+    );
+    console.log(`[health-insights] HRV data fetched:`, hrvResult.rows);
 
     const insights = {
       date,
@@ -121,6 +225,8 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
       dailies: dailiesResult.rows,
       sleep: sleepResult.rows,
       stress: stressResult.rows,
+      respiration: respResult.rows,
+      hrv: hrvResult.rows,
     };
 
     res.json(insights);

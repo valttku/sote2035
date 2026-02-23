@@ -19,12 +19,9 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="w-full text-indigo-200 hover:text-[#f2345d] transition py-2"
+      className="text-indigo-200 hover:text-[#f2345d] transition px-2 py-1 whitespace-nowrap"
     >
       <span className="bi bi-power"></span>
-        {t?.auth?.logout ?? "Logout"} {/* safe fallback */}
     </button>
   );
 }
-
-

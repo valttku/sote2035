@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Activity } from "../sections/ActivitiesSection";
-import { Dailies } from "../sections/DailiesSection";
-import { UserProfile } from "../sections/UserProfileSection";
-import { Sleep } from "../sections/SleepSection";
-import { Stress } from "../sections/StressSection";
+import { Activity } from "../app/health-insights/sections/ActivitiesSection";
+import { Dailies } from "../app/health-insights/sections/DailiesSection";
+import { UserProfile } from "../app/health-insights/sections/UserProfileSection";
+import { Sleep } from "../app/health-insights/sections/SleepSection";
+import { Stress } from "../app/health-insights/sections/StressSection";
+import { Respiration } from "../app/health-insights/sections/RespirationSection";
+import { HRV } from "../app/health-insights/sections/HRVSection";
 
 export type HealthData = {
   profile?: UserProfile;
@@ -11,9 +13,11 @@ export type HealthData = {
   activities?: Activity[];
   sleep?: Sleep[];
   stress?: Stress[];
+  respiration?: Respiration[];
+  hrv?: HRV[];
 };
 
-export function useHealthData(date?: string) {
+export function useGarminHealthInsights(date?: string) {
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +47,8 @@ export function useHealthData(date?: string) {
           activities?: Activity | Activity[];
           sleep?: Sleep | Sleep[];
           stress?: Stress | Stress[];
+          respiration?: Respiration | Respiration[];
+          hrv?: HRV | HRV[];
         };
 
         const raw = (await response.json()) as RawHealthData;
@@ -73,6 +79,12 @@ export function useHealthData(date?: string) {
               ? raw.stress
               : [raw.stress]
             : [],
+          respiration: raw.respiration
+            ? Array.isArray(raw.respiration)
+              ? raw.respiration
+              : [raw.respiration]
+            : [],
+          hrv: raw.hrv ? (Array.isArray(raw.hrv) ? raw.hrv : [raw.hrv]) : [],
         };
 
         setHealthData(normalized);
