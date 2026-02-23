@@ -18,8 +18,8 @@ export function RespirationSection({
   if (!respiration) return null;
 
   return (
-    <div className="space-y-4">
-      <h2>
+    <div className="space-y-4 p-0 md:p-4 w-full">
+      <h1>
         <span>
           Updated at: {" "}
           {new Date(respiration.updated_at).toLocaleString(undefined, {
@@ -31,7 +31,7 @@ export function RespirationSection({
             hour12: false,
           })}
         </span>
-      </h2>
+      </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard

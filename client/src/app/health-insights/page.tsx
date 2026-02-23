@@ -122,8 +122,8 @@ export default function HealthInsightsPage() {
   return (
     <AppLayout>
       <div className="w-full flex justify-center">
-        <div className="flex flex-row gap-5 w-full max-w-8xl px-4">
-          <div className="rounded-2xl border border-white/15 bg-black/20 backdrop-blur-md p-6 w-full space-y-6 mx-auto flex flex-col flex-1">
+        <div className="flex flex-col gap-5 w-full md:flex-row">
+          <div className="rounded-2xl border border-white/15 bg-black/20 backdrop-blur-md p-6 w-full space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] ">
             <h1 className="text-4xl">{t.healthInsights.title}</h1>
 
             {/* Navigation */}
@@ -139,7 +139,7 @@ export default function HealthInsightsPage() {
                     className={`px-4 py-2 rounded-full text-sm font-medium ${
                       activeSection === section.id
                         ? "bg-[#31c2d5] text-white"
-                        : "bg-[#1e1c4f]/40 text-gray-300 hover:bg-[#2a2a60]/80 hover:text-white"
+                        : "bg-[white]/10 border border-white/20  hover:bg-[white]/20"
                     }`}
                   >
                     {section.label}
@@ -148,7 +148,7 @@ export default function HealthInsightsPage() {
               </div>
 
               {/* Date Selection */}
-              <div className="ml-auto w-full max-w-[150px] md:max-w-[200px] mt-2 md:mt-0">
+              <div className="ml-auto w-full lg:w-[150px] mt-2 md:mt-0">
                 <input
                   type="date"
                   id="date"
@@ -266,7 +266,7 @@ export default function HealthInsightsPage() {
 
               {/* Analyze Button */}
               <button
-                className="button-style-blue w-full md:w-[200px] justify-center mb-5 ml-auto mr-5"
+                className="button-style-blue w-full md:w-auto justify-center mb-5 ml-auto mr-5"
                 onClick={() => {
                   if (showResult) setShowResult(false);
                   else handleAnalyzeClick();

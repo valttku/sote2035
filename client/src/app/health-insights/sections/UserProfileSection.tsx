@@ -15,8 +15,8 @@ export type UserProfile = {
 export function UserProfileSection({ profile }: { profile?: UserProfile }) {
   if (!profile) return null;
   return (
-    <div className="space-y-4">
-      <h2>
+    <div className="space-y-4 p-0 md:p-4 w-full">
+      <h1>
         <span>
           Updated at: {" "}
           {new Date(profile.updated_at).toLocaleString(undefined, {
@@ -28,7 +28,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
             hour12: false,
           })}
         </span>
-      </h2>
+      </h1>
 
       {/* Body Composition Section */}
       <div className="mb-6">
