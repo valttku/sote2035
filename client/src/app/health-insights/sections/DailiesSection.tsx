@@ -28,8 +28,8 @@ export type Dailies = {
   steps_goal: number;
   body_battery_charged: number;
   body_battery_drained: number;
-  heart_rate_samples: any;
-  updated_at: Record<string, number>;
+  heart_rate_samples: Record<string, number>;
+  updated_at: string;
 };
 
 export function DailiesSection({ dailies }: { dailies?: Dailies }) {
