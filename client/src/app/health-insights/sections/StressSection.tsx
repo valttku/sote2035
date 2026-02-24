@@ -194,7 +194,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
       };
 
   return (
-    <div className={`space-y-4 p-0 md:p-4 w-full ${!stress ? "opacity-50" : ""}`}>
+    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!stress ? "opacity-50" : ""}`}>
       <h1>
         <span>
           Updated at:{" "}
@@ -209,12 +209,12 @@ export function StressSection({ stress }: { stress?: Stress }) {
         </span>
       </h1>
 
-      <div className="flex flex-row items-start gap-2 h-full">
+      <div className="flex flex-row items-center gap-4 h-full rounded-xl border border-white/20 p-4">
         <div className="flex-shrink-0 w-1/2 my-auto">
         <StressWheelSVG stress={displayStress} />
         </div>
 
-        <div className="flex flex-col gap-2 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full lg:w-1/2">
           <StatCard
             label="Stress duration"
             value={formatSecondsToHoursMinutes(

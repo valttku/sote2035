@@ -16,7 +16,7 @@ export function StatCard({
         <span>{label}</span>
       </div>
 
-      <div className="text-sm font-semibold mt-1">{value}</div>
+      <div className="text-md font-semibold ml-1">{value}</div>
     </div>
   );
 }

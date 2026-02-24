@@ -57,7 +57,7 @@ export function ActivitiesSection({
   return (
     <div>
       <div
-        className={`space-y-4 p-0 md:p-4 w-full ${!hasData ? "opacity-50" : ""}`}
+        className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!hasData ? "opacity-50" : ""}`}
       >
         <p className="pb-2">Count: {hasData ? activities!.length : 0}</p>
         {displayActivities.map((activity: Activity) => (

@@ -28,7 +28,7 @@ export function RespirationSection({
       };
 
   return (
-    <div className={`space-y-4 p-0 md:p-4 w-full ${!respiration ? "opacity-50" : ""}`}>
+    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!respiration ? "opacity-50" : ""}`}>
       <h1>
         <span>
           Updated at:{" "}
