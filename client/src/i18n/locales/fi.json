@@ -252,19 +252,11 @@
     "loading": "Terveystietoja ladataan...",
     "aiTitle": "Tekoälyanalyysi",
     "aiPlaceholder": "Valitse tiedot ja napsauta \"Analysoi\" saadaksesi tekoälyn ehdotuksia.",
-    "comingSoon": "Osio tulossa pian...",
     "analyzing": "Analysoidaan...",
     "clearAnalysis": "Tyhjennä analyysi",
     "analyzeAll": "Analysoi kaikki tiedot",
     "analyzeSection": "Analysoi {{section}}",
     "failedInsights": "Tekoälyanalyysi epäonnistui. Yritä uudelleen.",
-    "noDailies": "Tälle päivämäärälle ei ole päivittäisiä tietoja.",
-    "noProfileData": "Ei tietoja tästä käyttäjästä",
-    "noActivitiesForDate": "Ei aktiviteetteja tälle päivälle",
-    "noSleepData": "Ei unidataa tälle päivälle",
-    "noStressData": "Ei stressitietoja tälle päivälle",
-    "noCardioData": "Ei sydänterveystietoja tälle päivälle",
-    "noRespirationData": "Ei hengitystietoja tälle päivälle",
-    "noHRVData": "Ei HRV-tietoja tälle päivälle"
+    "noData": "Ei dataa tältä päivältä."
   }
 }

@@ -105,9 +105,15 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
           WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],
     );
-    // No console log for heart_rate_samples
+    // After fetching dailies
+    const dailiesWithoutHR = dailiesResult.rows.map(
+      ({ heart_rate_samples, ...rest }) => rest,
+    );
 
-    
+    console.log(
+      "[health-insights] Dailies without heart_rate_samples:",
+      dailiesWithoutHR,
+    );
 
     // Fetch stress data separately from dailies table
     const stressResult = await db.query(

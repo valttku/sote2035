@@ -41,14 +41,29 @@ function formatSecondsToHoursMinutes(seconds: number): string {
 }
 
 export function SleepSection({ sleep }: { sleep?: Sleep }) {
-  if (!sleep) return null;
+  const hasData = !!sleep;
+
+  // If no data, provide default values
+  const displaySleep: Sleep = hasData
+    ? sleep!
+    : {
+        id: "empty",
+        duration_in_seconds: 0,
+        start_time_in_seconds: 0,
+        unmeasurable_sleep_in_seconds: 0,
+        deep_sleep_in_seconds: 0,
+        light_sleep_in_seconds: 0,
+        rem_sleep_in_seconds: 0,
+        awake_duration_in_seconds: 0,
+        updated_at: new Date().toISOString(),
+      };
 
   return (
     <div className="space-y-4 p-0 md:p-4 w-full">
       <h1>
         <span>
-          Updated at: {" "}
-          {new Date(sleep.updated_at).toLocaleString(undefined, {
+          Updated at:{" "}
+          {new Date(displaySleep.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
             year: "numeric",
@@ -62,41 +77,47 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           label="Total Sleep"
-          value={formatSecondsToHoursMinutes(sleep.duration_in_seconds)}
+          value={`${formatSecondsToHoursMinutes(displaySleep.duration_in_seconds)}`}
           icon="💤"
         />
         <StatCard
           label="Start / End"
           value={`${new Date(
-            sleep.start_time_in_seconds * 1000,
+            displaySleep.start_time_in_seconds * 1000,
           ).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
           })} - ${calculateSleepEndtime(
-            sleep.start_time_in_seconds,
-            sleep.duration_in_seconds,
+            displaySleep.start_time_in_seconds,
+            displaySleep.duration_in_seconds,
           )}`}
           icon="⏰"
         />
         <StatCard
           label="Awake"
-          value={formatSecondsToHoursMinutes(sleep.awake_duration_in_seconds)}
+          value={formatSecondsToHoursMinutes(
+            displaySleep.awake_duration_in_seconds,
+          )}
           icon="😒"
         />
         <StatCard
           label="Deep Sleep"
-          value={formatSecondsToHoursMinutes(sleep.deep_sleep_in_seconds)}
+          value={formatSecondsToHoursMinutes(
+            displaySleep.deep_sleep_in_seconds,
+          )}
           icon="💤"
         />
         <StatCard
           label="Light Sleep"
-          value={formatSecondsToHoursMinutes(sleep.light_sleep_in_seconds)}
+          value={formatSecondsToHoursMinutes(
+            displaySleep.light_sleep_in_seconds,
+          )}
           icon="💤"
         />
         <StatCard
           label="REM Sleep"
-          value={formatSecondsToHoursMinutes(sleep.rem_sleep_in_seconds)}
+          value={formatSecondsToHoursMinutes(displaySleep.rem_sleep_in_seconds)}
           icon="💤"
         />
       </div>
