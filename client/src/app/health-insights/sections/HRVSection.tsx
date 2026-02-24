@@ -13,14 +13,30 @@ export type HRV = {
 };
 
 export function HRVSection({ HRV }: { HRV?: HRV }) {
-  if (!HRV) return null;
+  const hasData = !!HRV;
+
+  const displayHRV: HRV = hasData
+    ? HRV!
+    : {
+        id: "empty",
+        last_night_avg: 0,
+        last_night_5min_high: 0,
+        avg_7d_night_hrv: null,
+        avg_7d_hrv: null,
+        avg_day_hrv: null,
+        days_in_7d_window: 0,
+        updated_at: new Date().toISOString(),
+      };
+
+  const formatHRV = (value: number | null) =>
+    value != null ? `${value.toFixed(0)} ms` : "No data";
 
   return (
     <div className="space-y-4 p-0 md:p-4 w-full">
       <h1>
         <span>
-          Updated at: {" "}
-          {new Date(HRV.updated_at).toLocaleString(undefined, {
+          Updated at:{" "}
+          {new Date(displayHRV.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
             year: "numeric",
@@ -34,40 +50,34 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           label="Last Night's Average HRV"
-          value={`${HRV.last_night_avg} ms`}
+          value={formatHRV(displayHRV.last_night_avg)}
           icon="💓"
         />
         <StatCard
           label="Last Night's 5-min High HRV"
-          value={`${HRV.last_night_5min_high} ms`}
+          value={formatHRV(displayHRV.last_night_5min_high)}
           icon="💓"
         />
         <StatCard
           label="Average Day HRV"
-          value={
-            HRV.avg_day_hrv ? `${HRV.avg_day_hrv.toFixed(0)} ms` : "No data"
-          }
+          value={formatHRV(displayHRV.avg_day_hrv)}
           icon="💓"
         />
         <StatCard
           label="7-Day Average Night HRV"
           value={
-            HRV.days_in_7d_window < 7
+            displayHRV.days_in_7d_window < 7
               ? "Not enough data"
-              : HRV.avg_7d_night_hrv
-                ? `${HRV.avg_7d_night_hrv.toFixed(0)} ms`
-                : "No data"
+              : formatHRV(displayHRV.avg_7d_night_hrv)
           }
           icon="💓"
         />
         <StatCard
           label="7-Day Average HRV"
           value={
-            HRV.days_in_7d_window < 7
+            displayHRV.days_in_7d_window < 7
               ? "Not enough data"
-              : HRV.avg_7d_hrv
-                ? `${HRV.avg_7d_hrv.toFixed(0)} ms`
-                : "No data"
+              : formatHRV(displayHRV.avg_7d_hrv)
           }
           icon="💓"
         />

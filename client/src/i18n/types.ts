@@ -188,17 +188,7 @@ export type HealthInsightsTranslations = {
   analyzeAll: string;
   analyzeSection: string;
   failedInsights: string;
-  noDailies: string;
-  sleepComingSoon: string;
-  stressComingSoon: string;
-  cardioComingSoon: string;
-  noProfileData: string;
-  noActivitiesForDate: string;
-  noSleepData: string;
-  noStressData: string;
-  noCardioData: string;
-  noRespirationData: string;
-  noHRVData: string;
+  noData: string;
 };
 
 //home

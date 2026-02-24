@@ -13,13 +13,25 @@ export type UserProfile = {
 };
 
 export function UserProfileSection({ profile }: { profile?: UserProfile }) {
-  if (!profile) return null;
+  const hasData = !!profile;
+
+  // Default values if no profile
+  const data = {
+    gender: profile?.gender ?? "-",
+    height: profile?.height ?? null,
+    weight: profile?.weight ?? null,
+    vo2_max: profile?.vo2_max ?? null,
+    vo2_max_cycling: profile?.vo2_max_cycling ?? null,
+    fitness_age: profile?.fitness_age ?? null,
+    updated_at: profile?.updated_at ?? new Date().toISOString(),
+  };
+
   return (
-    <div className="space-y-4 p-0 md:p-4 w-full">
+    <div className="space-y-4 p-0 md:p-4  w-full">
       <h1>
         <span>
-          Updated at: {" "}
-          {new Date(profile.updated_at).toLocaleString(undefined, {
+          Updated at:{" "}
+          {new Date(data.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
             year: "numeric",
@@ -34,19 +46,15 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
       <div className="mb-6">
         <h2 className="text-xl mb-2">Body Composition</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard
-            label="Gender"
-            value={`${profile.gender ?? "-"}`}
-            icon="👤"
-          />
+          <StatCard label="Gender" value={data.gender} icon="👤" />
           <StatCard
             label="Height"
-            value={`${profile.height ?? "-"} cm`}
+            value={data.height ? `${data.height} cm` : "-"}
             icon="📏"
           />
           <StatCard
             label="Weight"
-            value={`${profile.weight ?? "-"} kg`}
+            value={data.weight ? `${data.weight} kg` : "-"}
             icon="⚖️"
           />
         </div>
@@ -56,29 +64,21 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
       <div>
         <h2 className="text-xl mb-2">Metrics</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {profile.vo2_max != null && (
-            <StatCard
-              label="VO2 Max (Run)"
-              value={`${profile.vo2_max} ml/kg/min`}
-              icon="🏃‍♂️"
-            />
-          )}
-
-          {profile.vo2_max_cycling != null && (
-            <StatCard
-              label="VO2 Max (Cycling)"
-              value={`${profile.vo2_max_cycling} ml/kg/min`}
-              icon="🚴‍♂️"
-            />
-          )}
-
-          {profile.fitness_age != null && (
-            <StatCard
-              label="Fitness Age"
-              value={`${profile.fitness_age} years`}
-              icon="🎂"
-            />
-          )}
+          <StatCard
+            label="VO2 Max (Run)"
+            value={data.vo2_max ? `${data.vo2_max} ml/kg/min` : "-"}
+            icon="🏃‍♂️"
+          />
+          <StatCard
+            label="VO2 Max (Cycling)"
+            value={data.vo2_max_cycling ? `${data.vo2_max_cycling} ml/kg/min` : "-"}
+            icon="🚴‍♂️"
+          />
+          <StatCard
+            label="Fitness Age"
+            value={data.fitness_age ? `${data.fitness_age} years` : "-"}
+            icon="🎂"
+          />
         </div>
       </div>
     </div>

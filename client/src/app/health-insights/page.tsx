@@ -17,7 +17,7 @@ type Section = keyof HealthInsightsTranslations["sections"];
 
 type HealthDataToAnalyze = {
   profile?: UserProfile;
-  dailies?: Dailies[];
+  dailies?: Omit<Dailies, "heart_rate_samples">[];
   activities?: Activity[];
   sleep?: Sleep[];
   stress?: Stress[];
@@ -54,7 +54,10 @@ export default function HealthInsightsPage() {
           dataToAnalyze.profile = healthData?.profile;
           break;
         case "dailies":
-          dataToAnalyze.dailies = healthData?.dailies;
+          dataToAnalyze.dailies = healthData?.dailies?.map((d) => {
+            const { heart_rate_samples, ...rest } = d;
+            return rest;
+          });
           break;
         case "sleep":
           dataToAnalyze.sleep = healthData?.sleep;
@@ -177,8 +180,11 @@ export default function HealthInsightsPage() {
                         (healthData?.profile ? (
                           <UserProfileSection profile={healthData.profile} />
                         ) : (
-                          <div className="p-4">
-                            {t.healthInsights.noProfileData}
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <UserProfileSection profile={healthData?.profile} />
                           </div>
                         ))}
 
@@ -186,8 +192,13 @@ export default function HealthInsightsPage() {
                         (healthData?.dailies?.[0] ? (
                           <DailiesSection dailies={healthData.dailies[0]} />
                         ) : (
-                          <div className="p-4">
-                            {t.healthInsights.noDailies}
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <DailiesSection
+                              dailies={healthData?.dailies?.[0]}
+                            />
                           </div>
                         ))}
 
@@ -200,8 +211,15 @@ export default function HealthInsightsPage() {
                             onActivitiesSelected={setSelectedActivityIds}
                           />
                         ) : (
-                          <div className="p-4">
-                            {t.healthInsights.noActivitiesForDate}
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <ActivitiesSection
+                              activities={healthData?.activities}
+                              selectedActivityIds={selectedActivityIds}
+                              onActivitiesSelected={setSelectedActivityIds}
+                            />
                           </div>
                         ))}
 
@@ -209,8 +227,11 @@ export default function HealthInsightsPage() {
                         (healthData?.sleep?.[0] ? (
                           <SleepSection sleep={healthData.sleep[0]} />
                         ) : (
-                          <div className="p-4">
-                            {t.healthInsights.noSleepData}
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <SleepSection sleep={healthData?.sleep?.[0]} />
                           </div>
                         ))}
 
@@ -218,8 +239,11 @@ export default function HealthInsightsPage() {
                         (healthData?.stress?.[0] ? (
                           <StressSection stress={healthData.stress[0]} />
                         ) : (
-                          <div className="p-4">
-                            {t.healthInsights.noStressData}
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <StressSection stress={healthData?.stress?.[0]} />
                           </div>
                         ))}
 
@@ -229,16 +253,24 @@ export default function HealthInsightsPage() {
                             respiration={healthData.respiration[0]}
                           />
                         ) : (
-                          <div className="p-4">
-                            {t.healthInsights.noRespirationData}
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <RespirationSection
+                              respiration={healthData?.respiration?.[0]}
+                            />
                           </div>
                         ))}
                       {activeSection === "hrv" &&
                         (healthData?.hrv?.[0] ? (
                           <HRVSection HRV={healthData.hrv[0]} />
                         ) : (
-                          <div className="p-4">
-                            {t.healthInsights.noHRVData}
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <HRVSection HRV={healthData?.hrv?.[0]} />
                           </div>
                         ))}
                     </>
@@ -266,7 +298,7 @@ export default function HealthInsightsPage() {
 
               {/* Analyze Button */}
               <button
-                className="button-style-blue w-full md:w-auto justify-center mb-5 ml-auto mr-5"
+                className="button-style-blue w-auto justify-center mb-5 ml-auto mr-5"
                 onClick={() => {
                   if (showResult) setShowResult(false);
                   else handleAnalyzeClick();

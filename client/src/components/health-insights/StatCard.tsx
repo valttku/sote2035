@@ -10,15 +10,13 @@ export function StatCard({
   icon?: ReactNode;
 }) {
   return (
-    <div
-      className="bg-[white]/10 rounded-xl p-2 shadow-lg border border-white/20 whitespace-nowrap overflow-hidden text-ellipsis"
-    >
-      <div className="flex items-center text-xs text-gray-300 uppercase">
-        {icon && <span>{icon}</span>}
+    <div className="bg-[white]/10 rounded-xl p-2 shadow-lg border border-white/20">
+      <div className="flex items-center text-xs text-gray-300 uppercase whitespace-normal overflow-hidden text-ellipsis">
+        {icon && <span className="mr-1">{icon}</span>}
         <span>{label}</span>
       </div>
 
-      <div className="text-md font-semibold mt-1">{value}</div>
+      <div className="text-sm font-semibold mt-1">{value}</div>
     </div>
   );
 }
