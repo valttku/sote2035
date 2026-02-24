@@ -109,7 +109,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
   const maxHeartRate = numericValues.length > 0 ? Math.max(...numericValues, 210) : 120;
 
   return (
-    <div className={`space-y-4 p-0 md:p-4 w-full ${!dailies ? "opacity-50" : ""}`}>
+    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!dailies ? "opacity-50" : ""}`}>
       
       <h1>
         Updated at:{" "}
@@ -124,7 +124,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
       </h1>
 
       {/* Heart rate chart */}
-      <div className="rounded-xl shadow p-4 mt-6 text-white border border-white/20 bg-[white]/5">
+      <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
         <h3 className="mb-2 text-lg font-semibold">Daily Heart Rate Timeline</h3>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={hourlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -151,15 +151,15 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
         <StatCard label="Active Calories" value={`${displayData.active_kilocalories} kcal`} icon="🔥" />
         <StatCard label="BMR Calories" value={`${displayData.bmr_kilocalories} kcal`} icon="🔥" />
         <StatCard label="Total Calories" value={`${displayData.active_kilocalories + displayData.bmr_kilocalories} kcal`} icon="🔥" />
-        <StatCard label="Mod. Exercise" value={`${(displayData.moderate_intensity_duration_in_seconds / 60).toFixed(0)} min`} icon="⚡" />
+        <StatCard label="Moderate Exercise" value={`${(displayData.moderate_intensity_duration_in_seconds / 60).toFixed(0)} min`} icon="⚡" />
         <StatCard label="Vigorous Exercise" value={`${(displayData.vigorous_intensity_duration_in_seconds / 60).toFixed(0)} min`} icon="⚡" />
         <StatCard
           label="Weekly Intensity"
           value={`${(displayData.weekly_intensity_total_seconds / 60).toFixed(0)} / ${(displayData.intensity_duration_goal_in_seconds / 60).toFixed(0)} min`}
           icon="⚡"
         />
-        <StatCard label="Rest Heart Rate" value={`${displayData.resting_heart_rate} bpm`} icon="❤️" />
-        <StatCard label="Avg Heart Rate" value={`${displayData.avg_heart_rate} bpm`} icon="❤️" />
+        <StatCard label="Resting Heart Rate" value={`${displayData.resting_heart_rate} bpm`} icon="❤️" />
+        <StatCard label="Average Heart Rate" value={`${displayData.avg_heart_rate} bpm`} icon="❤️" />
         <StatCard label="Max Heart Rate" value={`${displayData.max_heart_rate} bpm`} icon="❤️" />
       </div>
     </div>

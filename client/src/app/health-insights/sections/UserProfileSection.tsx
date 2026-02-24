@@ -27,7 +27,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
   };
 
   return (
-    <div className={`space-y-4 p-0 md:p-4 w-full ${!profile ? "opacity-50" : ""}`}>
+    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!profile ? "opacity-50" : ""}`}>
       <h1>
         <span>
           Updated at:{" "}
@@ -44,7 +44,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
 
       {/* Body Composition Section */}
       <div className="mb-6">
-        <h2 className="text-xl mb-2">Body Composition</h2>
+        <h1 className="text-md mb-2">Body Composition</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard label="Gender" value={data.gender} icon="👤" />
           <StatCard
@@ -62,7 +62,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
 
       {/* Metrics Section */}
       <div>
-        <h2 className="text-xl mb-2">Metrics</h2>
+        <h1 className="text-md mb-2">Fitness</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
             label="VO2 Max (Run)"
