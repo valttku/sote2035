@@ -56,14 +56,14 @@ export function ActivitiesSection({
 
   return (
     <div>
-      <div className="space-y-4 p-0 md:p-4 w-full">
+      <div
+        className={`space-y-4 p-0 md:p-4 w-full ${!hasData ? "opacity-50" : ""}`}
+      >
         <p className="pb-2">Count: {hasData ? activities!.length : 0}</p>
         {displayActivities.map((activity: Activity) => (
           <div
             key={activity.id}
-            className={`bg-[white]/10 rounded-xl p-4 shadow-lg border border-white/20 text-white ${
-              !hasData ? "opacity-50" : ""
-            }`}
+            className="bg-[white]/10 rounded-xl p-4 shadow-lg border border-white/20 text-white"
           >
             {/* Title row */}
             <div className="flex justify-between items-center">

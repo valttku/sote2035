@@ -32,7 +32,7 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
     value != null ? `${value.toFixed(0)} ms` : "No data";
 
   return (
-    <div className="space-y-4 p-0 md:p-4 w-full">
+    <div className={`space-y-4 p-0 md:p-4 w-full ${!HRV ? "opacity-50" : ""}`}>
       <h1>
         <span>
           Updated at:{" "}

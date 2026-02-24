@@ -59,7 +59,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
       };
 
   return (
-    <div className="space-y-4 p-0 md:p-4 w-full">
+    <div className={`space-y-4 p-0 md:p-4 w-full ${!sleep ? "opacity-50" : ""}`}>
       <h1>
         <span>
           Updated at:{" "}
