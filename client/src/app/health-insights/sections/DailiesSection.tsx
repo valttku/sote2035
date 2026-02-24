@@ -109,7 +109,8 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
   const maxHeartRate = numericValues.length > 0 ? Math.max(...numericValues, 210) : 120;
 
   return (
-    <div className="space-y-4 p-0 md:p-4 w-full">
+    <div className={`space-y-4 p-0 md:p-4 w-full ${!dailies ? "opacity-50" : ""}`}>
+      
       <h1>
         Updated at:{" "}
         {new Date(displayData.updated_at).toLocaleString(undefined, {

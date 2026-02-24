@@ -27,7 +27,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
   };
 
   return (
-    <div className="space-y-4 p-0 md:p-4  w-full">
+    <div className={`space-y-4 p-0 md:p-4 w-full ${!profile ? "opacity-50" : ""}`}>
       <h1>
         <span>
           Updated at:{" "}
