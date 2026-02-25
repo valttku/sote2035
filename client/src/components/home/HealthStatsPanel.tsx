@@ -174,7 +174,7 @@ export default function HealthStatsPanel({
   }, [selected, selectedDate]);
 
   return (
-    <div className="panel-animation ui-component-styles p-4 pt-2">
+    <div className="panel-animation ui-component-styles backdrop-blur-3xl p-4 pt-2">
       {/* Header with close button */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">
