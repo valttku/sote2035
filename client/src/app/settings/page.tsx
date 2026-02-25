@@ -441,7 +441,7 @@ export default function SettingsPage() {
                 return (
                   <li
                     key={i}
-                    className={`text-sm flex items-center gap-2 ${passed ? "text-green-500" : "text-red-400"}`}
+                    className={`text-sm flex items-center gap-2 ${passed ? "text-green-500 line-through" : "text-red-400 text-shadow-lg"}`}
                   >
                     {passed ? "✓" : "✕"} {req.text}
                   </li>

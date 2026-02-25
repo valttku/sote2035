@@ -143,8 +143,6 @@ button {
 /* UI components */
 .ui-component-styles {
   background: rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.138);
   box-shadow: 0 8px 32px 0 rgba(26, 28, 62, 0.5);
