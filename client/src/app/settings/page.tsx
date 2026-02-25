@@ -60,16 +60,18 @@ export default function SettingsPage() {
 
   const strengthScore = useMemo(
     () => PASSWORD_REQUIREMENTS.filter((r) => r.regex.test(newPassword)).length,
-    [newPassword]
+    [newPassword],
   );
 
   const getStrengthColor = (score: number) =>
     score <= 2 ? "bg-red-500" : score <= 4 ? "bg-amber-500" : "bg-emerald-500";
 
   const getStrengthText = (score: number) =>
-    score <= 2 ? t.settings.weak_password || "Weak" :
-    score <= 4 ? t.settings.medium_password || "Medium" :
-    t.settings.strong_password || "Strong";
+    score <= 2
+      ? t.settings.weak_password || "Weak"
+      : score <= 4
+        ? t.settings.medium_password || "Medium"
+        : t.settings.strong_password || "Strong";
 
   // ---------------- EFFECTS ----------------
   useEffect(() => {
@@ -123,7 +125,7 @@ export default function SettingsPage() {
     // Prevent weak password submission
     if (strengthScore < 5)
       return alert(
-        t.settings.weak_password_alert || "Password does not meet requirements"
+        t.settings.weak_password_alert || "Password does not meet requirements",
       );
 
     setChangingPassword(true);
@@ -206,15 +208,26 @@ export default function SettingsPage() {
       {/* Scrollable main */}
       <main className="w-full flex justify-center h-screen overflow-y-auto">
         <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6 p-4">
-
           {/* PROFILE */}
           <section className="ui-component-styles p-4 w-full space-y-2">
-            <h2 className="text-xl font-semibold">{t.settings.profile_section_title}</h2>
-            <p>{t.settings.email_label}: {data.email}</p>
-            <p>{t.settings.username_label}: {data.display_name ?? "-"}</p>
-            <p>{t.settings.gender_label}: {data.gender ?? "-"}</p>
-            <p>{t.settings.height_label}: {data.height ?? "-"} cm</p>
-            <p>{t.settings.weight_label}: {data.weight ?? "-"} kg</p>
+            <h2 className="text-xl font-semibold">
+              {t.settings.profile_section_title}
+            </h2>
+            <p>
+              {t.settings.email_label}: {data.email}
+            </p>
+            <p>
+              {t.settings.username_label}: {data.display_name ?? "-"}
+            </p>
+            <p>
+              {t.settings.gender_label}: {data.gender ?? "-"}
+            </p>
+            <p>
+              {t.settings.height_label}: {data.height ?? "-"} cm
+            </p>
+            <p>
+              {t.settings.weight_label}: {data.weight ?? "-"} kg
+            </p>
 
             <div className="flex gap-3 pt-2">
               <button
@@ -234,7 +247,9 @@ export default function SettingsPage() {
 
           {/* PROVIDERS */}
           <section className="ui-component-styles p-4 w-full space-y-3">
-            <h2 className="text-xl font-semibold">{t.settings.profileAccount}</h2>
+            <h2 className="text-xl font-semibold">
+              {t.settings.profileAccount}
+            </h2>
 
             {/* Polar */}
             <div className="flex justify-between items-center">
@@ -281,17 +296,82 @@ export default function SettingsPage() {
 
           {/* ACCOUNT */}
           <section className="ui-component-styles p-4 w-full">
-            <h2 className="text-xl font-semibold mb-2">{t.settings.providerAccountManagement}</h2>
-            <button onClick={deleteAccount} className="cancel-button-style w-full">
+            <h2 className="text-xl font-semibold mb-2">
+              {t.settings.providerAccountManagement}
+            </h2>
+            <button
+              onClick={deleteAccount}
+              className="cancel-button-style w-full"
+            >
               {t.settings.delete_account}
             </button>
           </section>
         </div>
 
+        {/* EDIT PROFILE MODAL */}
+        {showEditProfile && (
+          <GlobalModal onClose={() => setShowEditProfile(false)}>
+            <h2 className="text-lg font-bold mb-4 text-center">
+              {t.settings.edit_profile}
+            </h2>
+
+            <input
+              type="text"
+              className="block w-full mb-3"
+              placeholder={t.settings.username_label}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+
+            <input
+              type="number"
+              className="block w-full mb-3"
+              placeholder={t.settings.weight_label}
+              value={weight ?? ""}
+              onChange={(e) =>
+                setWeight(e.target.value === "" ? null : Number(e.target.value))
+              }
+            />
+
+            <input
+              type="number"
+              className="block w-full mb-3"
+              placeholder={t.settings.height_label}
+              value={height ?? ""}
+              onChange={(e) =>
+                setHeight(e.target.value === "" ? null : Number(e.target.value))
+              }
+            />
+
+            <select
+              className="block w-full mb-3"
+              value={gender ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                setGender(val === "male" || val === "female" ? val : null);
+              }}
+            >
+              <option value="">{t.settings.select_gender}</option>
+              <option value="male">{t.settings.male}</option>
+              <option value="female">{t.settings.female}</option>
+            </select>
+
+            <button
+              onClick={saveProfile}
+              disabled={savingProfile}
+              className="button-style-blue w-full"
+            >
+              {savingProfile ? t.settings.saving : t.settings.edit_profile}
+            </button>
+          </GlobalModal>
+        )}
+
         {/* PASSWORD MODAL */}
         {showChangePassword && (
           <GlobalModal onClose={() => setShowChangePassword(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">{t.settings.change_password}</h2>
+            <h2 className="text-lg font-bold mb-4 text-center">
+              {t.settings.change_password}
+            </h2>
 
             <div className="relative mb-2">
               <input
@@ -355,7 +435,9 @@ export default function SettingsPage() {
               disabled={changingPassword}
               className="button-style-blue w-full"
             >
-              {changingPassword ? t.settings.changing : t.settings.change_password}
+              {changingPassword
+                ? t.settings.changing
+                : t.settings.change_password}
             </button>
           </GlobalModal>
         )}

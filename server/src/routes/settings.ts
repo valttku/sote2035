@@ -14,7 +14,7 @@ async function deregisterFromPolar(userId: number) {
     from app.user_integrations
     where user_id = $1 and provider = 'polar'
     `,
-    [userId]
+    [userId],
   );
 
   if (integ.rowCount === 0) return;
@@ -33,7 +33,7 @@ async function deregisterFromPolar(userId: number) {
       headers: {
         Authorization: `Bearer ${access_token}`,
       },
-    }
+    },
   );
 
   if (![204, 401, 403, 404].includes(res.status)) {
@@ -46,13 +46,13 @@ async function deregisterFromPolar(userId: number) {
 settingsRouter.get("/", authRequired, async (req, res, next) => {
   try {
     const userId = (req as any).userId;
-//add here parameters
+    //add here parameters
 
     const result = await db.query(
       `select id, email, display_name,gender, height, weight, created_at, updated_at, last_login
        from app.users
        where id = $1`,
-      [userId]
+      [userId],
     );
 
     if (result.rowCount === 0) {
@@ -88,7 +88,7 @@ settingsRouter.put("/profile", authRequired, async (req, res, next) => {
     if (weight !== undefined && (isNaN(weight) || weight < 0)) {
       return res.status(400).json({ error: "Invalid weight" });
     }
-    if (gender && !["male", "female", "other", "unknown"].includes(gender)) {
+    if (gender && !["male", "female"].includes(gender)) {
       return res.status(400).json({ error: "Invalid gender" });
     }
 
@@ -101,7 +101,13 @@ settingsRouter.put("/profile", authRequired, async (req, res, next) => {
            updated_at = now()
        WHERE id = $5
        RETURNING id, email, display_name, gender, height, weight, created_at, updated_at, last_login`,
-      [displayName ?? null, gender ?? null, height ?? null, weight ?? null, userId]
+      [
+        displayName ?? null,
+        gender ?? null,
+        height ?? null,
+        weight ?? null,
+        userId,
+      ],
     );
 
     res.json(result.rows[0]);
@@ -120,14 +126,16 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
     }
 
     if (newPassword.length < 8) {
-      return res.status(400).json({ error: "Password must be at least 8 characters" });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 8 characters" });
     }
 
     const result = await db.query(
       `select password
        from app.users
        where id = $1`,
-      [userId]
+      [userId],
     );
 
     if (result.rowCount === 0) {
@@ -145,7 +153,7 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
       `update app.users
        set password = $1
        where id = $2`,
-      [hashed, userId]
+      [hashed, userId],
     );
 
     res.json({ message: "Password changed" });
@@ -154,75 +162,39 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
   }
 });
 
-//Add here new endpoint for height,weight, gender
-settingsRouter.put("/profile", authRequired, async (req, res, next) => {
-  try {
-    const userId = (req as any).userId;
-    const { gender, height, weight } = req.body;
+settingsRouter.delete(
+  "/delete-account",
+  authRequired,
+  async (req, res, next) => {
+    try {
+      const userId = (req as any).userId as number;
 
-    if (
-      gender !== null &&
-      gender !== undefined &&
-      !["male", "female", "other", "unknown"].includes(gender)
-    ) {
-      return res.status(400).json({ error: "Invalid gender" });
+      await deregisterFromPolar(userId);
+
+      await db.query("begin");
+
+      const result = await db.query(`delete from app.users where id = $1`, [
+        userId,
+      ]);
+
+      if (result.rowCount === 0) {
+        await db.query("rollback");
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      await db.query("commit");
+
+      res.clearCookie("session", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        path: "/",
+      });
+
+      res.json({ message: "Account deleted permanently" });
+    } catch (e) {
+      await db.query("rollback").catch(() => {});
+      next(e);
     }
-
-    if (height !== null && height !== undefined && typeof height !== "number") {
-      return res.status(400).json({ error: "Invalid height" });
-    }
-
-    if (weight !== null && weight !== undefined && typeof weight !== "number") {
-      return res.status(400).json({ error: "Invalid weight" });
-    }
-
-    await db.query(
-      `
-      update app.users
-      set
-        gender = $1,
-        height = $2,
-        weight = $3,
-        updated_at = now()
-      where id = $4
-      `,
-      [gender ?? null, height ?? null, weight ?? null, userId]
-    );
-
-    res.json({ message: "Profile updated" });
-  } catch (e) {
-    next(e);
-  }
-});
-
-
-settingsRouter.delete("/delete-account", authRequired, async (req, res, next) => {
-  try {
-    const userId = (req as any).userId as number;
-
-    await deregisterFromPolar(userId);
-
-    await db.query("begin");
-
-    const result = await db.query(`delete from app.users where id = $1`, [userId]);
-
-    if (result.rowCount === 0) {
-      await db.query("rollback");
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    await db.query("commit");
-
-    res.clearCookie("session", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      path: "/",
-    });
-
-    res.json({ message: "Account deleted permanently" });
-  } catch (e) {
-    await db.query("rollback").catch(() => {});
-    next(e);
-  }
-});
+  },
+);
