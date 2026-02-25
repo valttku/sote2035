@@ -80,11 +80,12 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
   const sleepSegments: Array<{ stage: string; start: number; end: number }> =
     hasSegmentData
       ? Object.entries(sleep.sleep_levels_map!).flatMap(([stage, arr]) =>
-          (arr as any[]).map((seg) => ({
-            stage,
-            start: Number(seg.startTimeInSeconds) || 0,
-            end: Number(seg.endTimeInSeconds) || 0,
-          })),
+          (arr as Array<{ startTimeInSeconds: number; endTimeInSeconds: number }>).
+            map((seg) => ({
+              stage,
+              start: Number(seg.startTimeInSeconds) || 0,
+              end: Number(seg.endTimeInSeconds) || 0,
+            })),
         )
       : stageOrder.map((stage) => ({
           stage,
@@ -243,7 +244,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           : "No data"}
       </h1>
 
-      <div className="flex flex-col items-center gap-4 h-full rounded-xl border border-white/20">
+      <div className="flex flex-col items-center gap-4 h-full">
         <div className="w-full">
           <SleepTimeline sleep={displaySleep} />
         </div>
