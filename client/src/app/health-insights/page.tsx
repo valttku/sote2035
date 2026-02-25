@@ -125,8 +125,8 @@ export default function HealthInsightsPage() {
   return (
     <AppLayout>
       <div className="w-full flex justify-center">
-        <div className="flex flex-col gap-5 w-full md:flex-row">
-          <div className="bg-black/20 rounded-xl border border-white/15 p-6 w-full space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] ">
+        <div className="flex flex-col gap-5 w-full max-w-6xl">
+          <div className="bg-black/20 rounded-xl border border-white/15 p-6 w-full space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] overflow-auto">
             <h1 className="text-4xl">{t.healthInsights.title}</h1>
 
             {/* Navigation */}
@@ -276,48 +276,48 @@ export default function HealthInsightsPage() {
                     </>
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* AI Panel */}
-          <div className="flex-[0_0_40%] min-w-[200px] flex flex-col overflow-hidden mt-4 md:mt-0">
-            <div className="bg-black/20 rounded-xl border border-white/15 flex flex-col h-full">
-              <h1 className="sticky text-white text-2xl top-0 z-10 p-1 pl-5 bg-[#31c2d5] rounded-t-lg">
-                {t.healthInsights.aiTitle}
-              </h1>
-              <div className="flex-1 overflow-y-auto p-5">
-                {showResult && result ? (
-                  <p className="whitespace-pre-wrap text-sm">{result}</p>
-                ) : (
-                  <p className="italic text-sm">
-                    {t.healthInsights.aiPlaceholder}
-                  </p>
-                )}
-              </div>
+                {/* AI Panel */}
+                <div className="flex-[0_0_40%] flex flex-col overflow-hidden mt-4 md:mt-0">
+                  <div className="bg-black/20 rounded-xl border border-white/15 flex flex-col h-full">
+                    <h1 className="sticky text-white text-2xl top-0 z-10 p-1 pl-5 bg-[#31c2d5] rounded-t-lg">
+                      {t.healthInsights.aiTitle}
+                    </h1>
+                    <div className="flex-1 overflow-y-auto p-5">
+                      {showResult && result ? (
+                        <p className="whitespace-pre-wrap text-sm">{result}</p>
+                      ) : (
+                        <p className="italic text-sm">
+                          {t.healthInsights.aiPlaceholder}
+                        </p>
+                      )}
+                    </div>
 
-              {/* Analyze Button */}
-              <button
-                className="button-style-blue w-auto justify-center mb-5 ml-auto mr-5"
-                onClick={() => {
-                  if (showResult) setShowResult(false);
-                  else handleAnalyzeClick();
-                }}
-                disabled={loading || loadingData}
-              >
-                {loading
-                  ? t.healthInsights.analyzing
-                  : showResult
-                    ? t.healthInsights.clearAnalysis
-                    : selectedActivityIds.size > 0
-                      ? t.healthInsights.analyzeSection.replace(
-                          "{{section}}",
-                          t.healthInsights.sections[
-                            activeSection as keyof HealthInsightsTranslations["sections"]
-                          ],
-                        )
-                      : t.healthInsights.analyzeAll}
-              </button>
+                    {/* Analyze Button */}
+                    <button
+                      className="button-style-blue w-auto justify-center mb-5 ml-auto mr-5"
+                      onClick={() => {
+                        if (showResult) setShowResult(false);
+                        else handleAnalyzeClick();
+                      }}
+                      disabled={loading || loadingData}
+                    >
+                      {loading
+                        ? t.healthInsights.analyzing
+                        : showResult
+                          ? t.healthInsights.clearAnalysis
+                          : selectedActivityIds.size > 0
+                            ? t.healthInsights.analyzeSection.replace(
+                                "{{section}}",
+                                t.healthInsights.sections[
+                                  activeSection as keyof HealthInsightsTranslations["sections"]
+                                ],
+                              )
+                            : t.healthInsights.analyzeAll}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
