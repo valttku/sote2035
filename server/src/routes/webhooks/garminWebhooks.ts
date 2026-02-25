@@ -220,9 +220,20 @@ garminWebhookRouter.post("/body_comp", async (req, res) => {
   console.log("Payload:", JSON.stringify(req.body, null, 2));
 
   try {
-    const payload =
+    let payload =
       req.body.bodyCompositionSummaries ||
+      req.body.bodyComps ||
       (Array.isArray(req.body) ? req.body : [req.body]);
+
+    // If payload is an array of objects with 'bodyComps', flatten it
+    if (
+      Array.isArray(payload) &&
+      payload.length > 0 &&
+      payload[0].bodyComps &&
+      Array.isArray(payload[0].bodyComps)
+    ) {
+      payload = payload.flatMap((item) => item.bodyComps);
+    }
 
     console.log(
       "Extracted payload array length:",
