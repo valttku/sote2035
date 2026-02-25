@@ -1,6 +1,6 @@
 "use client";
 
-import Modal from "@/components/Modal";
+import GlobalModal from "@/components/GlobalModal";
 import { useRouter } from "next/navigation";
 
 export default function ChooseServicePage() {
@@ -31,7 +31,7 @@ export default function ChooseServicePage() {
 
   return (
     <main className="flex items-center justify-center min-h-screen">
-      <Modal onClose={closeModal}>
+      <GlobalModal onClose={closeModal}>
         <h1 className="text-2xl md:text-3xl mb-4 text-center">
           {/* Responsive heading: text-2xl mobile, text-3xl desktop */}
           Choose your device
@@ -88,7 +88,7 @@ export default function ChooseServicePage() {
             Skip
           </button>
         </div>
-      </Modal>
+      </GlobalModal>
     </main>
   );
 }

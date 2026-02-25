@@ -1,6 +1,6 @@
 "use client";
 
-import Modal from "@/components/Modal";
+import GlobalModal from "@/components/GlobalModal";
 import { useState } from "react";
 
 export default function ForgotPasswordPage() {
@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
       {/* RESPONSIVE: Added padding p-4 mobile, md:p-8 desktop */}
 
       {/* Modal for forgotten password */}
-      <Modal onClose={() => closeModal()}>
+      <GlobalModal onClose={() => closeModal()}>
         {done ? (
           <div className="text-center">
             <h1 className="text-xl sm:text-2xl mb-2">
@@ -58,8 +58,10 @@ export default function ForgotPasswordPage() {
               If an account exists for this email, a password reset link has
               been sent.
             </p>
-            <a href="/startup" className="text-sm md:text-base text-[#c3dafe]/80 underline">
-            
+            <a
+              href="/startup"
+              className="text-sm md:text-base text-[#c3dafe]/80 underline"
+            >
               {/* RESPONSIVE: text-sm mobile, md:text-base desktop */}
               Back to login
             </a>
@@ -96,7 +98,7 @@ export default function ForgotPasswordPage() {
             {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
           </form>
         )}
-      </Modal>
+      </GlobalModal>
     </main>
   );
 }

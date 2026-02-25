@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "../../components/AppLayout";
-import Modal from "../../components/Modal";
+import GlobalModal from "../../components/GlobalModal";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -290,7 +290,7 @@ export default function SettingsPage() {
 
         {/* PASSWORD MODAL */}
         {showChangePassword && (
-          <Modal onClose={() => setShowChangePassword(false)}>
+          <GlobalModal onClose={() => setShowChangePassword(false)}>
             <h2 className="text-lg font-bold mb-4 text-center">{t.settings.change_password}</h2>
 
             <div className="relative mb-2">
@@ -357,7 +357,7 @@ export default function SettingsPage() {
             >
               {changingPassword ? t.settings.changing : t.settings.change_password}
             </button>
-          </Modal>
+          </GlobalModal>
         )}
       </main>
     </AppLayout>
