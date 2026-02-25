@@ -102,11 +102,24 @@ button {
     transform 0.2s ease;
 }
 
-.button-style-blue:hover {
+.button-style-blue:hover:not(:disabled) {
   box-shadow:
     0 0 10px var(--button-blue-bg),
     0 0 10px var(--button-blue-bg);
   transform: scale(1.01);
+}
+
+.button-style-blue_disabled {
+  background-color: var(--button-blue-bg);
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .cancel-button-style {
