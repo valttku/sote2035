@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AppLayout from "../../components/AppLayout";
-import Modal from "../../components/Modal";
+import GlobalModal from "../../components/GlobalModal";
 import HealthStatsList, { HealthStatsResponse } from "../../components/calendar/HealthStatsList";
 import ActivitiesList, {  ActivitiesResponse } from "../../components/calendar/ActivitiesList";
 import ManualActivityForm from "../../components/calendar/ActivityForm";
@@ -204,7 +204,7 @@ export default function CalendarPage() {
 
           {/* Modal */}
           {selectedDate && (
-            <Modal onClose={closeModal}>
+            <GlobalModal onClose={closeModal}>
               <h2 className="text-2xl mb-2 text-center">
                 {new Date(selectedDate + "T00:00:00").toLocaleDateString(t.calendar.locale || "en-US", {
                   weekday: "long",
@@ -271,7 +271,7 @@ export default function CalendarPage() {
               </div>
 
               <ManualActivityForm selectedDate={selectedDate} onActivityAdded={() => loadManualActivities(selectedDate)} />
-            </Modal>
+            </GlobalModal>
           )}
 
           {loading && <p className="text-sm opacity-70">{t.calendar.loading}...</p>}

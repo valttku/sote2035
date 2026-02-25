@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Modal from "../../components/Modal";
+import LoginRegsiterModal from "../../components/LoginRegisterModal";
 import { FcLock } from "react-icons/fc";
 import LoginForm from "../../components/startup/LoginForm";
 import RegisterForm from "../../components/startup/RegisterForm";
@@ -10,6 +10,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import Button from "@/components/Button/Button";
 import LanguageSelector from "@/components/language-selector/LanguageSelector";
 import AppLogo from "@/components/app-logo/AppLogo";
+import LoginRegisterModal from "../../components/LoginRegisterModal";
 
 export default function StartUpPage() {
   // States to track if login and registration modal visibility
@@ -126,7 +127,7 @@ export default function StartUpPage() {
 
       {/* Login modal */}
       {showLogin && (
-        <Modal onClose={toggleLoginForm}>
+        <LoginRegisterModal onClose={toggleLoginForm}>
           <LoginForm
             toggleLoginForm={toggleLoginForm}
             toggleRegisterForm={toggleRegisterForm}
@@ -144,11 +145,11 @@ export default function StartUpPage() {
               {text.forgot_password}
             </a>
           </div>
-        </Modal>
+        </LoginRegisterModal>
       )}
       {/* Registration modal */}
       {showRegister && (
-        <Modal onClose={toggleRegisterForm}>
+        <LoginRegisterModal onClose={toggleRegisterForm}>
           <RegisterForm
             toggleLoginForm={toggleLoginForm}
             toggleRegisterForm={toggleRegisterForm}
@@ -156,7 +157,7 @@ export default function StartUpPage() {
               handleSubmit("register", email, password, displayName)
             }
           />
-        </Modal>
+        </LoginRegisterModal>
       )}
     </main>
   );

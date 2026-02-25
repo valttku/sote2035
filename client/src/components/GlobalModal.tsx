@@ -6,9 +6,9 @@ type ModalProps = {
   onClose: () => void;
 };
 
-export default function Modal({ children, onClose }: ModalProps) {
+export default function GlobalModal({ children, onClose }: ModalProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className="fixed inset-0 flex items-center justify-center bg-indigo-950/30 backdrop-blur-xl">
       <div
         // Responsive UI added
         className="ui-component-styles 
@@ -16,7 +16,6 @@ export default function Modal({ children, onClose }: ModalProps) {
           w-full max-w-md
           rounded-2xl
           max-h-[90vh] overflow-y-auto
-          translate-x-80
         "
         // Dark mode variables applied here
         style={{

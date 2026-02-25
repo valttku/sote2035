@@ -17,7 +17,7 @@ type Section = keyof HealthInsightsTranslations["sections"];
 
 type HealthDataToAnalyze = {
   profile?: UserProfile;
-  dailies?: Dailies[];
+  dailies?: Omit<Dailies, "heart_rate_samples">[];
   activities?: Activity[];
   sleep?: Sleep[];
   stress?: Stress[];
@@ -54,7 +54,10 @@ export default function HealthInsightsPage() {
           dataToAnalyze.profile = healthData?.profile;
           break;
         case "dailies":
-          dataToAnalyze.dailies = healthData?.dailies;
+          dataToAnalyze.dailies = healthData?.dailies?.map((d) => {
+            const { heart_rate_samples, ...rest } = d;
+            return rest;
+          });
           break;
         case "sleep":
           dataToAnalyze.sleep = healthData?.sleep;
@@ -122,169 +125,200 @@ export default function HealthInsightsPage() {
   return (
     <AppLayout>
       <div className="w-full flex justify-center">
-        <div className="ui-component-styles p-6 w-full max-w-5xl space-y-6 mx-auto flex flex-col flex-1">
-          <h1 className="text-4xl">{t.healthInsights.title}</h1>
+        <div className="flex flex-col gap-5 w-full max-w-6xl">
+          <div className="bg-black/20 rounded-xl border border-white/15 p-6 w-full space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] overflow-auto">
+            <h1 className="text-4xl">{t.healthInsights.title}</h1>
 
-          {/* Navigation */}
-          <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 ">
-            <div className="flex flex-wrap gap-2">
-              {sections.map((section) => (
-                <button
-                  key={String(section.id)} //Fix key prop
-                  onClick={() =>
-                    !section.disabled && setActiveSection(section.id)
-                  }
-                  disabled={section.disabled}
-                  className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    activeSection === section.id
-                      ? "bg-[#31c2d5] text-white"
-                      : "bg-[#1e1c4f]/40 text-gray-300 hover:bg-[#2a2a60]/80 hover:text-white"
-                  }`}
-                >
-                  {section.label}
-                </button>
-              ))}
-            </div>
+            {/* Navigation */}
+            <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 ">
+              <div className="flex flex-wrap gap-2">
+                {sections.map((section) => (
+                  <button
+                    key={String(section.id)} //Fix key prop
+                    onClick={() =>
+                      !section.disabled && setActiveSection(section.id)
+                    }
+                    disabled={section.disabled}
+                    className={`px-4 py-2 rounded-full text-sm font-medium ${
+                      activeSection === section.id
+                        ? "bg-[#31c2d5] text-white"
+                        : "bg-[white]/10 border border-white/20  hover:bg-[white]/20"
+                    }`}
+                  >
+                    {section.label}
+                  </button>
+                ))}
+              </div>
 
-            {/* Date Selection */}
-            <div className="ml-auto w-full max-w-[150px] md:max-w-[200px] mt-2 md:mt-0">
-              <input
-                type="date"
-                id="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="block w-full rounded-md 
+              {/* Date Selection */}
+              <div className="ml-auto w-full lg:w-[150px] mt-2 md:mt-0">
+                <input
+                  type="date"
+                  id="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="block w-full rounded-md 
                 border-gray-300 shadow-sm 
                 focus:border-blue-500 
                 focus:ring-blue-500 
                 sm:text-sm p-2 border"
-              />
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex flex-col flex-1 min-h-0 overflow-hidden p-2">
-            {/* Row with activities + AI */}
-            <div className="flex flex-col md:flex-row flex-1 min-h-0 gap-4 md:gap-6">
-              {/* Activities */}
-              <div className="flex-1 min-w-0 overflow-y-auto">
-                {loadingData ? (
-                  <p>{t.healthInsights.loading}</p>
-                ) : (
-                  <>
-                    {activeSection === "profile" &&
-                      (healthData?.profile ? (
-                        <UserProfileSection profile={healthData.profile} />
-                      ) : (
-                        <div className="p-4">
-                          {t.healthInsights.noProfileData}
-                        </div>
-                      ))}
-
-                    {activeSection === "dailies" &&
-                      (healthData?.dailies?.[0] ? (
-                        <DailiesSection dailies={healthData.dailies[0]} />
-                      ) : (
-                        <div className="p-4">{t.healthInsights.noDailies}</div>
-                      ))}
-
-                    {activeSection === "activities" &&
-                      (healthData?.activities &&
-                      healthData.activities.length > 0 ? (
-                        <ActivitiesSection
-                          activities={healthData.activities}
-                          selectedActivityIds={selectedActivityIds}
-                          onActivitiesSelected={setSelectedActivityIds}
-                        />
-                      ) : (
-                        <div className="p-4">
-                          {t.healthInsights.noActivitiesForDate}
-                        </div>
-                      ))}
-
-                    {activeSection === "sleep" &&
-                      (healthData?.sleep?.[0] ? (
-                        <SleepSection sleep={healthData.sleep[0]} />
-                      ) : (
-                        <div className="p-4">
-                          {t.healthInsights.noSleepData}
-                        </div>
-                      ))}
-
-                    {activeSection === "stress" &&
-                      (healthData?.stress?.[0] ? (
-                        <StressSection stress={healthData.stress[0]} />
-                      ) : (
-                        <div className="p-4">
-                          {t.healthInsights.noStressData}
-                        </div>
-                      ))}
-
-                    {activeSection === "respiration" &&
-                      (healthData?.respiration?.[0] ? (
-                        <RespirationSection
-                          respiration={healthData.respiration[0]}
-                        />
-                      ) : (
-                        <div className="p-4">
-                          {t.healthInsights.noRespirationData}
-                        </div>
-                      ))}
-                    {activeSection === "hrv" &&
-                      (healthData?.hrv?.[0] ? (
-                        <HRVSection
-                          HRV={healthData.hrv[0]}
-                        />
-                      ) : (
-                        <div className="p-4">
-                          {t.healthInsights.noHRVData}
-                        </div>
-                      ))}
-                  </>
-                )}
+                />
               </div>
+            </div>
 
-              {/* AI Panel */}
-              <div className="flex-[0_0_40%] min-w-[200px] flex flex-col overflow-hidden mt-4 md:mt-0">
-                <div className="bg-[#1e1c4f]/20 border-2 border-[#31c2d5] rounded-lg flex flex-col h-full">
-                  <p className="sticky text-white top-0 z-10 text-lg p-1 pl-5 bg-[#31c2d5]">
-                    {t.healthInsights.aiTitle}
-                  </p>
-                  <div className="flex-1 overflow-y-auto p-5">
-                    {showResult && result ? (
-                      <p className="whitespace-pre-wrap text-sm">{result}</p>
-                    ) : (
-                      <p className="italic text-sm">
-                        {t.healthInsights.aiPlaceholder}
-                      </p>
-                    )}
+            {/* Content */}
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden p-2">
+              {/* Row with activities + AI */}
+              <div className="flex flex-col md:flex-row flex-1 min-h-0 gap-4 md:gap-6">
+                {/* Activities */}
+                <div className="flex-1 min-w-0 overflow-y-auto">
+                  {loadingData ? (
+                    <p>{t.healthInsights.loading}</p>
+                  ) : (
+                    <>
+                      {activeSection === "profile" &&
+                        (healthData?.profile ? (
+                          <UserProfileSection profile={healthData.profile} />
+                        ) : (
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <UserProfileSection profile={healthData?.profile} />
+                          </div>
+                        ))}
+
+                      {activeSection === "dailies" &&
+                        (healthData?.dailies?.[0] ? (
+                          <DailiesSection dailies={healthData.dailies[0]} />
+                        ) : (
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <DailiesSection
+                              dailies={healthData?.dailies?.[0]}
+                            />
+                          </div>
+                        ))}
+
+                      {activeSection === "activities" &&
+                        (healthData?.activities &&
+                        healthData.activities.length > 0 ? (
+                          <ActivitiesSection
+                            activities={healthData.activities}
+                            selectedActivityIds={selectedActivityIds}
+                            onActivitiesSelected={setSelectedActivityIds}
+                          />
+                        ) : (
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <ActivitiesSection
+                              activities={healthData?.activities}
+                              selectedActivityIds={selectedActivityIds}
+                              onActivitiesSelected={setSelectedActivityIds}
+                            />
+                          </div>
+                        ))}
+
+                      {activeSection === "sleep" &&
+                        (healthData?.sleep?.[0] ? (
+                          <SleepSection sleep={healthData.sleep[0]} />
+                        ) : (
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <SleepSection sleep={healthData?.sleep?.[0]} />
+                          </div>
+                        ))}
+
+                      {activeSection === "stress" &&
+                        (healthData?.stress?.[0] ? (
+                          <StressSection stress={healthData.stress[0]} />
+                        ) : (
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <StressSection stress={healthData?.stress?.[0]} />
+                          </div>
+                        ))}
+
+                      {activeSection === "respiration" &&
+                        (healthData?.respiration?.[0] ? (
+                          <RespirationSection
+                            respiration={healthData.respiration[0]}
+                          />
+                        ) : (
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <RespirationSection
+                              respiration={healthData?.respiration?.[0]}
+                            />
+                          </div>
+                        ))}
+                      {activeSection === "hrv" &&
+                        (healthData?.hrv?.[0] ? (
+                          <HRVSection HRV={healthData.hrv[0]} />
+                        ) : (
+                          <div>
+                            <div className="p-4 italic text-gray-300">
+                              {t.healthInsights.noData}
+                            </div>
+                            <HRVSection HRV={healthData?.hrv?.[0]} />
+                          </div>
+                        ))}
+                    </>
+                  )}
+                </div>
+
+                {/* AI Panel */}
+                <div className="flex-[0_0_40%] flex flex-col overflow-hidden mt-4 md:mt-0">
+                  <div className="bg-black/20 rounded-xl border border-white/15 flex flex-col h-full">
+                    <h1 className="sticky text-white text-2xl top-0 z-10 p-1 pl-5 bg-[#31c2d5] rounded-t-lg">
+                      {t.healthInsights.aiTitle}
+                    </h1>
+                    <div className="flex-1 overflow-y-auto p-5">
+                      {showResult && result ? (
+                        <p className="whitespace-pre-wrap text-sm">{result}</p>
+                      ) : (
+                        <p className="italic text-sm">
+                          {t.healthInsights.aiPlaceholder}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Analyze Button */}
+                    <button
+                      className="button-style-blue w-auto justify-center mb-5 ml-auto mr-5"
+                      onClick={() => {
+                        if (showResult) setShowResult(false);
+                        else handleAnalyzeClick();
+                      }}
+                      disabled={loading || loadingData}
+                    >
+                      {loading
+                        ? t.healthInsights.analyzing
+                        : showResult
+                          ? t.healthInsights.clearAnalysis
+                          : selectedActivityIds.size > 0
+                            ? t.healthInsights.analyzeSection.replace(
+                                "{{section}}",
+                                t.healthInsights.sections[
+                                  activeSection as keyof HealthInsightsTranslations["sections"]
+                                ],
+                              )
+                            : t.healthInsights.analyzeAll}
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* Analyze Button */}
-            <button
-              className="button-style-blue w-full md:w-[200px] justify-center mt-3"
-              onClick={() => {
-                if (showResult) setShowResult(false);
-                else handleAnalyzeClick();
-              }}
-              disabled={loading || loadingData}
-            >
-              {loading
-                ? t.healthInsights.analyzing
-                : showResult
-                  ? t.healthInsights.clearAnalysis
-                  : selectedActivityIds.size > 0
-                    ? t.healthInsights.analyzeSection.replace(
-                        "{{section}}",
-                        t.healthInsights.sections[
-                          activeSection as keyof HealthInsightsTranslations["sections"]
-                        ],
-                      )
-                    : t.healthInsights.analyzeAll}
-            </button>
           </div>
         </div>
       </div>

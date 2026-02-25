@@ -125,9 +125,12 @@ export async function getHealthStatEntriesData(
           key === "Intense exercise this week" &&
           row.data.intensity_duration_goal_in_seconds != null
         ) {
-          const min = row.data.intensity_duration_goal_in_seconds / 60;
-          goal = { min };
-          status = numericValue >= min ? "good" : "low";
+          const minSeconds = row.data.intensity_duration_goal_in_seconds;
+
+          // store goal in same unit as numericValue (seconds)
+          goal = { min: minSeconds };
+
+          status = numericValue >= minSeconds ? "good" : "low";
         }
       }
 
