@@ -49,37 +49,32 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          label="Last Night's Average HRV"
+          label="💓Last Night's Average HRV"
           value={formatHRV(displayHRV.last_night_avg)}
-          icon="💓"
         />
         <StatCard
-          label="Last Night's 5-min High HRV"
+          label="💓Last Night's 5-min High HRV"
           value={formatHRV(displayHRV.last_night_5min_high)}
-          icon="💓"
         />
         <StatCard
-          label="Average Day HRV"
+          label="💓Average Day HRV"
           value={formatHRV(displayHRV.avg_day_hrv)}
-          icon="💓"
         />
         <StatCard
-          label="7-Day Average Night HRV"
+          label="💓7-Day Average Night HRV"
           value={
             displayHRV.days_in_7d_window < 7
               ? "Not enough data"
               : formatHRV(displayHRV.avg_7d_night_hrv)
           }
-          icon="💓"
         />
         <StatCard
-          label="7-Day Average HRV"
+          label="💓7-Day Average HRV"
           value={
             displayHRV.days_in_7d_window < 7
               ? "Not enough data"
               : formatHRV(displayHRV.avg_7d_hrv)
           }
-          icon="💓"
         />
       </div>
     </div>
