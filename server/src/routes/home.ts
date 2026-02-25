@@ -77,19 +77,22 @@ homeRouter.get("/", authRequired, async (req, res) => {
       console.log("[home route] alerts:", alerts);
       console.log("[home route] outOfRangeDetails:", outOfRangeDetails);
 
-      // Build prompt for OpenAI
-      let prompt = `You are a health assistant. Here are the user's health alerts for ${date}:\n`;
-      if (outOfRangeDetails.length > 0) {
-        prompt += `The following metrics are out of range:\n`;
-        for (const detail of outOfRangeDetails) {
-          prompt += `- ${detail.part}: ${detail.metric} is ${detail.status} (${detail.value})\n`;
+      // If there is no data at all, return empty aiMessage
+      const hasAnyData = metricsByPart.some((metrics) => metrics && Object.keys(metrics).length > 0);
+      let aiMessage = "";
+      if (hasAnyData) {
+        let prompt = `You are a health assistant. Here are the user's health alerts for ${date}:\n`;
+        if (outOfRangeDetails.length > 0) {
+          prompt += `The following metrics are out of range:\n`;
+          for (const detail of outOfRangeDetails) {
+            prompt += `- ${detail.part}: ${detail.metric} is ${detail.status} (${detail.value})\n`;
+          }
+          prompt += `\nGive specific advice for each out-of-range metric, and explain why it matters. Keep your advice concise and actionable.\n`;
+        } else {
+          prompt += `All metrics are within healthy ranges. Congratulate the user and encourage them to keep up the good work!`;
         }
-        prompt += `\nGive specific advice for each out-of-range metric, and explain why it matters. Keep your advice concise and actionable.\n`;
-      } else {
-        prompt += `All metrics are within healthy ranges. Congratulate the user and encourage them to keep up the good work!`;
+        aiMessage = await getAICompletion(prompt);
       }
-      const aiMessage = await getAICompletion(prompt);
-
       // Respond with alerts, user gender, and AI message
       return res.json({ alerts, user: { gender }, aiMessage });
     }
