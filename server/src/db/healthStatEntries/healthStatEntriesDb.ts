@@ -105,9 +105,11 @@ export async function getHealthStatEntriesData(
       // numeric range used to derive the `status` (low/good/high).
       let status: MetricStatus | undefined;
       let goal: MetricGoal | undefined;
+      let valueForGoal = numericValue;
 
       // Activity goals: if minimum goal is achieved, status = good, otherwise low
       // goals are defined from the user's Garmin data when available.
+
       if (row.kind === "activity_daily") {
         if (key === "Steps" && row.data.steps_goal != null) {
           const min = row.data.steps_goal;
@@ -126,11 +128,9 @@ export async function getHealthStatEntriesData(
           row.data.intensity_duration_goal_in_seconds != null
         ) {
           const minSeconds = row.data.intensity_duration_goal_in_seconds;
-
-          // store goal in same unit as numericValue (seconds)
-          goal = { min: minSeconds };
-
-          status = numericValue >= minSeconds ? "good" : "low";
+          const goalInMinutes = Math.round(minSeconds / 60);
+          goal = { min: goalInMinutes };
+          valueForGoal = Math.round(numericValue / 60);
         }
       }
 
@@ -203,7 +203,6 @@ export async function getHealthStatEntriesData(
       }
 
       // Convert numericValue to hours for comparison (numericValue is in seconds)
-      let valueForGoal = numericValue;
       if (row.kind === "sleep_daily" && key === "Total sleep") {
         valueForGoal = numericValue / 3600; // seconds → hours
       }
