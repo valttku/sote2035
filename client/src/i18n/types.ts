@@ -37,6 +37,9 @@ export type SettingsTranslations = {
   link_garmin: string;
   unlink_garmin: string;
   unlink_garmin_confirm: string;
+  active_provider: string;
+  linkPolarDisabled: string;
+  linkGarminDisabled: string;
   providerAccountManagement: string;
   delete_account: string;
   delete_account_confirm: string;

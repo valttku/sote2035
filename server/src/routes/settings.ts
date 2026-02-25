@@ -6,7 +6,6 @@ import { authRequired } from "../middleware/authRequired.js";
 export const settingsRouter = Router();
 
 //Deregister from polar
-
 async function deregisterFromPolar(userId: number) {
   const integ = await db.query(
     `
@@ -48,8 +47,9 @@ settingsRouter.get("/", authRequired, async (req, res, next) => {
     const userId = (req as any).userId;
     //add here parameters
 
+
     const result = await db.query(
-      `select id, email, display_name,gender, height, weight, created_at, updated_at, last_login
+      `select id, email, display_name, gender, height, weight, created_at, updated_at, last_login, active_provider
        from app.users
        where id = $1`,
       [userId],
@@ -62,7 +62,13 @@ settingsRouter.get("/", authRequired, async (req, res, next) => {
     //add console for checking
     console.log("SETTINGS USER FROM DB:", result.rows[0]);
 
-    res.json(result.rows[0]);
+    // Add booleans for frontend convenience
+    const user = result.rows[0];
+    res.json({
+      ...user,
+      polarLinked: user.active_provider === 'polar',
+      garminLinked: user.active_provider === 'garmin',
+    });
   } catch (e) {
     next(e);
   }
