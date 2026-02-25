@@ -46,16 +46,14 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
       <div className="mb-6">
         <h1 className="text-md mb-2">Body Composition</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard label="Gender" value={data.gender} icon="👤" />
+          <StatCard label="👤Gender" value={data.gender} />
           <StatCard
-            label="Height"
+            label="📏Height"
             value={data.height ? `${data.height} cm` : "-"}
-            icon="📏"
           />
           <StatCard
-            label="Weight"
+            label="⚖️Weight"
             value={data.weight ? `${data.weight} kg` : "-"}
-            icon="⚖️"
           />
         </div>
       </div>
@@ -65,19 +63,16 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
         <h1 className="text-md mb-2">Fitness</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
-            label="VO2 Max (Run)"
+            label="🏃‍♂️VO2 Max (Run)"
             value={data.vo2_max ? `${data.vo2_max} ml/kg/min` : "-"}
-            icon="🏃‍♂️"
           />
           <StatCard
-            label="VO2 Max (Cycling)"
+            label="🚴‍♂️VO2 Max (Cycling)"
             value={data.vo2_max_cycling ? `${data.vo2_max_cycling} ml/kg/min` : "-"}
-            icon="🚴‍♂️"
           />
           <StatCard
-            label="Fitness Age"
+            label="🎂Fitness Age"
             value={data.fitness_age ? `${data.fitness_age} years` : "-"}
-            icon="🎂"
           />
         </div>
       </div>

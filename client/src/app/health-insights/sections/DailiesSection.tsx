@@ -145,22 +145,21 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-        <StatCard label="Steps" value={`${displayData.steps} / ${displayData.steps_goal}`} icon="👟" />
-        <StatCard label="Distance" value={`${(displayData.distance_in_meters / 1000).toFixed(2)} km`} icon="🛣" />
-        <StatCard label="Floors Climbed" value={`${displayData.floors_climbed} / ${displayData.floors_climbed_goal}`} icon="🪜" />
-        <StatCard label="Active Calories" value={`${displayData.active_kilocalories} kcal`} icon="🔥" />
-        <StatCard label="BMR Calories" value={`${displayData.bmr_kilocalories} kcal`} icon="🔥" />
-        <StatCard label="Total Calories" value={`${displayData.active_kilocalories + displayData.bmr_kilocalories} kcal`} icon="🔥" />
-        <StatCard label="Moderate Exercise" value={`${(displayData.moderate_intensity_duration_in_seconds / 60).toFixed(0)} min`} icon="⚡" />
-        <StatCard label="Vigorous Exercise" value={`${(displayData.vigorous_intensity_duration_in_seconds / 60).toFixed(0)} min`} icon="⚡" />
+        <StatCard label="👟Steps" value={`${displayData.steps} / ${displayData.steps_goal}`} />
+        <StatCard label="🛣 Distance" value={`${(displayData.distance_in_meters / 1000).toFixed(2)} km`} />
+        <StatCard label="🪜 Floors Climbed" value={`${displayData.floors_climbed} / ${displayData.floors_climbed_goal}`} />
+        <StatCard label="🔥 Active Calories" value={`${displayData.active_kilocalories} kcal`}  />
+        <StatCard label="🔥 BMR Calories" value={`${displayData.bmr_kilocalories} kcal`} />
+        <StatCard label="🔥 Total Calories" value={`${displayData.active_kilocalories + displayData.bmr_kilocalories} kcal`} />
+        <StatCard label="⚡Moderate Exercise" value={`${(displayData.moderate_intensity_duration_in_seconds / 60).toFixed(0)} min`} />
+        <StatCard label="⚡Vigorous Exercise" value={`${(displayData.vigorous_intensity_duration_in_seconds / 60).toFixed(0)} min`} />
         <StatCard
-          label="Weekly Intensity"
+          label="⚡Weekly Intensity"
           value={`${(displayData.weekly_intensity_total_seconds / 60).toFixed(0)} / ${(displayData.intensity_duration_goal_in_seconds / 60).toFixed(0)} min`}
-          icon="⚡"
         />
-        <StatCard label="Resting Heart Rate" value={`${displayData.resting_heart_rate} bpm`} icon="❤️" />
-        <StatCard label="Average Heart Rate" value={`${displayData.avg_heart_rate} bpm`} icon="❤️" />
-        <StatCard label="Max Heart Rate" value={`${displayData.max_heart_rate} bpm`} icon="❤️" />
+        <StatCard label="❤️Resting Heart Rate" value={`${displayData.resting_heart_rate} bpm`}/>
+        <StatCard label="❤️Average Heart Rate" value={`${displayData.avg_heart_rate} bpm`} />
+        <StatCard label="❤️Max Heart Rate" value={`${displayData.max_heart_rate} bpm`} />
       </div>
     </div>
   );

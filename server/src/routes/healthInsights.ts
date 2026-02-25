@@ -151,7 +151,9 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
         deep_sleep_in_seconds,
         light_sleep_in_seconds,
         rem_sleep_in_seconds,
-        awake_duration_in_seconds
+        awake_duration_in_seconds,
+        sleep_levels_map,
+        overall_sleep_score
       FROM app.user_sleeps_garmin
       WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],
