@@ -22,13 +22,6 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
         .json({ error: "Invalid date format. Use YYYY-MM-DD" });
     }
 
-    // Fetch body composition data
-    //const bodyCompResult = await db.query(
-    //  `SELECT * FROM app.user_body_composition_garmin
-    //   WHERE user_id = $1 AND day_date = $2::date`,
-    //  [userId, date],
-    //);
-
     console.log(`[health-insights] user=${userId} date=${date}`);
 
     // Fetch profile and metrics in parallel

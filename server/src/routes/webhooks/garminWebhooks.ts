@@ -17,10 +17,6 @@ import {
   upsertGarminActivity,
 } from "../../db/garminTables/activitiesDb.js";
 import {
-  mapGarminBodyCompToRow,
-  upsertGarminBodyComp,
-} from "../../db/garminTables/bodyCompDb.js";
-import {
   mapGarminSleepToRow,
   upsertGarminSleep,
 } from "../../db/garminTables/sleepDb.js";
@@ -205,80 +201,6 @@ garminWebhookRouter.post("/respiration", async (req, res) => {
     res.sendStatus(200);
   } catch (err) {
     console.error("Garmin Respiration webhook failed:", err);
-    console.error(
-      "Error stack:",
-      err instanceof Error ? err.stack : "No stack trace",
-    );
-    res.sendStatus(200);
-  }
-});
-
-// https://sote2035-server.onrender.com/api/v1/webhooks/garmin/body_comp
-// POST /api/v1/webhooks/garmin/body_comp
-garminWebhookRouter.post("/body_comp", async (req, res) => {
-  console.log("Body Comp Webhook received at:", new Date().toISOString());
-  console.log("Payload:", JSON.stringify(req.body, null, 2));
-
-  try {
-    let payload =
-      req.body.bodyCompositionSummaries ||
-      req.body.bodyComps ||
-      (Array.isArray(req.body) ? req.body : [req.body]);
-
-    // If payload is an array of objects with 'bodyComps', flatten it
-    if (
-      Array.isArray(payload) &&
-      payload.length > 0 &&
-      payload[0].bodyComps &&
-      Array.isArray(payload[0].bodyComps)
-    ) {
-      payload = payload.flatMap((item) => item.bodyComps);
-    }
-
-    console.log(
-      "Extracted payload array length:",
-      Array.isArray(payload) ? payload.length : "Not an array",
-    );
-    console.log("Payload items:", JSON.stringify(payload, null, 2));
-
-    for (const item of payload) {
-      const providerUserId = item.userId;
-      console.log("Processing Garmin user:", providerUserId);
-
-      if (!providerUserId) {
-        console.warn(
-          "No userId found in body_comp item:",
-          JSON.stringify(item, null, 2),
-        );
-        continue;
-      }
-
-      const r = await db.query(
-        `SELECT user_id FROM app.user_integrations
-         WHERE provider = 'garmin' AND provider_user_id = $1`,
-        [providerUserId],
-      );
-
-      console.log("Found internal user:", r.rows[0]?.user_id);
-
-      if (r.rowCount === 0) {
-        console.warn("Garmin user not linked:", providerUserId);
-        continue;
-      }
-
-      const row = mapGarminBodyCompToRow(r.rows[0].user_id, item);
-      console.log("Mapped body_comp row:", JSON.stringify(row, null, 2));
-
-      await upsertGarminBodyComp(row);
-      console.log(
-        "Successfully upserted body_comp data for user:",
-        r.rows[0].user_id,
-      );
-    }
-
-    res.sendStatus(200);
-  } catch (err) {
-    console.error("Garmin Body Comp webhook failed:", err);
     console.error(
       "Error stack:",
       err instanceof Error ? err.stack : "No stack trace",

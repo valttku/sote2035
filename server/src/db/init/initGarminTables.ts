@@ -199,45 +199,6 @@ export async function createGarminTables() {
   `);
 
   // ----------------------------
-  // user_body_comp_garmin table
-  // ----------------------------
-  await db.query(`
-    create table if not exists app.user_body_comp_garmin (
-      id uuid primary key default gen_random_uuid(),
-      user_id integer not null references app.users(id) on delete cascade,
-      day_date date not null,
-      summary_id varchar(100),
-      muscle_mass_in_grams integer,
-      bone_mass_in_grams integer,
-      body_water_in_percent double precision,
-      body_fat_in_percent double precision,
-      body_mass_index double precision,
-      weight_in_grams integer,
-      measurement_time_in_seconds bigint,
-      measurement_time_offset_in_seconds integer,
-      source varchar(50) not null default 'garmin',
-      created_at timestamptz not null default now(),
-      updated_at timestamptz not null default now(),
-      unique (user_id, day_date)
-    );
-
-    create index if not exists idx_user_body_comp_garmin_user_id
-      on app.user_body_comp_garmin (user_id, day_date);
-  `);
-
-  await db.query(`
-    drop trigger if exists trg_ensure_health_day_for_body_comp on app.user_body_comp_garmin;
-    create trigger trg_ensure_health_day_for_body_comp
-    after insert or update on app.user_body_comp_garmin
-    for each row execute function app.ensure_health_day_exists();
-
-    drop trigger if exists update_user_body_comp_garmin_updated_at on app.user_body_comp_garmin;
-    create trigger update_user_body_comp_garmin_updated_at
-    before update on app.user_body_comp_garmin
-    for each row execute function app.update_updated_at_column();
-  `);
-
-  // ----------------------------
   // user_activities_garmin table
   // ----------------------------
   await db.query(`
