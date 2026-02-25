@@ -35,13 +35,16 @@ function StatusBadge({
     undefined: "bg-gray-200/20 text-gray-200",
   };
 
+  // Show "No status" for undefined
+  const displayText = status === "undefined" ? "no_status" : status;
+
   return (
     <span
       className={`px-2 py-0.5 text-xs rounded-full cursor-pointer ${
         styles[status ?? "undefined"]
       }`}
     >
-      {status}
+      {displayText}
     </span>
   );
 }

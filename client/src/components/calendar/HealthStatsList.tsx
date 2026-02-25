@@ -40,12 +40,55 @@ function labelForKind(kind: string, t?: Translations) {
   }
 }
 
-// Pretty-print unknown values
-function prettyValue(v: unknown) {
-  if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
-    return String(v);
+// Format value for a specific health stat key
+function formatHealthStatValue(key: string, value: unknown) {
+  // Intense exercise values (seconds to minutes)
+  if (
+    (key === "Intense exercise this week" ||
+      key === "Intense exercise today") &&
+    typeof value === "number"
+  ) {
+    return Math.round(value / 60) + " min";
   }
-  return JSON.stringify(v);
+  // Total sleep (seconds to hours/minutes)
+  if (key === "Total sleep" && typeof value === "number") {
+    const mins = Math.round(value / 60);
+    const hours = Math.floor(mins / 60);
+    const minutes = mins % 60;
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  }
+  // Distance (meters to km)
+  if (key === "Distance" && typeof value === "number") {
+    return (value / 1000).toFixed(2) + " km";
+  }
+  // Heart rate (bpm)
+  if (
+    (key === "Resting heart rate" || key === "Average heart rate") &&
+    typeof value === "number"
+  ) {
+    return Math.round(value) + " bpm";
+  }
+  // HRV (ms)
+  if (key === "Overnight average HRV" && typeof value === "number") {
+    return Math.round(value) + " ms";
+  }
+  // Energy (kcal)
+  if (key === "Total energy expenditure" && typeof value === "number") {
+    return Math.round(value) + " kcal";
+  }
+  // Respiratory rate (brpm)
+  if (key === "Average respiratory rate" && typeof value === "number") {
+    return value.toFixed() + " brpm";
+  }
+  // Default: pretty print
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value);
+  }
+  return JSON.stringify(value);
 }
 
 // Show a list of health entries
@@ -58,17 +101,33 @@ export default function HealthStatsList({
 }) {
   const { t } = useTranslation();
 
-  if (entries.length === 0) {
-    return (
-      <p className="text-sm opacity-80">
-        {t.calendar.noHealthStats ?? "No health stats for this day."}
-      </p>
-    );
-  }
+  // Define expected kinds to ensure consistent display, even if some are missing from API response
+  const expectedKinds = [
+    "heart_daily",
+    "sleep_daily",
+    "stress_daily",
+    "activity_daily",
+    "resp_daily",
+    "skin_temp_daily",
+  ];
+
+  // Ensure all expected kinds are shown, even if missing from API response
+  const mergedEntries = expectedKinds.map((kind) => {
+    const existing = entries.find((e) => e.kind === kind);
+    if (existing) return existing;
+
+    return {
+      id: `placeholder-${kind}`,
+      kind,
+      source: null,
+      data: null,
+      created_at: "",
+    };
+  });
 
   return (
     <div className="space-y-3 overflow-y-auto max-h-96">
-      {entries.map((e) => (
+      {mergedEntries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           {/* Header: Health stat label + source */}
           <div className="flex items-center justify-between">
@@ -93,17 +152,25 @@ export default function HealthStatsList({
 
           {/* Health stat data */}
           <div className="text-sm space-y-1 mt-1">
-            {typeof e.data === "object" && e.data !== null ? (
-              Object.entries(e.data as Record<string, unknown>).map(([k, v]) => (
-                <div key={k}>
-                  <span className="font-semibold">
-                    {t.calendar.fields[k as keyof typeof t.calendar.fields] ?? k}:
-                  </span>{" "}
-                  {prettyValue(v)}
-                </div>
-              ))
+            {e.data === null ? (
+              <div className="text-sm opacity-60">
+                {t.calendar.noData ?? "No data"}
+              </div>
+            ) : typeof e.data === "object" ? (
+              Object.entries(e.data as Record<string, unknown>).map(
+                ([k, v]) => (
+                  <div key={k}>
+                    <span className="font-semibold">
+                      {t.calendar.fields[k as keyof typeof t.calendar.fields] ??
+                        k}
+                      :
+                    </span>{" "}
+                    {formatHealthStatValue(k, v)}
+                  </div>
+                ),
+              )
             ) : (
-              <div>{prettyValue(e.data)}</div>
+              <div>{formatHealthStatValue("", e.data)}</div>
             )}
           </div>
         </div>

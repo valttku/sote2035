@@ -3,8 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import AppLayout from "../../components/AppLayout";
 import GlobalModal from "../../components/GlobalModal";
-import HealthStatsList, { HealthStatsResponse } from "../../components/calendar/HealthStatsList";
-import ActivitiesList, {  ActivitiesResponse } from "../../components/calendar/ActivitiesList";
+import HealthStatsList, {
+  HealthStatsResponse,
+} from "../../components/calendar/HealthStatsList";
+import ActivitiesList, {
+  ActivitiesResponse,
+} from "../../components/calendar/ActivitiesList";
 import ManualActivityForm from "../../components/calendar/ActivityForm";
 
 import { useTranslation } from "@/i18n/LanguageProvider";
@@ -47,9 +51,12 @@ export default function CalendarPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [healthStats, setHealthStats] = useState<HealthStatsResponse | null>(null);
+  const [healthStats, setHealthStats] = useState<HealthStatsResponse | null>(
+    null,
+  );
   const [activities, setActivities] = useState<ActivitiesResponse | null>(null);
-  const [manualActivities, setManualActivities] = useState<HealthStatsResponse | null>(null);
+  const [manualActivities, setManualActivities] =
+    useState<HealthStatsResponse | null>(null);
 
   const [loading, setLoading] = useState(false); // unified loading state
 
@@ -58,9 +65,12 @@ export default function CalendarPage() {
     async function loadMonth() {
       setError(null);
       try {
-        const res = await fetch(`/api/v1/calendar/month?year=${year}&month=${month}`, {
-          credentials: "include",
-        });
+        const res = await fetch(
+          `/api/v1/calendar/month?year=${year}&month=${month}`,
+          {
+            credentials: "include",
+          },
+        );
         const json: unknown = await res.json();
         if (!res.ok) {
           setError(t.calendar.loadMonthError);
@@ -112,21 +122,21 @@ export default function CalendarPage() {
 
   async function loadHealthStats(date: string) {
     const data = await fetchJson<HealthStatsResponse>(
-      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`
+      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
     );
     setHealthStats(data);
   }
 
   async function loadActivities(date: string) {
     const data = await fetchJson<ActivitiesResponse>(
-      `/api/v1/calendar/activities?date=${encodeURIComponent(date)}`
+      `/api/v1/calendar/activities?date=${encodeURIComponent(date)}`,
     );
     setActivities(data);
   }
 
   async function loadManualActivities(date: string) {
     const data = await fetchJson<HealthStatsResponse>(
-      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`
+      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
     );
     if (data) {
       const manual = data.entries.filter((e) => e.kind === "manual_activity");
@@ -164,22 +174,39 @@ export default function CalendarPage() {
 
           {/* Month navigation */}
           <div className="flex items-center gap-2">
-            <button onClick={prevMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30">{t.calendar.prev}</button>
-            <div className="font-semibold">{year}-{pad2(month)}</div>
-            <button onClick={nextMonth} className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30">{t.calendar.next}</button>
+            <button
+              onClick={prevMonth}
+              className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+            >
+              {t.calendar.prev}
+            </button>
+            <div className="font-semibold">
+              {year}-{pad2(month)}
+            </div>
+            <button
+              onClick={nextMonth}
+              className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+            >
+              {t.calendar.next}
+            </button>
           </div>
 
           {/* Weekdays */}
           <section className="grid grid-cols-7 gap-3">
             {getDaysOfWeek(t).map((day) => (
-              <div key={day} className="font-bold text-center pb-1">{day}</div>
+              <div key={day} className="font-bold text-center pb-1">
+                {day}
+              </div>
             ))}
           </section>
 
           {/* Calendar grid */}
           <section className="grid grid-cols-7 gap-3">
             {Array.from({ length: offset }).map((_, i) => (
-              <div key={`blank-${year}-${month}-${i}`} className="min-h-18 w-full" />
+              <div
+                key={`blank-${year}-${month}-${i}`}
+                className="min-h-18 w-full"
+              />
             ))}
             {Array.from({ length: totalDays }, (_, i) => {
               const day = i + 1;
@@ -195,7 +222,9 @@ export default function CalendarPage() {
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span className="leading-none">{day}</span>
-                    {hasData && <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>}
+                    {hasData && (
+                      <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>
+                    )}
                   </div>
                 </button>
               );
@@ -206,27 +235,50 @@ export default function CalendarPage() {
           {selectedDate && (
             <GlobalModal onClose={closeModal}>
               <h2 className="text-2xl mb-2 text-center">
-                {new Date(selectedDate + "T00:00:00").toLocaleDateString(t.calendar.locale || "en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {new Date(selectedDate + "T00:00:00").toLocaleDateString(
+                  t.calendar.locale || "en-US",
+                  {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  },
+                )}
               </h2>
 
               {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+              {loading && (
+                <p className="text-sm opacity-70">{t.calendar.loading}...</p>
+              )}
 
               <div className="space-y-4">
                 {/* Health Stats */}
                 {healthStats ? (
                   <div className="space-y-2">
-                    <button onClick={() => setHealthStats(null)} className="w-full text-left hover:opacity-70">
-                      ▼ {t.calendar.healthStats} ({healthStats.entries.filter((e) => e.kind !== "manual_activity").length})
+                    <button
+                      onClick={() => setHealthStats(null)}
+                      className="w-full text-left hover:opacity-70"
+                    >
+                      ▼ {t.calendar.healthStats} (
+                      {
+                        healthStats.entries.filter(
+                          (e) => e.kind !== "manual_activity",
+                        ).length
+                      }
+                      )
                     </button>
-                    <HealthStatsList entries={healthStats.entries.filter((e) => e.kind !== "manual_activity")} />
+                    <HealthStatsList
+                      entries={healthStats.entries.filter(
+                        (e) => e.kind !== "manual_activity",
+                      )}
+                    />
                   </div>
                 ) : (
-                  <button type="button" className="border-b pb-4 mb-4 w-full text-left" onClick={() => loadHealthStats(selectedDate)}>
+                  <button
+                    type="button"
+                    className="border-b pb-4 mb-4 w-full text-left"
+                    onClick={() => loadHealthStats(selectedDate)}
+                  >
                     ▶ {t.calendar.healthStats}
                   </button>
                 )}
@@ -234,13 +286,20 @@ export default function CalendarPage() {
                 {/* Activities */}
                 {activities ? (
                   <div className="space-y-2">
-                    <button onClick={() => setActivities(null)} className="w-full text-left hover:opacity-70">
+                    <button
+                      onClick={() => setActivities(null)}
+                      className="w-full text-left hover:opacity-70"
+                    >
                       ▼ {t.calendar.activities} ({activities.entries.length})
                     </button>
                     <ActivitiesList entries={activities.entries} />
                   </div>
                 ) : (
-                  <button type="button" className="border-b pb-4 mb-4 w-full text-left" onClick={() => loadActivities(selectedDate)}>
+                  <button
+                    type="button"
+                    className="border-b pb-4 mb-4 w-full text-left"
+                    onClick={() => loadActivities(selectedDate)}
+                  >
                     ▶ {t.calendar.activities}
                   </button>
                 )}
@@ -248,33 +307,48 @@ export default function CalendarPage() {
                 {/* Manual Activities */}
                 {manualActivities ? (
                   <div className="space-y-2">
-                    <button onClick={() => setManualActivities(null)} className="w-full text-left hover:opacity-70">
-                      ▼ {t.calendar.manualActivities} ({manualActivities.entries.length})
+                    <button
+                      onClick={() => setManualActivities(null)}
+                      className="w-full text-left hover:opacity-70"
+                    >
+                      ▼ {t.calendar.manualActivities} (
+                      {manualActivities.entries.length})
                     </button>
                     {manualActivities.entries.length === 0 ? (
-                      <p className="text-sm opacity-80">{t.calendar.noManualActivities}</p>
+                      <p className="text-sm opacity-80">
+                        {t.calendar.noManualActivities}
+                      </p>
                     ) : (
                       <HealthStatsList
                         entries={manualActivities.entries}
                         onDelete={async (id) => {
-                          await fetch(`/api/v1/calendar/manual-activities/${id}`, { method: "DELETE", credentials: "include" });
-                          if (selectedDate) await loadManualActivities(selectedDate);
+                          await fetch(
+                            `/api/v1/calendar/manual-activities/${id}`,
+                            { method: "DELETE", credentials: "include" },
+                          );
+                          if (selectedDate)
+                            await loadManualActivities(selectedDate);
                         }}
                       />
                     )}
                   </div>
                 ) : (
-                  <button type="button" className="border-b pb-4 mb-4 w-full text-left" onClick={() => loadManualActivities(selectedDate)}>
+                  <button
+                    type="button"
+                    className="border-b pb-4 mb-4 w-full text-left"
+                    onClick={() => loadManualActivities(selectedDate)}
+                  >
                     ▶ {t.calendar.manualActivities}
                   </button>
                 )}
               </div>
 
-              <ManualActivityForm selectedDate={selectedDate} onActivityAdded={() => loadManualActivities(selectedDate)} />
+              <ManualActivityForm
+                selectedDate={selectedDate}
+                onActivityAdded={() => loadManualActivities(selectedDate)}
+              />
             </GlobalModal>
           )}
-
-          {loading && <p className="text-sm opacity-70">{t.calendar.loading}...</p>}
         </div>
       </div>
     </AppLayout>
