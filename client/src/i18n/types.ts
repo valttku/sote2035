@@ -66,6 +66,7 @@ export type SettingsTranslations = {
   medium_password: string;
   strong_password: string;
   weak_password_alert: string;
+  old_password_incorrect: string;
 };
 
 // Startup page

@@ -79,7 +79,8 @@
     "weak_password": "Weak",
     "medium_password": "Medium",
     "strong_password": "Strong",
-    "weak_password_alert": "Password does not meet requirements"
+    "weak_password_alert": "Password does not meet requirements",
+    "old_password_incorrect": "Old password is incorrect"
   },
 
   "startup": {

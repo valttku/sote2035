@@ -22,6 +22,15 @@ type SettingsData = {
   garminLinked?: boolean;
 };
 
+// ---------------- PASSWORD REQUIREMENTS ----------------
+const PASSWORD_REQUIREMENTS = [
+  { regex: /.{8,}/, text: "At least 8 characters" },
+  { regex: /[0-9]/, text: "At least 1 number" },
+  { regex: /[a-z]/, text: "At least 1 lowercase letter" },
+  { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+  { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
+];
+
 export default function SettingsPage() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -51,15 +60,7 @@ export default function SettingsPage() {
   const [polarBusy, setPolarBusy] = useState(false);
   const [garminBusy, setGarminBusy] = useState(false);
 
-  // ---------------- PASSWORD REQUIREMENTS ----------------
-  const PASSWORD_REQUIREMENTS = [
-    { regex: /.{8,}/, text: "At least 8 characters" },
-    { regex: /[0-9]/, text: "At least 1 number" },
-    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
-    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
-    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
-  ];
-
+  // Calculate password strength score
   const strengthScore = useMemo(
     () => PASSWORD_REQUIREMENTS.filter((r) => r.regex.test(newPassword)).length,
     [newPassword],
@@ -134,7 +135,15 @@ export default function SettingsPage() {
     setSavingProfile(true);
 
     try {
-      const updates: any = {};
+      type ProfileUpdates = {
+        displayName?: string;
+        gender?: string | null;
+        height?: number | null;
+        weight?: number | null;
+        birthday?: string | null;
+      };
+
+      const updates: ProfileUpdates = {};
 
       if (displayName !== data.display_name) updates.displayName = displayName;
       if (gender !== data.gender) updates.gender = gender;
@@ -180,6 +189,7 @@ export default function SettingsPage() {
       );
 
     setChangingPassword(true);
+
     try {
       const res = await fetch(`/api/v1/settings/password`, {
         method: "PUT",
@@ -187,13 +197,24 @@ export default function SettingsPage() {
         credentials: "include",
         body: JSON.stringify({ oldPassword, newPassword }),
       });
-      if (!res.ok) throw new Error();
 
+      if (!res.ok) {
+        const json = await res.json();
+        if (res.status === 403 && json.error === "Old password incorrect") {
+          alert("Old password is incorrect");
+          return;
+        }
+        // Handle other errors
+        alert(json.error || t.settings.failed_connect_server);
+        return;
+      }
+
+      // Success
       alert(t.settings.password_changed);
       setOldPassword("");
       setNewPassword("");
       setShowChangePassword(false);
-    } catch {
+    } catch (err) {
       alert(t.settings.failed_connect_server);
     } finally {
       setChangingPassword(false);
@@ -439,7 +460,6 @@ export default function SettingsPage() {
               value={gender ?? ""}
               onChange={(e) => setGender(e.target.value || null)}
             >
-              <option value="">{t.settings.select_gender}</option>
               <option value="male">{t.settings.male}</option>
               <option value="female">{t.settings.female}</option>
             </select>
