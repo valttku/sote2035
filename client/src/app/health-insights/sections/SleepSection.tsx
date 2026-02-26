@@ -80,12 +80,16 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
   const sleepSegments: Array<{ stage: string; start: number; end: number }> =
     hasSegmentData
       ? Object.entries(sleep.sleep_levels_map!).flatMap(([stage, arr]) =>
-          (arr as Array<{ startTimeInSeconds: number; endTimeInSeconds: number }>).
-            map((seg) => ({
-              stage,
-              start: Number(seg.startTimeInSeconds) || 0,
-              end: Number(seg.endTimeInSeconds) || 0,
-            })),
+          (
+            arr as Array<{
+              startTimeInSeconds: number;
+              endTimeInSeconds: number;
+            }>
+          ).map((seg) => ({
+            stage,
+            start: Number(seg.startTimeInSeconds) || 0,
+            end: Number(seg.endTimeInSeconds) || 0,
+          })),
         )
       : stageOrder.map((stage) => ({
           stage,
@@ -102,6 +106,30 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
     ? Math.max(...sleepSegments.map((s) => s.end))
     : (sleep.start_time_in_seconds || 0) +
       Math.max(sleep.duration_in_seconds || 0, 1);
+
+  // Change this to control density (in seconds)
+  // 3600 = 1 hour
+  // 1800 = 30 minutes
+  // 900  = 15 minutes
+  const totalDuration = sleepEndFromSegments - sleepStartFromSegments;
+
+  let tickInterval = 3600; // default 1h
+
+  if (totalDuration <= 4 * 3600) {
+    tickInterval = 900; // 15 min
+  } else if (totalDuration <= 7 * 3600) {
+    tickInterval = 1800; // 30 min
+  }
+
+  const timeTicks: number[] = [];
+
+  for (
+    let t = sleepStartFromSegments;
+    t <= sleepEndFromSegments;
+    t += tickInterval
+  ) {
+    timeTicks.push(t);
+  }
 
   const xScale = (t: number) => {
     const total = sleepEndFromSegments - sleepStartFromSegments;
@@ -187,6 +215,35 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
               )
             : "No data"}
         </text>
+
+        {/* X-axis time ticks */}
+        {timeTicks.map((tick, i) => (
+          <g key={i}>
+            <line
+              x1={xScale(tick)}
+              x2={xScale(tick)}
+              y1={height - margin.bottom}
+              y2={height - margin.bottom + 8}
+              stroke="rgba(255,255,255,0.4)"
+            />
+            {/* Hide first and last tick labels to avoid overlap with start/end */}
+            {i !== 0 && i !== timeTicks.length - 1 && (
+              <text
+                x={xScale(tick)}
+                y={height - margin.bottom + 25}
+                fill="rgba(255,255,255,0.7)"
+                fontSize={13}
+                textAnchor="middle"
+              >
+                {new Date(tick * 1000).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })}
+              </text>
+            )}
+          </g>
+        ))}
 
         {/* Sleep segments */}
         {sleepSegments.map((seg, idx) => (
