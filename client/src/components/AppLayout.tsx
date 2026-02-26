@@ -24,10 +24,10 @@ export default function AppLayout({
         </div>
       </div>
 
-      {/* Scroll Bar */}
-      <main className="flex-1 overflow-y-auto">
+      {/* Main scrollable content */}
+      <main className="flex-1 overflow-y-auto pt-2">
         <div className="flex justify-center px-4 sm:px-6 lg:px-8 py-6">
-          <div className="w-full max-w-5xl">
+          <div className="w-full">
             {children}
           </div>
         </div>

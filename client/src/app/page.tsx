@@ -92,8 +92,7 @@ export default function Home() {
 
   return (
     <AppLayout>
-      <main className=" w-full flex justify-center h-screen overflow-y-auto">
-      <div className="w-full flex justify-center">
+      <main className="w-full flex justify-center">
         <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
@@ -123,49 +122,48 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Info + AI buttons in bottom right */}
-      <div className="fixed bottom-6 right-25 pointer-events-auto">
-        <InfoButton
-          onClick={() => {
-            setShowInfo((prev) => {
-              if (!prev) setShowAIWindow(false);
-              return !prev;
-            });
-          }}
+        {/* Info + AI buttons in bottom right */}
+        <div className="fixed bottom-6 right-25 pointer-events-auto">
+          <InfoButton
+            onClick={() => {
+              setShowInfo((prev) => {
+                if (!prev) setShowAIWindow(false);
+                return !prev;
+              });
+            }}
+          />
+        </div>
+        <div className="fixed bottom-6 right-6 pointer-events-auto">
+          <AIMessageButton
+            hasNewMessage={!!aiMessage && !showAIWindow}
+            onClick={() => {
+              setShowAIWindow((prev) => {
+                if (!prev) setShowInfo(false);
+                return !prev;
+              });
+            }}
+          />
+        </div>
+
+        {/* Info window with homepage guide */}
+        <InfoWindow
+          info={t.home.info}
+          title={t.home.guideTitle}
+          open={showInfo}
+          onClose={() => setShowInfo(false)}
         />
-      </div>
-      <div className="fixed bottom-6 right-6 pointer-events-auto">
-        <AIMessageButton
-          hasNewMessage={!!aiMessage && !showAIWindow}
-          onClick={() => {
-            setShowAIWindow((prev) => {
-              if (!prev) setShowInfo(false);
-              return !prev;
-            });
-          }}
+
+        {/* AI message window */}
+        <AIMessageWindow
+          message={aiMessage || ""}
+          title={t.home.aiTitle}
+          generatingMessage={t.home.generatingMessage}
+          placeholder={t.home.noMessage}
+          loading={loadingAI}
+          open={showAIWindow}
+          onClose={() => setShowAIWindow(false)}
         />
-      </div>
-
-      {/* Info window with homepage guide */}
-      <InfoWindow
-        info={t.home.info}
-        title={t.home.guideTitle}
-        open={showInfo}
-        onClose={() => setShowInfo(false)}
-      />
-
-      {/* AI message window */}
-      <AIMessageWindow
-        message={aiMessage || ""}
-        title={t.home.aiTitle}
-        generatingMessage={t.home.generatingMessage}
-        placeholder={t.home.noMessage}
-        loading={loadingAI}
-        open={showAIWindow}
-        onClose={() => setShowAIWindow(false)}
-      />
       </main>
     </AppLayout>
   );
