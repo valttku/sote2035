@@ -8,24 +8,31 @@ export default function AppLayout({
   children,
 }: {
   children: ReactNode;
-  hideSidebar?: boolean;
 }) {
   return (
-    <div className="h-dvh flex flex-col">
-      <div className="relative w-full">
+    <div className="h-screen flex flex-col overflow-hidden">
+
+      {/* Header */}
+      <div className="relative shrink-0">
         <AppLogo />
         <Navbar />
 
         <div className="hidden md:flex absolute right-6 top-4 z-50 items-center gap-3">
-          <LanguageSelector className="relative inline-block " />
+          <LanguageSelector />
           <div className="h-5 w-px bg-white/30" />
           <LogoutButton />
         </div>
       </div>
 
-      <main className="flex-1 p-8 px-4 sm:px-6 lg:px-8 flex justify-center overflow-y-auto">
-        {children}
+      {/* Scroll Bar */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="flex justify-center px-4 sm:px-6 lg:px-8 py-6">
+          <div className="w-full max-w-5xl">
+            {children}
+          </div>
+        </div>
       </main>
+
     </div>
   );
 }

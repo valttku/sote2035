@@ -124,6 +124,7 @@ export default function HealthInsightsPage() {
 
   return (
     <AppLayout>
+     <main className=" w-full flex justify-center h-screen overflow-y-auto">
       <div className="w-full flex justify-center">
         <div className="flex flex-col gap-5 w-full max-w-6xl">
           <div className="bg-black/20 rounded-xl border border-white/15 p-6 w-full space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] overflow-auto">
@@ -322,6 +323,7 @@ export default function HealthInsightsPage() {
           </div>
         </div>
       </div>
+      </main>
     </AppLayout>
   );
 }

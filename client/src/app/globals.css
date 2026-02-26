@@ -209,8 +209,12 @@ h2 {
   margin-bottom: 1rem;
 }
 
-/*  Prevent horizontal scrolling on mobile */
+/* Prevent horizontal scroll + allow vertical scroll */
 html,
 body {
+  height: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
+ 
 }
+
