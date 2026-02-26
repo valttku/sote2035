@@ -8,11 +8,12 @@ type ModalProps = {
 
 export default function GlobalModal({ children, onClose }: ModalProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className="fixed inset-0 flex items-center justify-center z-50">
       <div
         // Responsive UI added
-        className="ui-component-styles 
-          backdrop-blur-3xl
+        className="
+          ui-component-styles
+          backdrop-blur-lg
           mx-4 sm:mx-0 p-4 sm:p-6
           w-full max-w-md
           rounded-2xl

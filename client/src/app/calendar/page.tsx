@@ -169,189 +169,189 @@ export default function CalendarPage() {
   return (
     <AppLayout>
       <main className=" w-full flex justify-center">
-      <div className="w-full flex justify-center">
-        <div className="ui-component-styles backdrop-blur-lg p-6 mx-auto w-full max-w-5xl space-y-6 flex-1 overflow-auto">
-          <h1 className="text-4xl">{t.calendar.title}</h1>
+        {/* Modal */}
+        {selectedDate && (
+          <GlobalModal onClose={closeModal}>
+            <h2 className="text-2xl mb-2 text-center">
+              {new Date(selectedDate + "T00:00:00").toLocaleDateString(
+                t.calendar.locale || "en-US",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                },
+              )}
+            </h2>
 
-          {/* Month navigation */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={prevMonth}
-              className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
-            >
-              {t.calendar.prev}
-            </button>
-            <div className="font-semibold">
-              {year}-{pad2(month)}
-            </div>
-            <button
-              onClick={nextMonth}
-              className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
-            >
-              {t.calendar.next}
-            </button>
-          </div>
+            {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+            {loading && (
+              <p className="text-sm opacity-70">{t.calendar.loading}...</p>
+            )}
 
-          {/* Weekdays */}
-          <section className="grid grid-cols-7 gap-3">
-            {getDaysOfWeek(t).map((day) => (
-              <div key={day} className="font-bold text-center pb-1">
-                {day}
-              </div>
-            ))}
-          </section>
-
-          {/* Calendar grid */}
-          <section className="grid grid-cols-7 gap-3">
-            {Array.from({ length: offset }).map((_, i) => (
-              <div
-                key={`blank-${year}-${month}-${i}`}
-                className="min-h-18 w-full"
-              />
-            ))}
-            {Array.from({ length: totalDays }, (_, i) => {
-              const day = i + 1;
-              const date = toYmd(year, month, day);
-              const hasData = daysWithData.has(date);
-
-              return (
-                <button
-                  key={date}
-                  onClick={() => openDay(date)}
-                  className="border rounded min-h-18 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
-                  title={hasData ? t.calendar.hasData : t.calendar.noData}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="leading-none">{day}</span>
-                    {hasData && (
-                      <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>
+            <div className="space-y-4">
+              {/* Health Stats */}
+              {healthStats ? (
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setHealthStats(null)}
+                    className="w-full text-left hover:opacity-70"
+                  >
+                    ▼ {t.calendar.healthStats} (
+                    {
+                      healthStats.entries.filter(
+                        (e) => e.kind !== "manual_activity",
+                      ).length
+                    }
+                    )
+                  </button>
+                  <HealthStatsList
+                    entries={healthStats.entries.filter(
+                      (e) => e.kind !== "manual_activity",
                     )}
-                  </div>
+                  />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="border-b pb-4 mb-4 w-full text-left"
+                  onClick={() => loadHealthStats(selectedDate)}
+                >
+                  ▶ {t.calendar.healthStats}
                 </button>
-              );
-            })}
-          </section>
-
-          {/* Modal */}
-          {selectedDate && (
-            <GlobalModal onClose={closeModal}>
-              <h2 className="text-2xl mb-2 text-center">
-                {new Date(selectedDate + "T00:00:00").toLocaleDateString(
-                  t.calendar.locale || "en-US",
-                  {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  },
-                )}
-              </h2>
-
-              {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-              {loading && (
-                <p className="text-sm opacity-70">{t.calendar.loading}...</p>
               )}
 
-              <div className="space-y-4">
-                {/* Health Stats */}
-                {healthStats ? (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setHealthStats(null)}
-                      className="w-full text-left hover:opacity-70"
-                    >
-                      ▼ {t.calendar.healthStats} (
-                      {
-                        healthStats.entries.filter(
-                          (e) => e.kind !== "manual_activity",
-                        ).length
-                      }
-                      )
-                    </button>
+              {/* Activities */}
+              {activities ? (
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setActivities(null)}
+                    className="w-full text-left hover:opacity-70"
+                  >
+                    ▼ {t.calendar.activities} ({activities.entries.length})
+                  </button>
+                  <ActivitiesList entries={activities.entries} />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="border-b pb-4 mb-4 w-full text-left"
+                  onClick={() => loadActivities(selectedDate)}
+                >
+                  ▶ {t.calendar.activities}
+                </button>
+              )}
+
+              {/* Manual Activities */}
+              {manualActivities ? (
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setManualActivities(null)}
+                    className="w-full text-left hover:opacity-70"
+                  >
+                    ▼ {t.calendar.manualActivities} (
+                    {manualActivities.entries.length})
+                  </button>
+                  {manualActivities.entries.length === 0 ? (
+                    <p className="text-sm opacity-80">
+                      {t.calendar.noManualActivities}
+                    </p>
+                  ) : (
                     <HealthStatsList
-                      entries={healthStats.entries.filter(
-                        (e) => e.kind !== "manual_activity",
-                      )}
+                      entries={manualActivities.entries}
+                      onDelete={async (id) => {
+                        await fetch(
+                          `/api/v1/calendar/manual-activities/${id}`,
+                          { method: "DELETE", credentials: "include" },
+                        );
+                        if (selectedDate)
+                          await loadManualActivities(selectedDate);
+                      }}
                     />
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="border-b pb-4 mb-4 w-full text-left"
-                    onClick={() => loadHealthStats(selectedDate)}
-                  >
-                    ▶ {t.calendar.healthStats}
-                  </button>
-                )}
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="border-b pb-4 mb-4 w-full text-left"
+                  onClick={() => loadManualActivities(selectedDate)}
+                >
+                  ▶ {t.calendar.manualActivities}
+                </button>
+              )}
+            </div>
 
-                {/* Activities */}
-                {activities ? (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setActivities(null)}
-                      className="w-full text-left hover:opacity-70"
-                    >
-                      ▼ {t.calendar.activities} ({activities.entries.length})
-                    </button>
-                    <ActivitiesList entries={activities.entries} />
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="border-b pb-4 mb-4 w-full text-left"
-                    onClick={() => loadActivities(selectedDate)}
-                  >
-                    ▶ {t.calendar.activities}
-                  </button>
-                )}
+            <ManualActivityForm
+              selectedDate={selectedDate}
+              onActivityAdded={() => loadManualActivities(selectedDate)}
+            />
+          </GlobalModal>
+        )}
+        
+        <div className="w-full flex justify-center">
+          <div className="ui-component-styles z-10 backdrop-blur-3xl p-6 mx-auto w-full max-w-5xl space-y-6 flex-1 overflow-auto">
+            <h1 className="text-4xl">{t.calendar.title}</h1>
 
-                {/* Manual Activities */}
-                {manualActivities ? (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setManualActivities(null)}
-                      className="w-full text-left hover:opacity-70"
-                    >
-                      ▼ {t.calendar.manualActivities} (
-                      {manualActivities.entries.length})
-                    </button>
-                    {manualActivities.entries.length === 0 ? (
-                      <p className="text-sm opacity-80">
-                        {t.calendar.noManualActivities}
-                      </p>
-                    ) : (
-                      <HealthStatsList
-                        entries={manualActivities.entries}
-                        onDelete={async (id) => {
-                          await fetch(
-                            `/api/v1/calendar/manual-activities/${id}`,
-                            { method: "DELETE", credentials: "include" },
-                          );
-                          if (selectedDate)
-                            await loadManualActivities(selectedDate);
-                        }}
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    className="border-b pb-4 mb-4 w-full text-left"
-                    onClick={() => loadManualActivities(selectedDate)}
-                  >
-                    ▶ {t.calendar.manualActivities}
-                  </button>
-                )}
+            {/* Month navigation */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={prevMonth}
+                className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+              >
+                {t.calendar.prev}
+              </button>
+              <div className="font-semibold">
+                {year}-{pad2(month)}
               </div>
+              <button
+                onClick={nextMonth}
+                className="border px-3 py-1 rounded hover:bg-[#1aa5b0]/30"
+              >
+                {t.calendar.next}
+              </button>
+            </div>
 
-              <ManualActivityForm
-                selectedDate={selectedDate}
-                onActivityAdded={() => loadManualActivities(selectedDate)}
-              />
-            </GlobalModal>
-          )}
+            {/* Weekdays */}
+            <section className="grid grid-cols-7 gap-3">
+              {getDaysOfWeek(t).map((day) => (
+                <div key={day} className="font-bold text-center pb-1">
+                  {day}
+                </div>
+              ))}
+            </section>
+
+            {/* Calendar grid */}
+            <section className="grid grid-cols-7 gap-3">
+              {Array.from({ length: offset }).map((_, i) => (
+                <div
+                  key={`blank-${year}-${month}-${i}`}
+                  className="min-h-18 w-full"
+                />
+              ))}
+              {Array.from({ length: totalDays }, (_, i) => {
+                const day = i + 1;
+                const date = toYmd(year, month, day);
+                const hasData = daysWithData.has(date);
+
+                return (
+                  <button
+                    key={date}
+                    onClick={() => openDay(date)}
+                    className="border rounded min-h-18 w-full overflow-hidden hover:bg-[#1aa5b0]/30"
+                    title={hasData ? t.calendar.hasData : t.calendar.noData}
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="leading-none">{day}</span>
+                      {hasData && (
+                        <span className="w-2 h-2 bg-[#31c2d5] rounded-full block"></span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </section>
+          </div>
         </div>
-      </div>
       </main>
     </AppLayout>
   );
