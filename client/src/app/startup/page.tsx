@@ -46,18 +46,20 @@ export default function StartUpPage() {
         body: JSON.stringify(body),
       });
 
+      // If request failed → show error
+      if (!res.ok) {
+        const error = await res.json().catch(() => null);
+        alert(error?.error || text.login_failed_session);
+        return;
+      }
+
       // Handle successful response
       if (res.ok) {
         if (endpoint === "login") {
           router.push("/"); // Only redirect if /me confirms login
         } else {
-          alert(text.login_failed_session);
+          router.push("/choose-service");
         }
-      } else {
-        // Registration flow
-        setShowRegister(false);
-        setShowLogin(false);
-        router.push("/choose-service");
       }
     } catch (error) {
       console.error("Authentication error:", error);
