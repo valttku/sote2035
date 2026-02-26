@@ -33,10 +33,10 @@ export async function ensureSchema() {
     display_name varchar(100),
     active_provider varchar(50),
 
+    birthday date,
     gender app.gender_enum,
     height double precision,
     weight double precision,
-   
 
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
