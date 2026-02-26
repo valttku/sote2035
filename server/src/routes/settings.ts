@@ -201,6 +201,46 @@ settingsRouter.put("/password", authRequired, async (req, res, next) => {
   }
 });
 
+settingsRouter.put("/email", authRequired, async (req, res, next) => {
+  try {
+    const userId = (req as any).userId;
+    const { newEmail } = req.body;
+
+    // Basic validation
+    if (!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      return res.status(400).json({ error: "Invalid email" });
+    }
+
+    // Check if email is taken
+    const emailCheck = await db.query(
+      `select id from app.users where email = $1 and id != $2`,
+      [newEmail, userId],
+    );
+
+    if ((emailCheck.rowCount ?? 0) > 0) {
+      return res.status(400).json({ error: "Email already in use" });
+    }
+
+    // Update email and return updated user
+    const result = await db.query(
+      `update app.users
+        set email = $1
+        where id = $2
+        returning id, email, display_name, gender, height, weight, birthday, created_at, updated_at, last_login
+      `,
+      [newEmail, userId],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (e) {
+    next(e);
+  }
+});
+
 settingsRouter.delete(
   "/delete-account",
   authRequired,

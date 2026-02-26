@@ -126,7 +126,7 @@ export default function HealthInsightsPage() {
     <AppLayout>
       <main className="w-full flex justify-center">
         <div className="flex flex-col gap-5 w-full max-w-6xl ">
-          <div className="bg-black/20 rounded-xl border border-white/15 p-6 w-full max-h-full lg:min-h-[84vh] lg:max-h-[84vh] space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] overflow-auto">
+          <div className="ui-component-styles backdrop-blur-lg p-6 w-full max-h-full lg:min-h-[84vh] lg:max-h-[84vh] space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] overflow-auto">
             <h1 className="text-4xl">{t.healthInsights.title}</h1>
             {/* Navigation */}
             <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 ">
