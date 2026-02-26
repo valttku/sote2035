@@ -1,5 +1,5 @@
 "use client";
-import Modal from "@/components/LoginRegisterModal";
+import GlobalModal from "@/components/GlobalModal";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo, useRef, useState, Suspense } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -108,7 +108,7 @@ function ResetPasswordForm() {
 
   return (
     <main className="flex items-center justify-center min-h-screen">
-      <Modal onClose={closeModal}>
+      <GlobalModal onClose={closeModal}>
         <h1 className="text-2xl text-center mb-4">Reset password</h1>
 
         <form onSubmit={handleSubmit} className="space-y-2">
@@ -158,7 +158,7 @@ function ResetPasswordForm() {
             {PASSWORD_REQUIREMENTS.map((req) => (
               <li
                 key={req.text}
-                className={`text-sm flex items-center gap-2 ${req.regex.test(password) ? "text-green-600" : "text-red-500"}`}
+                className={`text-sm flex items-center gap-2 ${req.regex.test(password) ? "text-green-600 line-through" : "text-red-500"}`}
               >
                 {req.text}
                 {req.regex.test(password) ? "✓" : "✕"}
@@ -196,7 +196,7 @@ function ResetPasswordForm() {
             {loading ? "Resetting..." : "Reset password"}
           </button>
         </form>
-      </Modal>
+      </GlobalModal>
     </main>
   );
 }
