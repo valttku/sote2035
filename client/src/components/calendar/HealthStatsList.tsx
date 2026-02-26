@@ -108,7 +108,6 @@ export default function HealthStatsList({
     "stress_daily",
     "activity_daily",
     "resp_daily",
-    "skin_temp_daily",
   ];
 
   // Ensure all expected kinds are shown, even if missing from API response
