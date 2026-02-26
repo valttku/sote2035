@@ -3,12 +3,14 @@
 /* Root color variables for light mode */
 :root {
   --background:
-    radial-gradient(
+    url("/digital_twin_background.png"),
+    /*radial-gradient(
       circle at 50% 40%,
       rgba(90, 114, 191, 0.35),
       transparent 60%
     ),
-    linear-gradient(180deg, #171741 0%, #705abf 50%, #171741 100%);
+    linear-gradient(180deg, #171741 0%, #705abf 50%, #171741 100%);*/
+    #171741;
   --foreground: #ededed;
   --button-blue-bg: #31c2d5;
   --button-blue-hover: #22b1c4;
@@ -22,13 +24,13 @@ html.dark {
 
 /* Dark mode gradient */
 html.dark body {
-  background:
+  /*background:
     radial-gradient(
       circle at 50% 40%,
       rgba(90, 114, 191, 0.35),
       transparent 60%
     ),
-    linear-gradient(180deg, #07071f 0%, #382783 50%, #07071f 100%);
+    linear-gradient(180deg, #07071f 0%, #382783 50%, #07071f 100%);*/
 }
 
 html.dark input,
@@ -63,6 +65,8 @@ body {
     sans-serif;
   background: var(--background);
   background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   color: var(--foreground);
   background-attachment: fixed;
 }
@@ -142,10 +146,9 @@ button {
 
 /* UI components */
 .ui-component-styles {
-  background: rgba(255, 255, 255, 0.09);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.138);
-  box-shadow: 0 8px 32px 0 rgba(26, 28, 62, 0.5);
+  background: rgba(0, 0, 0, 0.3); /* bg-black/30 */
+  border-radius: 0.75rem; /* rounded-xl */
+  border: 1px solid rgba(255, 255, 255, 0.15); /* border-white/15 */
 }
 
 /* Inputs, textareas, selects */
@@ -215,6 +218,4 @@ body {
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
- 
 }
-
