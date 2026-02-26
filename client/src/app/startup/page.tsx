@@ -1,8 +1,7 @@
 "use client";
-import Image from "next/image";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import LoginRegsiterModal from "../../components/LoginRegisterModal";
 import { FcLock } from "react-icons/fc";
 import LoginForm from "../../components/startup/LoginForm";
 import RegisterForm from "../../components/startup/RegisterForm";

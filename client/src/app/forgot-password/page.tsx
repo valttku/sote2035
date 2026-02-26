@@ -1,18 +1,43 @@
 "use client";
 
 import GlobalModal from "@/components/GlobalModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ForgotPasswordPage() {
-  // States variables for email, completion status, error message, and loading
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isGmail, setIsGmail] = useState(true);
 
-  //Handles form submission to send password reset email
+  //  Real-time Gmail validation
+  useEffect(() => {
+    if (!email) {
+      setError(null);
+      setIsGmail(true);
+      return;
+    }
+
+    const gmailValid = email.toLowerCase().endsWith("@gmail.com");
+    setIsGmail(gmailValid);
+
+    if (!gmailValid) {
+      setError("Password reset is allowed only for Gmail accounts");
+    } else {
+      setError(null);
+    }
+  }, [email]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!email) return;
+
+    if (!isGmail) {
+      setError("Password reset is allowed only for Gmail accounts");
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
@@ -25,77 +50,82 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
 
-      if (!res.ok) throw new Error("Server error");
+      const data = await res.json();
 
-      await res.json();
-      // Mark as complete to show success message
+      if (!res.ok) {
+        throw new Error(data.error || "Server error");
+      }
+
       setDone(true);
-    } catch {
-      setError("Failed to contact server");
-    } finally {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+      setError(err.message);
+    } else {
+      setError("Failed to contact server")
+    }}
+    finally {
       setLoading(false);
     }
   }
+  
 
-  //Closes the modal by navigating back in browser history
   function closeModal() {
     window.history.back();
   }
 
   return (
     <main className="flex items-center justify-center min-h-screen p-4 md:p-8">
-      {/* RESPONSIVE: Added padding p-4 mobile, md:p-8 desktop */}
-
-      {/* Modal for forgotten password */}
-      <GlobalModal onClose={() => closeModal()}>
+      <GlobalModal onClose={closeModal}>
         {done ? (
-          <div className="text-center">
-            <h1 className="text-xl sm:text-2xl mb-2">
-              {/* RESPONSIVE: text-xl mobile, md:text-2xl desktop */}
+          <div className="text-center space-y-4">
+            <h1 className="text-xl md:text-2xl font-semibold">
               Check your email
             </h1>
-            <p className="mb-4">
+
+            <p className="text-gray-500 text-sm md:text-base">
               If an account exists for this email, a password reset link has
               been sent.
             </p>
+
             <a
               href="/startup"
-              className="text-sm md:text-base text-[#c3dafe]/80 underline"
+              className="text-sm md:text-base text-blue-400 underline"
             >
-              {/* RESPONSIVE: text-sm mobile, md:text-base desktop */}
               Back to login
             </a>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h1 className="text-2xl md:text-3xl text-center mb-4">
-              {/* RESPONSIVE: text-2xl mobile, md:text-3xl desktop */}
+            <h1 className="text-2xl md:text-3xl text-center font-semibold mb-2">
               Forgot password?
             </h1>
 
-            <label htmlFor="email" className="block text-left">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="border p-2 w-full rounded md:p-3"
-              /* RESPONSIVE: p-2 mobile, md:p-3 desktop for larger input */
-            />
+            <div className="space-y-1">
+              <label htmlFor="email">Email</label>
+
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="border p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+
+              {error && (
+                <p className="text-sm text-red-600 transition-all">
+                  {error}
+                </p>
+              )}
+            </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="button-style-blue w-full disabled:opacity-50 md:px-6 md:py-3"
-              /* RESPONSIVE: increase padding on desktop for bigger click area */
+              disabled={loading || !isGmail}
+              className="button-style-blue w-full disabled:opacity-50 transition"
             >
-              {loading ? "Sending..." : "Send password reset link to email"}
+              {loading ? "Sending..." : "Send password reset link"}
             </button>
-
-            {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
           </form>
         )}
       </GlobalModal>

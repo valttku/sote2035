@@ -153,6 +153,14 @@ authRouter.post("/forgot-password", async (req, res, next) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: "Email required" });
 
+    //  Gmail-only restriction  i add here now
+    if (!email.toLowerCase().endsWith("@gmail.com")) {
+      return res.status(400).json({
+        error: "Password reset is allowed only for Gmail accounts",
+      });
+    }
+
+
     const user = await findUserByEmail(email);
 
     if (!user) {
@@ -201,46 +209,70 @@ authRouter.post("/forgot-password", async (req, res, next) => {
   }
 });
 
-// reset password
 authRouter.post("/reset-password", async (req, res, next) => {
   try {
     const { token, newPassword } = req.body;
 
     if (!token || !newPassword) {
-      return res.status(400).json({ error: "Token and new password required" });
+      return res.status(400).json({
+        error: "Token and new password required",
+      });
     }
 
-    // Find token in DB
-    const result = await db.query(
-      `SELECT user_id, expires_at FROM app.password_reset_tokens WHERE token = $1`,
+    const result = await db.query<{
+      user_id: string;
+      expires_at: Date;
+      email: string;
+    }>(
+      `
+      SELECT prt.user_id, prt.expires_at, u.email
+      FROM app.password_reset_tokens prt
+      JOIN app.users u ON prt.user_id = u.id
+      WHERE prt.token = $1
+      `,
       [token],
     );
 
     if (!result.rows.length) {
-      return res.status(400).json({ error: "Invalid or expired token" });
+      return res.status(400).json({
+        error: "Invalid or expired token",
+      });
     }
 
-    const { user_id, expires_at } = result.rows[0];
-    if (new Date() > expires_at) {
-      return res.status(400).json({ error: "Token expired" });
+    const row = result.rows[0];
+
+    //  Token expiration check
+    if (new Date() > new Date(row.expires_at)) {
+      return res.status(400).json({
+        error: "Token expired",
+      });
     }
 
-    // Hash the new password
+    //  Gmail restriction (backend safety)
+    if (!row.email.toLowerCase().endsWith("@gmail.com")) {
+      return res.status(400).json({
+        error: "Password reset is allowed only for Gmail accounts",
+      });
+    }
+
+    //  Hash password
     const hash = await bcrypt.hash(newPassword, 10);
 
-    // Update user password
-    await db.query(`UPDATE app.users SET password = $1 WHERE id = $2`, [
-      hash,
-      user_id,
-    ]);
+    //  Update password
+    await db.query(
+      `UPDATE app.users SET password = $1 WHERE id = $2`,
+      [hash, row.user_id],
+    );
 
-    // Delete the token after use
-    await db.query(`DELETE FROM app.password_reset_tokens WHERE token = $1`, [
-      token,
-    ]);
+    //  Delete token after use
+    await db.query(
+      `DELETE FROM app.password_reset_tokens WHERE token = $1`,
+      [token],
+    );
 
     res.json({ message: "Password reset successful" });
   } catch (err) {
     next(err);
   }
 });
+  
