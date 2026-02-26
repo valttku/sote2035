@@ -92,7 +92,7 @@ export default function HealthInsightsPage() {
             dataToAnalyze,
             null,
             2,
-          )}'If the updated_at date is today, use present tense ("so far today you have...").If the date is in the past, use past tense ("on x date you had..."). 
+          )}'If the date is in the past, use past tense ("on x date you had..."), if the updated_at date is today, use present tense ("so far today you have..."). 
           Provide insights TO ME in a concise manner, max 5 sentences. Focus on the most interesting or unusual aspects of the data. 
           If possible, provide actionable advice based on the data. If the data looks normal, say that everything looks good!`,
         }),
@@ -124,12 +124,10 @@ export default function HealthInsightsPage() {
 
   return (
     <AppLayout>
-     <main className=" w-full flex justify-center h-screen overflow-y-auto">
-      <div className="w-full flex justify-center">
-        <div className="flex flex-col gap-5 w-full max-w-6xl">
-          <div className="bg-black/20 rounded-xl border border-white/15 p-6 w-full space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] overflow-auto">
+      <main className="w-full flex justify-center">
+        <div className="flex flex-col gap-5 w-full max-w-6xl ">
+          <div className="bg-black/20 rounded-xl border border-white/15 p-6 w-full max-h-full lg:min-h-[84vh] lg:max-h-[84vh] space-y-6 mx-auto flex flex-col flex-1 min-w-[200px] overflow-auto">
             <h1 className="text-4xl">{t.healthInsights.title}</h1>
-
             {/* Navigation */}
             <div className="flex flex-col md:flex-row mb-5 border-b gap-2 md:gap-0 items-start md:items-center pb-3 ">
               <div className="flex flex-wrap gap-2">
@@ -166,7 +164,6 @@ export default function HealthInsightsPage() {
                 />
               </div>
             </div>
-
             {/* Content */}
             <div className="flex flex-col flex-1 min-h-0 overflow-hidden p-2">
               {/* Row with activities + AI */}
@@ -322,7 +319,6 @@ export default function HealthInsightsPage() {
             </div>
           </div>
         </div>
-      </div>
       </main>
     </AppLayout>
   );

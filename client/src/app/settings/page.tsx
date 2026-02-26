@@ -278,7 +278,7 @@ export default function SettingsPage() {
   return (
     <AppLayout>
       {/* Scrollable main */}
-      <main className="w-full flex justify-center h-screen overflow-y-auto">
+      <main className="w-full flex justify-center">
         <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6 p-4">
           {/* PROFILE */}
           <section className="ui-component-styles p-4 w-full space-y-2 ">
