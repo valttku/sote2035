@@ -144,7 +144,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+      <div className="grid grid-cols-4 lg:grid-cols-6 gap-2">
         <StatCard label="👟Steps" value={`${displayData.steps} / ${displayData.steps_goal}`} />
         <StatCard label="🛣 Distance" value={`${(displayData.distance_in_meters / 1000).toFixed(2)} km`} />
         <StatCard label="🪜 Floors Climbed" value={`${displayData.floors_climbed} / ${displayData.floors_climbed_goal}`} />
