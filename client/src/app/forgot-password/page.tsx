@@ -57,12 +57,17 @@ export default function ForgotPasswordPage() {
       }
 
       setDone(true);
-    } catch (err: any) {
-      setError(err.message || "Failed to contact server");
-    } finally {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+      setError(err.message);
+    } else {
+      setError("Failed to contact server")
+    }}
+    finally {
       setLoading(false);
     }
   }
+  
 
   function closeModal() {
     window.history.back();
