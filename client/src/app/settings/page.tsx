@@ -53,6 +53,9 @@ export default function SettingsPage() {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [showChangeEmail, setShowChangeEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [changingEmail, setChangingEmail] = useState(false);
 
   // Providers
   const [polarLinked, setPolarLinked] = useState(false);
@@ -201,7 +204,10 @@ export default function SettingsPage() {
       if (!res.ok) {
         const json = await res.json();
         if (res.status === 403 && json.error === "Old password incorrect") {
-          alert("Old password is incorrect");
+          alert({
+            error:
+              t.settings.old_password_incorrect || "Old password is incorrect",
+          });
           return;
         }
         // Handle other errors
@@ -231,6 +237,47 @@ export default function SettingsPage() {
       router.replace("/");
     } catch {
       alert(t.settings.failed_delete_account);
+    }
+  }
+
+  async function changeEmail() {
+    if (!newEmail) {
+      alert(t.settings.failed_change_email || "Failed to change email");
+      return;
+    }
+
+    setChangingEmail(true);
+
+    try {
+      const res = await fetch(`/api/v1/settings/email`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ newEmail }),
+      });
+
+      if (!res.ok) {
+        const json = await res.json();
+
+        // Handle email already taken
+        if (res.status === 409) {
+          alert(t.settings.email_taken || "Email is already in use");
+          return;
+        }
+
+        // Other errors
+        alert(json.error || t.settings.failed_connect_server);
+        return;
+      }
+
+      const updatedUser = await res.json();
+      setData(updatedUser);
+      setShowChangeEmail(false);
+      alert(t.settings.success_change_email || "Email changed successfully.");
+    } catch (err) {
+      alert(t.settings.failed_connect_server);
+    } finally {
+      setChangingEmail(false);
     }
   }
 
@@ -279,14 +326,14 @@ export default function SettingsPage() {
     <AppLayout>
       {/* Scrollable main */}
       <main className="w-full flex justify-center">
-        <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6 p-4">
+        <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6 min-h-0 overflow-hidden">
           {/* PROFILE */}
-          <section className="ui-component-styles p-4 w-full space-y-2 ">
+          <section className="ui-component-styles backdrop-blur-lg p-4 w-full space-y-2">
             <h2 className="text-2xl font-semibold">
               {t.settings.profile_section_title}
             </h2>
 
-            <div className="flex flex-row justify-between gap-4">
+            <div className="flex flex-col md:flex-row justify-between gap-4">
               <div className="flex flex-col gap-2">
                 <p>
                   {t.settings.email_label}: {data.email}
@@ -324,6 +371,14 @@ export default function SettingsPage() {
                 >
                   {t.settings.edit_profile}
                 </button>
+
+                <button
+                  onClick={() => setShowChangeEmail(true)}
+                  className="button-style-blue min-w-[120px]"
+                >
+                  {t.settings.change_email}
+                </button>
+
                 <button
                   onClick={() => setShowChangePassword(true)}
                   className="button-style-blue min-w-[120px]"
@@ -335,7 +390,7 @@ export default function SettingsPage() {
           </section>
 
           {/* PROVIDERS */}
-          <section className="ui-component-styles p-4">
+          <section className="ui-component-styles backdrop-blur-lg p-4">
             <h2 className="text-2xl font-semibold mb-2">
               {t.settings.profileAccount}
             </h2>
@@ -403,7 +458,7 @@ export default function SettingsPage() {
           </section>
 
           {/* ACCOUNT */}
-          <section className="ui-component-styles p-4 w-full">
+          <section className="ui-component-styles backdrop-blur-lg p-4 w-full">
             <h2 className="text-2xl font-semibold mb-2">
               {t.settings.providerAccountManagement}
             </h2>
@@ -501,7 +556,7 @@ export default function SettingsPage() {
               />
               <button
                 onClick={() => setShowOldPassword(!showOldPassword)}
-                className="absolute right-2 top-2"
+                className="absolute right-2 top-1/2 -translate-y-1/2"
               >
                 <FaEyeSlash />
               </button>
@@ -517,7 +572,7 @@ export default function SettingsPage() {
               />
               <button
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-2 top-2"
+                className="absolute right-2 top-1/2 -translate-y-1/2"
               >
                 <FaEye />
               </button>
@@ -556,6 +611,29 @@ export default function SettingsPage() {
               {changingPassword
                 ? t.settings.changing
                 : t.settings.change_password}
+            </button>
+          </GlobalModal>
+        )}
+
+        {/* CHANGE EMAIL MODAL */}
+        {showChangeEmail && (
+          <GlobalModal onClose={() => setShowChangeEmail(false)}>
+            <h2 className="text-lg font-bold mb-4 text-center">
+              {t.settings.change_email}
+            </h2>
+            <input
+              type="email"
+              className="block w-full mb-4"
+              placeholder={t.settings.new_email_placeholder}
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+            />
+            <button
+              onClick={changeEmail}
+              disabled={changingEmail || !newEmail.includes("@")}
+              className="button-style-blue w-full"
+            >
+              {changingEmail ? t.settings.changing : t.settings.change_email}
             </button>
           </GlobalModal>
         )}

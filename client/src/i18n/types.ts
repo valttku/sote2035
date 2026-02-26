@@ -67,6 +67,11 @@ export type SettingsTranslations = {
   strong_password: string;
   weak_password_alert: string;
   old_password_incorrect: string;
+  change_email: string;
+  new_email_placeholder: string;
+  failed_change_email: string;
+  success_change_email: string;
+  email_taken: string;
 };
 
 // Startup page

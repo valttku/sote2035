@@ -80,7 +80,12 @@
     "medium_password": "Medium",
     "strong_password": "Strong",
     "weak_password_alert": "Password does not meet requirements",
-    "old_password_incorrect": "Old password is incorrect"
+    "old_password_incorrect": "Old password is incorrect",
+    "change_email": "Change Email",
+    "new_email_placeholder": "Enter new email",
+    "failed_change_email": "Failed to change email",
+    "success_change_email": "Email changed successfully.",
+    "email_taken": "Email is already taken."
   },
 
   "startup": {

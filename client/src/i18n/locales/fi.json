@@ -77,7 +77,12 @@
     "medium_password": "Keskivahva",
     "strong_password": "Vahva",
     "weak_password_alert": "Salasana ei täytä vaatimuksia",
-    "old_password_incorrect": "Vanha salasana on virheellinen"
+    "old_password_incorrect": "Vanha salasana on virheellinen",
+    "change_email": "Vaihda sähköpostiosoite",
+    "new_email_placeholder": "Anna uusi sähköpostiosoite",
+    "failed_change_email": "Sähköpostiosoitteen vaihtaminen epäonnistui.",
+    "success_change_email": "Sähköpostiosoite vaihdettu onnistuneesti.",
+    "email_taken": "Sähköpostiosoite on jo käytössä."
   },
   "startup": {
     "patient": "Potilas",
