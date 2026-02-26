@@ -42,6 +42,7 @@
     "gender_label": "Gender",
     "height_label": "Height",
     "weight_label": "Weight",
+    "birthday_label": "Birthday",
     "edit_profile": "Edit Profile",
     "change_password": "Change Password",
     "profileAccount": "Provider Accounts",

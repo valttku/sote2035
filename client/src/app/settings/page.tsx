@@ -14,6 +14,7 @@ type SettingsData = {
   gender: string | null;
   height: number | null;
   weight: number | null;
+  birthday: string | null;
   created_at: string;
   updated_at: string;
   last_login: string | null;
@@ -34,6 +35,7 @@ export default function SettingsPage() {
   const [gender, setGender] = useState<string | null>(null);
   const [height, setHeight] = useState<number | null>(null);
   const [weight, setWeight] = useState<number | null>(null);
+  const [birthday, setBirthday] = useState<string | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -86,6 +88,11 @@ export default function SettingsPage() {
         setGender(json.gender);
         setHeight(json.height);
         setWeight(json.weight);
+        setBirthday(
+          json.birthday
+            ? new Date(json.birthday).toISOString().split("T")[0]
+            : null,
+        );
         setPolarLinked(json.polarLinked ?? false);
         setGarminLinked(json.garminLinked ?? false);
       } catch {
@@ -95,20 +102,64 @@ export default function SettingsPage() {
     loadSettings();
   }, [t]);
 
+  // ---------------- HELPERS ----------------
+  function normalizeDate(date: string | null) {
+    if (!date) return null;
+    return new Date(date).toISOString().split("T")[0];
+  }
+
+  // Calculate age from birthday for display purposes
+  function calculateAge(birthday: string | null) {
+    if (!birthday) return null;
+
+    const birthDate = new Date(birthday);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+
+    // If birthday hasn't occurred yet this year, subtract 1
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age;
+  }
+
   // ---------------- ACTIONS ----------------
   async function saveProfile() {
+    if (!data) return;
+
     setSavingProfile(true);
+
     try {
+      const updates: any = {};
+
+      if (displayName !== data.display_name) updates.displayName = displayName;
+      if (gender !== data.gender) updates.gender = gender;
+      if (height !== data.height) updates.height = height;
+      if (weight !== data.weight) updates.weight = weight;
+      if (normalizeDate(birthday) !== normalizeDate(data.birthday))
+        updates.birthday = birthday;
+
+      // If nothing changed, exit early
+      if (Object.keys(updates).length === 0) {
+        setShowEditProfile(false);
+        return;
+      }
+
       const res = await fetch(`/api/v1/settings/profile`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ displayName, gender, height, weight }),
+        body: JSON.stringify(updates),
       });
+
       if (!res.ok) throw new Error();
 
-      if (data)
-        setData({ ...data, display_name: displayName, gender, height, weight });
+      const updatedUser = await res.json();
+      setData(updatedUser);
 
       setShowEditProfile(false);
     } catch {
@@ -216,20 +267,32 @@ export default function SettingsPage() {
 
             <div className="flex flex-row justify-between gap-4">
               <div className="flex flex-col gap-2">
-                <p >
+                <p>
                   {t.settings.email_label}: {data.email}
                 </p>
                 <p>
                   {t.settings.username_label}: {data.display_name ?? "-"}
                 </p>
                 <p>
-                  {t.settings.gender_label}: {data.gender ?? "-"}
+                  {t.settings.gender_label}:{" "}
+                  {data.gender === "male"
+                    ? t.settings.male
+                    : data.gender === "female"
+                      ? t.settings.female
+                      : data.gender || "-"}
                 </p>
                 <p>
                   {t.settings.height_label}: {data.height ?? "-"} cm
                 </p>
                 <p>
                   {t.settings.weight_label}: {data.weight ?? "-"} kg
+                </p>
+                <p>
+                  {t.settings.birthday_label}:{" "}
+                  {data.birthday
+                    ? new Date(data.birthday).toLocaleDateString()
+                    : "-"}
+                  {data.birthday && ` (${calculateAge(data.birthday)})`}
                 </p>
               </div>
 
@@ -339,6 +402,7 @@ export default function SettingsPage() {
               {t.settings.edit_profile}
             </h2>
 
+            <label>{t.settings.username_label}</label>
             <input
               type="text"
               className="block w-full mb-3"
@@ -347,6 +411,7 @@ export default function SettingsPage() {
               onChange={(e) => setDisplayName(e.target.value)}
             />
 
+            <label>{t.settings.weight_label}</label>
             <input
               type="number"
               className="block w-full mb-3"
@@ -357,6 +422,7 @@ export default function SettingsPage() {
               }
             />
 
+            <label>{t.settings.height_label}</label>
             <input
               type="number"
               className="block w-full mb-3"
@@ -367,6 +433,7 @@ export default function SettingsPage() {
               }
             />
 
+            <label>{t.settings.gender_label}</label>
             <select
               className="block w-full mb-3"
               value={gender ?? ""}
@@ -376,6 +443,16 @@ export default function SettingsPage() {
               <option value="male">{t.settings.male}</option>
               <option value="female">{t.settings.female}</option>
             </select>
+
+            <label>{t.settings.birthday_label}</label>
+            <input
+              type="date"
+              className="block w-full mb-3"
+              value={
+                birthday ? new Date(birthday).toISOString().split("T")[0] : ""
+              }
+              onChange={(e) => setBirthday(e.target.value || null)}
+            />
 
             <button
               onClick={saveProfile}

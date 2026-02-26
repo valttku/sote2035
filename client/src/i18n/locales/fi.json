@@ -39,6 +39,7 @@
     "gender_label": "Sukupuoli",
     "height_label": "Pituus",
     "weight_label": "Paino",
+    "birthday_label": "Syntymäaika",
     "edit_profile": "Muokkaa profiilia",
     "change_password": "Vaihda salasana",
     "profileAccount": "Palveluntarjoajan tilit",
