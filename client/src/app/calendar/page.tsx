@@ -158,6 +158,7 @@ export default function CalendarPage() {
   // ----------------- Render -----------------
   return (
     <AppLayout>
+      <main className=" w-full flex justify-center h-screen overflow-y-auto">
       <div className="w-full flex justify-center">
         <div className="p-6 mx-auto w-full max-w-5xl space-y-6 ui-component-styles flex-1 overflow-auto">
           <h1 className="text-4xl">{t.calendar.title}</h1>
@@ -277,6 +278,7 @@ export default function CalendarPage() {
           {loading && <p className="text-sm opacity-70">{t.calendar.loading}...</p>}
         </div>
       </div>
+      </main>
     </AppLayout>
   );
 }

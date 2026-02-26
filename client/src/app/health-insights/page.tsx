@@ -121,6 +121,7 @@ export default function HealthInsightsPage() {
 
   return (
     <AppLayout>
+     <main className=" w-full flex justify-center h-screen overflow-y-auto">
       <div className="w-full flex justify-center">
         <div className="ui-component-styles p-6 w-full max-w-5xl space-y-6 mx-auto flex flex-col flex-1">
           <h1 className="text-4xl">{t.healthInsights.title}</h1>
@@ -288,6 +289,7 @@ export default function HealthInsightsPage() {
           </div>
         </div>
       </div>
+      </main>
     </AppLayout>
   );
 }

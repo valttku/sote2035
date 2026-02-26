@@ -73,7 +73,7 @@ export default function StartUpPage() {
   };
 
   return (
-    <main className="main-page">
+    <main className="main-page ">
       <AppLogo />
       <LanguageSelector className="absolute right-6 top-4 z-50" />
 

@@ -92,6 +92,7 @@ export default function Home() {
 
   return (
     <AppLayout>
+      <main className=" w-full flex justify-center h-screen overflow-y-auto">
       <div className="w-full flex justify-center">
         <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
           <h1 className="text-5xl text-left">{t.home.title}</h1>
@@ -165,6 +166,7 @@ export default function Home() {
         open={showAIWindow}
         onClose={() => setShowAIWindow(false)}
       />
+      </main>
     </AppLayout>
   );
 }
