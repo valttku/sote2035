@@ -28,6 +28,7 @@ export type SettingsTranslations = {
   gender_label: string;
   height_label: string;
   weight_label: string;
+  birthday_label: string;
   edit_profile: string;
   change_password: string;
   profileAccount: string;
@@ -65,6 +66,7 @@ export type SettingsTranslations = {
   medium_password: string;
   strong_password: string;
   weak_password_alert: string;
+  old_password_incorrect: string;
 };
 
 // Startup page
