@@ -35,13 +35,16 @@ function StatusBadge({
     undefined: "bg-gray-200/20 text-gray-200",
   };
 
+  // Show "No status" for undefined
+  const displayText = status === "undefined" ? "no_status" : status;
+
   return (
     <span
       className={`px-2 py-0.5 text-xs rounded-full cursor-pointer ${
         styles[status ?? "undefined"]
       }`}
     >
-      {status}
+      {displayText}
     </span>
   );
 }
@@ -171,7 +174,7 @@ export default function HealthStatsPanel({
   }, [selected, selectedDate]);
 
   return (
-    <div className="panel-animation ui-component-styles p-4 pt-2">
+    <div className="panel-animation ui-component-styles backdrop-blur-3xl p-4 pt-2">
       {/* Header with close button */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">

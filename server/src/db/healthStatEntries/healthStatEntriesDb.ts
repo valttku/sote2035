@@ -2,6 +2,7 @@ import { db } from "../db.js";
 import { extractHealthMetrics } from "./extractHealthMetrics.js";
 
 export type MetricStatus = "low" | "good" | "high" | undefined;
+
 type MetricGoal = { min?: number; max?: number };
 
 type MetricObject = {
@@ -14,6 +15,7 @@ type MetricObject = {
     formatted: string;
   };
 };
+
 export type HealthData = Record<string, number | MetricObject>;
 
 // Helper to parse numeric values from the formatted metrics.
@@ -24,6 +26,33 @@ function parseNumeric(value: string | number): number | null {
     if (!isNaN(num)) return num;
   }
   return null;
+}
+
+// Define expected metrics per body part to ensure consistent UI display, even if some are missing from API response
+const placeholderMetricsByPart: Record<
+  "heart" | "brain" | "legs" | "lungs",
+  string[]
+> = {
+  heart: ["Resting heart rate", "Overnight average HRV"],
+  brain: ["Total sleep", "Average stress"],
+  legs: [
+    "Steps",
+    "Distance",
+    "Intense exercise today",
+    "Intense exercise this week",
+    "Floors climbed",
+  ],
+  lungs: ["Average respiratory rate"],
+};
+
+function createPlaceholderMetric(): MetricObject {
+  return {
+    rawValue: 0,
+    value: "—",
+    goal: undefined,
+    status: undefined,
+    avg7: undefined,
+  };
 }
 
 // Main function: fetch today's health stat entries for the specified user and part (heart, brain, legs, lungs),
@@ -51,6 +80,15 @@ export async function getHealthStatEntriesData(
        AND kind = ANY($3::text[])`,
     [userId, date, kinds],
   );
+
+  // If no data exists for today, return placeholders for expected metrics to ensure consistent UI display
+  if (todayRows.length === 0) {
+    const placeholders: HealthData = {};
+    for (const key of placeholderMetricsByPart[part]) {
+      placeholders[key] = createPlaceholderMetric();
+    }
+    return placeholders;
+  }
 
   // Fetch last 7 days for historical comparison
   const { rows: historyRows } = await db.query(
@@ -105,9 +143,11 @@ export async function getHealthStatEntriesData(
       // numeric range used to derive the `status` (low/good/high).
       let status: MetricStatus | undefined;
       let goal: MetricGoal | undefined;
+      let valueForGoal = numericValue;
 
       // Activity goals: if minimum goal is achieved, status = good, otherwise low
       // goals are defined from the user's Garmin data when available.
+
       if (row.kind === "activity_daily") {
         if (key === "Steps" && row.data.steps_goal != null) {
           const min = row.data.steps_goal;
@@ -125,9 +165,10 @@ export async function getHealthStatEntriesData(
           key === "Intense exercise this week" &&
           row.data.intensity_duration_goal_in_seconds != null
         ) {
-          const min = row.data.intensity_duration_goal_in_seconds / 60;
-          goal = { min };
-          status = numericValue >= min ? "good" : "low";
+          const minSeconds = row.data.intensity_duration_goal_in_seconds;
+          const goalInMinutes = Math.round(minSeconds / 60);
+          goal = { min: goalInMinutes };
+          valueForGoal = Math.round(numericValue / 60);
         }
       }
 
@@ -200,7 +241,6 @@ export async function getHealthStatEntriesData(
       }
 
       // Convert numericValue to hours for comparison (numericValue is in seconds)
-      let valueForGoal = numericValue;
       if (row.kind === "sleep_daily" && key === "Total sleep") {
         valueForGoal = numericValue / 3600; // seconds → hours
       }

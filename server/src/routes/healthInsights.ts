@@ -22,13 +22,6 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
         .json({ error: "Invalid date format. Use YYYY-MM-DD" });
     }
 
-    // Fetch body composition data
-    //const bodyCompResult = await db.query(
-    //  `SELECT * FROM app.user_body_composition_garmin
-    //   WHERE user_id = $1 AND day_date = $2::date`,
-    //  [userId, date],
-    //);
-
     console.log(`[health-insights] user=${userId} date=${date}`);
 
     // Fetch profile and metrics in parallel
@@ -84,29 +77,35 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     // Fetch data from dailies table
     const dailiesResult = await db.query(
       `SELECT id, user_id, day_date, active_kilocalories, 
-          bmr_kilocalories, steps, distance_in_meters,  
-          floors_climbed, avg_heart_rate, resting_heart_rate, 
-          max_heart_rate, avg_stress_level, steps_goal,
-          body_battery_charged, body_battery_drained,
-          moderate_intensity_duration_in_seconds, 
-          vigorous_intensity_duration_in_seconds,
-          intensity_duration_goal_in_seconds,
-          -- weekly total (seconds), weighting vigorous = 2x
-          (
-            SELECT COALESCE(SUM(moderate_intensity_duration_in_seconds + (vigorous_intensity_duration_in_seconds * 2)), 0)::int
-            FROM app.user_dailies_garmin
-            WHERE user_id = $1
-              AND day_date >= date_trunc('week', $2::date)::date
-              AND day_date <= $2::date
-          ) AS weekly_intensity_total_seconds,
-          floors_climbed_goal, source, created_at, updated_at
-        FROM app.user_dailies_garmin 
-        WHERE user_id = $1 AND day_date = $2::date`,
+            bmr_kilocalories, steps, distance_in_meters,  
+            floors_climbed, avg_heart_rate, resting_heart_rate, 
+            max_heart_rate, avg_stress_level, steps_goal,
+            body_battery_charged, body_battery_drained,
+            moderate_intensity_duration_in_seconds, 
+            vigorous_intensity_duration_in_seconds,
+            intensity_duration_goal_in_seconds,
+            heart_rate_samples,
+            -- weekly total (seconds), weighting vigorous = 2x
+            (
+              SELECT COALESCE(SUM(moderate_intensity_duration_in_seconds + (vigorous_intensity_duration_in_seconds * 2)), 0)::int
+              FROM app.user_dailies_garmin
+              WHERE user_id = $1
+                AND day_date >= date_trunc('week', $2::date)::date
+                AND day_date <= $2::date
+            ) AS weekly_intensity_total_seconds,
+            floors_climbed_goal, source, created_at, updated_at
+          FROM app.user_dailies_garmin 
+          WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],
     );
+    // After fetching dailies
+    const dailiesWithoutHR = dailiesResult.rows.map(
+      ({ heart_rate_samples, ...rest }) => rest,
+    );
+
     console.log(
-      `[health-insights] Dailies data fetched (without heart_rate_samples):`,
-      dailiesResult.rows,
+      "[health-insights] Dailies without heart_rate_samples:",
+      dailiesWithoutHR,
     );
 
     // Fetch stress data separately from dailies table
@@ -145,7 +144,9 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
         deep_sleep_in_seconds,
         light_sleep_in_seconds,
         rem_sleep_in_seconds,
-        awake_duration_in_seconds
+        awake_duration_in_seconds,
+        sleep_levels_map,
+        overall_sleep_score
       FROM app.user_sleeps_garmin
       WHERE user_id = $1 AND day_date = $2::date`,
       [userId, date],

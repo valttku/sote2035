@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import AppLayout from "../../components/AppLayout";
-import Modal from "../../components/Modal";
+import GlobalModal from "../../components/GlobalModal";
 import { useTranslation } from "../../i18n/LanguageProvider";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -60,16 +60,18 @@ export default function SettingsPage() {
 
   const strengthScore = useMemo(
     () => PASSWORD_REQUIREMENTS.filter((r) => r.regex.test(newPassword)).length,
-    [newPassword]
+    [newPassword],
   );
 
   const getStrengthColor = (score: number) =>
     score <= 2 ? "bg-red-500" : score <= 4 ? "bg-amber-500" : "bg-emerald-500";
 
   const getStrengthText = (score: number) =>
-    score <= 2 ? t.settings.weak_password || "Weak" :
-    score <= 4 ? t.settings.medium_password || "Medium" :
-    t.settings.strong_password || "Strong";
+    score <= 2
+      ? t.settings.weak_password || "Weak"
+      : score <= 4
+        ? t.settings.medium_password || "Medium"
+        : t.settings.strong_password || "Strong";
 
   // ---------------- EFFECTS ----------------
   useEffect(() => {
@@ -123,7 +125,7 @@ export default function SettingsPage() {
     // Prevent weak password submission
     if (strengthScore < 5)
       return alert(
-        t.settings.weak_password_alert || "Password does not meet requirements"
+        t.settings.weak_password_alert || "Password does not meet requirements",
       );
 
     setChangingPassword(true);
@@ -206,92 +208,191 @@ export default function SettingsPage() {
       {/* Scrollable main */}
       <main className="w-full flex justify-center h-screen overflow-y-auto">
         <div className="flex flex-col w-full max-w-5xl mx-auto flex-1 space-y-6 p-4">
-
           {/* PROFILE */}
-          <section className="ui-component-styles p-4 w-full space-y-2">
-            <h2 className="text-xl font-semibold">{t.settings.profile_section_title}</h2>
-            <p>{t.settings.email_label}: {data.email}</p>
-            <p>{t.settings.username_label}: {data.display_name ?? "-"}</p>
-            <p>{t.settings.gender_label}: {data.gender ?? "-"}</p>
-            <p>{t.settings.height_label}: {data.height ?? "-"} cm</p>
-            <p>{t.settings.weight_label}: {data.weight ?? "-"} kg</p>
+          <section className="ui-component-styles p-4 w-full space-y-2 ">
+            <h2 className="text-2xl font-semibold">
+              {t.settings.profile_section_title}
+            </h2>
 
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => setShowEditProfile(true)}
-                className="button-style-blue min-w-[120px]"
-              >
-                {t.settings.edit_profile}
-              </button>
-              <button
-                onClick={() => setShowChangePassword(true)}
-                className="button-style-blue min-w-[120px]"
-              >
-                {t.settings.change_password}
-              </button>
+            <div className="flex flex-row justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <p >
+                  {t.settings.email_label}: {data.email}
+                </p>
+                <p>
+                  {t.settings.username_label}: {data.display_name ?? "-"}
+                </p>
+                <p>
+                  {t.settings.gender_label}: {data.gender ?? "-"}
+                </p>
+                <p>
+                  {t.settings.height_label}: {data.height ?? "-"} cm
+                </p>
+                <p>
+                  {t.settings.weight_label}: {data.weight ?? "-"} kg
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 pt-2">
+                <button
+                  onClick={() => setShowEditProfile(true)}
+                  className="button-style-blue min-w-[120px]"
+                >
+                  {t.settings.edit_profile}
+                </button>
+                <button
+                  onClick={() => setShowChangePassword(true)}
+                  className="button-style-blue min-w-[120px]"
+                >
+                  {t.settings.change_password}
+                </button>
+              </div>
             </div>
           </section>
 
           {/* PROVIDERS */}
-          <section className="ui-component-styles p-4 w-full space-y-3">
-            <h2 className="text-xl font-semibold">{t.settings.profileAccount}</h2>
+          <section className="ui-component-styles p-4">
+            <h2 className="text-2xl font-semibold mb-2">
+              {t.settings.profileAccount}
+            </h2>
 
-            {/* Polar */}
-            <div className="flex justify-between items-center">
-              <p>Polar</p>
-              {polarLinked ? (
-                <button
-                  onClick={unlinkPolar}
-                  disabled={polarBusy}
-                  className="button-style-blue min-w-[120px]"
-                >
-                  {polarBusy ? t.settings.unlinking : t.settings.unlink_polar}
-                </button>
-              ) : (
-                <button
-                  onClick={linkPolar}
-                  className="button-style-blue min-w-[120px]"
-                >
-                  {t.settings.link_polar}
-                </button>
-              )}
-            </div>
+            <div className="flex flex-col justify-start gap-4">
+              <div>
+                {garminLinked && (
+                  <span>{t.settings.active_provider}Garmin</span>
+                )}
+                {polarLinked && <span>{t.settings.active_provider}Polar</span>}
+              </div>
 
-            {/* Garmin */}
-            <div className="flex justify-between items-center">
-              <p>Garmin</p>
-              {garminLinked ? (
-                <button
-                  onClick={unlinkGarmin}
-                  disabled={garminBusy}
-                  className="button-style-blue min-w-[120px]"
-                >
-                  {garminBusy ? t.settings.unlinking : t.settings.unlink_garmin}
-                </button>
-              ) : (
-                <button
-                  onClick={linkGarmin}
-                  className="button-style-blue min-w-[120px]"
-                >
-                  {t.settings.link_garmin}
-                </button>
-              )}
+              <div className="flex gap-4 w-full">
+                {/* Polar */}
+                <div className="flex-1">
+                  {polarLinked ? (
+                    <button
+                      onClick={unlinkPolar}
+                      disabled={polarBusy}
+                      className={`button-style-blue w-full ${polarBusy ? "button-style-blue_disabled" : ""}`}
+                    >
+                      {polarBusy
+                        ? t.settings.unlinking
+                        : t.settings.unlink_polar}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={linkPolar}
+                      disabled={garminLinked}
+                      className={`button-style-blue w-full ${garminLinked ? "button-style-blue_disabled" : ""}`}
+                    >
+                      {garminLinked
+                        ? t.settings.linkPolarDisabled
+                        : t.settings.link_polar}
+                    </button>
+                  )}
+                </div>
+
+                {/* Garmin */}
+                <div className="flex-1">
+                  {garminLinked ? (
+                    <button
+                      onClick={unlinkGarmin}
+                      disabled={garminBusy}
+                      className="button-style-blue w-full"
+                    >
+                      {garminBusy
+                        ? t.settings.unlinking
+                        : t.settings.unlink_garmin}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={linkGarmin}
+                      disabled={polarLinked}
+                      className="button-style-blue w-full"
+                    >
+                      {polarLinked
+                        ? t.settings.linkGarminDisabled
+                        : t.settings.link_garmin}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </section>
 
           {/* ACCOUNT */}
           <section className="ui-component-styles p-4 w-full">
-            <h2 className="text-xl font-semibold mb-2">{t.settings.providerAccountManagement}</h2>
-            <button onClick={deleteAccount} className="cancel-button-style w-full">
+            <h2 className="text-2xl font-semibold mb-2">
+              {t.settings.providerAccountManagement}
+            </h2>
+            <button
+              onClick={deleteAccount}
+              className="cancel-button-style w-full"
+            >
               {t.settings.delete_account}
             </button>
           </section>
         </div>
 
+        {/* EDIT PROFILE MODAL */}
+        {showEditProfile && (
+          <GlobalModal onClose={() => setShowEditProfile(false)}>
+            <h2 className="text-lg font-bold mb-4 text-center">
+              {t.settings.edit_profile}
+            </h2>
+
+            <input
+              type="text"
+              className="block w-full mb-3"
+              placeholder={t.settings.username_label}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+
+            <input
+              type="number"
+              className="block w-full mb-3"
+              placeholder={t.settings.weight_label}
+              value={weight ?? ""}
+              onChange={(e) =>
+                setWeight(e.target.value === "" ? null : Number(e.target.value))
+              }
+            />
+
+            <input
+              type="number"
+              className="block w-full mb-3"
+              placeholder={t.settings.height_label}
+              value={height ?? ""}
+              onChange={(e) =>
+                setHeight(e.target.value === "" ? null : Number(e.target.value))
+              }
+            />
+
+            <select
+              className="block w-full mb-3"
+              value={gender ?? ""}
+              onChange={(e) => setGender(e.target.value || null)}
+            >
+              <option value="">{t.settings.select_gender}</option>
+              <option value="male">{t.settings.male}</option>
+              <option value="female">{t.settings.female}</option>
+            </select>
+
+            <button
+              onClick={saveProfile}
+              disabled={savingProfile}
+              className="button-style-blue w-full"
+            >
+              {savingProfile ? t.settings.saving : t.settings.edit_profile}
+            </button>
+          </GlobalModal>
+        )}
+
         {/* PASSWORD MODAL */}
         {showChangePassword && (
-          <Modal onClose={() => setShowChangePassword(false)}>
-            <h2 className="text-lg font-bold mb-4 text-center">{t.settings.change_password}</h2>
+          <GlobalModal onClose={() => setShowChangePassword(false)}>
+            <h2 className="text-lg font-bold mb-4 text-center">
+              {t.settings.change_password}
+            </h2>
 
             <div className="relative mb-2">
               <input
@@ -340,7 +441,7 @@ export default function SettingsPage() {
                 return (
                   <li
                     key={i}
-                    className={`text-sm flex items-center gap-2 ${passed ? "text-green-500" : "text-red-400"}`}
+                    className={`text-sm flex items-center gap-2 ${passed ? "text-green-500 line-through" : "text-red-400 text-shadow-lg"}`}
                   >
                     {passed ? "✓" : "✕"} {req.text}
                   </li>
@@ -355,9 +456,11 @@ export default function SettingsPage() {
               disabled={changingPassword}
               className="button-style-blue w-full"
             >
-              {changingPassword ? t.settings.changing : t.settings.change_password}
+              {changingPassword
+                ? t.settings.changing
+                : t.settings.change_password}
             </button>
-          </Modal>
+          </GlobalModal>
         )}
       </main>
     </AppLayout>

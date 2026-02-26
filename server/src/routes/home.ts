@@ -51,7 +51,12 @@ homeRouter.get("/", authRequired, async (req, res) => {
 
       // Build alerts object: true if any metric for the part is 'low' or 'high'
       const alerts: Record<string, boolean> = {};
-      const outOfRangeDetails: Array<{ part: string; metric: string; status: string; value: any }> = [];
+      const outOfRangeDetails: Array<{
+        part: string;
+        metric: string;
+        status: string;
+        value: any;
+      }> = [];
       for (let i = 0; i < parts.length; i++) {
         const metrics = metricsByPart[i] ?? {};
         alerts[parts[i]] = false;
@@ -77,19 +82,40 @@ homeRouter.get("/", authRequired, async (req, res) => {
       console.log("[home route] alerts:", alerts);
       console.log("[home route] outOfRangeDetails:", outOfRangeDetails);
 
-      // Build prompt for OpenAI
-      let prompt = `You are a health assistant. Here are the user's health alerts for ${date}:\n`;
-      if (outOfRangeDetails.length > 0) {
-        prompt += `The following metrics are out of range:\n`;
-        for (const detail of outOfRangeDetails) {
-          prompt += `- ${detail.part}: ${detail.metric} is ${detail.status} (${detail.value})\n`;
-        }
-        prompt += `\nGive specific advice for each out-of-range metric, and explain why it matters. Keep your advice concise and actionable.\n`;
-      } else {
-        prompt += `All metrics are within healthy ranges. Congratulate the user and encourage them to keep up the good work!`;
-      }
-      const aiMessage = await getAICompletion(prompt);
+      // If there the data exists and at least one metric is out of range, generate AI message
+      // Check if there is any metric data
+      const hasAnyData = metricsByPart.some(
+        (metrics) => metrics && Object.keys(metrics).length > 0,
+      );
 
+      // Check if at least one metric has a defined status (low or high)
+      const hasDefinedStatus = metricsByPart.some((metrics) =>
+        Object.values(metrics).some(
+          (value) =>
+            typeof value === "object" &&
+            value != null &&
+            "status" in value &&
+            (value.status === "low" || value.status === "high"),
+        ),
+      );
+
+      // Generate AI message only if there is data with meaningful statuses
+      let aiMessage = "";
+      if (hasAnyData && hasDefinedStatus) {
+        let prompt = `You are a health assistant. Here are the user's health alerts for ${date}:\n`;
+        if (outOfRangeDetails.length > 0) {
+          prompt += `The following metrics are out of range:\n`;
+          for (const detail of outOfRangeDetails) {
+            prompt += `- ${detail.part}: ${detail.metric} is ${detail.status} (${detail.value})\n`;
+          }
+          prompt += `\nGive specific advice for each out-of-range metric, and explain why it matters. Keep your advice concise and actionable.\n`;
+        } else {
+          prompt += `All metrics are within healthy ranges. Congratulate the user and encourage them to keep up the good work!`;
+        }
+        aiMessage = await getAICompletion(prompt);
+      } else {
+        aiMessage = ""; // no message if all statuses undefined or no data
+      }
       // Respond with alerts, user gender, and AI message
       return res.json({ alerts, user: { gender }, aiMessage });
     }

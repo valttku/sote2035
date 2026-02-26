@@ -1,19 +1,18 @@
 "use client";
-import Modal from "@/components/Modal";
+import GlobalModal from "@/components/GlobalModal";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useMemo, useRef, useState, Suspense } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
+// Password requirements
+const PASSWORD_REQUIREMENTS = [
+  { regex: /.{8,}/, text: "At least 8 characters" },
+  { regex: /[0-9]/, text: "At least 1 number" },
+  { regex: /[a-z]/, text: "At least 1 lowercase letter" },
+  { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+  { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
+];
 
- // Password requirements
-  const PASSWORD_REQUIREMENTS = [
-    { regex: /.{8,}/, text: "At least 8 characters" },
-    { regex: /[0-9]/, text: "At least 1 number" },
-    { regex: /[a-z]/, text: "At least 1 lowercase letter" },
-    { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
-    { regex: /[^A-Za-z0-9]/, text: "At least 1 special character" },
-  ];
-  
 function ResetPasswordForm() {
   const params = useSearchParams();
   const token = params.get("token");
@@ -28,8 +27,6 @@ function ResetPasswordForm() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
-
- 
 
   // Calculate strength score
   const strengthScore = useMemo(() => {
@@ -111,7 +108,7 @@ function ResetPasswordForm() {
 
   return (
     <main className="flex items-center justify-center min-h-screen">
-      <Modal onClose={closeModal}>
+      <GlobalModal onClose={closeModal}>
         <h1 className="text-2xl text-center mb-4">Reset password</h1>
 
         <form onSubmit={handleSubmit} className="space-y-2">
@@ -161,7 +158,7 @@ function ResetPasswordForm() {
             {PASSWORD_REQUIREMENTS.map((req) => (
               <li
                 key={req.text}
-                className={`text-sm flex items-center gap-2 ${req.regex.test(password) ? "text-green-600" : "text-red-500"}`}
+                className={`text-sm flex items-center gap-2 ${req.regex.test(password) ? "text-green-600 line-through" : "text-red-500"}`}
               >
                 {req.text}
                 {req.regex.test(password) ? "✓" : "✕"}
@@ -199,7 +196,7 @@ function ResetPasswordForm() {
             {loading ? "Resetting..." : "Reset password"}
           </button>
         </form>
-      </Modal>
+      </GlobalModal>
     </main>
   );
 }

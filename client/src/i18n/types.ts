@@ -37,6 +37,9 @@ export type SettingsTranslations = {
   link_garmin: string;
   unlink_garmin: string;
   unlink_garmin_confirm: string;
+  active_provider: string;
+  linkPolarDisabled: string;
+  linkGarminDisabled: string;
   providerAccountManagement: string;
   delete_account: string;
   delete_account_confirm: string;
@@ -188,17 +191,7 @@ export type HealthInsightsTranslations = {
   analyzeAll: string;
   analyzeSection: string;
   failedInsights: string;
-  noDailies: string;
-  sleepComingSoon: string;
-  stressComingSoon: string;
-  cardioComingSoon: string;
-  noProfileData: string;
-  noActivitiesForDate: string;
-  noSleepData: string;
-  noStressData: string;
-  noCardioData: string;
-  noRespirationData: string;
-  noHRVData: string;
+  noData: string;
 };
 
 //home

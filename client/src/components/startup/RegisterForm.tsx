@@ -199,7 +199,7 @@ export default function RegisterForm({
               <li
                 key={req.text}
                 className={`text-sm flex items-center gap-2 ${
-                  req.regex.test(password) ? "text-green-600" : "text-red-500"
+                  req.regex.test(password) ? "text-green-600 line-through" : "text-red-500"
                 }`}
               >
                 {req.text} {req.regex.test(password) ? "✓" : "✕"}

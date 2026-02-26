@@ -51,6 +51,9 @@
     "link_garmin": "Link Garmin",
     "unlink_garmin": "Unlink Garmin",
     "unlink_garmin_confirm": "Are you sure you want to unlink Garmin?",
+    "active_provider": "Active Provider: ",
+    "linkPolarDisabled": "Link Polar (Disabled)",
+    "linkGarminDisabled": "Link Garmin (Disabled)",
     "providerAccountManagement": "Account Management",
     "delete_account": "Delete Account",
     "delete_account_confirm": "Are you sure you want to delete your account?",
@@ -259,19 +262,11 @@
     "loading": "Loading health data...",
     "aiTitle": "AI Analysis",
     "aiPlaceholder": "Select data and click \"Analyze\" to get insights and suggestions from the AI.",
-    "comingSoon": "Section coming soon...",
     "analyzing": "Analyzing...",
     "clearAnalysis": "Clear Analysis",
     "analyzeAll": "Analyze all data",
     "analyzeSection": "Analyze {{section}}",
     "failedInsights": "Failed to get AI insights. Try again.",
-    "noDailies": "No daily data available for this date.",
-    "noProfileData": "No data for this user",
-    "noActivitiesForDate": "No activities for this date",
-    "noSleepData": "No sleep data for this date",
-    "noStressData": "No stress data for this date",
-    "noCardioData": "No cardiovascular data for this date",
-    "noRespirationData": "No respiration data for this date",
-    "noHRVData": "No HRV data for this date"
+    "noData": "No data for this date. This is a preview of what the stats would look like."
   }
 }
