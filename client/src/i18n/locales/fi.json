@@ -109,7 +109,7 @@
     "sending": "Lähettäminen...",
     "account_exists": "Jos tälle sähköpostille on olemassa tili, salasanan vaihtolinkki on lähetetty.",
     "gmail_only": "Salasanan nollaus on sallittu vain Gmail-tileissä",
-    "required_field": "Täytä tämä kenttä.",
+    "email_required": "Sähköpostiosoite on pakollinen.",
     "check_email": "Tarkista sähköpostisi",
     "invalid_email": "Anna kelvollinen sähköpostiosoite."
   },
