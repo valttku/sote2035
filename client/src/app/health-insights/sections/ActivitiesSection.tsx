@@ -129,13 +129,24 @@ export function ActivitiesSection({
       >
         <p className="pb-2">Count: {hasData ? activities!.length : 0}</p>
         {displayActivities.map((activity: Activity) => {
-          const [isExpanded, setIsExpanded] = useState(false);
+          const [expandedActivities, setExpandedActivities] = useState<
+            Set<string>
+          >(new Set());
+
+          const toggleActivity = (id: string) => {
+            setExpandedActivities((prev) => {
+              const newSet = new Set(prev);
+              if (newSet.has(id)) newSet.delete(id);
+              else newSet.add(id);
+              return newSet;
+            });
+          };
 
           return (
             <div
               key={activity.id}
               className="bg-[white]/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={() => toggleActivity(activity.id)}
             >
               {/* Title row */}
               <div className="flex justify-between items-center">
@@ -144,10 +155,13 @@ export function ActivitiesSection({
 
                   {/* Click to toggle details */}
                   <div
-                    onClick={() => setIsExpanded(!isExpanded)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevent toggle expand when clicking details
+                      toggleActivity(activity.id);
+                    }}
                     className="mt-2 text-sm text-gray-400 cursor-pointer hover:text-white"
                   >
-                    {isExpanded ? "- hide details" : "- open details"}
+                    {expandedActivities.has(activity.id) ? "- hide details" : "- open details"}
                   </div>
                 </div>
 
@@ -167,7 +181,7 @@ export function ActivitiesSection({
               </div>
 
               {/* Expanded content */}
-              {isExpanded && (
+              {expandedActivities.has(activity.id) && (
                 <div className="mt-2 text-sm text-gray-200 flex flex-wrap gap-4">
                   {Object.entries(activityFieldMap).map(
                     ([key, { label, formatter }]) => {
