@@ -91,6 +91,21 @@ export type StartupTranslations = {
   general_error: string;
 };
 
+// Forgot-passsword page
+export type ForgotPasswordTranslations = {
+  forgot_password: string;
+  send_password: string;
+  back_to_login: string;
+  email: string;
+  enter_your_email: string;
+  sending: string;
+  account_exists: string;
+  gmail_only: string;
+  required_field: string;
+  check_email: string;
+  invalid_email: string;
+};
+
 // Calendar page
 export type CalendarTranslations = {
   title: string;
@@ -288,9 +303,11 @@ export type AuthTranslations = {
 
 // Complete translation type
 export type Translations = {
+  //forgot_password: any;
   common: CommonTranslations;
   settings: SettingsTranslations;
   startup: StartupTranslations;
+  forgotPassword: ForgotPasswordTranslations;
   calendar: CalendarTranslations;
   healthInsights: HealthInsightsTranslations;
   navbar: NavbarTranslations;
