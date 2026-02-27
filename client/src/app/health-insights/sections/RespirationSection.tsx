@@ -26,8 +26,16 @@ export function RespirationSection({
         updated_at: new Date().toISOString(),
       };
 
+  // Show "No data" if value is 0 or NaN, otherwise show the value with units
+  const checkData = (value: string | number | null | undefined) =>
+    value === null || value === undefined || isNaN(Number(value))
+      ? "No data"
+      : `${Number(value).toFixed(0)} brpm`;
+
   return (
-    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!respiration ? "opacity-50" : ""}`}>
+    <div
+      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!respiration ? "opacity-50" : ""}`}
+    >
       <h1>
         <span>
           Updated at:{" "}
@@ -45,16 +53,15 @@ export function RespirationSection({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           label="🌬️Min Respiration Rate"
-          value={`${displayRespiration.min_respiration.toFixed(1)} brpm`}
-
+          value={checkData(displayRespiration.min_respiration)}
         />
         <StatCard
           label="🌬️Avg Respiration Rate"
-          value={`${displayRespiration.avg_respiration.toFixed(1)} brpm`}
+          value={checkData(displayRespiration.avg_respiration)}
         />
         <StatCard
           label="🌬️Max Respiration Rate"
-          value={`${displayRespiration.max_respiration.toFixed(1)} brpm`}
+          value={checkData(displayRespiration.max_respiration)}
         />
       </div>
     </div>

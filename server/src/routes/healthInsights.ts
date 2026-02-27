@@ -27,7 +27,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     // Fetch profile and metrics in parallel
     const [profileResult, metricsResult] = await Promise.all([
       db.query(
-        `SELECT id, gender, height, weight, updated_at
+        `SELECT id, gender, height, weight, birthday,updated_at
          FROM app.users
          WHERE id = $1`,
         [userId],
@@ -186,7 +186,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
         u.last_night_avg,
         u.last_night_5min_high,
         (
-          SELECT AVG(last_night_avg)
+          SELECT AVG((last_night_avg)::float)
           FROM app.user_hrv_garmin
           WHERE user_id = $1
             AND day_date >= ($2::date - INTERVAL '6 days')

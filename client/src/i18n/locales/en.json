@@ -104,6 +104,20 @@
     "general_error": "An error occurred. Please try again."
   },
 
+  "forgotPassword":{
+    "forgot_password": "Forgot password?",
+    "send_password": "Send password reset link",
+    "back_to_login": "Back to login",
+    "email": "email",
+    "enter_your_email": "Enter your email",
+    "sending": "Sending...",
+    "account_exists": "If an account exists for this email, a password reset link has been sent",
+    "gmail_only": "Password reset is allowed only for Gmail accounts",
+    "email_required": "Email is required",
+    "check_email": "Check your email",
+    "invalid_email": "Please enter a valid email address."
+  },
+
   "calendar": {
     "title": "Calendar",
     "prev": "Prev",

@@ -184,7 +184,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
     : {
         id: "empty",
         avg_stress_level: 0,
-        stress_qualifier: "-",
+        stress_qualifier: "unknown",
         stress_duration_in_seconds: 0,
         rest_stress_duration_in_seconds: 0,
         low_stress_duration_in_seconds: 0,
@@ -193,6 +193,12 @@ export function StressSection({ stress }: { stress?: Stress }) {
         updated_at: new Date().toISOString(),
       };
 
+  // Show "No data" if value is null/undefined/empty string/NaN
+  const checkData = (value: string | number | null | undefined): string =>
+    value !== null && value !== undefined && value !== "" && !(typeof value === "number" && isNaN(value))
+      ? String(value)
+      : "No data";
+  
   return (
     <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!stress ? "opacity-50" : ""}`}>
       <h1>
@@ -217,45 +223,45 @@ export function StressSection({ stress }: { stress?: Stress }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full lg:w-1/2">
           <StatCard
             label="Stress duration"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(formatSecondsToHoursMinutes(
               displayStress.stress_duration_in_seconds,
-            )}
+            ))}
           />
 
           <StatCard
             label="Stress qualifier"
-            value={displayStress.stress_qualifier}
+            value={checkData(displayStress.stress_qualifier)}
           />
 
           <StatCard
             label="Rest stress duration"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(formatSecondsToHoursMinutes(
               displayStress.rest_stress_duration_in_seconds,
-            )}
+            ))}
             icon={<FaCircle color="#3b82f6" size={16} />}
           />
 
           <StatCard
             label="Low stress duration"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(formatSecondsToHoursMinutes(
               displayStress.low_stress_duration_in_seconds,
-            )}
+            ))}
             icon={<FaCircle color="#10b981" size={16} />}
           />
 
           <StatCard
             label="Medium stress duration"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(formatSecondsToHoursMinutes(
               displayStress.medium_stress_duration_in_seconds,
-            )}
+            ))}
             icon={<FaCircle color="#f59e0b" size={16} />}
           />
 
           <StatCard
             label="High stress duration"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(formatSecondsToHoursMinutes(
               displayStress.high_stress_duration_in_seconds,
-            )}
+            ))}
             icon={<FaCircle color="#ef4444" size={16} />}
           />
         </div>

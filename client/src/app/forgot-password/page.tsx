@@ -1,6 +1,8 @@
 "use client";
 
+import Button from "@/components/Button/Button";
 import GlobalModal from "@/components/GlobalModal";
+import { useTranslation } from "../../i18n/LanguageProvider";
 import { useState, useEffect } from "react";
 
 export default function ForgotPasswordPage() {
@@ -9,6 +11,10 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isGmail, setIsGmail] = useState(true);
+
+  //for translation
+  const { t } = useTranslation();
+
 
   //  Real-time Gmail validation
   useEffect(() => {
@@ -22,19 +28,24 @@ export default function ForgotPasswordPage() {
     setIsGmail(gmailValid);
 
     if (!gmailValid) {
-      setError("Password reset is allowed only for Gmail accounts");
+      setError(t.forgotPassword.gmail_only);
     } else {
       setError(null);
     }
-  }, [email]);
+  }, [email, t]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!email) return;
+    const trimmed = email.trim();
 
-    if (!isGmail) {
-      setError("Password reset is allowed only for Gmail accounts");
+    if (!trimmed) {
+      setError(t.forgotPassword.email_required);
+      return;
+    }
+
+    if (!trimmed.toLowerCase().endsWith("@gmail.com")) {
+      setError(t.forgotPassword.gmail_only);
       return;
     }
 
@@ -61,7 +72,7 @@ export default function ForgotPasswordPage() {
       if (err instanceof Error) {
       setError(err.message);
     } else {
-      setError("Failed to contact server")
+      setError(t.forgotPassword.gmail_only)
     }}
     finally {
       setLoading(false);
@@ -74,34 +85,42 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="flex items-center justify-center min-h-screen p-4 md:p-8">
-      <GlobalModal onClose={closeModal}>
+  <main className="main-page flex items-center justify-center">
+
+    <GlobalModal onClose={closeModal}>
+      <div className="w-full max-w-md space-y-5 text-white">
+
         {done ? (
           <div className="text-center space-y-4">
-            <h1 className="text-xl md:text-2xl font-semibold">
-              Check your email
+            <h1 className="text-2xl font-semibold">
+             {t.forgotPassword.check_email}
             </h1>
 
-            <p className="text-gray-500 text-sm md:text-base">
-              If an account exists for this email, a password reset link has
-              been sent.
+            <p className="text-white/70 text-sm">
+             {t.forgotPassword.account_exists}
             </p>
 
             <a
               href="/startup"
-              className="text-sm md:text-base text-blue-400 underline"
+              className="text-[#31c2d5] hover:text-[#31c2d5]/80 underline transition"
             >
-              Back to login
+               {t.forgotPassword.back_to_login}
             </a>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <h1 className="text-2xl md:text-3xl text-center font-semibold mb-2">
-              Forgot password?
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+
+            <h1 className="text-2xl md:text-3xl text-center font-semibold">
+              {t.forgotPassword.forgot_password}
             </h1>
 
-            <div className="space-y-1">
-              <label htmlFor="email">Email</label>
+            <div className="space-y-2">
+              <label
+                htmlFor="email"
+                className="text-sm text-white/80"
+              >
+                {t.forgotPassword.email}
+              </label>
 
               <input
                 id="email"
@@ -109,26 +128,50 @@ export default function ForgotPasswordPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder={t.forgotPassword.enter_your_email}
+                className="
+                  w-full p-3 rounded-xl
+                  bg-white/5
+                  border border-white/20
+                  text-white
+                  placeholder:text-white/40
+                  outline-none
+                  focus:ring-2 focus:ring-[#31c2d5]/60
+                "
               />
 
               {error && (
-                <p className="text-sm text-red-600 transition-all">
+                <p className="text-sm text-red-400">
                   {error}
                 </p>
               )}
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={loading || !isGmail}
-              className="button-style-blue w-full disabled:opacity-50 transition"
-            >
-              {loading ? "Sending..." : "Send password reset link"}
-            </button>
+              label={loading ?  t.forgotPassword.sending : t.forgotPassword.send_password}
+              className="w-full font-semibold"
+              textColor="text-white"
+              borderColor="border-transparent"
+              bgColor="bg-[var(--button-blue-bg)]"
+            />
+
+            <div className="text-center">
+              <a
+                href="/startup"
+                className="text-sm text-white/70 hover:text-white underline transition"
+              >
+                {t.forgotPassword.back_to_login}
+              </a>
+            </div>
+
           </form>
         )}
-      </GlobalModal>
-    </main>
-  );
+      </div>
+    </GlobalModal>
+
+  </main>
+);
+
 }
