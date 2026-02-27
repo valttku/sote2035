@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
+import healthChatRoute from "./routes/healthChatRoute";  //for chat AI
 
 import { ensureSchema } from "./db/init/init.js";
 import { dbOk } from "./db/healthCheckDb.js";
@@ -45,6 +46,9 @@ app.use(
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
+
+//chat AI
+app.use("/api/v1/chat", healthChatRoute);
 
 // health and status check
 app.get("/health", (_req, res) => res.json({ ok: true }));
