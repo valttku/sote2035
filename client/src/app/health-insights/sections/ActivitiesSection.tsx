@@ -122,17 +122,18 @@ export function ActivitiesSection({
     id: { label: "ID" }, // won't render
   };
 
+  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
+    new Set(),
+  );
+
   return (
     <div>
       <div
         className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!hasData ? "opacity-50" : ""}`}
       >
         <p className="pb-2">Count: {hasData ? activities!.length : 0}</p>
-        {displayActivities.map((activity: Activity) => {
-          const [expandedActivities, setExpandedActivities] = useState<
-            Set<string>
-          >(new Set());
 
+        {displayActivities.map((activity: Activity) => {
           const toggleActivity = (id: string) => {
             setExpandedActivities((prev) => {
               const newSet = new Set(prev);
@@ -161,7 +162,9 @@ export function ActivitiesSection({
                     }}
                     className="mt-2 text-sm text-gray-400 cursor-pointer hover:text-white"
                   >
-                    {expandedActivities.has(activity.id) ? "- hide details" : "- open details"}
+                    {expandedActivities.has(activity.id)
+                      ? "- hide details"
+                      : "- open details"}
                   </div>
                 </div>
 
