@@ -33,8 +33,6 @@ export type Dailies = {
 };
 
 export function DailiesSection({ dailies }: { dailies?: Dailies }) {
-  const hasData = !!dailies;
-
   const displayData: Dailies = dailies || {
     id: "empty",
     steps: 0,
@@ -58,16 +56,16 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
     updated_at: new Date().toISOString(),
   };
 
-  // Check if value is null/undefined/empty string/NaN, show "No data". 
+  // Check if value is null/undefined/empty string/NaN, show "No data".
   // Otherwise, format it if formatter is provided, else just convert to string
   const checkData = (
     value: number | string | null | undefined,
-    formatter?: (v: any) => string,
+    formatter?: (v: number) => string,
   ) =>
     value !== null &&
     value !== undefined &&
     !(typeof value === "number" && isNaN(value))
-      ? formatter
+      ? typeof value === "number" && formatter
         ? formatter(value)
         : String(value)
       : "No data";
@@ -157,7 +155,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
       {/* Heart rate chart */}
       <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
         <h3 className="mb-2 text-lg font-semibold">
-          Daily Heart Rate Timeline   
+          Daily Heart Rate Timeline
           {!showLine ? " (No data)" : ""}
         </h3>
         <ResponsiveContainer width="100%" height={250}>
@@ -206,7 +204,10 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
       <div className="grid grid-cols-4 lg:grid-cols-6 gap-2">
         <StatCard
           label="👟Steps"
-          value={checkData(displayData.steps, (v) => `${v} / ${displayData.steps_goal}`)}
+          value={checkData(
+            displayData.steps,
+            (v) => `${v} / ${displayData.steps_goal}`,
+          )}
         />
         <StatCard
           label="🛣 Distance"
@@ -214,7 +215,10 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
         />
         <StatCard
           label="🪜 Floors Climbed"
-          value={checkData(displayData.floors_climbed, (v) => `${v} / ${displayData.floors_climbed_goal}`)}
+          value={checkData(
+            displayData.floors_climbed,
+            (v) => `${v} / ${displayData.floors_climbed_goal}`,
+          )}
         />
         <StatCard
           label="🔥 Active Calories"
@@ -226,20 +230,31 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
         />
         <StatCard
           label="🔥 Total Calories"
-          value={checkData(displayData.active_kilocalories + displayData.bmr_kilocalories, formatCalories)}
+          value={checkData(
+            displayData.active_kilocalories + displayData.bmr_kilocalories,
+            formatCalories,
+          )}
         />
         <StatCard
           label="⚡Moderate Exercise"
-          value={checkData(displayData.moderate_intensity_duration_in_seconds, formatMinutes)}
+          value={checkData(
+            displayData.moderate_intensity_duration_in_seconds,
+            formatMinutes,
+          )}
         />
         <StatCard
           label="⚡Vigorous Exercise"
-          value={checkData(displayData.vigorous_intensity_duration_in_seconds, formatMinutes)}
+          value={checkData(
+            displayData.vigorous_intensity_duration_in_seconds,
+            formatMinutes,
+          )}
         />
         <StatCard
           label="⚡Weekly Intensity"
-          value={checkData(displayData.weekly_intensity_total_seconds, (v) =>
-            `${Math.round(v / 60)} / ${Math.round(displayData.intensity_duration_goal_in_seconds / 60)} min`
+          value={checkData(
+            displayData.weekly_intensity_total_seconds,
+            (v) =>
+              `${Math.round(v / 60)} / ${Math.round(displayData.intensity_duration_goal_in_seconds / 60)} min`,
           )}
         />
         <StatCard

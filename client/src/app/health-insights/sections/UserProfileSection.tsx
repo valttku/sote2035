@@ -13,8 +13,6 @@ export type UserProfile = {
 };
 
 export function UserProfileSection({ profile }: { profile?: UserProfile }) {
-  const hasData = !!profile;
-
   // Default values if no profile
   const data = {
     gender: profile?.gender ?? "No data",
@@ -29,12 +27,12 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
   // Check for missing/null/NaN values and optionally format them
   const checkData = (
     value: number | string | null | undefined,
-    formatter?: (v: any) => string,
+    formatter?: (v: number) => string,
   ) =>
     value !== null &&
     value !== undefined &&
     !(typeof value === "number" && isNaN(value))
-      ? formatter
+      ? typeof value === "number" && formatter
         ? formatter(value)
         : String(value)
       : "No data";

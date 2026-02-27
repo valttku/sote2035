@@ -290,13 +290,13 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
   // Otherwise, format it if formatter is provided, else just convert to string
   const checkData = (
     value: number | string | null | undefined,
-    formatter?: (v: any) => string,
+    formatter?: (v: number) => string,
   ) =>
     value !== null &&
     value !== undefined &&
     !(typeof value === "number" && isNaN(value)) &&
     value !== ""
-      ? formatter
+      ? typeof value === "number" && formatter
         ? formatter(value)
         : String(value)
       : "No data";
