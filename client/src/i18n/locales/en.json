@@ -113,8 +113,7 @@
     "sending": "Sending...",
     "account_exists": "If an account exists for this email, a password reset link has been sent",
     "gmail_only": "Password reset is allowed only for Gmail accounts",
-    "required_field": "Please fill out this field.",
-    "check_email": "Check your email",
+    "email_required": "Email is required",
     "invalid_email": "Please enter a valid email address."
   },
 

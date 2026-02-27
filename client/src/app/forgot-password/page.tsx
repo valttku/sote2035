@@ -32,14 +32,19 @@ export default function ForgotPasswordPage() {
     } else {
       setError(null);
     }
-  }, [email, t.forgotPassword.gmail_only]);
+  }, [email, t]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!email) return;
+    const trimmed = email.trim();
 
-    if (!isGmail) {
+    if (!trimmed) {
+      setError(t.forgotPassword.email_required);
+      return;
+    }
+
+    if (!trimmed.toLowerCase().endsWith("@gmail.com")) {
       setError(t.forgotPassword.gmail_only);
       return;
     }
@@ -103,7 +108,7 @@ export default function ForgotPasswordPage() {
             </a>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
 
             <h1 className="text-2xl md:text-3xl text-center font-semibold">
               {t.forgotPassword.forgot_password}

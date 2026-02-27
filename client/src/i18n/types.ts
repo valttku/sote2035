@@ -101,8 +101,7 @@ export type ForgotPasswordTranslations = {
   sending: string;
   account_exists: string;
   gmail_only: string;
-  required_field: string;
-  check_email: string;
+  email_required: string;
   invalid_email: string;
 };
 
