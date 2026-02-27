@@ -185,6 +185,8 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
         u.updated_at,
         u.last_night_avg,
         u.last_night_5min_high,
+        u.hrv_values,
+        u.duration_in_seconds,
         (
           SELECT AVG((last_night_avg)::float)
           FROM app.user_hrv_garmin
@@ -217,7 +219,16 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     `,
       [userId, date],
     );
-    console.log(`[health-insights] HRV data fetched:`, hrvResult.rows);
+
+    // After fetching hrv data
+    const hrvWithoutHRV = hrvResult.rows.map(
+      ({ hrv_values, ...rest }) => rest,
+    );
+
+    console.log(
+      "[health-insights] HRV data without HRV values:",
+      hrvWithoutHRV,
+    );
 
     const insights = {
       date,
