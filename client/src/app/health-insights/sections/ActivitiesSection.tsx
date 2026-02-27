@@ -90,17 +90,32 @@ export function ActivitiesSection({
     keyof Activity,
     { label: string; formatter?: (v: number) => string }
   > = {
-    duration_in_seconds: { label: "⏱️Duration", formatter: (v) => `${(v / 60).toFixed(1)} min` },
-    distance_in_meters: { label: "🛤️Distance", formatter: (v) => `${(v / 1000).toFixed(2)} km` },
-    active_kilocalories: { label: "🔥Calories", formatter: (v) => `${v} kcal`},
+    duration_in_seconds: {
+      label: "⏱️Duration",
+      formatter: (v) => `${(v / 60).toFixed(1)} min`,
+    },
+    distance_in_meters: {
+      label: "🛤️Distance",
+      formatter: (v) => `${(v / 1000).toFixed(2)} km`,
+    },
+    active_kilocalories: { label: "🔥Calories", formatter: (v) => `${v} kcal` },
     average_heart_rate: { label: "❤️Avg HR", formatter: (v) => `${v} bpm` },
     max_heart_rate: { label: "💓Max HR", formatter: (v) => `${v} bpm` },
     steps: { label: "👣Steps" },
-    average_pace: {label: "🏃‍♂️Avg Pace", formatter: (v) => `${v.toFixed(2)} min/km` },
+    average_pace: {
+      label: "🏃‍♂️Avg Pace",
+      formatter: (v) => `${v.toFixed(2)} min/km`,
+    },
     avg_run_cadence: { label: "🏃‍♂️Run Cadence", formatter: (v) => `${v} spm` },
     avg_bike_cadence: { label: "🚴‍♂️Bike Cadence", formatter: (v) => `${v} rpm` },
-    average_swim_cadence: { label: "🏊‍♂️Swim Cadence", formatter: (v) => `${v} spm` },
-    average_push_cadence: { label: "🤸‍♂️Push Cadence", formatter: (v) => `${v} spm` },
+    average_swim_cadence: {
+      label: "🏊‍♂️Swim Cadence",
+      formatter: (v) => `${v} spm`,
+    },
+    average_push_cadence: {
+      label: "🤸‍♂️Push Cadence",
+      formatter: (v) => `${v} spm`,
+    },
     pushes: { label: "🤸‍♂️Pushes" },
     total_elevation_gain: { label: "⬆️Elev Gain", formatter: (v) => `${v} m` },
     total_elevation_loss: { label: "⬇️Elev Loss", formatter: (v) => `${v} m` },
@@ -160,10 +175,8 @@ export function ActivitiesSection({
                     type="checkbox"
                     value={activity.id}
                     checked={selectedActivityIds.has(activity.id)}
-                    onChange={(e) => {
-                      e.stopPropagation(); // prevent toggle expand when clicking checkbox
-                      handleActivityToggle(activity.id);
-                    }}
+                    onClick={(e) => e.stopPropagation()} // ⬅️ stop bubbling here
+                    onChange={() => handleActivityToggle(activity.id)}
                     className="cursor-pointer accent-[#1d9dad] w-5 h-5"
                   />
                 )}
