@@ -5,20 +5,20 @@ import { useState } from "react";
 export type Activity = {
   id: string;
   activity_name: string;
-  duration_in_seconds?: number | null; // all activities have
-  distance_in_meters?: number | null; // some activities may not have
-  active_kilocalories?: number | null; // all activities have
-  average_heart_rate?: number | null; // all activities have
-  steps?: number | null; // all activities have
-  average_pace?: number | null; // some activities may not have
-  max_heart_rate?: number | null; // all activities have
-  avg_run_cadence?: number | null; // some activities may not have
-  avg_bike_cadence?: number | null; // some activities may not have
-  average_swim_cadence?: number | null; // some activities may not have,
-  average_push_cadence?: number | null; // some activities may not have,
-  pushes?: number | null; // some activities may not have
-  total_elevation_gain?: number | null; // some activities may not have,
-  total_elevation_loss?: number | null; // some activities may not have,
+  duration_in_seconds?: number | null;
+  distance_in_meters?: number | null;
+  active_kilocalories?: number | null;
+  average_heart_rate?: number | null; 
+  steps?: number | null;
+  average_pace?: number | null;
+  max_heart_rate?: number | null;
+  avg_run_cadence?: number | null;
+  avg_bike_cadence?: number | null;
+  average_swim_cadence?: number | null;
+  average_push_cadence?: number | null;
+  pushes?: number | null;
+  total_elevation_gain?: number | null;
+  total_elevation_loss?: number | null;
 };
 
 type ActivitiesSectionProps = {
@@ -75,6 +75,7 @@ export function ActivitiesSection({
         : String(value)
       : "No data";
 
+  // Handle activity selection toggle
   const handleActivityToggle = (activityId: string) => {
     const newSelected = new Set(selectedActivityIds);
     if (newSelected.has(activityId)) {
@@ -88,52 +89,36 @@ export function ActivitiesSection({
   // Mapping keys to label + formatter for display
   const activityFieldMap: Record<
     keyof Activity,
-    { label: string; formatter?: (v: number) => string }
-  > = {
-    duration_in_seconds: {
-      label: "⏱️Duration",
-      formatter: (v) => `${(v / 60).toFixed(1)} min`,
-    },
-    distance_in_meters: {
-      label: "🛤️Distance",
-      formatter: (v) => `${(v / 1000).toFixed(2)} km`,
-    },
+    { label: string; formatter?: (v: number) => string }> = {
+    duration_in_seconds: {label: "⏱️Duration", formatter: (v) => `${(v / 60).toFixed(1)} min`},
+    distance_in_meters: {label: "🛤️Distance", formatter: (v) => `${(v / 1000).toFixed(2)} km`},
     active_kilocalories: { label: "🔥Calories", formatter: (v) => `${v} kcal` },
     average_heart_rate: { label: "❤️Avg HR", formatter: (v) => `${v} bpm` },
     max_heart_rate: { label: "💓Max HR", formatter: (v) => `${v} bpm` },
     steps: { label: "👣Steps" },
-    average_pace: {
-      label: "🏃‍♂️Avg Pace",
-      formatter: (v) => `${v.toFixed(2)} min/km`,
-    },
+    average_pace: {label: "🏃‍♂️Avg Pace", formatter: (v) => `${v.toFixed(2)} min/km`},
     avg_run_cadence: { label: "🏃‍♂️Run Cadence", formatter: (v) => `${v} spm` },
     avg_bike_cadence: { label: "🚴‍♂️Bike Cadence", formatter: (v) => `${v} rpm` },
-    average_swim_cadence: {
-      label: "🏊‍♂️Swim Cadence",
-      formatter: (v) => `${v} spm`,
-    },
-    average_push_cadence: {
-      label: "🤸‍♂️Push Cadence",
-      formatter: (v) => `${v} spm`,
-    },
+    average_swim_cadence: {label: "🏊‍♂️Swim Cadence",formatter: (v) => `${v} spm`},
+    average_push_cadence: {label: "🤸‍♂️Push Cadence",formatter: (v) => `${v} spm`},
     pushes: { label: "🤸‍♂️Pushes" },
     total_elevation_gain: { label: "⬆️Elev Gain", formatter: (v) => `${v} m` },
     total_elevation_loss: { label: "⬇️Elev Loss", formatter: (v) => `${v} m` },
-    activity_name: { label: "Activity" }, // just in case
-    id: { label: "ID" }, // won't render
+    activity_name: { label: "Activity" },
+    id: { label: "ID" },
   };
 
+  // State to track which activities are expanded to show details
   const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
     new Set(),
   );
 
   return (
     <div>
-      <div
-        className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!hasData ? "opacity-50" : ""}`}
-      >
+      <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!hasData ? "opacity-50" : ""}`}>
         <p className="pb-2">Count: {hasData ? activities!.length : 0}</p>
 
+        {/* Map activities to display */}
         {displayActivities.map((activity: Activity) => {
           const toggleActivity = (id: string) => {
             setExpandedActivities((prev) => {
@@ -169,7 +154,7 @@ export function ActivitiesSection({
                   </div>
                 </div>
 
-                {/* Optional select checkbox */}
+                {/* Select checkbox */}
                 {hasData && (
                   <input
                     type="checkbox"

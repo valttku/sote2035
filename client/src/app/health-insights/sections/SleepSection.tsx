@@ -20,6 +20,7 @@ export type Sleep = {
   updated_at: string;
 };
 
+// Utility to calculate end time from start time and duration
 function calculateSleepEndtime(
   startTimeInSeconds: string | number,
   durationInSeconds: number,
@@ -37,6 +38,7 @@ function calculateSleepEndtime(
   });
 }
 
+// Timeline visualization of sleep stages
 function SleepTimeline({ sleep }: { sleep: Sleep }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(800);
@@ -334,7 +336,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           <SleepTimeline sleep={displaySleep} />
         </div>
 
-        {/* Sleep stats */}
+        {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full ">
           <StatCard
             label="Deep Sleep"
@@ -344,7 +346,6 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
             )}
             icon={<FaCircle color="#3510b9" size={16} />}
           />
-
           <StatCard
             label="Light Sleep"
             value={checkData(
@@ -353,7 +354,6 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
             )}
             icon={<FaCircle color="#3bd7f6" size={16} />}
           />
-
           <StatCard
             label="REM Sleep"
             value={checkData(
@@ -362,7 +362,6 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
             )}
             icon={<FaCircle color="#f50be9" size={16} />}
           />
-
           <StatCard
             label="Awake"
             value={checkData(
@@ -371,7 +370,6 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
             )}
             icon={<FaCircle color="#fdb0fc" size={16} />}
           />
-
           <StatCard
             label="💤Total Sleep"
             value={checkData(
@@ -379,7 +377,6 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
               formatSecondsToHoursMinutes,
             )}
           />
-
           <StatCard
             label="⏰Start / End"
             value={checkData(
@@ -392,7 +389,6 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
                 : null,
             )}
           />
-
           <StatCard
             label="Sleep Score"
             value={checkData(
@@ -401,7 +397,6 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
                 : null,
             )}
           />
-
           <StatCard
             label="Unmeasurable Sleep"
             value={checkData(
