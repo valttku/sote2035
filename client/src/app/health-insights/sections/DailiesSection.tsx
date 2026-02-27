@@ -155,7 +155,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
       {/* Heart rate chart */}
       <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
         <h3 className="mb-2 text-lg font-semibold">
-          Daily Heart Rate Timeline
+          Daily Heart Rate Timeline (Hourly)
           {!showLine ? " (No data)" : ""}
         </h3>
         <ResponsiveContainer width="100%" height={250}>
@@ -179,7 +179,8 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
               }
               labelFormatter={(label) => `Time: ${label}`}
               contentStyle={{
-                backgroundColor: "#1e1c4f",
+                borderRadius: "8px",
+                backgroundColor: "#090828",
                 border: "none",
                 color: "#ffffff",
               }}

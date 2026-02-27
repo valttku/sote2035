@@ -75,11 +75,6 @@ export function ActivitiesSection({
         : String(value)
       : "No data";
 
-  const formatMinutes = (seconds: number) => `${(seconds / 60).toFixed(1)} min`;
-  const formatDistance = (meters: number) => `${(meters / 1000).toFixed(2)} km`;
-  const formatCalories = (kcal: number) => `${kcal} kcal`;
-  const formatHeartRate = (hr: number) => `${hr} bpm`;
-
   const handleActivityToggle = (activityId: string) => {
     const newSelected = new Set(selectedActivityIds);
     if (newSelected.has(activityId)) {
@@ -90,16 +85,22 @@ export function ActivitiesSection({
     onActivitiesSelected?.(newSelected);
   };
 
-  // Mapping keys to label + optional formatter
+  // Mapping keys to label + formatter for display
   const activityFieldMap: Record<
     keyof Activity,
     { label: string; formatter?: (v: number) => string }
   > = {
-    duration_in_seconds: { label: "⏱️Duration", formatter: formatMinutes },
-    distance_in_meters: { label: "🛤️Distance", formatter: formatDistance },
-    active_kilocalories: { label: "🔥Calories", formatter: formatCalories },
-    average_heart_rate: { label: "❤️Avg HR", formatter: formatHeartRate },
-    max_heart_rate: { label: "💓Max HR", formatter: formatHeartRate },
+    duration_in_seconds: {
+      label: "⏱️Duration",
+      formatter: (v) => `${(v / 60).toFixed(1)} min`,
+    },
+    distance_in_meters: {
+      label: "🛤️Distance",
+      formatter: (v) => `${(v / 1000).toFixed(2)} km`,
+    },
+    active_kilocalories: { label: "🔥Calories", formatter: (v) => `${v} kcal` },
+    average_heart_rate: { label: "❤️Avg HR", formatter: (v) => `${v} bpm` },
+    max_heart_rate: { label: "💓Max HR", formatter: (v) => `${v} bpm` },
     steps: { label: "👣Steps" },
     average_pace: {
       label: "🏃‍♂️Avg Pace",
@@ -174,10 +175,8 @@ export function ActivitiesSection({
                     type="checkbox"
                     value={activity.id}
                     checked={selectedActivityIds.has(activity.id)}
-                    onChange={(e) => {
-                      e.stopPropagation(); // prevent toggle expand when clicking checkbox
-                      handleActivityToggle(activity.id);
-                    }}
+                    onClick={(e) => e.stopPropagation()} // ⬅️ stop bubbling here
+                    onChange={() => handleActivityToggle(activity.id)}
                     className="cursor-pointer accent-[#1d9dad] w-5 h-5"
                   />
                 )}
