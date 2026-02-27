@@ -101,21 +101,30 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
       Math.max(sleep.duration_in_seconds || 0, 1);
 
   // Change this to control density (in seconds)
-  // 3600 = 1 hour
-  // 1800 = 30 minutes
-  // 900  = 15 minutes
   const totalDuration = sleepEndFromSegments - sleepStartFromSegments;
 
+  const minTickSpacingPx = 25; // minimum space between ticks
+  const maxTicks = Math.floor(innerWidth / minTickSpacingPx);
+
+  // Base interval in seconds
   let tickInterval = 3600; // default 1h
 
-  if (totalDuration <= 4 * 3600) {
+  // Try to adjust interval to reduce number of ticks
+  const approxInterval = totalDuration / maxTicks;
+
+  // Round interval to nearest "nice" value
+  if (approxInterval <= 900)
     tickInterval = 900; // 15 min
-  } else if (totalDuration <= 7 * 3600) {
+  else if (approxInterval <= 1800)
     tickInterval = 1800; // 30 min
-  }
+  else if (approxInterval <= 3600)
+    tickInterval = 3600; // 1h
+  else if (approxInterval <= 7200)
+    tickInterval = 7200; // 2h
+  else tickInterval = 14400; // 4h
 
+  // Generate ticks
   const timeTicks: number[] = [];
-
   for (
     let t = sleepStartFromSegments;
     t <= sleepEndFromSegments;
@@ -178,13 +187,13 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
           stroke="rgba(255,255,255,0.3)"
         />
 
-        {/* Start / End times */}
+        {/* Start time */}
         <text
           x={margin.left}
           y={height - margin.bottom + 25}
           fill="rgba(255,255,255,0.7)"
-          fontSize={16}
-          textAnchor="start"
+          fontSize={12}
+          textAnchor="middle"
         >
           {sleepStartFromSegments
             ? new Date(sleepStartFromSegments * 1000).toLocaleTimeString([], {
@@ -194,12 +203,14 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
               })
             : "No data"}
         </text>
+
+        {/* End time */}
         <text
           x={width - margin.right}
           y={height - margin.bottom + 25}
           fill="rgba(255,255,255,0.7)"
-          fontSize={16}
-          textAnchor="end"
+          fontSize={12}
+          textAnchor="middle"
         >
           {sleepEndFromSegments
             ? calculateSleepEndtime(
@@ -219,22 +230,23 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
               y2={height - margin.bottom + 8}
               stroke="rgba(255,255,255,0.4)"
             />
-            {/* Hide first and last tick labels to avoid overlap with start/end */}
-            {i !== 0 && i !== timeTicks.length - 1 && (
-              <text
-                x={xScale(tick)}
-                y={height - margin.bottom + 25}
-                fill="rgba(255,255,255,0.7)"
-                fontSize={13}
-                textAnchor="middle"
-              >
-                {new Date(tick * 1000).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })}
-              </text>
-            )}
+            {i % 2 === 0 &&
+              i !== 0 &&
+              i !== timeTicks.length - 1 && ( // skip every other label
+                <text
+                  x={xScale(tick)}
+                  y={height - margin.bottom + 25}
+                  fill="rgba(255,255,255,0.7)"
+                  fontSize={13}
+                  textAnchor="middle"
+                >
+                  {new Date(tick * 1000).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
+                </text>
+              )}
           </g>
         ))}
 

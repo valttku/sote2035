@@ -6,6 +6,7 @@ export type UserProfile = {
   gender?: string;
   height?: number;
   weight?: number;
+  birthday?: string;
   vo2_max?: number;
   vo2_max_cycling?: number;
   fitness_age?: number;
@@ -43,6 +44,31 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
   const formatVO2 = (v: number) => `${v} ml/kg/min`;
   const formatFitnessAge = (v: number) => `${v} years`;
 
+  // Utility to calculate age from birthday
+  const calculateAge = (birthday: string | undefined) => {
+    if (!birthday) return null;
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--; // hasn't had birthday yet this year
+    }
+    return age;
+  };
+
+  // Utility to calculate body mass index (BMI)
+  function calculateBMI(
+    weightKg: number | null,
+    heightCm: number | null,
+  ): number | null {
+    if (!weightKg || !heightCm) return null; // missing data
+    const heightM = heightCm / 100; // convert cm to meters
+    const bmi = weightKg / (heightM * heightM);
+    return Math.round(bmi * 10) / 10; // round to 1 decimal
+  }
+
   return (
     <div
       className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!profile ? "opacity-50" : ""}`}
@@ -61,39 +87,50 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
         </span>
       </h1>
 
+      {/* Basic Info Section */}
+      <h1 className="text-md mb-2">Basic info</h1>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard
+          label="🎂Age"
+          value={checkData(
+            calculateAge(profile?.birthday),
+            (v) => `${v} years`,
+          )}
+        />
+        <StatCard label="👤Gender" value={checkData(data.gender)} />
+      </div>
+
       {/* Body Composition Section */}
-      <div className="mb-6">
-        <h1 className="text-md mb-2">Body Composition</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard label="👤Gender" value={data.gender} />
-          <StatCard
-            label="📏Height"
-            value={checkData(data.height, formatHeight)}
-          />
-          <StatCard
-            label="⚖️Weight"
-            value={checkData(data.weight, formatWeight)}
-          />
-        </div>
+      <h1 className="text-md mb-2">Body Composition</h1>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard
+          label="📏Height"
+          value={checkData(data.height, formatHeight)}
+        />
+        <StatCard
+          label="⚖️Weight"
+          value={checkData(data.weight, formatWeight)}
+        />
+
+        <StatCard label="Body Mass Index" value={checkData(calculateBMI(data.weight, data.height))} />
       </div>
 
       {/* Metrics Section */}
-      <div>
-        <h1 className="text-md mb-2">Fitness</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard
-            label="🏃‍♂️VO2 Max (Run)"
-            value={checkData(data.vo2_max, formatVO2)}
-          />
-          <StatCard
-            label="🚴‍♂️VO2 Max (Cycling)"
-            value={checkData(data.vo2_max_cycling, formatVO2)}
-          />
-          <StatCard
-            label="🎂Fitness Age"
-            value={checkData(data.fitness_age, formatFitnessAge)}
-          />
-        </div>
+
+      <h1 className="text-md mb-2">Fitness</h1>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <StatCard
+          label="🎂Fitness Age"
+          value={checkData(data.fitness_age, formatFitnessAge)}
+        />
+        <StatCard
+          label="🏃‍♂️VO2 Max (Run)"
+          value={checkData(data.vo2_max, formatVO2)}
+        />
+        <StatCard
+          label="🚴‍♂️VO2 Max (Cycling)"
+          value={checkData(data.vo2_max_cycling, formatVO2)}
+        />
       </div>
     </div>
   );
