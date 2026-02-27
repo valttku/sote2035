@@ -134,7 +134,6 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
               itemStyle={{ color: "#fff" }}
               wrapperStyle={{ minWidth: 120 }}
             />
-
             <Line
               type="monotone"
               dataKey="value"
@@ -148,11 +147,11 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          label="💓Last Night's Average HRV"
+          label="💓Last Night Average HRV"
           value={checkData(displayHRV.last_night_avg)}
         />
         <StatCard
-          label="💓Last Night's 5-min High HRV"
+          label="💓Last Night 5-min High HRV"
           value={checkData(displayHRV.last_night_5min_high)}
         />
         <StatCard
