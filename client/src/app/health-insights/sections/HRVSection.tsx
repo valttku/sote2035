@@ -21,18 +21,23 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
         id: "empty",
         last_night_avg: 0,
         last_night_5min_high: 0,
-        avg_7d_night_hrv: null,
-        avg_7d_hrv: null,
-        avg_day_hrv: null,
+        avg_7d_night_hrv: 0,
+        avg_7d_hrv: 0,
+        avg_day_hrv: 0,
         days_in_7d_window: 0,
         updated_at: new Date().toISOString(),
       };
 
-  const formatHRV = (value: number | null) =>
-    value != null ? `${value.toFixed(0)} ms` : "No data";
+  // Format HRV values, showing "No data" if the value is null or not a number
+  const checkData = (value: number | null) =>
+    typeof value === "number" && !isNaN(value)
+      ? `${value.toFixed(0)} ms`
+      : "No data";
 
   return (
-    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!HRV ? "opacity-50" : ""}`}>
+    <div
+      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!HRV ? "opacity-50" : ""}`}
+    >
       <h1>
         <span>
           Updated at:{" "}
@@ -50,22 +55,22 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           label="💓Last Night's Average HRV"
-          value={formatHRV(displayHRV.last_night_avg)}
+          value={checkData(displayHRV.last_night_avg)}
         />
         <StatCard
           label="💓Last Night's 5-min High HRV"
-          value={formatHRV(displayHRV.last_night_5min_high)}
+          value={checkData(displayHRV.last_night_5min_high)}
         />
         <StatCard
           label="💓Average Day HRV"
-          value={formatHRV(displayHRV.avg_day_hrv)}
+          value={checkData(displayHRV.avg_day_hrv)}
         />
         <StatCard
           label="💓7-Day Average Night HRV"
           value={
             displayHRV.days_in_7d_window < 7
               ? "Not enough data"
-              : formatHRV(displayHRV.avg_7d_night_hrv)
+              : checkData(displayHRV.avg_7d_night_hrv)
           }
         />
         <StatCard
@@ -73,7 +78,7 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
           value={
             displayHRV.days_in_7d_window < 7
               ? "Not enough data"
-              : formatHRV(displayHRV.avg_7d_hrv)
+              : checkData(displayHRV.avg_7d_hrv)
           }
         />
       </div>
