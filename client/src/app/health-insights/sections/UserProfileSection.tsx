@@ -17,7 +17,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
 
   // Default values if no profile
   const data = {
-    gender: profile?.gender ?? "-",
+    gender: profile?.gender ?? "No data",
     height: profile?.height ?? null,
     weight: profile?.weight ?? null,
     vo2_max: profile?.vo2_max ?? null,
@@ -26,8 +26,29 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
     updated_at: profile?.updated_at ?? new Date().toISOString(),
   };
 
+  // Check for missing/null/NaN values and optionally format them
+  const checkData = (
+    value: number | string | null | undefined,
+    formatter?: (v: any) => string,
+  ) =>
+    value !== null &&
+    value !== undefined &&
+    !(typeof value === "number" && isNaN(value))
+      ? formatter
+        ? formatter(value)
+        : String(value)
+      : "No data";
+
+  // Formatters
+  const formatHeight = (v: number) => `${v} cm`;
+  const formatWeight = (v: number) => `${v} kg`;
+  const formatVO2 = (v: number) => `${v} ml/kg/min`;
+  const formatFitnessAge = (v: number) => `${v} years`;
+
   return (
-    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!profile ? "opacity-50" : ""}`}>
+    <div
+      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!profile ? "opacity-50" : ""}`}
+    >
       <h1>
         <span>
           Updated at:{" "}
@@ -49,11 +70,11 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
           <StatCard label="👤Gender" value={data.gender} />
           <StatCard
             label="📏Height"
-            value={data.height ? `${data.height} cm` : "-"}
+            value={checkData(data.height, formatHeight)}
           />
           <StatCard
             label="⚖️Weight"
-            value={data.weight ? `${data.weight} kg` : "-"}
+            value={checkData(data.weight, formatWeight)}
           />
         </div>
       </div>
@@ -64,15 +85,15 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
             label="🏃‍♂️VO2 Max (Run)"
-            value={data.vo2_max ? `${data.vo2_max} ml/kg/min` : "-"}
+            value={checkData(data.vo2_max, formatVO2)}
           />
           <StatCard
             label="🚴‍♂️VO2 Max (Cycling)"
-            value={data.vo2_max_cycling ? `${data.vo2_max_cycling} ml/kg/min` : "-"}
+            value={checkData(data.vo2_max_cycling, formatVO2)}
           />
           <StatCard
             label="🎂Fitness Age"
-            value={data.fitness_age ? `${data.fitness_age} years` : "-"}
+            value={checkData(data.fitness_age, formatFitnessAge)}
           />
         </div>
       </div>

@@ -33,7 +33,9 @@ export type Dailies = {
 };
 
 export function DailiesSection({ dailies }: { dailies?: Dailies }) {
-  const emptyData = {
+  const hasData = !!dailies;
+
+  const displayData: Dailies = dailies || {
     id: "empty",
     steps: 0,
     floors_climbed: 0,
@@ -43,7 +45,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
     moderate_intensity_duration_in_seconds: 0,
     vigorous_intensity_duration_in_seconds: 0,
     weekly_intensity_total_seconds: 0,
-    intensity_duration_goal_in_seconds: 1500,
+    intensity_duration_goal_in_seconds: 9000,
     distance_in_meters: 0,
     avg_heart_rate: 0,
     resting_heart_rate: 0,
@@ -56,13 +58,33 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
     updated_at: new Date().toISOString(),
   };
 
-  const displayData = dailies || emptyData;
+  // Check if value is null/undefined/empty string/NaN, show "No data". 
+  // Otherwise, format it if formatter is provided, else just convert to string
+  const checkData = (
+    value: number | string | null | undefined,
+    formatter?: (v: any) => string,
+  ) =>
+    value !== null &&
+    value !== undefined &&
+    !(typeof value === "number" && isNaN(value))
+      ? formatter
+        ? formatter(value)
+        : String(value)
+      : "No data";
+
+  const formatMinutes = (seconds: number) => `${Math.round(seconds / 60)} min`;
+  const formatDistance = (meters: number) => `${(meters / 1000).toFixed(2)} km`;
+  const formatCalories = (kcal: number) => `${kcal} kcal`;
+  const formatHeartRate = (hr: number) => `${hr} bpm`;
 
   // ---- HEART RATE PARSING ----
   let hourlyData: { time: string; value: number | null }[] = [];
   let showLine = false;
 
-  if (displayData.heart_rate_samples && Object.keys(displayData.heart_rate_samples).length > 0) {
+  if (
+    displayData.heart_rate_samples &&
+    Object.keys(displayData.heart_rate_samples).length > 0
+  ) {
     try {
       const samples =
         typeof displayData.heart_rate_samples === "string"
@@ -81,7 +103,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
         const hourEnd = hourStart + 3600;
 
         const samplesInHour = parsed.filter(
-          (d) => d.second >= hourStart && d.second < hourEnd
+          (d) => d.second >= hourStart && d.second < hourEnd,
         );
 
         const lastSample =
@@ -89,7 +111,10 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
             ? samplesInHour[samplesInHour.length - 1].value
             : null;
 
-        hourlyData.push({ time: `${hour.toString().padStart(2, "0")}:00`, value: lastSample });
+        hourlyData.push({
+          time: `${hour.toString().padStart(2, "0")}:00`,
+          value: lastSample,
+        });
       }
     } catch {
       hourlyData = [];
@@ -97,7 +122,10 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
   } else {
     // If no samples, create empty hourly data
     for (let hour = 0; hour < 24; hour++) {
-      hourlyData.push({ time: `${hour.toString().padStart(2, "0")}:00`, value: null });
+      hourlyData.push({
+        time: `${hour.toString().padStart(2, "0")}:00`,
+        value: null,
+      });
     }
   }
 
@@ -105,12 +133,15 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
   const numericValues = hourlyData
     .map((d) => (typeof d.value === "number" ? d.value : null))
     .filter((v): v is number => v !== null && !isNaN(v));
-  const minHeartRate = numericValues.length > 0 ? Math.max(30, Math.min(...numericValues)) : 50;
-  const maxHeartRate = numericValues.length > 0 ? Math.max(...numericValues, 210) : 120;
+  const minHeartRate =
+    numericValues.length > 0 ? Math.max(30, Math.min(...numericValues)) : 50;
+  const maxHeartRate =
+    numericValues.length > 0 ? Math.max(...numericValues, 210) : 120;
 
   return (
-    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!dailies ? "opacity-50" : ""}`}>
-      
+    <div
+      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!dailies ? "opacity-50" : ""}`}
+    >
       <h1>
         Updated at:{" "}
         {new Date(displayData.updated_at).toLocaleString(undefined, {
@@ -125,41 +156,104 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
 
       {/* Heart rate chart */}
       <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
-        <h3 className="mb-2 text-lg font-semibold">Daily Heart Rate Timeline</h3>
+        <h3 className="mb-2 text-lg font-semibold">
+          Daily Heart Rate Timeline   
+          {!showLine ? " (No data)" : ""}
+        </h3>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={hourlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <XAxis dataKey="time" tick={{ fill: "#ffffff", fontSize: 12 }} stroke="#ffffff" />
-            <YAxis domain={[minHeartRate, maxHeartRate]} tick={{ fill: "#ffffff", fontSize: 12 }} stroke="#ffffff" />
+          <LineChart
+            data={hourlyData}
+            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+          >
+            <XAxis
+              dataKey="time"
+              tick={{ fill: "#ffffff", fontSize: 12 }}
+              stroke="#ffffff"
+            />
+            <YAxis
+              domain={[minHeartRate, maxHeartRate]}
+              tick={{ fill: "#ffffff", fontSize: 12 }}
+              stroke="#ffffff"
+            />
             <Tooltip
-              formatter={(value) => (value !== null && value !== undefined ? `${value} bpm` : "-")}
+              formatter={(value) =>
+                value !== null && value !== undefined ? `${value} bpm` : "-"
+              }
               labelFormatter={(label) => `Time: ${label}`}
-              contentStyle={{ backgroundColor: "#1e1c4f", border: "none", color: "#ffffff" }}
+              contentStyle={{
+                backgroundColor: "#1e1c4f",
+                border: "none",
+                color: "#ffffff",
+              }}
               labelStyle={{ color: "#ffffff" }}
               itemStyle={{ color: "#ffffff" }}
               wrapperStyle={{ minWidth: 120 }}
             />
-            {showLine && <Line type="monotone" dataKey="value" stroke="#e63946" dot={false} connectNulls={false} />}
+            {showLine && (
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#e63946"
+                dot={false}
+                connectNulls={false}
+              />
+            )}
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-4 lg:grid-cols-6 gap-2">
-        <StatCard label="👟Steps" value={`${displayData.steps} / ${displayData.steps_goal}`} />
-        <StatCard label="🛣 Distance" value={`${(displayData.distance_in_meters / 1000).toFixed(2)} km`} />
-        <StatCard label="🪜 Floors Climbed" value={`${displayData.floors_climbed} / ${displayData.floors_climbed_goal}`} />
-        <StatCard label="🔥 Active Calories" value={`${displayData.active_kilocalories} kcal`}  />
-        <StatCard label="🔥 BMR Calories" value={`${displayData.bmr_kilocalories} kcal`} />
-        <StatCard label="🔥 Total Calories" value={`${displayData.active_kilocalories + displayData.bmr_kilocalories} kcal`} />
-        <StatCard label="⚡Moderate Exercise" value={`${(displayData.moderate_intensity_duration_in_seconds / 60).toFixed(0)} min`} />
-        <StatCard label="⚡Vigorous Exercise" value={`${(displayData.vigorous_intensity_duration_in_seconds / 60).toFixed(0)} min`} />
+        <StatCard
+          label="👟Steps"
+          value={checkData(displayData.steps, (v) => `${v} / ${displayData.steps_goal}`)}
+        />
+        <StatCard
+          label="🛣 Distance"
+          value={checkData(displayData.distance_in_meters, formatDistance)}
+        />
+        <StatCard
+          label="🪜 Floors Climbed"
+          value={checkData(displayData.floors_climbed, (v) => `${v} / ${displayData.floors_climbed_goal}`)}
+        />
+        <StatCard
+          label="🔥 Active Calories"
+          value={checkData(displayData.active_kilocalories, formatCalories)}
+        />
+        <StatCard
+          label="🔥 BMR Calories"
+          value={checkData(displayData.bmr_kilocalories, formatCalories)}
+        />
+        <StatCard
+          label="🔥 Total Calories"
+          value={checkData(displayData.active_kilocalories + displayData.bmr_kilocalories, formatCalories)}
+        />
+        <StatCard
+          label="⚡Moderate Exercise"
+          value={checkData(displayData.moderate_intensity_duration_in_seconds, formatMinutes)}
+        />
+        <StatCard
+          label="⚡Vigorous Exercise"
+          value={checkData(displayData.vigorous_intensity_duration_in_seconds, formatMinutes)}
+        />
         <StatCard
           label="⚡Weekly Intensity"
-          value={`${(displayData.weekly_intensity_total_seconds / 60).toFixed(0)} / ${(displayData.intensity_duration_goal_in_seconds / 60).toFixed(0)} min`}
+          value={checkData(displayData.weekly_intensity_total_seconds, (v) =>
+            `${Math.round(v / 60)} / ${Math.round(displayData.intensity_duration_goal_in_seconds / 60)} min`
+          )}
         />
-        <StatCard label="❤️Resting Heart Rate" value={`${displayData.resting_heart_rate} bpm`}/>
-        <StatCard label="❤️Average Heart Rate" value={`${displayData.avg_heart_rate} bpm`} />
-        <StatCard label="❤️Max Heart Rate" value={`${displayData.max_heart_rate} bpm`} />
+        <StatCard
+          label="❤️Resting Heart Rate"
+          value={checkData(displayData.resting_heart_rate, formatHeartRate)}
+        />
+        <StatCard
+          label="❤️Average Heart Rate"
+          value={checkData(displayData.avg_heart_rate, formatHeartRate)}
+        />
+        <StatCard
+          label="❤️Max Heart Rate"
+          value={checkData(displayData.max_heart_rate, formatHeartRate)}
+        />
       </div>
     </div>
   );

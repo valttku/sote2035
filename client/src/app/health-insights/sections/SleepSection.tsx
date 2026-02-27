@@ -37,13 +37,6 @@ function calculateSleepEndtime(
   });
 }
 
-function formatSecondsToHoursMinutes(seconds?: number | null): string {
-  if (seconds == null) return "No data";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${h > 0 ? `${h}h ` : ""}${m}m`.trim();
-}
-
 function SleepTimeline({ sleep }: { sleep: Sleep }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(800);
@@ -266,39 +259,62 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
   const hasData = !!sleep;
 
   // Fallback for completely missing data
-  const displaySleep: Sleep = {
-    id: sleep?.id || "empty",
-    duration_in_seconds: sleep?.duration_in_seconds ?? 0,
-    start_time_in_seconds: sleep?.start_time_in_seconds ?? 0,
-    unmeasurable_sleep_in_seconds: sleep?.unmeasurable_sleep_in_seconds ?? 0,
-    deep_sleep_in_seconds: sleep?.deep_sleep_in_seconds ?? 0,
-    light_sleep_in_seconds: sleep?.light_sleep_in_seconds ?? 0,
-    rem_sleep_in_seconds: sleep?.rem_sleep_in_seconds ?? 0,
-    awake_duration_in_seconds: sleep?.awake_duration_in_seconds ?? 0,
-    overall_sleep_score: sleep?.overall_sleep_score ?? {
-      value: 0,
-      qualifierKey: "unknown",
-    },
-    sleep_levels_map: sleep?.sleep_levels_map ?? {},
-    updated_at: sleep?.updated_at ?? new Date().toISOString(),
-  };
+  const displaySleep: Sleep = hasData
+    ? sleep!
+    : {
+        id: "empty",
+        duration_in_seconds: 0,
+        start_time_in_seconds: 0,
+        unmeasurable_sleep_in_seconds: 0,
+        deep_sleep_in_seconds: 0,
+        light_sleep_in_seconds: 0,
+        rem_sleep_in_seconds: 0,
+        awake_duration_in_seconds: 0,
+        overall_sleep_score: {
+          value: 0,
+          qualifierKey: "unknown",
+        },
+        sleep_levels_map: {},
+        updated_at: new Date().toISOString(),
+      };
+
+  // Utility to format seconds into "Xh Ym" format
+  function formatSecondsToHoursMinutes(seconds: number): string {
+    if (seconds === 0) return "0 min";
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.round((seconds % 3600) / 60);
+    return `${hours > 0 ? `${hours}h ` : ""}${minutes}m`;
+  }
+
+  // if value is null/undefined/empty string/NaN, show "No data".
+  // Otherwise, format it if formatter is provided, else just convert to string
+  const checkData = (
+    value: number | string | null | undefined,
+    formatter?: (v: any) => string,
+  ) =>
+    value !== null &&
+    value !== undefined &&
+    !(typeof value === "number" && isNaN(value)) &&
+    value !== ""
+      ? formatter
+        ? formatter(value)
+        : String(value)
+      : "No data";
 
   return (
     <div
-      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!hasData ? "opacity-50" : ""}`}
+      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!sleep ? "opacity-50" : ""}`}
     >
       <h1>
         Updated at:{" "}
-        {displaySleep.updated_at
-          ? new Date(displaySleep.updated_at).toLocaleString(undefined, {
-              hour: "2-digit",
-              minute: "2-digit",
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour12: false,
-            })
-          : "No data"}
+        {new Date(displaySleep.updated_at).toLocaleString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour12: false,
+        })}
       </h1>
 
       <div className="flex flex-col items-center gap-4 h-full">
@@ -310,62 +326,75 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full ">
           <StatCard
             label="Deep Sleep"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(
               displaySleep.deep_sleep_in_seconds,
+              formatSecondsToHoursMinutes,
             )}
             icon={<FaCircle color="#3510b9" size={16} />}
           />
+
           <StatCard
             label="Light Sleep"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(
               displaySleep.light_sleep_in_seconds,
+              formatSecondsToHoursMinutes,
             )}
             icon={<FaCircle color="#3bd7f6" size={16} />}
           />
+
           <StatCard
             label="REM Sleep"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(
               displaySleep.rem_sleep_in_seconds,
+              formatSecondsToHoursMinutes,
             )}
             icon={<FaCircle color="#f50be9" size={16} />}
           />
+
           <StatCard
             label="Awake"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(
               displaySleep.awake_duration_in_seconds,
+              formatSecondsToHoursMinutes,
             )}
             icon={<FaCircle color="#fdb0fc" size={16} />}
           />
+
           <StatCard
             label="💤Total Sleep"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(
               displaySleep.duration_in_seconds,
+              formatSecondsToHoursMinutes,
             )}
           />
+
           <StatCard
             label="⏰Start / End"
-            value={
+            value={checkData(
               displaySleep.start_time_in_seconds &&
-              displaySleep.duration_in_seconds
+                displaySleep.duration_in_seconds
                 ? `${new Date(displaySleep.start_time_in_seconds * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })} - ${calculateSleepEndtime(
                     displaySleep.start_time_in_seconds,
                     displaySleep.duration_in_seconds,
                   )}`
-                : "No data"
-            }
+                : null,
+            )}
           />
+
           <StatCard
             label="Sleep Score"
-            value={
+            value={checkData(
               displaySleep.overall_sleep_score?.value
                 ? `${displaySleep.overall_sleep_score.value} (${displaySleep.overall_sleep_score.qualifierKey})`
-                : "No data"
-            }
+                : null,
+            )}
           />
+
           <StatCard
             label="Unmeasurable Sleep"
-            value={formatSecondsToHoursMinutes(
+            value={checkData(
               displaySleep.unmeasurable_sleep_in_seconds,
+              formatSecondsToHoursMinutes,
             )}
           />
         </div>

@@ -22,27 +22,51 @@ export function ActivitiesSection({
 }: ActivitiesSectionProps) {
   const hasData = activities && activities.length > 0;
 
+  // Check if the activity is fully empty (all numeric fields 0)
+  const isEmptyActivity = (activity: Activity) =>
+    !activity.duration_in_seconds &&
+    !activity.distance_in_meters &&
+    !activity.active_kilocalories &&
+    !activity.average_heart_rate;
+
   // Use dummy activities if none exist
-  const displayActivities: Activity[] = hasData
-    ? activities!
-    : [
-        {
-          id: "empty-1",
-          activity_name: "Activity Name",
-          duration_in_seconds: 0,
-          distance_in_meters: 0,
-          active_kilocalories: 0,
-          average_heart_rate: 0,
-        },
-        {
-          id: "empty-2",
-          activity_name: "Activity Name",
-          duration_in_seconds: 0,
-          distance_in_meters: 0,
-          active_kilocalories: 0,
-          average_heart_rate: 0,
-        },
-      ];
+  const displayActivities: Activity[] =
+    hasData && !activities.every(isEmptyActivity)
+      ? activities!
+      : [
+          {
+            id: "empty-1",
+            activity_name: "Activity Name",
+            duration_in_seconds: 0,
+            distance_in_meters: 0,
+            active_kilocalories: 0,
+            average_heart_rate: 0,
+          },
+          {
+            id: "empty-2",
+            activity_name: "Activity Name",
+            duration_in_seconds: 0,
+            distance_in_meters: 0,
+            active_kilocalories: 0,
+            average_heart_rate: 0,
+          },
+        ];
+
+  // show "No data" if value is null/undefined/NaN
+  const checkData = (
+    value: number | null | undefined,
+    formatter?: (v: number) => string,
+  ) =>
+    value !== null && value !== undefined && !isNaN(value)
+      ? formatter
+        ? formatter(value)
+        : String(value)
+      : "No data";
+
+  const formatMinutes = (seconds: number) => `${(seconds / 60).toFixed(1)} min`;
+  const formatDistance = (meters: number) => `${(meters / 1000).toFixed(2)} km`;
+  const formatCalories = (kcal: number) => `${kcal} kcal`;
+  const formatHeartRate = (hr: number) => `${hr} bpm`;
 
   const handleActivityToggle = (activityId: string) => {
     const newSelected = new Set(selectedActivityIds);
@@ -73,7 +97,7 @@ export function ActivitiesSection({
               >
                 {activity.activity_name}
                 <span className="text-sm text-gray-400">
-                  ({(activity.duration_in_seconds / 60).toFixed(1)} min)
+                  ({checkData(activity.duration_in_seconds, formatMinutes)})
                 </span>
               </label>
 
@@ -95,15 +119,21 @@ export function ActivitiesSection({
             <div className="flex flex-row mt-2 text-sm text-gray-200 items-start justify-start gap-4">
               {activity.distance_in_meters != null && (
                 <div>
-                  🛣 Distance: {(activity.distance_in_meters / 1000).toFixed(2)}{" "}
-                  km
+                  🛣 Distance:{" "}
+                  {checkData(activity.distance_in_meters, formatDistance)}
                 </div>
               )}
               {activity.active_kilocalories != null && (
-                <div>🔥 Calories: {activity.active_kilocalories} kcal</div>
+                <div>
+                  🔥 Calories:{" "}
+                  {checkData(activity.active_kilocalories, formatCalories)}
+                </div>
               )}
               {activity.average_heart_rate != null && (
-                <div>❤️ Avg HR: {activity.average_heart_rate} bpm</div>
+                <div>
+                  ❤️ Avg HR:{" "}
+                  {checkData(activity.average_heart_rate, formatHeartRate)}
+                </div>
               )}
             </div>
           </div>

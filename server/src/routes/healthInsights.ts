@@ -186,7 +186,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
         u.last_night_avg,
         u.last_night_5min_high,
         (
-          SELECT AVG(last_night_avg)
+          SELECT AVG((last_night_avg)::float)
           FROM app.user_hrv_garmin
           WHERE user_id = $1
             AND day_date >= ($2::date - INTERVAL '6 days')
