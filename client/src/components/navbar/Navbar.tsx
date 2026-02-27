@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import DarkModeToggle from "./DarkModeToggle";
 import LogoutButton from "./LogoutButton";
+import { FaRobot } from "react-icons/fa";
 
 //  Import your translation hook and types
 import { useTranslation } from "@/i18n/LanguageProvider";
@@ -21,6 +22,7 @@ export default function Navbar() {
     { label: t.navbar.home, path: "/", icon: <FaHome /> },
     { label: t.navbar.calendar, path: "/calendar", icon: <FaCalendarAlt /> },
     { label: t.navbar.health, path: "/health-insights", icon: <FaHeartbeat /> },
+     { label: "Health AI Chat", path: "/chat", icon: <FaRobot /> },
     { label: t.navbar.settings, path: "/settings", icon: <FaCog /> },
   ];
 
@@ -49,6 +51,7 @@ export default function Navbar() {
                 
           <div className="hidden md:flex items-center gap-2">
             <DarkModeToggle />
+            
           </div> 
 
           <div className="w-40 flex items-center justify-end gap-3">
