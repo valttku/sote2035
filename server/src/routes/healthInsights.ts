@@ -27,7 +27,7 @@ healthInsightsRouter.get("/garmin", authRequired, async (req, res, next) => {
     // Fetch profile and metrics in parallel
     const [profileResult, metricsResult] = await Promise.all([
       db.query(
-        `SELECT id, gender, height, weight, updated_at
+        `SELECT id, gender, height, weight, birthday,updated_at
          FROM app.users
          WHERE id = $1`,
         [userId],
