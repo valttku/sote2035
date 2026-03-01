@@ -19,6 +19,7 @@ import { healthInsightsRouter } from "./routes/healthInsights.js";
 import { polarRouter } from "./routes/integrations/polar.js";
 import { garminRouter } from "./routes/integrations/garmin.js";
 import { garminWebhookRouter } from "./routes/webhooks/garminWebhooks.js";
+import { polarWebhookRouter } from "./routes/webhooks/polarWebhooks.js";
 
 import { errorHandler } from "./middleware/error.js";
 
@@ -78,6 +79,7 @@ app.use("/api/v1/integrations/garmin", garminRouter);
 
 // webhooks for providers
 app.use("/api/v1/webhooks/garmin", garminWebhookRouter);
+app.use("/api/v1/webhooks/polar", polarWebhookRouter);
 
 // global error handler
 app.use(errorHandler);
