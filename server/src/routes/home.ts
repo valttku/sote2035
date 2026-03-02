@@ -112,7 +112,13 @@ homeRouter.get("/", authRequired, async (req, res) => {
         } else {
           prompt += `All metrics are within healthy ranges. Congratulate the user and encourage them to keep up the good work!`;
         }
-        aiMessage = await getAICompletion(prompt);
+        // Wrap AI call in try-catch to ensure alerts are still returned if AI fails
+        try {
+          aiMessage = await getAICompletion(prompt);
+        } catch (aiError) {
+          console.error("[home route] AI completion failed:", aiError);
+          aiMessage = "AI assistant is temporarily unavailable. ";
+        }
       } else {
         aiMessage = ""; // no message if all statuses undefined or no data
       }
