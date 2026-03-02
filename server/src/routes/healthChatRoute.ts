@@ -1,6 +1,6 @@
 import express from "express";
-import { generateHealthAIResponse } from "../ai/chatAIService";
-import { checkEmergencyRisk } from "../ai/safetyGuard";
+import { generateHealthAIResponse } from "../ai/chatAIService.js";
+import { checkEmergencyRisk } from "../ai/safetyGuard.js";
 
 const router = express.Router();
 

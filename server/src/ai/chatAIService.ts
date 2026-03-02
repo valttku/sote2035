@@ -1,4 +1,4 @@
-import { getAICompletion } from "../services/openAIService";
+import { getAICompletion } from "../services/openAIService.js";
 
 /**
  * Health AI response generator
