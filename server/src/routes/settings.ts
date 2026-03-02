@@ -41,6 +41,9 @@ async function deregisterFromPolar(userId: number) {
   }
 }
 
+// Deregister from garmin
+
+
 //GET /api/v1/settings
 settingsRouter.get("/", authRequired, async (req, res, next) => {
   try {
