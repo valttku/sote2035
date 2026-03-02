@@ -151,7 +151,11 @@ polarRouter.get("/callback", async (req, res, next) => {
     const regJson: any = await regRes.json().catch(() => ({}));
 
     const polarUserId =
-      regJson["polar-user-id"] ?? regJson["polar_user_id"] ?? regJson.user_id ?? null;
+      regJson["polar-user-id"] ??
+      regJson["polar_user_id"] ??
+      regJson.user_id ??
+      tokenJson.x_user_id ??
+      null;
 
     if (!regRes.ok && !polarUserId) {
       return res.status(400).send(`User register failed: ${JSON.stringify(regJson)}`);
