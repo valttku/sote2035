@@ -92,15 +92,18 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
             <span
               className="
                 absolute
-                bottom-full
-                right-0
-                -translate-x-1/4
-                mb-0
+                left-full
+                top-1/2
+                -translate-y-1/2
+                ml-2
                 min-w-[max-content]
                 rounded
-                bg-gray-700
-                text-white
-                text-xs
+                bg-white/90
+                border
+                border-gray-300
+                p-2
+                text-black
+                text-sm
                 px-2 py-1
                 opacity-0
                 group-hover/badge:opacity-100

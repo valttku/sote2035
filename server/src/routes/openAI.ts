@@ -12,7 +12,7 @@ openAIRouter.post("/", async (req: Request, res: Response) => {
     res.json({ result });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Something went wrong" });
+    res.status(500).json({ error: "AI assistant is temporarily unavailable." });
   }
 });
 

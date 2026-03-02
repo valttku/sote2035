@@ -26,20 +26,35 @@ export default function Home() {
   });
 
   const [aiMessage, setAIMessage] = useState<string | null>(null);
+  const [aiStatus, setAIStatus] = useState<
+    "none" | "generated" | "quota_exceeded" | "error"
+  >("none");
   const [loadingAI, setLoadingAI] = useState(true);
   const [showAIWindow, setShowAIWindow] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+
+  useEffect(() => {
+    const femaleAvatar = new Image();
+    femaleAvatar.src = "/avatar-female.png";
+
+    const maleAvatar = new Image();
+    maleAvatar.src = "/avatar-male.png";
+  }, []);
 
   // Poll each body part for alerts (metric status !== 'good')
   useEffect(() => {
     const date = new Date().toISOString().split("T")[0];
     let cancelled = false;
 
-    async function fetchSummary() {
+    async function fetchSummary(requestAI = false) {
       try {
-        const res = await fetch(`/api/v1/home?date=${date}&part=summary`, {
-          credentials: "include",
-        });
+        const aiParam = requestAI ? "&ai=1" : "";
+        const res = await fetch(
+          `/api/v1/home?date=${date}&part=summary${aiParam}`,
+          {
+            credentials: "include",
+          },
+        );
         if (!res.ok) return;
         const json = await res.json().catch(() => ({}));
 
@@ -52,12 +67,21 @@ export default function Home() {
           lungs: !!alertsResp.lungs,
           legs: !!alertsResp.legs,
         });
-        setAIMessage(json.aiMessage || "");
-        setLoadingAI(false);
+        if (requestAI) {
+          setAIMessage(json.aiMessage || "");
+          setAIStatus(json.aiStatus || "none");
+          setLoadingAI(false);
+          console.log("[AI Generation] AI message fetched and set", {
+            timestamp: new Date().toISOString(),
+            hasMessage: !!json.aiMessage,
+            aiStatus: json.aiStatus,
+          });
+        }
 
         const gender = json.user?.gender;
-        if (gender && !genderLoaded.current) {
-          setAvatarType(gender === "female" ? "female" : "male");
+        if (!genderLoaded.current) {
+          const newType = gender === "female" ? "female" : "male";
+          setAvatarType(newType);
           genderLoaded.current = true;
         }
       } catch (err) {
@@ -65,8 +89,13 @@ export default function Home() {
       }
     }
 
-    fetchSummary();
-    const id = setInterval(fetchSummary, 1000 * 60 * 5);
+    fetchSummary(true);
+    const id = setInterval(
+      () => {
+        fetchSummary(false);
+      },
+      1000 * 60 * 5,
+    );
     return () => {
       cancelled = true;
       clearInterval(id);
@@ -98,13 +127,15 @@ export default function Home() {
 
           <div className="flex justify-center w-full">
             <div className="relative flex flex-col md:flex-row items-center md:items-start">
-              <DigitalTwin
-                BODY_PARTS={BODY_PARTS}
-                selected={selected}
-                setSelected={setSelected}
-                alerts={alerts}
-                isFemale={isFemale}
-              />
+              <div className="relative">
+                <DigitalTwin
+                  BODY_PARTS={BODY_PARTS}
+                  selected={selected}
+                  setSelected={setSelected}
+                  alerts={alerts}
+                  isFemale={isFemale}
+                />
+              </div>
 
               {selected && (
                 <div
@@ -136,7 +167,7 @@ export default function Home() {
         </div>
         <div className="fixed bottom-6 right-6 pointer-events-auto">
           <AIMessageButton
-            hasNewMessage={!!aiMessage && !showAIWindow}
+            aiStatus={aiStatus}
             onClick={() => {
               setShowAIWindow((prev) => {
                 if (!prev) setShowInfo(false);
@@ -161,6 +192,7 @@ export default function Home() {
           generatingMessage={t.home.generatingMessage}
           placeholder={t.home.noMessage}
           loading={loadingAI}
+          aiStatus={aiStatus}
           open={showAIWindow}
           onClose={() => setShowAIWindow(false)}
         />

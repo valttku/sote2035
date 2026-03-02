@@ -10,7 +10,7 @@ const openai = new OpenAI({
 
 export async function getAICompletion(prompt: string): Promise<string> {
   const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-5-nano-2025-08-07",
     messages: [{ role: "user", content: prompt }],
     max_tokens: 300,
   });
