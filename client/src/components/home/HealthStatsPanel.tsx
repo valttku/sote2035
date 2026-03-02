@@ -92,13 +92,13 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
             <span
               className="
                 absolute
-                left-full
+                right-full
                 top-1/2
                 -translate-y-1/2
                 ml-2
                 min-w-[max-content]
                 rounded
-                bg-white/90
+                bg-white/95
                 border
                 border-gray-300
                 p-2

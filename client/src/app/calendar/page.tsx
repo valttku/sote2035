@@ -172,7 +172,7 @@ export default function CalendarPage() {
         {/* Modal */}
         {selectedDate && (
           <GlobalModal onClose={closeModal}>
-            <h2 className="text-2xl mb-2 text-center">
+            <h1 className="text-2xl mb-2 text-center">
               {new Date(selectedDate + "T00:00:00").toLocaleDateString(
                 t.calendar.locale || "en-US",
                 {
@@ -182,7 +182,7 @@ export default function CalendarPage() {
                   day: "numeric",
                 },
               )}
-            </h2>
+            </h1>
 
             {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
             {loading && (
