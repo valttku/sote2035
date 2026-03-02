@@ -7,15 +7,23 @@ import { authRequired } from "../middleware/authRequired.js";
 // Home route provides health summary and detailed metrics for the homepage.
 const homeRouter = Router();
 
-// GET /api/v1/home?date=YYYY-MM-DD&part=heart|brain|legs|lungs|summary
-// - If part=summary: returns alert status for each body part (true if any metric is out of range)
-// - If part=heart|brain|legs|lungs: returns detailed metrics for the selected body part
-// Requires authentication.
+// Simple in-memory AI cache
+type CachedAI = {
+  message: string;
+  createdAt: number;
+};
 
+const aiCache = new Map<string, CachedAI>();
+
+// Optional: cache expiration (e.g. 6 hours)
+const AI_CACHE_TTL = 1000 * 60 * 60 * 6; // 6 hours
+
+// GET /api/v1/home?date=YYYY-MM-DD&part=heart|brain|legs|lungs|summary
 homeRouter.get("/", authRequired, async (req, res) => {
   // Extract date and part from query parameters
   const date = String(req.query.date ?? "");
   const part = String(req.query.part ?? "");
+  const ai = String(req.query.ai ?? "0");
 
   // Validate required parameters
   if (!date || !part) {
@@ -36,7 +44,6 @@ homeRouter.get("/", authRequired, async (req, res) => {
 
     // If requesting summary, return alert status for each body part
     if (part === "summary") {
-      // Define body parts to check
       const parts: Array<"heart" | "brain" | "legs" | "lungs"> = [
         "brain",
         "heart",
@@ -44,12 +51,10 @@ homeRouter.get("/", authRequired, async (req, res) => {
         "legs",
       ];
 
-      // Fetch metrics for each part
       const metricsByPart = await Promise.all(
         parts.map((p) => getHealthStatEntriesData(userId, date, p)),
       );
 
-      // Build alerts object: true if any metric for the part is 'low' or 'high'
       const alerts: Record<string, boolean> = {};
       const outOfRangeDetails: Array<{
         part: string;
@@ -57,9 +62,11 @@ homeRouter.get("/", authRequired, async (req, res) => {
         status: string;
         value: any;
       }> = [];
+
       for (let i = 0; i < parts.length; i++) {
         const metrics = metricsByPart[i] ?? {};
         alerts[parts[i]] = false;
+
         for (const [metric, value] of Object.entries(metrics)) {
           if (
             typeof value === "object" &&
@@ -72,58 +79,79 @@ homeRouter.get("/", authRequired, async (req, res) => {
               part: parts[i],
               metric,
               status: value.status,
-              value: value.value,
+              value: (value as any).value,
             });
           }
         }
       }
 
-      // Log alerts for debugging
-      console.log("[home route] alerts:", alerts);
-      console.log("[home route] outOfRangeDetails:", outOfRangeDetails);
+      // Determine if we should generate an AI message
+      const hasDefinedStatus = outOfRangeDetails.length > 0;
+      const hasAlerts = Object.values(alerts).some(Boolean);
 
-      // If there the data exists and at least one metric is out of range, generate AI message
-      // Check if there is any metric data
-      const hasAnyData = metricsByPart.some(
-        (metrics) => metrics && Object.keys(metrics).length > 0,
-      );
+      let aiMessage: string | null = null;
+      let aiStatus: "none" | "generated" | "quota_exceeded" | "error" = "none";
 
-      // Check if at least one metric has a defined status (low or high)
-      const hasDefinedStatus = metricsByPart.some((metrics) =>
-        Object.values(metrics).some(
-          (value) =>
-            typeof value === "object" &&
-            value != null &&
-            "status" in value &&
-            (value.status === "low" || value.status === "high"),
-        ),
-      );
+      const cacheKey = `${userId}-${date}`;
+      const cached = aiCache.get(cacheKey);
 
-      // Generate AI message only if there is data with meaningful statuses
-      let aiMessage = "";
-      if (hasAnyData && hasDefinedStatus) {
-        let prompt = `You are a health assistant. Here are the user's health alerts for ${date}:\n`;
-        if (outOfRangeDetails.length > 0) {
-          prompt += `The following metrics are out of range:\n`;
-          for (const detail of outOfRangeDetails) {
-            prompt += `- ${detail.part}: ${detail.metric} is ${detail.status} (${detail.value})\n`;
-          }
-          prompt += `\nGive specific advice for each out-of-range metric, and explain why it matters. Keep your advice concise and actionable.\n`;
-        } else {
-          prompt += `All metrics are within healthy ranges. Congratulate the user and encourage them to keep up the good work!`;
-        }
-        // Wrap AI call in try-catch to ensure alerts are still returned if AI fails
-        try {
-          aiMessage = await getAICompletion(prompt);
-        } catch (aiError) {
-          console.error("[home route] AI completion failed:", aiError);
-          aiMessage = "AI assistant is temporarily unavailable. ";
-        }
-      } else {
-        aiMessage = ""; // no message if all statuses undefined or no data
+      // Remove expired cache
+      if (cached && Date.now() - cached.createdAt > AI_CACHE_TTL) {
+        aiCache.delete(cacheKey);
       }
-      // Respond with alerts, user gender, and AI message
-      return res.json({ alerts, user: { gender }, aiMessage });
+
+      // Re-check after possible delete
+      const validCache = aiCache.get(cacheKey);
+
+      // Determine if we can use cached AI message
+      if (validCache) {
+        aiMessage = validCache.message;
+        aiStatus = "generated";
+      } else if (hasDefinedStatus) {
+        if (ai !== "1") {
+          // There are alerts but frontend didn't request AI generation
+          aiStatus = "none";
+        } else {
+          try {
+            const prompt = `
+            You are a health assistant. Here are the user's health alerts for ${date}:
+
+            ${outOfRangeDetails
+              .map(
+                (d) => `- ${d.part}: ${d.metric} is ${d.status} (${d.value})`,
+              )
+              .join("\n")}
+
+            Give concise, specific, actionable advice.
+            `;
+
+            aiMessage = await getAICompletion(prompt);
+
+            aiCache.set(cacheKey, {
+              message: aiMessage,
+              createdAt: Date.now(),
+            });
+
+            aiStatus = "generated";
+          } catch (err: any) {
+            console.error("[home route] AI failed:", err);
+
+            if (err?.message?.includes("quota")) {
+              aiStatus = "quota_exceeded";
+            } else {
+              aiStatus = "error";
+            }
+          }
+        }
+      }
+
+      return res.json({
+        alerts,
+        hasAlerts,
+        user: { gender },
+        aiMessage,
+        aiStatus,
+      });
     }
 
     // Otherwise, fetch detailed metrics for the selected body part
