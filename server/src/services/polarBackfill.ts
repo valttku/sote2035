@@ -107,7 +107,7 @@ export async function backfillPolarData(
   // ── 3. Sleep — all available nights ─────────────────────────────────────
   // Response: { nights: [ { date, sleep_start_time, light_sleep, ... }, ... ] }
   try {
-    const data = await polarGet(`/v3/users/${polarUserId}/sleep`, accessToken);
+    const data = await polarGet(`/v3/users/sleep`, accessToken);
     const nights: any[] = data?.nights ?? (Array.isArray(data) ? data : []);
     console.log(`[polar-backfill] ${nights.length} sleep nights fetched`);
     for (const night of nights) {
@@ -124,7 +124,7 @@ export async function backfillPolarData(
   // Response: { recharges: [ { date, heart_rate_avg, heart_rate_variability_avg, ... } ] }
   try {
     const data = await polarGet(
-      `/v3/users/${polarUserId}/nightly-recharge`,
+      `/v3/users/nightly-recharge`,
       accessToken
     );
     const recharges: any[] = data?.recharges ?? (Array.isArray(data) ? data : []);
