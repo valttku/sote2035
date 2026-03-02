@@ -10,11 +10,14 @@
  * Call ensurePolarWebhook() at server startup. Errors are logged but non-fatal
  * so the server still starts even if Polar is temporarily unreachable.
  *
- * Required env vars:
+ * Required env vars (production only):
  *   POLAR_CLIENT_ID
  *   POLAR_CLIENT_SECRET
  *   POLAR_WEBHOOK_SERVER_URL  → your deployed server root URL
  *                               e.g. https://sote2035-server.onrender.com
+ *
+ * If POLAR_WEBHOOK_SERVER_URL is not set (e.g. local dev), the function
+ * skips silently — Polar can't reach localhost anyway.
  */
 
 const BASE = "https://www.polaraccesslink.com";
@@ -32,13 +35,7 @@ function getWebhookUrl(): string {
     process.env.POLAR_WEBHOOK_SERVER_URL ??
     process.env.APP_SERVER_URL ??
     "";
-  if (!serverUrl) {
-    throw new Error(
-      "Set POLAR_WEBHOOK_SERVER_URL env var to your server URL " +
-        "(e.g. https://sote2035-server.onrender.com)"
-    );
-  }
-  return `${serverUrl.replace(/\/$/, "")}/api/v1/webhooks/polar`;
+  return serverUrl ? `${serverUrl.replace(/\/$/, "")}/api/v1/webhooks/polar` : "";
 }
 
 async function adminFetch(
@@ -64,6 +61,14 @@ async function adminFetch(
 export async function ensurePolarWebhook(): Promise<void> {
   try {
     const webhookUrl = getWebhookUrl();
+
+    if (!webhookUrl) {
+      console.log(
+        "[polar-webhook-setup] POLAR_WEBHOOK_SERVER_URL not set — skipping (local dev)"
+      );
+      return;
+    }
+
     console.log(`[polar-webhook-setup] Checking webhook → ${webhookUrl}`);
 
     // GET /v3/webhooks — check if one already exists
