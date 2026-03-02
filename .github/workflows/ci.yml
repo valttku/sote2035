@@ -50,3 +50,16 @@ jobs:
       - name: Build backend
         working-directory: ./server
         run: npm run build
+
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Trigger server deploy
+        run: curl -fsSL -X POST "${{ secrets.RENDER_SERVER_DEPLOY_HOOK }}"
+
+      - name: Trigger client deploy
+        run: curl -fsSL -X POST "${{ secrets.RENDER_CLIENT_DEPLOY_HOOK }}"
