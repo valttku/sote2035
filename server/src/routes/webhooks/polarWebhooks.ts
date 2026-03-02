@@ -155,23 +155,26 @@ polarWebhookRouter.post("/", async (req, res) => {
             const activityData = await fetchPolarResource(dataUrl, access_token);
             if (!activityData) return;
 
-            // The response may be a single object or wrapped in an array
             const activities = Array.isArray(activityData)
               ? activityData
               : [activityData];
 
             for (const activity of activities) {
-              if (!activity.date) {
-                console.warn("[polar-webhook] Activity missing date, skipping");
+              // new API uses start_time; old deprecated API uses date
+              const dayDate =
+                activity.date ??
+                (activity.start_time ? String(activity.start_time).slice(0, 10) : null);
+              if (!dayDate) {
+                console.warn("[polar-webhook] Activity missing date/start_time, skipping");
                 continue;
               }
               console.log(
-                `[polar-webhook] Processing activity_summary for user ${user_id} on ${activity.date}`
+                `[polar-webhook] Processing activity_summary for user ${user_id} on ${dayDate}`
               );
               const row = mapPolarActivitySummaryToRow(user_id, activity);
               await upsertPolarActivitySummary(row);
               console.log(
-                `[polar-webhook] Upserted activity_summary for user ${user_id} on ${activity.date}`
+                `[polar-webhook] Upserted activity_summary for user ${user_id} on ${dayDate}`
               );
             }
             break;
