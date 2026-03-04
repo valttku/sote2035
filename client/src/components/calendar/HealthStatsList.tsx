@@ -3,7 +3,7 @@
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { Translations } from "@/i18n/types";
 
-// One health entry from the backend
+// Health entry from the backend
 export type HealthStatsEntry = {
   id: string;
   kind: string;
@@ -31,8 +31,6 @@ function labelForKind(kind: string, t?: Translations) {
       return t?.calendar.activity ?? "Activity";
     case "resp_daily":
       return t?.calendar.respiratory ?? "Respiratory";
-    case "skin_temp_daily":
-      return t?.calendar.skinTemp ?? "Skin Temp";
     case "manual_activity":
       return t?.calendar.manualActivity ?? "Manual Activity";
     default:
@@ -92,12 +90,9 @@ function formatHealthStatValue(key: string, value: unknown) {
 }
 
 // Show a list of health entries
-export default function HealthStatsList({
-  entries,
-  onDelete,
-}: {
+export default function HealthStatsList({entries, onDelete}: {
   entries: HealthStatsEntry[];
-  onDelete?: (id: string) => Promise<void>; // optional delete function
+  onDelete?: (id: string) => Promise<void>;
 }) {
   const { t } = useTranslation();
 
@@ -126,9 +121,11 @@ export default function HealthStatsList({
 
   return (
     <div className="space-y-3 overflow-y-auto max-h-96">
+      {/* Map each health stat entry to a card with details */ }
       {mergedEntries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
-          {/* Header: Health stat label + source */}
+          
+          {/* Header: Health stat label + source + delete */}
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-lg text-[#31c2d5]">
               {labelForKind(e.kind, t)}
@@ -138,6 +135,8 @@ export default function HealthStatsList({
               <span className="text-xs opacity-70">
                 {e.source ?? t.calendar.unknown ?? "unknown"}
               </span>
+
+              {/* Show delete button for manual activities */ }
               {e.kind === "manual_activity" && onDelete && (
                 <button
                   onClick={() => onDelete(e.id)}
