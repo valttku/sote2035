@@ -268,26 +268,147 @@
     "logout": "Log off"
   },
 
+  
   "healthInsights": {
     "title": "Health Insights",
-    "sections": {
-      "profile": "Profile",
-      "dailies": "Dailies",
-      "activities": "Activities",
-      "sleep": "Sleep",
-      "stress": "Stress",
-      "bodyComposition": "Body Composition",
-      "respiration": "Respiration",
-      "hrv": "HRV"
-    },
+    "description": "Overview of your health data",
+
     "loading": "Loading health data...",
     "aiTitle": "AI Analysis",
-    "aiPlaceholder": "Select data and click \"Analyze\" to get insights and suggestions from the AI.",
+    "aiPlaceholder": "Select data and click \"Analyze\" to receive AI suggestions.",
     "analyzing": "Analyzing...",
-    "clearAnalysis": "Clear Analysis",
+    "clearAnalysis": "Clear analysis",
     "analyzeAll": "Analyze all data",
     "analyzeSection": "Analyze {{section}}",
-    "failedInsights": "Failed to get AI insights. Try again.",
-    "noData": "No data for this date. This is a preview of what the stats would look like."
+    "failedInsights": "AI analysis failed. Please try again.",
+    "noData": "No data available for today.",
+    "updatedAt": "Updated",
+    "notEnoughData": "Not enough data",
+
+  "sections": {
+     "activities": "Activities",
+      "dailies": "Dailies",
+      "sleep": "Sleep",
+      "stress": "Stress",
+      "respiration": "Respiration",
+      "hrv": "HRV",
+      "profile": "Profile"
+    },
+
+  "activities": {
+      "count": "Count",
+      "openDetails": "Open details",
+      "hideDetails": "Hide details",
+       "activityName": "Activity",
+    
+      "fields": {
+        "duration": "Duration",
+        "distance": "Distance",
+        "calories": "Calories",
+        "avgHeartRate": "Average heart rate",
+        "maxHeartRate": "Max heart rate",
+        "steps": "Steps",
+        "avgPace": "Average pace",
+        "runCadence": "Run cadence",
+        "bikeCadence": "Bike cadence",
+        "swimCadence": "Swim cadence",
+        "pushCadence": "Push cadence",
+        "pushes": "Pushes",
+        "elevationGain": "Elevation gain",
+        "elevationLoss": "Elevation loss"
+         
+      }
+    },
+
+    "dailies": {
+      "heartRateTimeline": "Daily heart rate timeline",
+      "stats": {
+        "steps": "Steps",
+        "distance": "Distance",
+        "floorsClimbed": "Floors climbed",
+        "activeCalories": "Active calories",
+        "bmrCalories": "BMR calories",
+        "totalCalories": "Total calories",
+        "moderateExercise": "Moderate exercise",
+        "vigorousExercise": "Vigorous exercise",
+        "weeklyIntensity": "Weekly intensity",
+        "restingHeartRate": "Resting heart rate",
+        "avgHeartRate": "Average heart rate",
+        "maxHeartRate": "Max heart rate"
+      }
+    },
+
+    "sleep": {
+      "sleepStagesTimeline": "Sleep stages timeline",
+      "deepSleep": "Deep sleep",
+      "lightSleep": "Light sleep",
+      "remSleep": "REM sleep",
+      "awake": "Awake",
+      "totalSleep": "Total sleep",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "sleepScore": "Sleep score",
+      "unmeasurable": "Unmeasurable", 
+
+       "hour": "h",
+      "minute": "m",
+      "second": "s"
+    },
+
+    "stress": {
+      "overall": "Overall stress level",
+      "stressDuration": "Stress duration",
+      "restStressDuration": "Rest stress duration",
+      "lowStressDuration": "Low stress",
+      "mediumStressDuration": "Medium stress",
+      "highStressDuration": "High stress",
+      "stressQualifier": "Stress evaluation"
+    },
+
+    "respiration": {
+      "title": "Respiration rate",
+      "minRespirationRate": "Minimum respiration rate",
+      "avgRespirationRate": "Average respiration rate",
+      "maxRespirationRate": "Maximum respiration rate"
+    },
+
+    "hrv": {
+      "title": "Heart Rate Variability (HRV)",
+      "dailyAverage": "Daily average",
+      "lastNightAverage": "Last night average",
+      "lastNightHigh": "Last night 5-min high",
+      "sevenDayNightAvg": "7-day night average",
+      "sevenDayAvg": "7-day average",
+      "notEnoughData": "Not enough data",
+      "updatedAt": "Updated"
+    },
+
+    "profile": {
+      "basicInfo": "Basic information",
+      "bodyComposition": "Body composition",
+      "fitness": "Fitness metrics",
+      "age": "Age",
+      "gender": "Gender",
+      "height": "Height",
+      "weight": "Weight",
+      "bmi": "BMI",
+      "bodyFat": "Body fat",
+      "muscleMass": "Muscle mass",
+      "fitnessAge": "Fitness age",
+      "vo2Run": "VO2max (running)",
+      "vo2Cycling": "VO2max (cycling)"
+    }
+  },
+
+
+
+
+   "chat": {
+    "title": "Health AI Assistant",
+    "description": "Ask health-related questions. Not a medical diagnosis tool.",
+    "placeholder": "Ask your health question...",
+    "send": "Send",
+    "thinking": "AI is thinking..."
   }
 }
+

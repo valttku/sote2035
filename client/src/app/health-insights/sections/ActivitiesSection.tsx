@@ -1,24 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type Activity = {
   id: string;
   activity_name: string;
-  duration_in_seconds?: number | null; // all activities have
-  distance_in_meters?: number | null; // some activities may not have
-  active_kilocalories?: number | null; // all activities have
-  average_heart_rate?: number | null; // all activities have
-  steps?: number | null; // all activities have
-  average_pace?: number | null; // some activities may not have
-  max_heart_rate?: number | null; // all activities have
-  avg_run_cadence?: number | null; // some activities may not have
-  avg_bike_cadence?: number | null; // some activities may not have
-  average_swim_cadence?: number | null; // some activities may not have,
-  average_push_cadence?: number | null; // some activities may not have,
-  pushes?: number | null; // some activities may not have
-  total_elevation_gain?: number | null; // some activities may not have,
-  total_elevation_loss?: number | null; // some activities may not have,
+  duration_in_seconds?: number | null;
+  distance_in_meters?: number | null;
+  active_kilocalories?: number | null;
+  average_heart_rate?: number | null;
+  steps?: number | null;
+  average_pace?: number | null;
+  max_heart_rate?: number | null;
+  avg_run_cadence?: number | null;
+  avg_bike_cadence?: number | null;
+  average_swim_cadence?: number | null;
+  average_push_cadence?: number | null;
+  pushes?: number | null;
+  total_elevation_gain?: number | null;
+  total_elevation_loss?: number | null;
 };
 
 type ActivitiesSectionProps = {
@@ -32,18 +33,23 @@ export function ActivitiesSection({
   onActivitiesSelected,
   selectedActivityIds = new Set(),
 }: ActivitiesSectionProps) {
+  const { t } = useTranslation();
+
+
+  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
+    new Set(),
+  );
+
   const hasData = activities && activities.length > 0;
 
-  // Check if the activity is fully empty (all numeric fields 0)
   const isEmptyActivity = (activity: Activity) =>
     !activity.duration_in_seconds &&
     !activity.distance_in_meters &&
     !activity.active_kilocalories &&
     !activity.average_heart_rate;
 
-  // Use dummy activities if none exist
   const displayActivities: Activity[] =
-    hasData && !activities.every(isEmptyActivity)
+    hasData && !activities!.every(isEmptyActivity)
       ? activities!
       : [
           {
@@ -64,7 +70,6 @@ export function ActivitiesSection({
           },
         ];
 
-  // show "No data" if value is null/undefined/NaN
   const checkData = (
     value: number | null | undefined,
     formatter?: (v: number) => string,
@@ -73,10 +78,12 @@ export function ActivitiesSection({
       ? formatter
         ? formatter(value)
         : String(value)
-      : "No data";
+      : t.healthInsights.noData;
 
-  const formatMinutes = (seconds: number) => `${(seconds / 60).toFixed(1)} min`;
-  const formatDistance = (meters: number) => `${(meters / 1000).toFixed(2)} km`;
+  const formatMinutes = (seconds: number) =>
+    `${(seconds / 60).toFixed(1)} min`;
+  const formatDistance = (meters: number) =>
+    `${(meters / 1000).toFixed(2)} km`;
   const formatCalories = (kcal: number) => `${kcal} kcal`;
   const formatHeartRate = (hr: number) => `${hr} bpm`;
 
@@ -90,124 +97,149 @@ export function ActivitiesSection({
     onActivitiesSelected?.(newSelected);
   };
 
-  // Mapping keys to label + optional formatter
+  const toggleExpand = (id: string) => {
+    setExpandedActivities((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  };
+
   const activityFieldMap: Record<
     keyof Activity,
     { label: string; formatter?: (v: number) => string }
   > = {
-    duration_in_seconds: { label: "⏱️Duration", formatter: formatMinutes },
-    distance_in_meters: { label: "🛤️Distance", formatter: formatDistance },
-    active_kilocalories: { label: "🔥Calories", formatter: formatCalories },
-    average_heart_rate: { label: "❤️Avg HR", formatter: formatHeartRate },
-    max_heart_rate: { label: "💓Max HR", formatter: formatHeartRate },
-    steps: { label: "👣Steps" },
+    duration_in_seconds: {
+      label: `⏱️ ${t.healthInsights.activities.fields.duration}`,
+      formatter: formatMinutes,
+    },
+    distance_in_meters: {
+      label: `🛤️ ${t.healthInsights.activities.fields.distance}`,
+      formatter: formatDistance,
+    },
+    active_kilocalories: {
+      label: `🔥 ${t.healthInsights.activities.fields.calories}`,
+      formatter: formatCalories,
+    },
+    average_heart_rate: {
+      label: `❤️ ${t.healthInsights.activities.fields.avgHeartRate}`,
+      formatter: formatHeartRate,
+    },
+    max_heart_rate: {
+      label: `💓 ${t.healthInsights.activities.fields.maxHeartRate}`,
+      formatter: formatHeartRate,
+    },
+    steps: {
+      label: `👣 ${t.healthInsights.activities.fields.steps}`,
+    },
     average_pace: {
-      label: "🏃‍♂️Avg Pace",
+      label: `🏃 ${t.healthInsights.activities.fields.avgPace}`,
       formatter: (v) => `${v.toFixed(2)} min/km`,
     },
-    avg_run_cadence: { label: "🏃‍♂️Run Cadence", formatter: (v) => `${v} spm` },
-    avg_bike_cadence: { label: "🚴‍♂️Bike Cadence", formatter: (v) => `${v} rpm` },
+    avg_run_cadence: {
+      label: `🏃 ${t.healthInsights.activities.fields.runCadence}`,
+      formatter: (v) => `${v} spm`,
+    },
+    avg_bike_cadence: {
+      label: `🚴 ${t.healthInsights.activities.fields.bikeCadence}`,
+      formatter: (v) => `${v} rpm`,
+    },
     average_swim_cadence: {
-      label: "🏊‍♂️Swim Cadence",
+      label: `🏊 ${t.healthInsights.activities.fields.swimCadence}`,
       formatter: (v) => `${v} spm`,
     },
     average_push_cadence: {
-      label: "🤸‍♂️Push Cadence",
+      label: `🤸 ${t.healthInsights.activities.fields.pushCadence}`,
       formatter: (v) => `${v} spm`,
     },
-    pushes: { label: "🤸‍♂️Pushes" },
-    total_elevation_gain: { label: "⬆️Elev Gain", formatter: (v) => `${v} m` },
-    total_elevation_loss: { label: "⬇️Elev Loss", formatter: (v) => `${v} m` },
-    activity_name: { label: "Activity" }, // just in case
-    id: { label: "ID" }, // won't render
+    pushes: {
+      label: `🤸 ${t.healthInsights.activities.fields.pushes}`,
+    },
+    total_elevation_gain: {
+      label: `⬆️ ${t.healthInsights.activities.fields.elevationGain}`,
+      formatter: (v) => `${v} m`,
+    },
+    total_elevation_loss: {
+      label: `⬇️ ${t.healthInsights.activities.fields.elevationLoss}`,
+      formatter: (v) => `${v} m`,
+    },
+    activity_name: {  label: t.healthInsights.activities.activityName,},
+    id: { label: "ID" },
   };
-
-  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set(),
-  );
 
   return (
     <div>
       <div
-        className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!hasData ? "opacity-50" : ""}`}
+        className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${
+          !hasData ? "opacity-50" : ""
+        }`}
       >
-        <p className="pb-2">Count: {hasData ? activities!.length : 0}</p>
+        <p className="pb-2">
+          {t.healthInsights.activities.count}:{" "}
+          {hasData ? activities!.length : 0}
+        </p>
 
-        {displayActivities.map((activity: Activity) => {
-          const toggleActivity = (id: string) => {
-            setExpandedActivities((prev) => {
-              const newSet = new Set(prev);
-              if (newSet.has(id)) newSet.delete(id);
-              else newSet.add(id);
-              return newSet;
-            });
-          };
-
-          return (
-            <div
-              key={activity.id}
-              className="bg-[white]/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
-              onClick={() => toggleActivity(activity.id)}
-            >
-              {/* Title row */}
-              <div className="flex justify-between items-center">
-                <div className="text-lg flex items-baseline gap-2">
-                  {activity.activity_name}
-
-                  {/* Click to toggle details */}
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevent toggle expand when clicking details
-                      toggleActivity(activity.id);
-                    }}
-                    className="mt-2 text-sm text-gray-400 cursor-pointer hover:text-white"
-                  >
-                    {expandedActivities.has(activity.id)
-                      ? "- hide details"
-                      : "- open details"}
-                  </div>
+        {displayActivities.map((activity) => (
+          <div
+            key={activity.id}
+            className="bg-white/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
+            onClick={() => toggleExpand(activity.id)}
+          >
+            <div className="flex justify-between items-center">
+              <div className="text-lg flex items-baseline gap-2">
+                {t.healthInsights.activities.activityName}
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleExpand(activity.id);
+                  }}
+                  className="text-sm text-gray-400 hover:text-white"
+                >
+                  {expandedActivities.has(activity.id)
+                    ? t.healthInsights.activities.hideDetails
+                    : t.healthInsights.activities.openDetails}
                 </div>
-
-                {/* Optional select checkbox */}
-                {hasData && (
-                  <input
-                    type="checkbox"
-                    value={activity.id}
-                    checked={selectedActivityIds.has(activity.id)}
-                    onChange={(e) => {
-                      e.stopPropagation(); // prevent toggle expand when clicking checkbox
-                      handleActivityToggle(activity.id);
-                    }}
-                    className="cursor-pointer accent-[#1d9dad] w-5 h-5"
-                  />
-                )}
               </div>
 
-              {/* Expanded content */}
-              {expandedActivities.has(activity.id) && (
-                <div className="mt-2 text-sm text-gray-200 flex flex-wrap gap-4">
-                  {Object.entries(activityFieldMap).map(
-                    ([key, { label, formatter }]) => {
-                      const value = activity[key as keyof Activity];
-                      if (
-                        value == null ||
-                        key === "activity_name" ||
-                        key === "id"
-                      )
-                        return null;
-                      return (
-                        <div key={key}>
-                          {label}: {checkData(value as number, formatter)}
-                        </div>
-                      );
-                    },
-                  )}
-                </div>
+              {hasData && (
+                <input
+                  type="checkbox"
+                  checked={selectedActivityIds.has(activity.id)}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleActivityToggle(activity.id);
+                  }}
+                  className="cursor-pointer accent-[#1d9dad] w-5 h-5"
+                />
               )}
             </div>
-          );
-        })}
+
+            {expandedActivities.has(activity.id) && (
+              <div className="mt-2 text-sm text-gray-200 flex flex-wrap gap-4">
+                {Object.entries(activityFieldMap).map(
+                  ([key, { label, formatter }]) => {
+                    const value = activity[key as keyof Activity];
+                    if (
+                      value == null ||
+                      key === "activity_name" ||
+                      key === "id"
+                    )
+                      return null;
+
+                    return (
+                      <div key={key}>
+                        {label}: {checkData(value as number, formatter)}
+                      </div>
+                    );
+                  },
+                )}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
 }
+

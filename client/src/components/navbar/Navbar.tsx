@@ -22,7 +22,7 @@ export default function Navbar() {
     { label: t.navbar.home, path: "/", icon: <FaHome /> },
     { label: t.navbar.calendar, path: "/calendar", icon: <FaCalendarAlt /> },
     { label: t.navbar.health, path: "/health-insights", icon: <FaHeartbeat /> },
-     { label: "Health AI Chat", path: "/chat", icon: <FaRobot /> },
+     { label: t.chat.title, path: "/chat", icon: <FaRobot /> },
     { label: t.navbar.settings, path: "/settings", icon: <FaCog /> },
   ];
 

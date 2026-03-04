@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type Dailies = {
   id: string;
@@ -74,6 +75,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
   const formatDistance = (meters: number) => `${(meters / 1000).toFixed(2)} km`;
   const formatCalories = (kcal: number) => `${kcal} kcal`;
   const formatHeartRate = (hr: number) => `${hr} bpm`;
+  const { t } = useTranslation()
 
   // ---- HEART RATE PARSING ----
   let hourlyData: { time: string; value: number | null }[] = [];
@@ -141,7 +143,7 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
       className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!dailies ? "opacity-50" : ""}`}
     >
       <h1>
-        Updated at:{" "}
+        {t.healthInsights.updatedAt}:{" "}
         {new Date(displayData.updated_at).toLocaleString(undefined, {
           hour: "2-digit",
           minute: "2-digit",
@@ -155,8 +157,8 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
       {/* Heart rate chart */}
       <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
         <h3 className="mb-2 text-lg font-semibold">
-          Daily Heart Rate Timeline
-          {!showLine ? " (No data)" : ""}
+        {t.healthInsights.dailies.heartRateTimeline}
+          {!showLine ? ` (${t.healthInsights.noData})` : " "}
         </h3>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart
@@ -203,54 +205,54 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
       {/* Stat cards */}
       <div className="grid grid-cols-4 lg:grid-cols-6 gap-2">
         <StatCard
-          label="👟Steps"
+          label={`👟${t.healthInsights.dailies.stats.steps}`}
           value={checkData(
             displayData.steps,
             (v) => `${v} / ${displayData.steps_goal}`,
           )}
         />
         <StatCard
-          label="🛣 Distance"
+          label= {`🛣 ${t.healthInsights.dailies.stats.distance}`}
           value={checkData(displayData.distance_in_meters, formatDistance)}
         />
         <StatCard
-          label="🪜 Floors Climbed"
+          label={`🪜 ${t.healthInsights.dailies.stats.floorsClimbed}`}
           value={checkData(
             displayData.floors_climbed,
             (v) => `${v} / ${displayData.floors_climbed_goal}`,
           )}
         />
         <StatCard
-          label="🔥 Active Calories"
+          label={`🔥 ${t.healthInsights.dailies.stats.activeCalories}`}
           value={checkData(displayData.active_kilocalories, formatCalories)}
         />
         <StatCard
-          label="🔥 BMR Calories"
+          label={`🔥 ${t.healthInsights.dailies.stats.bmrCalories}`}
           value={checkData(displayData.bmr_kilocalories, formatCalories)}
         />
         <StatCard
-          label="🔥 Total Calories"
+          label={`🔥 ${t.healthInsights.dailies.stats.totalCalories}`}
           value={checkData(
             displayData.active_kilocalories + displayData.bmr_kilocalories,
             formatCalories,
           )}
         />
         <StatCard
-          label="⚡Moderate Exercise"
+          label={`⚡ ${t.healthInsights.dailies.stats.moderateExercise}`}
           value={checkData(
             displayData.moderate_intensity_duration_in_seconds,
             formatMinutes,
           )}
         />
         <StatCard
-          label="⚡Vigorous Exercise"
+          label={`⚡ ${t.healthInsights.dailies.stats.vigorousExercise}`}
           value={checkData(
             displayData.vigorous_intensity_duration_in_seconds,
             formatMinutes,
           )}
         />
         <StatCard
-          label="⚡Weekly Intensity"
+          label={`⚡ ${t.healthInsights.dailies.stats.weeklyIntensity}`}
           value={checkData(
             displayData.weekly_intensity_total_seconds,
             (v) =>
@@ -258,15 +260,15 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
           )}
         />
         <StatCard
-          label="❤️Resting Heart Rate"
+          label={`❤️ ${t.healthInsights.dailies.stats.restingHeartRate}`}
           value={checkData(displayData.resting_heart_rate, formatHeartRate)}
         />
         <StatCard
-          label="❤️Average Heart Rate"
+          label={`❤️ ${t.healthInsights.dailies.stats.avgHeartRate}`}
           value={checkData(displayData.avg_heart_rate, formatHeartRate)}
         />
         <StatCard
-          label="❤️Max Heart Rate"
+          label={`❤️ ${t.healthInsights.dailies.stats.maxHeartRate}`}
           value={checkData(displayData.max_heart_rate, formatHeartRate)}
         />
       </div>

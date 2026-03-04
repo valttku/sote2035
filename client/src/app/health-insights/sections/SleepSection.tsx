@@ -2,6 +2,7 @@
 import { FaCircle } from "react-icons/fa6";
 import { StatCard } from "../../../components/health-insights/StatCard";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type Sleep = {
   id: string;
@@ -41,6 +42,11 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(800);
 
+  const  { t } = useTranslation();
+
+
+
+
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
       if (entries[0]) setContainerWidth(entries[0].contentRect.width);
@@ -65,6 +71,14 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
     rem: "#f50be9",
     awake: "#fdb0fc",
   };
+
+  
+const stageLabelMap: Record<string, string> = {
+  deep: t.healthInsights.sleep.deepSleep,
+  light: t.healthInsights.sleep.lightSleep,
+  rem: t.healthInsights.sleep.remSleep,
+  awake: t.healthInsights.sleep.awake,
+};
 
   const hasSegmentData =
     sleep.sleep_levels_map && Object.keys(sleep.sleep_levels_map).length > 0;
@@ -145,10 +159,10 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
       className="rounded-xl shadow p-4 text-white border border-white/20 bg-white/5 w-full"
     >
       <h3 className="mb-4 text-lg font-semibold">
-        Sleep Stages Timeline{" "}
+        {t.healthInsights.sleep.sleepScore}{" "}
         {!sleep.sleep_levels_map ||
         Object.keys(sleep.sleep_levels_map).length === 0
-          ? "(No Data)"
+          ? t.healthInsights.noData 
           : ""}
       </h3>
       <svg width={width} height={height}>
@@ -172,7 +186,7 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
                 fontSize={16}
                 fontWeight={500}
               >
-                {stage.toUpperCase()}
+                 {stageLabelMap[stage] ?? stage.toUpperCase()}
               </text>
             </g>
           );
@@ -201,7 +215,7 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
                 minute: "2-digit",
                 hour12: false,
               })
-            : "No data"}
+            : t.healthInsights.noData}
         </text>
 
         {/* End time */}
@@ -217,7 +231,7 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
                 sleepStartFromSegments,
                 sleepEndFromSegments - sleepStartFromSegments,
               )
-            : "No data"}
+            : t.healthInsights.noData}
         </text>
 
         {/* X-axis time ticks */}
@@ -269,6 +283,7 @@ function SleepTimeline({ sleep }: { sleep: Sleep }) {
 
 export function SleepSection({ sleep }: { sleep?: Sleep }) {
   const hasData = !!sleep;
+   const  { t } = useTranslation();
 
   // Fallback for completely missing data
   const displaySleep: Sleep = hasData
@@ -318,7 +333,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
       className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!sleep ? "opacity-50" : ""}`}
     >
       <h1>
-        Updated at:{" "}
+        {t.healthInsights.updatedAt}:{" "}
         {new Date(displaySleep.updated_at).toLocaleString(undefined, {
           hour: "2-digit",
           minute: "2-digit",
@@ -337,7 +352,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
         {/* Sleep stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full ">
           <StatCard
-            label="Deep Sleep"
+            label={t.healthInsights.sleep.deepSleep}
             value={checkData(
               displaySleep.deep_sleep_in_seconds,
               formatSecondsToHoursMinutes,
@@ -346,7 +361,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           />
 
           <StatCard
-            label="Light Sleep"
+            label={t.healthInsights.sleep.lightSleep}
             value={checkData(
               displaySleep.light_sleep_in_seconds,
               formatSecondsToHoursMinutes,
@@ -355,7 +370,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           />
 
           <StatCard
-            label="REM Sleep"
+            label={t.healthInsights.sleep.remSleep}
             value={checkData(
               displaySleep.rem_sleep_in_seconds,
               formatSecondsToHoursMinutes,
@@ -364,7 +379,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           />
 
           <StatCard
-            label="Awake"
+            label={t.healthInsights.sleep.awake}
             value={checkData(
               displaySleep.awake_duration_in_seconds,
               formatSecondsToHoursMinutes,
@@ -373,7 +388,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           />
 
           <StatCard
-            label="💤Total Sleep"
+            label={`💤${t?.healthInsights?.sleep?.totalSleep ?? "Total sleep" }`}
             value={checkData(
               displaySleep.duration_in_seconds,
               formatSecondsToHoursMinutes,
@@ -381,7 +396,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           />
 
           <StatCard
-            label="⏰Start / End"
+            label={`⏰ ${t.healthInsights.sleep.startTime} / ${t.healthInsights.sleep.endTime}`}
             value={checkData(
               displaySleep.start_time_in_seconds &&
                 displaySleep.duration_in_seconds
@@ -394,7 +409,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           />
 
           <StatCard
-            label="Sleep Score"
+            label={t.healthInsights.sleep.sleepScore}
             value={checkData(
               displaySleep.overall_sleep_score?.value
                 ? `${displaySleep.overall_sleep_score.value} (${displaySleep.overall_sleep_score.qualifierKey})`
@@ -403,7 +418,7 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
           />
 
           <StatCard
-            label="Unmeasurable Sleep"
+            label={t.healthInsights.sleep.unmeasurable}
             value={checkData(
               displaySleep.unmeasurable_sleep_in_seconds,
               formatSecondsToHoursMinutes,

@@ -1,6 +1,7 @@
 "use client";
 import { StatCard } from "../../../components/health-insights/StatCard";
 import { FaCircle } from "react-icons/fa";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type Stress = {
   id: string;
@@ -78,6 +79,9 @@ export function StressWheelSVG({ stress }: { stress?: Stress }) {
   const lowDash = toDash(low);
   const medDash = toDash(med);
   const highDash = toDash(high);
+
+   const  { t } = useTranslation();
+  
 
   return (
     <svg
@@ -169,7 +173,7 @@ export function StressWheelSVG({ stress }: { stress?: Stress }) {
       >
         {stress?.avg_stress_level ?? 0}
         <tspan x={center} dy="38" fontSize="22" fontWeight="normal">
-          Overall
+          {t.healthInsights.stress.overall}
         </tspan>
       </text>
     </svg>
@@ -178,6 +182,8 @@ export function StressWheelSVG({ stress }: { stress?: Stress }) {
 
 export function StressSection({ stress }: { stress?: Stress }) {
   const hasData = !!stress;
+  
+  const  { t } = useTranslation();
 
   const displayStress: Stress = hasData
     ? stress!
@@ -203,7 +209,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
     <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!stress ? "opacity-50" : ""}`}>
       <h1>
         <span>
-          Updated at:{" "}
+          {t.healthInsights.updatedAt}:{" "}
           {new Date(displayStress.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -222,19 +228,19 @@ export function StressSection({ stress }: { stress?: Stress }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full lg:w-1/2">
           <StatCard
-            label="Stress duration"
+            label={t.healthInsights.stress.stressDuration}
             value={checkData(formatSecondsToHoursMinutes(
               displayStress.stress_duration_in_seconds,
             ))}
           />
 
           <StatCard
-            label="Stress qualifier"
+            label={t.healthInsights.stress.stressQualifier}
             value={checkData(displayStress.stress_qualifier)}
           />
 
           <StatCard
-            label="Rest stress duration"
+            label={t.healthInsights.stress.restStressDuration}
             value={checkData(formatSecondsToHoursMinutes(
               displayStress.rest_stress_duration_in_seconds,
             ))}
@@ -242,7 +248,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
           />
 
           <StatCard
-            label="Low stress duration"
+            label={t.healthInsights.stress.lowStressDuration}
             value={checkData(formatSecondsToHoursMinutes(
               displayStress.low_stress_duration_in_seconds,
             ))}
@@ -250,7 +256,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
           />
 
           <StatCard
-            label="Medium stress duration"
+            label={t.healthInsights.stress.mediumStressDuration}
             value={checkData(formatSecondsToHoursMinutes(
               displayStress.medium_stress_duration_in_seconds,
             ))}
@@ -258,7 +264,7 @@ export function StressSection({ stress }: { stress?: Stress }) {
           />
 
           <StatCard
-            label="High stress duration"
+            label={t.healthInsights.stress.highStressDuration}
             value={checkData(formatSecondsToHoursMinutes(
               displayStress.high_stress_duration_in_seconds,
             ))}
