@@ -1,6 +1,14 @@
 "use client";
 import { StatCard } from "../../../components/health-insights/StatCard";
 import { useTranslation } from "@/i18n/LanguageProvider";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 export type HRV = {
   id: string;
@@ -63,7 +71,7 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
     >
       <h1>
         <span>
-           {t.healthInsights.sections.hrv.updatedAt}:{" "}
+           {t.healthInsights.updatedAt}:{" "}
           {new Date(displayHRV.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
