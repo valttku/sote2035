@@ -170,124 +170,80 @@ export function ActivitiesSection({
   };
 
   return (
-    <div>
-      <div
-        className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${
-          !hasData ? "opacity-50" : ""
-        }`}
-      >
-        <p className="pb-2">
-          {t.healthInsights.activities.count}:{" "}
-          {hasData ? activities!.length : 0}
-        </p>
+  <div>
+    <div
+      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${
+        !hasData ? "opacity-50" : ""
+      }`}
+    >
+      <p className="pb-2">
+        {t.healthInsights.activities.count}:{" "}
+        {hasData ? activities!.length : 0}
+      </p>
 
-        {displayActivities.map((activity) => (
-          <div
-            key={activity.id}
-            className="bg-white/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
-            onClick={() => toggleExpand(activity.id)}
-          >
-            <div className="flex justify-between items-center">
-              <div className="text-lg flex items-baseline gap-2">
-                {t.healthInsights.activities.activityName}
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleExpand(activity.id);
-                  }}
-                  className="text-sm text-gray-400 hover:text-white"
-                >
-                  {expandedActivities.has(activity.id)
-                    ? t.healthInsights.activities.hideDetails
-                    : t.healthInsights.activities.openDetails}
-                </div>
+      {displayActivities.map((activity) => (
+        <div
+          key={activity.id}
+          className="bg-white/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
+          onClick={() => toggleExpand(activity.id)}
+        >
+          {/* TITLE ROW */}
+          <div className="flex justify-between items-center">
+            <div className="text-lg flex items-baseline gap-2">
+              {t.healthInsights.activities.activityName}
+
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleExpand(activity.id);
+                }}
+                className="text-sm text-gray-400 hover:text-white cursor-pointer"
+              >
+                {expandedActivities.has(activity.id)
+                  ? t.healthInsights.activities.hideDetails
+                  : t.healthInsights.activities.openDetails}
               </div>
-        {/* Map activities to display */}
-        {displayActivities.map((activity: Activity) => {
-          const toggleActivity = (id: string) => {
-            setExpandedActivities((prev) => {
-              const newSet = new Set(prev);
-              if (newSet.has(id)) newSet.delete(id);
-              else newSet.add(id);
-              return newSet;
-            });
-          };
-
-          return (
-            <div
-              key={activity.id}
-              className="bg-[white]/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
-              onClick={() => toggleActivity(activity.id)}
-            >
-              {/* Title row */}
-              <div className="flex justify-between items-center">
-                <div className="text-lg flex items-baseline gap-2">
-                  {activity.activity_name}
-
-                  {/* Click to toggle details */}
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevent toggle expand when clicking details
-                      toggleActivity(activity.id);
-                    }}
-                    className="mt-2 text-sm text-gray-400 cursor-pointer hover:text-white"
-                  >
-                    {expandedActivities.has(activity.id)
-                      ? "- hide details"
-                      : "- open details"}
-                  </div>
-                </div>
-
-                {/* Select checkbox */}
-                {hasData && (
-                  <input
-                    type="checkbox"
-                    value={activity.id}
-                    checked={selectedActivityIds.has(activity.id)}
-                    onClick={(e) => e.stopPropagation()} // ⬅️ stop bubbling here
-                    onChange={() => handleActivityToggle(activity.id)}
-                    className="cursor-pointer accent-[#1d9dad] w-5 h-5"
-                  />
-                )}
-              </div>
-              {hasData && (
-                <input
-                  type="checkbox"
-                  checked={selectedActivityIds.has(activity.id)}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleActivityToggle(activity.id);
-                  }}
-                  className="cursor-pointer accent-[#1d9dad] w-5 h-5"
-                />
-              )}
             </div>
 
-            {expandedActivities.has(activity.id) && (
-              <div className="mt-2 text-sm text-gray-200 flex flex-wrap gap-4">
-                {Object.entries(activityFieldMap).map(
-                  ([key, { label, formatter }]) => {
-                    const value = activity[key as keyof Activity];
-                    if (
-                      value == null ||
-                      key === "activity_name" ||
-                      key === "id"
-                    )
-                      return null;
-
-                    return (
-                      <div key={key}>
-                        {label}: {checkData(value as number, formatter)}
-                      </div>
-                    );
-                  },
-                )}
-              </div>
+            {/* Checkbox */}
+            {hasData && (
+              <input
+                type="checkbox"
+                checked={selectedActivityIds.has(activity.id)}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleActivityToggle(activity.id);
+                }}
+                className="cursor-pointer accent-[#1d9dad] w-5 h-5"
+              />
             )}
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
+          {/* DETAILS SECTION */}
+          {expandedActivities.has(activity.id) && (
+            <div className="mt-2 text-sm text-gray-200 flex flex-wrap gap-4">
+              {Object.entries(activityFieldMap).map(
+                ([key, { label, formatter }]) => {
+                  const value = activity[key as keyof Activity];
+
+                  if (
+                    value == null ||
+                    key === "activity_name" ||
+                    key === "id"
+                  )
+                    return null;
+
+                  return (
+                    <div key={key}>
+                      {label}: {checkData(value as number, formatter)}
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
