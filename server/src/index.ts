@@ -22,6 +22,7 @@ import { garminWebhookRouter } from "./routes/webhooks/garminWebhooks.js";
 import { polarWebhookRouter } from "./routes/webhooks/polarWebhooks.js";
 
 import { errorHandler } from "./middleware/error.js";
+import { ensurePolarWebhook } from "./services/polarWebhookSetup.js";
 
 const app = express();
 
@@ -87,6 +88,8 @@ app.use(errorHandler);
 // start the server after ensuring the database schema
 (async () => {
   await ensureSchema();
+  // Register/verify the Polar webhook so Polar pushes new data events to us
+  await ensurePolarWebhook();
   if (!Number.isFinite(env.PORT)) throw new Error("Invalid PORT");
   console.log(`Starting server on port ${env.PORT}`);
   app.listen(env.PORT);
