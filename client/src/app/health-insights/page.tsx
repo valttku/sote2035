@@ -99,7 +99,6 @@ export default function HealthInsightsPage() {
       let resultText = "";
 
       if (!response.ok) {
-        console.error("AI API returned HTTP error:", response.status);
         resultText = t.healthInsights.failedInsights;
       } else {
         const data = await response.json().catch(() => ({}));
