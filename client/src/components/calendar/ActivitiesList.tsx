@@ -2,7 +2,7 @@
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { Translations } from "@/i18n/types";
 
-// One activity entry
+// Activity entry
 export type ActivitiesEntry = {
   id: string;
   device_name?: string | null;
@@ -34,11 +34,9 @@ function formatDuration(seconds?: number | null, t?: Translations): string {
 }
 
 // Convert unix timestamp to "HH:MM"
-function formatTime(
-  unixSeconds?: number | string | null,
-  offsetSeconds?: number | null,
-): string {
+function formatTime(unixSeconds?: number | string | null,offsetSeconds?: number | null,): string {
   const sec = Number(unixSeconds);
+
   if (!sec || isNaN(sec)) return "N/A";
   const date = new Date((sec + (offsetSeconds ?? 0)) * 1000);
   return isNaN(date.getTime())
@@ -51,13 +49,10 @@ function formatTime(
 }
 
 // Show list of activities
-export default function ActivitiesList({
-  entries,
-}: {
-  entries: ActivitiesEntry[];
-}) {
+export default function ActivitiesList({entries,}: {entries: ActivitiesEntry[];}) {
   const { t } = useTranslation();
 
+  {/* If no activities, show a message */ }
   if (entries.length === 0) {
     return (
       <p className="text-sm opacity-80">
@@ -68,10 +63,13 @@ export default function ActivitiesList({
 
   return (
     <div className="space-y-3 overflow-y-auto max-h-96">
+      {/* Map each activity entry to a card with details */}
       {entries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-[#31c2d5]">{e.activity_name}</h3>
+
+            {/* Show source (device or manual) */ }
             <span className="text-xs opacity-70">
               {e.source_type === "manual"
                 ? (t.calendar.manuallyAdded ?? "Manually added activity")
@@ -79,22 +77,30 @@ export default function ActivitiesList({
             </span>
           </div>
 
+          {/* Activity details: duration, start time, heart rate, calories, steps */}
           <div className="text-sm space-y-1">
+
+            {e.duration_in_seconds != null && (
             <div>
               <span className="font-semibold">
                 {t.calendar.duration ?? "Duration"}:{" "}
               </span>
               {formatDuration(e.duration_in_seconds, t)}
             </div>
-            <div>
-              <span className="font-semibold">
-                {t.calendar.startTime ?? "Start Time"}:{" "}
-              </span>
-              {formatTime(
-                e.start_time_in_seconds,
-                e.start_time_offset_in_seconds,
-              )}
-            </div>
+            )}
+
+            {e.start_time_in_seconds && (
+              <div>
+                <span className="font-semibold">
+                  {t.calendar.startTime ?? "Start Time"}:{" "}
+                </span>
+                {formatTime(
+                  e.start_time_in_seconds,
+                  e.start_time_offset_in_seconds,
+                )}
+              </div>
+            )}
+
             {e.average_heart_rate != null && (
               <div>
                 <span className="font-semibold">
@@ -103,6 +109,7 @@ export default function ActivitiesList({
                 {e.average_heart_rate} bpm
               </div>
             )}
+
             {e.active_kilocalories != null && (
               <div>
                 <span className="font-semibold">
@@ -111,6 +118,7 @@ export default function ActivitiesList({
                 {e.active_kilocalories} kcal
               </div>
             )}
+
             {e.steps != null && (
               <div>
                 <span className="font-semibold">
@@ -120,6 +128,7 @@ export default function ActivitiesList({
               </div>
             )}
           </div>
+
         </div>
       ))}
     </div>
