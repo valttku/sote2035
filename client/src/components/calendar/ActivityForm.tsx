@@ -16,7 +16,6 @@ export default function ManualActivityForm({
   const [showForm, setShowForm] = useState(false);
   const [loading] = useState(false); 
 
-
   return (
     <div className="mt-4">
       {!showForm ? (
@@ -113,9 +112,6 @@ export default function ManualActivityForm({
               disabled={loading}
               className="button-style-blue flex-1"
             >
-              
-                
-                
                { t.calendar.submitButton}
             </button>
               <button

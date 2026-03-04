@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import healthChatRoute from "./routes/healthChatRoute";  //for chat AI
+import healthChatRoute from "./routes/healthChatRoute.js";
 
 import { ensureSchema } from "./db/init/init.js";
 import { dbOk } from "./db/healthCheckDb.js";
@@ -19,8 +19,10 @@ import { healthInsightsRouter } from "./routes/healthInsights.js";
 import { polarRouter } from "./routes/integrations/polar.js";
 import { garminRouter } from "./routes/integrations/garmin.js";
 import { garminWebhookRouter } from "./routes/webhooks/garminWebhooks.js";
+import { polarWebhookRouter } from "./routes/webhooks/polarWebhooks.js";
 
 import { errorHandler } from "./middleware/error.js";
+import { ensurePolarWebhook } from "./services/polarWebhookSetup.js";
 
 const app = express();
 
@@ -78,6 +80,7 @@ app.use("/api/v1/integrations/garmin", garminRouter);
 
 // webhooks for providers
 app.use("/api/v1/webhooks/garmin", garminWebhookRouter);
+app.use("/api/v1/webhooks/polar", polarWebhookRouter);
 
 // global error handler
 app.use(errorHandler);
@@ -85,6 +88,8 @@ app.use(errorHandler);
 // start the server after ensuring the database schema
 (async () => {
   await ensureSchema();
+  // Register/verify the Polar webhook so Polar pushes new data events to us
+  await ensurePolarWebhook();
   if (!Number.isFinite(env.PORT)) throw new Error("Invalid PORT");
   console.log(`Starting server on port ${env.PORT}`);
   app.listen(env.PORT);

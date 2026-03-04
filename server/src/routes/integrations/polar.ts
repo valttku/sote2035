@@ -2,6 +2,7 @@ import { Router } from "express";
 import crypto from "crypto";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
+import { backfillPolarData } from "../../services/polarBackfill.js";
 
 export const polarRouter = Router();
 
@@ -20,17 +21,13 @@ polarRouter.get("/status", authRequired, async (req, res, next) => {
     const userId = (req as any).userId as number;
 
     const r = await db.query(
-      `
-      select provider_user_id, created_at, updated_at
-      from app.user_integrations
-      where user_id = $1 and provider = 'polar'
-      `,
+      `select provider_user_id, created_at, updated_at
+       from app.user_integrations
+       where user_id = $1 and provider = 'polar'`,
       [userId]
     );
 
-    if (r.rowCount === 0) {
-      return res.json({ linked: false });
-    }
+    if (r.rowCount === 0) return res.json({ linked: false });
 
     return res.json({
       linked: true,
@@ -50,13 +47,11 @@ polarRouter.get("/connect", authRequired, async (req, res, next) => {
     mustEnv("POLAR_REDIRECT_URI", REDIRECT_URI);
 
     const userId = (req as any).userId as number;
-
     const state = crypto.randomUUID();
     const expires = new Date(Date.now() + 10 * 60 * 1000);
 
     await db.query(
-      `insert into app.oauth_states (state, user_id, expires_at)
-       values ($1, $2, $3)`,
+      `insert into app.oauth_states (state, user_id, expires_at) values ($1, $2, $3)`,
       [state, userId, expires]
     );
 
@@ -73,7 +68,7 @@ polarRouter.get("/connect", authRequired, async (req, res, next) => {
 });
 
 // GET /api/v1/integrations/polar/callback?code=...&state=...
-// NOTE: no authRequired here. We bind the callback to a user via the state row.
+// No authRequired — we bind to the user via the state row.
 polarRouter.get("/callback", async (req, res, next) => {
   try {
     mustEnv("POLAR_CLIENT_ID", CLIENT_ID);
@@ -83,15 +78,12 @@ polarRouter.get("/callback", async (req, res, next) => {
     const code = typeof req.query.code === "string" ? req.query.code : "";
     const state = typeof req.query.state === "string" ? req.query.state : "";
 
-    if (!code || !state) {
-      return res.status(400).send("Missing code/state");
-    }
+    if (!code || !state) return res.status(400).send("Missing code/state");
 
     const st = await db.query(
       `select user_id, expires_at from app.oauth_states where state = $1`,
       [state]
     );
-
     if (st.rowCount === 0) return res.status(400).send("Invalid state");
 
     const { user_id, expires_at } = st.rows[0] as {
@@ -99,13 +91,13 @@ polarRouter.get("/callback", async (req, res, next) => {
       expires_at: string;
     };
 
+    await db.query(`delete from app.oauth_states where state = $1`, [state]);
+
     if (new Date(expires_at).getTime() < Date.now()) {
-      await db.query(`delete from app.oauth_states where state = $1`, [state]);
       return res.status(400).send("Expired state");
     }
 
-    await db.query(`delete from app.oauth_states where state = $1`, [state]);
-
+    // ── Exchange authorization code for access token ───────────────────────
     const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64");
 
     const tokenRes = await fetch("https://polarremote.com/v2/oauth2/token", {
@@ -122,9 +114,10 @@ polarRouter.get("/callback", async (req, res, next) => {
     });
 
     const tokenJson: any = await tokenRes.json();
-
     if (!tokenRes.ok) {
-      return res.status(400).send(`Token exchange failed: ${JSON.stringify(tokenJson)}`);
+      return res
+        .status(400)
+        .send(`Token exchange failed: ${JSON.stringify(tokenJson)}`);
     }
 
     const accessToken = tokenJson.access_token as string;
@@ -132,12 +125,13 @@ polarRouter.get("/callback", async (req, res, next) => {
       typeof tokenJson.refresh_token === "string" ? tokenJson.refresh_token : null;
     const expiresIn =
       typeof tokenJson.expires_in === "number" ? tokenJson.expires_in : null;
-
-    if (!accessToken) return res.status(400).send("No access_token returned");
-
     const tokenExpiresAt =
       expiresIn !== null ? new Date(Date.now() + expiresIn * 1000) : null;
 
+    if (!accessToken) return res.status(400).send("No access_token returned");
+
+    // ── Register user with Polar AccessLink ───────────────────────────────
+    // 409 = already registered (safe to ignore)
     const regRes = await fetch("https://www.polaraccesslink.com/v3/users", {
       method: "POST",
       headers: {
@@ -149,48 +143,94 @@ polarRouter.get("/callback", async (req, res, next) => {
     });
 
     const regJson: any = await regRes.json().catch(() => ({}));
+    const polarUserId: string | null = String(
+      regJson["polar-user-id"] ??
+        regJson["polar_user_id"] ??
+        regJson.user_id ??
+        tokenJson.x_user_id ??
+        ""
+    ) || null;
 
-    const polarUserId =
-      regJson["polar-user-id"] ?? regJson["polar_user_id"] ?? regJson.user_id ?? null;
-
-    if (!regRes.ok && !polarUserId) {
-      return res.status(400).send(`User register failed: ${JSON.stringify(regJson)}`);
+    if (!regRes.ok && regRes.status !== 409) {
+      console.error(`[polar] User registration failed ${regRes.status}:`, regJson);
+      // Non-fatal: we still have the token, so continue
     }
 
+    // ── Save integration to DB ────────────────────────────────────────────
     await db.query("begin");
-
     await db.query(
-      `
-      insert into app.user_integrations
-        (user_id, provider, provider_user_id, access_token, refresh_token, token_expires_at)
-      values
-        ($1, 'polar', $2, $3, $4, $5)
-      on conflict (user_id, provider)
-      do update set
-        provider_user_id = excluded.provider_user_id,
-        access_token = excluded.access_token,
-        refresh_token = excluded.refresh_token,
-        token_expires_at = excluded.token_expires_at,
-        updated_at = now()
-      `,
-      [
-        user_id,
-        polarUserId ? String(polarUserId) : null,
-        accessToken,
-        refreshToken,
-        tokenExpiresAt,
-      ]
+      `insert into app.user_integrations
+         (user_id, provider, provider_user_id, access_token, refresh_token, token_expires_at)
+       values ($1, 'polar', $2, $3, $4, $5)
+       on conflict (user_id, provider) do update set
+         provider_user_id = excluded.provider_user_id,
+         access_token = excluded.access_token,
+         refresh_token = excluded.refresh_token,
+         token_expires_at = excluded.token_expires_at,
+         updated_at = now()`,
+      [user_id, polarUserId, accessToken, refreshToken, tokenExpiresAt]
     );
-
-    await db.query(`update app.users set active_provider = 'polar' where id = $1`, [
-      user_id,
-    ]);
-
+    await db.query(
+      `update app.users set active_provider = 'polar' where id = $1`,
+      [user_id]
+    );
     await db.query("commit");
 
+    // ── Redirect user immediately, backfill data in background ───────────
     res.redirect(`${APP_BASE_URL}/`);
+
+    // Fire-and-forget: fetch all available Polar data for this user.
+    // Errors are caught inside backfillPolarData so they won't crash the process.
+    if (polarUserId) {
+      setImmediate(() => {
+        backfillPolarData(user_id, polarUserId, accessToken).catch((err) =>
+          console.error("[polar] Backfill failed:", err)
+        );
+      });
+    }
   } catch (e) {
     await db.query("rollback").catch(() => {});
+    next(e);
+  }
+});
+
+// POST /api/v1/integrations/polar/sync
+// Manually re-fetches all available Polar data for the authenticated user.
+// Useful after the initial connect if some data was missing, or to pull new data
+// without waiting for a webhook event.
+polarRouter.post("/sync", authRequired, async (req, res, next) => {
+  try {
+    const userId = (req as any).userId as number;
+
+    const integ = await db.query(
+      `select provider_user_id, access_token
+       from app.user_integrations
+       where user_id = $1 and provider = 'polar'`,
+      [userId]
+    );
+
+    if (integ.rowCount === 0) {
+      return res.status(404).json({ error: "Polar account not linked" });
+    }
+
+    const { provider_user_id, access_token } = integ.rows[0] as {
+      provider_user_id: string | null;
+      access_token: string | null;
+    };
+
+    if (!access_token || !provider_user_id) {
+      return res.status(400).json({ error: "Missing access token or Polar user ID" });
+    }
+
+    // Respond immediately, run backfill in background
+    res.json({ message: "Sync started — data will appear shortly" });
+
+    setImmediate(() => {
+      backfillPolarData(userId, provider_user_id, access_token).catch((err) =>
+        console.error("[polar] Manual sync failed:", err)
+      );
+    });
+  } catch (e) {
     next(e);
   }
 });
@@ -201,24 +241,20 @@ polarRouter.delete("/unlink", authRequired, async (req, res, next) => {
     const userId = (req as any).userId as number;
 
     const integ = await db.query(
-      `
-      select provider_user_id, access_token
-      from app.user_integrations
-      where user_id = $1 and provider = 'polar'
-      `,
+      `select provider_user_id, access_token
+       from app.user_integrations
+       where user_id = $1 and provider = 'polar'`,
       [userId]
     );
 
-    if (integ.rowCount === 0) {
-      return res.json({ message: "Not linked" });
-    }
+    if (integ.rowCount === 0) return res.json({ message: "Not linked" });
 
     const { provider_user_id, access_token } = integ.rows[0] as {
       provider_user_id: string | null;
       access_token: string | null;
     };
 
-    // Best-effort deregister from Polar; do not block unlink on expected statuses
+    // Best-effort deregister from Polar
     if (provider_user_id && access_token) {
       const r = await fetch(
         `https://www.polaraccesslink.com/v3/users/${encodeURIComponent(provider_user_id)}`,
@@ -227,27 +263,24 @@ polarRouter.delete("/unlink", authRequired, async (req, res, next) => {
           headers: { Authorization: `Bearer ${access_token}` },
         }
       );
-
       if (![204, 401, 403, 404].includes(r.status)) {
         const text = await r.text().catch(() => "");
-        return res.status(400).json({ error: `Polar unlink failed: ${r.status} ${text}` });
+        return res
+          .status(400)
+          .json({ error: `Polar unlink failed: ${r.status} ${text}` });
       }
     }
 
     await db.query("begin");
-
     await db.query(
       `delete from app.user_integrations where user_id = $1 and provider = 'polar'`,
       [userId]
     );
-
     await db.query(
-      `update app.users
-       set active_provider = null
+      `update app.users set active_provider = null
        where id = $1 and active_provider = 'polar'`,
       [userId]
     );
-
     await db.query("commit");
 
     res.json({ message: "Unlinked" });

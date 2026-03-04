@@ -201,12 +201,17 @@ export function StressSection({ stress }: { stress?: Stress }) {
 
   // Show "No data" if value is null/undefined/empty string/NaN
   const checkData = (value: string | number | null | undefined): string =>
-    value !== null && value !== undefined && value !== "" && !(typeof value === "number" && isNaN(value))
+    value !== null &&
+    value !== undefined &&
+    value !== "" &&
+    !(typeof value === "number" && isNaN(value))
       ? String(value)
       : "No data";
-  
+
   return (
-    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!stress ? "opacity-50" : ""}`}>
+    <div
+      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!stress ? "opacity-50" : ""}`}
+    >
       <h1>
         <span>
           {t.healthInsights.updatedAt}:{" "}
@@ -220,13 +225,12 @@ export function StressSection({ stress }: { stress?: Stress }) {
           })}
         </span>
       </h1>
-
-      <div className="flex flex-row items-center gap-4 h-full rounded-xl border border-white/20 p-4">
-        <div className="flex-shrink-0 w-1/2 my-auto">
-        <StressWheelSVG stress={displayStress} />
+      <div className="flex flex-col items-center gap-4 h-full flex-1 rounded-xl border border-white/20 p-4 overflow-auto">
+        <div className="my-auto">
+          <StressWheelSVG stress={displayStress} />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full lg:w-1/2">
+        <div className="grid grid-cols-3 lg:grid-cols-4 gap-4">
           <StatCard
             label={t.healthInsights.stress.stressDuration}
             value={checkData(formatSecondsToHoursMinutes(
@@ -269,6 +273,20 @@ export function StressSection({ stress }: { stress?: Stress }) {
               displayStress.high_stress_duration_in_seconds,
             ))}
             icon={<FaCircle color="#ef4444" size={16} />}
+          />
+
+          <StatCard
+            label="Stress"
+            value={checkData(
+              formatSecondsToHoursMinutes(
+                displayStress.stress_duration_in_seconds,
+              ),
+            )}
+          />
+
+          <StatCard
+            label="Stress qualifier"
+            value={checkData(displayStress.stress_qualifier)}
           />
         </div>
       </div>

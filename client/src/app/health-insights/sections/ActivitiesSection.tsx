@@ -106,6 +106,7 @@ export function ActivitiesSection({
     });
   };
 
+  // Mapping keys to label + formatter for display
   const activityFieldMap: Record<
     keyof Activity,
     { label: string; formatter?: (v: number) => string }
@@ -201,7 +202,54 @@ export function ActivitiesSection({
                     : t.healthInsights.activities.openDetails}
                 </div>
               </div>
+        {/* Map activities to display */}
+        {displayActivities.map((activity: Activity) => {
+          const toggleActivity = (id: string) => {
+            setExpandedActivities((prev) => {
+              const newSet = new Set(prev);
+              if (newSet.has(id)) newSet.delete(id);
+              else newSet.add(id);
+              return newSet;
+            });
+          };
 
+          return (
+            <div
+              key={activity.id}
+              className="bg-[white]/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
+              onClick={() => toggleActivity(activity.id)}
+            >
+              {/* Title row */}
+              <div className="flex justify-between items-center">
+                <div className="text-lg flex items-baseline gap-2">
+                  {activity.activity_name}
+
+                  {/* Click to toggle details */}
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevent toggle expand when clicking details
+                      toggleActivity(activity.id);
+                    }}
+                    className="mt-2 text-sm text-gray-400 cursor-pointer hover:text-white"
+                  >
+                    {expandedActivities.has(activity.id)
+                      ? "- hide details"
+                      : "- open details"}
+                  </div>
+                </div>
+
+                {/* Select checkbox */}
+                {hasData && (
+                  <input
+                    type="checkbox"
+                    value={activity.id}
+                    checked={selectedActivityIds.has(activity.id)}
+                    onClick={(e) => e.stopPropagation()} // ⬅️ stop bubbling here
+                    onChange={() => handleActivityToggle(activity.id)}
+                    className="cursor-pointer accent-[#1d9dad] w-5 h-5"
+                  />
+                )}
+              </div>
               {hasData && (
                 <input
                   type="checkbox"

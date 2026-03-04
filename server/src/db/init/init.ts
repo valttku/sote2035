@@ -1,5 +1,6 @@
 import { db } from "../db.js";
 import { createGarminTables } from "./initGarminTables.js";
+import { createPolarTables } from "./initPolarTables.js";
 
 export async function ensureSchema() {
   // make sure the "app" schema exists
@@ -13,6 +14,7 @@ export async function ensureSchema() {
   `);
 
   await createGarminTables();
+  await createPolarTables();
 
   // create users table (accounts)
   await db.query(`

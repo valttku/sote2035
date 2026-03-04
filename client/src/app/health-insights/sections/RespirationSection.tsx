@@ -35,9 +35,7 @@ export function RespirationSection({
       : `${Number(value).toFixed(0)} brpm`;
 
   return (
-    <div
-      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!respiration ? "opacity-50" : ""}`}
-    >
+    <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!respiration ? "opacity-50" : ""}`}>
       <h1>
         <span>
           {t.healthInsights.sections.respiration.title}:{" "}
@@ -52,6 +50,7 @@ export function RespirationSection({
         </span>
       </h1>
 
+      {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           label={`🌬️${t.healthInsights.respiration.minRespirationRate}`}

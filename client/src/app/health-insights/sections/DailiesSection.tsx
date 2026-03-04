@@ -181,7 +181,8 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
               }
               labelFormatter={(label) => `Time: ${label}`}
               contentStyle={{
-                backgroundColor: "#1e1c4f",
+                borderRadius: "8px",
+                backgroundColor: "#090828",
                 border: "none",
                 color: "#ffffff",
               }}

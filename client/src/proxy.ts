@@ -13,7 +13,8 @@ export default function proxy(request: NextRequest) {
     pathname.startsWith("/public") ||
     pathname.startsWith("/static") ||
     pathname === "/logo.svg" ||
-    pathname === "/main-bg.svg"
+    pathname === "/main-bg.svg" ||
+    pathname === "/digital_twin_background.png"
   ) {
     return NextResponse.next();
   }

@@ -6,6 +6,7 @@ interface AIMessageWindowProps {
   placeholder?: string;
   loading?: boolean;
   open: boolean;
+  aiStatus?: "none" | "generated" | "quota_exceeded" | "error";
   onClose: () => void;
 }
 
@@ -16,6 +17,7 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
   placeholder,
   loading,
   open,
+  aiStatus = "none",
   onClose,
 }) => {
   if (!open) return null;
@@ -47,11 +49,15 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
         </h3>
 
         {loading ? (
-          <p className="italic text-xs sm:text-base">{generatingMessage}</p>
+          <p className="italic">{generatingMessage}</p>
         ) : message ? (
-          <p className="whitespace-pre-line text-xs sm:text-base">{message}</p>
+          <p className="whitespace-pre-line">{message}</p>
+        ) : aiStatus === "quota_exceeded" ? (
+          <p>AI message is temporarily unavailable (quota exceeded).</p>
+        ) : aiStatus === "error" ? (
+          <p>AI message could not be generated due to a system error.</p>
         ) : (
-          <p className="text-xs sm:text-base">{placeholder}</p>
+          <p>No health alerts for today.</p>
         )}
       </div>
     </div>

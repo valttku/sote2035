@@ -12,6 +12,7 @@ interface DigitalTwinProps {
   setSelected: (id: BodyPartId) => void;
   alerts: Record<BodyPartId, boolean>;
   isFemale: boolean;
+  onAvatarLoad?: () => void;
 }
 
 const DigitalTwin: React.FC<DigitalTwinProps> = ({
@@ -20,11 +21,16 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({
   setSelected,
   alerts,
   isFemale,
+  onAvatarLoad,
 }) => (
   <div className="relative w-1/2 max-w-[200px] min-w-[200px] flex-shrink-0">
     <img
       src={isFemale ? "/avatar-female.png" : "/avatar-male.png"}
       alt="Digital twin"
+      loading="eager"
+      fetchPriority="high"
+      decoding="async"
+      onLoad={onAvatarLoad}
       className="w-full max-h-[60vh] object-contain block"
     />
     {BODY_PARTS.map(({ id, top, left }) => (
