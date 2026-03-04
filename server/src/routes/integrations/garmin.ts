@@ -132,34 +132,42 @@ garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
       refresh_token: string | null;
     };
 
-    // Call Garmin's DELETE /rest/user/registration endpoint to deregister the user
+    // Call Garmin's official DELETE endpoint
     try {
       const deregResponse = await fetch(
-        "https://healthapi.garmin.com/rest/user/registration",
+        "https://apis.garmin.com/wellness-api/rest/user/registration",
         {
           method: "DELETE",
           headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
             Authorization: `Bearer ${row.access_token}`,
           },
         },
       );
 
       if (!deregResponse.ok) {
+        const errorText = await deregResponse.text();
         console.error(
-          `Failed to deregister from Garmin: ${deregResponse.status}`,
-          await deregResponse.text(),
+          `Failed to deregister from Garmin: ${deregResponse.status} - ${errorText}`,
+        );
+      } else {
+        console.log(
+          `Successfully deregistered Garmin user with userId ${userId}`,
         );
       }
     } catch (err) {
       console.error("Error calling Garmin deregistration endpoint:", err);
     }
 
+    // Remove local integration record
     await db.query(
       `DELETE FROM app.user_integrations
        WHERE user_id = $1 AND provider = 'garmin'`,
       [userId],
     );
 
+    // Clear active provider if it was Garmin
     await db.query(
       `UPDATE app.users
        SET active_provider = NULL
@@ -169,7 +177,7 @@ garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
 
     await db.query("COMMIT");
 
-    res.json({ message: "Unlinked" });
+    res.json({ message: "Unlinked from Garmin" });
   } catch (e) {
     await db.query("ROLLBACK");
     next(e);
