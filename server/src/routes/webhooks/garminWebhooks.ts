@@ -395,4 +395,60 @@ garminWebhookRouter.post("/hrv", async (req, res) => {
   }
 });
 
+// POST /api/v1/webhooks/garmin/deregistrations
+garminWebhookRouter.post("/deregistrations", async (req, res) => {
+  console.log("=== Garmin Deregistration Webhook Received ===");
+  console.log("Received at:", new Date().toISOString());
+  console.log("Payload:", JSON.stringify(req.body, null, 2));
+
+  try {
+    const payload =
+      req.body.users || (Array.isArray(req.body) ? req.body : [req.body]);
+
+    for (const item of payload) {
+      const providerUserId = item.userId;
+      if (!providerUserId) continue;
+
+      console.log("Processing deregistration for Garmin user:", providerUserId);
+
+      const r = await db.query(
+        `SELECT user_id FROM app.user_integrations
+         WHERE provider = 'garmin' AND provider_user_id = $1`,
+        [providerUserId],
+      );
+
+      if (r.rowCount === 0) {
+        console.warn("No internal user found for deregistration:", providerUserId);
+        continue;
+      }
+
+      const user_id = r.rows[0].user_id;
+
+      // Optional: mark integration as inactive without deleting historical data
+      await db.query(
+        `UPDATE app.user_integrations
+         SET active = FALSE
+         WHERE provider = 'garmin' AND provider_user_id = $1`,
+        [providerUserId],
+      );
+
+      // Optional: clear active_provider if this was the active provider
+      await db.query(
+        `UPDATE app.users
+         SET active_provider = NULL
+         WHERE id = $1 AND active_provider = 'garmin'`,
+        [user_id],
+      );
+
+      console.log("Marked Garmin integration as inactive for user:", user_id);
+    }
+
+    // Garmin expects 200 OK even if some users weren’t found
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Error handling Garmin deregistration webhook:", err);
+    res.sendStatus(500);
+  }
+});
+
 export default garminWebhookRouter;

@@ -3,8 +3,6 @@ import { buildGarminAuthUrl } from "./garmin-oauth/garminAuthUrl.js";
 import { consumeOAuthState } from "./garmin-oauth/stateStore.js";
 import { exchangeGarminCodeForToken } from "./garmin-oauth/garminToken.js";
 import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
-import { refreshGarminToken } from "./garmin-oauth/garminToken.js";
-import { revokeGarminToken } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
 
@@ -37,63 +35,6 @@ garminRouter.get("/status", authRequired, async (req, res, next) => {
       updated_at: row.updated_at,
     });
   } catch (e) {
-    next(e);
-  }
-});
-
-// DELETE /api/v1/integrations/garmin/unlink
-garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
-  const userId = (req as any).userId as number;
-
-  await db.query("BEGIN");
-
-  try {
-    const tokenResult = await db.query(
-      `SELECT access_token, refresh_token
-       FROM app.user_integrations
-       WHERE user_id = $1 AND provider = 'garmin'
-       FOR UPDATE`,
-      [userId],
-    );
-
-    if (tokenResult.rowCount === 0) {
-      await db.query("ROLLBACK");
-      return res.status(404).json({ message: "Garmin not linked" });
-    }
-
-    const row = tokenResult.rows[0] as {
-      access_token: string;
-      refresh_token: string | null;
-    };
-
-    try {
-      if (row.refresh_token) {
-        await revokeGarminToken(row.refresh_token);
-      } else {
-        await revokeGarminToken(row.access_token);
-      }
-    } catch (err) {
-      console.error("Warning: Failed to revoke token on Garmin:", err);
-    }
-
-    await db.query(
-      `DELETE FROM app.user_integrations
-       WHERE user_id = $1 AND provider = 'garmin'`,
-      [userId],
-    );
-
-    await db.query(
-      `UPDATE app.users
-       SET active_provider = NULL
-       WHERE id = $1 AND active_provider = 'garmin'`,
-      [userId],
-    );
-
-    await db.query("COMMIT");
-
-    res.json({ message: "Unlinked" });
-  } catch (e) {
-    await db.query("ROLLBACK");
     next(e);
   }
 });
@@ -163,6 +104,75 @@ garminRouter.get("/callback", async (req, res) => {
     await db.query("ROLLBACK").catch(() => {});
     console.error("Garmin callback error:", err.message || err);
     res.status(500).json({ error: "Garmin integration failed" });
+  }
+});
+
+// DELETE /api/v1/integrations/garmin/unlink
+garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
+  const userId = (req as any).userId as number;
+
+  await db.query("BEGIN");
+
+  try {
+    const tokenResult = await db.query(
+      `SELECT access_token, refresh_token
+       FROM app.user_integrations
+       WHERE user_id = $1 AND provider = 'garmin'
+       FOR UPDATE`,
+      [userId],
+    );
+
+    if (tokenResult.rowCount === 0) {
+      await db.query("ROLLBACK");
+      return res.status(404).json({ message: "Garmin not linked" });
+    }
+
+    const row = tokenResult.rows[0] as {
+      access_token: string;
+      refresh_token: string | null;
+    };
+
+    // Call Garmin's DELETE /rest/user/registration endpoint to deregister the user
+    try {
+      const deregResponse = await fetch(
+        "https://healthapi.garmin.com/rest/user/registration",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${row.access_token}`,
+          },
+        },
+      );
+
+      if (!deregResponse.ok) {
+        console.error(
+          `Failed to deregister from Garmin: ${deregResponse.status}`,
+          await deregResponse.text(),
+        );
+      }
+    } catch (err) {
+      console.error("Error calling Garmin deregistration endpoint:", err);
+    }
+
+    await db.query(
+      `DELETE FROM app.user_integrations
+       WHERE user_id = $1 AND provider = 'garmin'`,
+      [userId],
+    );
+
+    await db.query(
+      `UPDATE app.users
+       SET active_provider = NULL
+       WHERE id = $1 AND active_provider = 'garmin'`,
+      [userId],
+    );
+
+    await db.query("COMMIT");
+
+    res.json({ message: "Unlinked" });
+  } catch (e) {
+    await db.query("ROLLBACK");
+    next(e);
   }
 });
 
