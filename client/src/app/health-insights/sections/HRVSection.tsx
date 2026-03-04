@@ -86,8 +86,8 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
       {/* HRV chart */}
       <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
         <h3 className="mb-2 text-lg font-semibold">
-          Last Night Heart Rate Variability Timeline
-          {!displayHRV.hrv_values ? " (No data)" : ""}
+          {t.healthInsights.hrv.title}
+          {!displayHRV.hrv_values ?  t.healthInsights.noData : ""}
         </h3>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart
