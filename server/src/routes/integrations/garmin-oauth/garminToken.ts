@@ -62,7 +62,7 @@ export async function fetchGarminUserProfile(accessToken: string) {
 export async function refreshGarminToken(refreshToken: string) {
   const clientId = process.env.GARMIN_CLIENT_ID;
   const clientSecret = process.env.GARMIN_CLIENT_SECRET;
-  
+
   if (!clientId || !clientSecret) {
     throw new Error("GARMIN_CLIENT_ID and GARMIN_CLIENT_SECRET must be set");
   }
@@ -91,4 +91,36 @@ export async function refreshGarminToken(refreshToken: string) {
 
   const data = await response.json();
   return data; // Contains new access_token, refresh_token, expires_in
+}
+
+export async function revokeGarminToken(token: string) {
+  const clientId = process.env.GARMIN_CLIENT_ID;
+  const clientSecret = process.env.GARMIN_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("GARMIN_CLIENT_ID and GARMIN_CLIENT_SECRET must be set");
+  }
+
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    token,
+    token_type_hint: "refresh_token",
+  });
+
+  const response = await fetch(
+    "https://diauth.garmin.com/di-oauth2-service/oauth/revoke",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(),
+    },
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Garmin token revocation failed:", response.status, text);
+  }
 }
