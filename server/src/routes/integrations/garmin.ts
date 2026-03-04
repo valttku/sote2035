@@ -2,6 +2,7 @@ import express from "express";
 import { buildGarminAuthUrl } from "./garmin-oauth/garminAuthUrl.js";
 import { consumeOAuthState } from "./garmin-oauth/stateStore.js";
 import { exchangeGarminCodeForToken } from "./garmin-oauth/garminToken.js";
+import { refreshGarminToken } from "./garmin-oauth/garminToken.js";
 import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
@@ -47,7 +48,6 @@ garminRouter.get("/connect", authRequired, async (req, res) => {
 });
 
 // GET /api/v1/integrations/garmin/callback
-// Callback
 garminRouter.get("/callback", async (req, res) => {
   const { code, state } = req.query as { code?: string; state?: string };
   if (!code || !state)
@@ -107,7 +107,6 @@ garminRouter.get("/callback", async (req, res) => {
   }
 });
 
-// DELETE /api/v1/integrations/garmin/unlink
 garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
   const userId = (req as any).userId as number;
 
@@ -127,47 +126,58 @@ garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
       return res.status(404).json({ message: "Garmin not linked" });
     }
 
-    const row = tokenResult.rows[0] as {
-      access_token: string;
-      refresh_token: string | null;
-    };
+    let { access_token, refresh_token } = tokenResult.rows[0];
 
-    // Call Garmin's official DELETE endpoint
-    try {
-      const deregResponse = await fetch(
+    const attemptDeregister = async (token: string) => {
+      return fetch(
         "https://apis.garmin.com/wellness-api/rest/user/registration",
         {
           method: "DELETE",
           headers: {
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
             Accept: "application/json",
-            Authorization: `Bearer ${row.access_token}`,
           },
         },
       );
+    };
 
-      if (!deregResponse.ok) {
-        const errorText = await deregResponse.text();
-        console.error(
-          `Failed to deregister from Garmin: ${deregResponse.status} - ${errorText}`,
-        );
-      } else {
-        console.log(
-          `Successfully deregistered Garmin user with userId ${userId}`,
-        );
-      }
-    } catch (err) {
-      console.error("Error calling Garmin deregistration endpoint:", err);
+    let deregResponse = await attemptDeregister(access_token);
+
+    // If expired → refresh and retry once
+    if (deregResponse.status === 401 && refresh_token) {
+      console.log("Access token expired. Refreshing...");
+
+      const refreshed = await refreshGarminToken(refresh_token);
+
+      access_token = refreshed.access_token;
+      refresh_token = refreshed.refresh_token ?? refresh_token;
+
+      // Store new tokens
+      await db.query(
+        `UPDATE app.user_integrations
+         SET access_token = $1,
+             refresh_token = $2
+         WHERE user_id = $3 AND provider = 'garmin'`,
+        [access_token, refresh_token, userId],
+      );
+
+      deregResponse = await attemptDeregister(access_token);
     }
 
-    // Remove local integration record
+    if (!deregResponse.ok) {
+      const text = await deregResponse.text();
+      console.error("Garmin deregistration failed:", text);
+      await db.query("ROLLBACK");
+      return res.status(500).json({ message: "Failed to deregister from Garmin" });
+    }
+
+    // Only delete local integration if Garmin confirmed deregistration
     await db.query(
       `DELETE FROM app.user_integrations
        WHERE user_id = $1 AND provider = 'garmin'`,
       [userId],
     );
 
-    // Clear active provider if it was Garmin
     await db.query(
       `UPDATE app.users
        SET active_provider = NULL
@@ -177,11 +187,9 @@ garminRouter.delete("/unlink", authRequired, async (req, res, next) => {
 
     await db.query("COMMIT");
 
-    res.json({ message: "Unlinked from Garmin" });
+    res.json({ message: "Garmin unlinked successfully" });
   } catch (e) {
     await db.query("ROLLBACK");
     next(e);
   }
 });
-
-export default garminRouter;
