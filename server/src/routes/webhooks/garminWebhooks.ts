@@ -423,24 +423,6 @@ garminWebhookRouter.post("/deregistrations", async (req, res) => {
       }
 
       const user_id = r.rows[0].user_id;
-
-      // Optional: mark integration as inactive without deleting historical data
-      await db.query(
-        `UPDATE app.user_integrations
-         SET active = FALSE
-         WHERE provider = 'garmin' AND provider_user_id = $1`,
-        [providerUserId],
-      );
-
-      // Optional: clear active_provider if this was the active provider
-      await db.query(
-        `UPDATE app.users
-         SET active_provider = NULL
-         WHERE id = $1 AND active_provider = 'garmin'`,
-        [user_id],
-      );
-
-      console.log("Marked Garmin integration as inactive for user:", user_id);
     }
 
     // Garmin expects 200 OK even if some users weren’t found
