@@ -1,5 +1,6 @@
 "use client";
 import { StatCard } from "../../../components/health-insights/StatCard";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type UserProfile = {
   id: string;
@@ -14,9 +15,11 @@ export type UserProfile = {
 };
 
 export function UserProfileSection({ profile }: { profile?: UserProfile }) {
+
+  const  { t } = useTranslation();
   // Default values if no profile
   const data = {
-    gender: profile?.gender ?? "No data",
+    gender: profile?.gender ?? t.healthInsights.noData,
     height: profile?.height ?? null,
     weight: profile?.weight ?? null,
     vo2_max: profile?.vo2_max ?? null,
@@ -36,7 +39,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
       ? typeof value === "number" && formatter
         ? formatter(value)
         : String(value)
-      : "No data";
+      : t.healthInsights.noData;
 
   // Formatters
   const formatHeight = (v: number) => `${v} cm`;
@@ -75,7 +78,7 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
     >
       <h1>
         <span>
-          Updated at:{" "}
+          {t.healthInsights.updatedAt}:{" "}
           {new Date(data.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -88,47 +91,48 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
       </h1>
 
       {/* Basic Info Section */}
-      <h1 className="text-md mb-2">Basic info</h1>
+      <h1 className="text-md mb-2">{t.healthInsights.profile.basicInfo}</h1>
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          label="🎂Age"
+          label={`🎂${t.healthInsights.profile.age}`}
           value={checkData(
             calculateAge(profile?.birthday),
             (v) => `${v} years`,
           )}
         />
-        <StatCard label="👤Gender" value={checkData(data.gender)} />
+        <StatCard label={`👤${t.healthInsights.profile.gender}`}
+        value={checkData(data.gender)} />
       </div>
 
       {/* Body Composition Section */}
-      <h1 className="text-md mb-2">Body Composition</h1>
+      <h1 className="text-md mb-2">{t.healthInsights.profile.bodyComposition}</h1>
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          label="📏Height"
+          label={`📏${t.healthInsights.profile.height}`}
           value={checkData(data.height, formatHeight)}
         />
         <StatCard
-          label="⚖️Weight"
+          label={`⚖️${t.healthInsights.profile.weight}`}
           value={checkData(data.weight, formatWeight)}
         />
 
-        <StatCard label="Body Mass Index" value={checkData(calculateBMI(data.weight, data.height))} />
+        <StatCard label={t.healthInsights.profile.bmi} value={checkData(calculateBMI(data.weight, data.height))} />
       </div>
 
       {/* Metrics Section */}
 
-      <h1 className="text-md mb-2">Fitness</h1>
+      <h1 className="text-md mb-2">{t.healthInsights.profile.fitness}</h1>
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <StatCard
-          label="🎂Fitness Age"
+          label={`🎂${t.healthInsights.profile.fitnessAge}`}
           value={checkData(data.fitness_age, formatFitnessAge)}
         />
         <StatCard
-          label="🏃‍♂️VO2 Max (Run)"
+          label={`🏃‍♂️${t.healthInsights.profile.vo2Run}`}
           value={checkData(data.vo2_max, formatVO2)}
         />
         <StatCard
-          label="🚴‍♂️VO2 Max (Cycling)"
+          label={`🚴‍♂️${t.healthInsights.profile.vo2Cycling}`}
           value={checkData(data.vo2_max_cycling, formatVO2)}
         />
       </div>

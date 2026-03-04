@@ -1,5 +1,6 @@
 "use client";
 import { StatCard } from "../../../components/health-insights/StatCard";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type Respiration = {
   id: string;
@@ -15,6 +16,7 @@ export function RespirationSection({
   respiration?: Respiration;
 }) {
   const hasData = !!respiration;
+  const  { t } = useTranslation();
 
   const displayRespiration: Respiration = hasData
     ? respiration!
@@ -36,7 +38,7 @@ export function RespirationSection({
     <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!respiration ? "opacity-50" : ""}`}>
       <h1>
         <span>
-          Updated at:{" "}
+          {t.healthInsights.respiration.title}:{" "}
           {new Date(displayRespiration.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -51,15 +53,15 @@ export function RespirationSection({
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          label="🌬️Min Respiration Rate"
+          label={`🌬️${t.healthInsights.respiration.minRespirationRate}`}
           value={checkData(displayRespiration.min_respiration)}
         />
         <StatCard
-          label="🌬️Avg Respiration Rate"
+          label={`🌬️${t.healthInsights.respiration.avgRespirationRate}`}
           value={checkData(displayRespiration.avg_respiration)}
         />
         <StatCard
-          label="🌬️Max Respiration Rate"
+          label={`🌬️${t.healthInsights.respiration.maxRespirationRate}`}
           value={checkData(displayRespiration.max_respiration)}
         />
       </div>

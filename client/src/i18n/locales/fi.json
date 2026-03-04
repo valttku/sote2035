@@ -261,8 +261,10 @@
     "logout": "Kirjaudu ulos"
   },
 
+  
   "healthInsights": {
     "title": "Terveysanalyysit",
+
     "sections": {
       "profile": "Profiili",
       "dailies": "Päivittäiset tiedot",
@@ -273,6 +275,7 @@
       "respiration": "Hengitys",
       "hrv": "HRV"
     },
+
     "loading": "Terveystietoja ladataan...",
     "aiTitle": "Tekoälyanalyysi",
     "aiPlaceholder": "Valitse tiedot ja napsauta \"Analysoi\" saadaksesi tekoälyn ehdotuksia.",
@@ -281,6 +284,121 @@
     "analyzeAll": "Analysoi kaikki tiedot",
     "analyzeSection": "Analysoi {{section}}",
     "failedInsights": "Tekoälyanalyysi epäonnistui. Yritä uudelleen.",
-    "noData": "Ei dataa tältä päivältä."
+    "noData": "Ei dataa tältä päivältä.",
+    "updatedAt": "Päivitetty",
+    "notEnoughData": "Ei riittävästi tietoja",
+
+    "activities": {
+      "count": "Määrä",
+      "openDetails": "Avaa tiedot",
+      "hideDetails": "Piilota tiedot",
+      "activityName": "Aktiviteetti",
+      "fields": {
+        "duration": "Kesto",
+        "distance": "Matka",
+        "calories": "Kalorit",
+        "avgHeartRate": "Keskisyke",
+        "maxHeartRate": "Maksimisyke",
+        "steps": "Askeleet",
+        "avgPace": "Vauhti",
+        "runCadence": "Juoksurytmi",
+        "bikeCadence": "Pyöräilyrytmi",
+        "swimCadence": "Uintirytmi",
+        "pushCadence": "Työntörytmi",
+        "pushes": "Työnnöt",
+        "elevationGain": "Nousumetrit",
+        "elevationLoss": "Laskumetrit"
+      }
+    },
+
+    "dailies": {
+      "heartRateTimeline": "Päivittäinen sykeaikajana",
+      "stats": {
+        "steps": "Askeleet",
+        "distance": "Matka",
+        "floorsClimbed": "Kerrokset",
+        "activeCalories": "Aktiivikalorit",
+        "bmrCalories": "Perusaineenvaihdunta",
+        "totalCalories": "Kokonaiskalorit",
+        "moderateExercise": "Kohtalainen liikunta",
+        "vigorousExercise": "Raskas liikunta",
+        "weeklyIntensity": "Viikon intensiteetti",
+        "restingHeartRate": "Leposyke",
+        "avgHeartRate": "Keskisyke",
+        "maxHeartRate": "Maksimisyke"
+      }
+    },
+
+    "sleep": {
+      "sleepStagesTimeline": "Univaiheiden aikajana",
+      "deepSleep": "Syvä uni",
+      "lightSleep": "Kevyt uni",
+      "remSleep": "REM-uni",
+      "awake": "Hereillä",
+      "totalSleep": "Kokonaisuni",
+      "startTime": "Nukahtamisaika",
+      "endTime": "Heräämisaika",
+      "sleepScore": "Unipisteet",
+      "unmeasurable": "Ei mitattavissa",
+
+       "hour": "t",
+      "minute": "min",
+      "second": "s"
+    },
+
+    "stress": {
+      "overall": "Kokonaisstressitaso",
+      "stressDuration": "Stressin kesto",
+      "restStressDuration": "Lepostressin kesto",
+      "lowStressDuration": "Matala stressi",
+      "mediumStressDuration": "Keskitasoinen stressi",
+      "highStressDuration": "Korkea stressi",
+      "stressQualifier": "Stressin arvio"
+    },
+
+    "respiration": {
+      "title": "Hengitystiheys",
+      "minRespirationRate": "Minimi hengitystiheys",
+      "avgRespirationRate": "Keskimääräinen hengitystiheys",
+      "maxRespirationRate": "Maksimi hengitystiheys"
+    },
+
+    "hrv": {
+      "title": "Sykevälivaihtelu (HRV)",
+      "dailyAverage": "Päivän keskiarvo",
+      "lastNightAverage": "Viime yön keskiarvo",
+      "lastNightHigh": "Viime yön 5 min huippu",
+      "sevenDayNightAvg": "7 päivän yön HRV keskiarvo",
+      "sevenDayAvg": "7 päivän HRV keskiarvo",
+      "notEnoughData": "Ei tarpeeksi dataa",
+      "updatedAt": "Päivitetty"
+    },
+
+    "profile": {
+      "basicInfo": "Perustiedot",
+      "bodyComposition": "Kehonkoostumus",
+      "fitness": "Kuntomittarit",
+      "age": "Ikä",
+      "gender": "Sukupuoli",
+      "height": "Pituus",
+      "weight": "Paino",
+      "bmi": "Painoindeksi",
+      "bodyFat": "Rasvaprosentti",
+      "muscleMass": "Lihasmassa",
+      "fitnessAge": "Kuntoikä",
+      "vo2Run": "VO2max (juoksu)",
+      "vo2Cycling": "VO2max (pyöräily)"
+    }
+  
+
+  },
+
+    "chat": {
+    "title": "Terveys AI ",
+    "description": "Esitä terveyteen liittyviä kysymyksiä. Tämä ei ole lääketieteellinen diagnoosityökalu.",
+    "placeholder": "Kirjoita terveysaiheinen kysymyksesi...",
+    "send": "Lähetä",
+    "thinking": "AI käsittelee..."
   }
+
 }
