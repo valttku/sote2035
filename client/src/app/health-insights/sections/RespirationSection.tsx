@@ -38,7 +38,7 @@ export function RespirationSection({
     <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!respiration ? "opacity-50" : ""}`}>
       <h1>
         <span>
-          {t.healthInsights.sections.respiration.title}:{" "}
+          {t.healthInsights.respiration.title}:{" "}
           {new Date(displayRespiration.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
