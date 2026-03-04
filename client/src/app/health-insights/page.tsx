@@ -29,7 +29,6 @@ export default function HealthInsightsPage() {
   const { t } = useTranslation();
 
   const [activeSection, setActiveSection] = useState<Section>("dailies");
-  const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(
@@ -44,7 +43,6 @@ export default function HealthInsightsPage() {
   const handleAnalyzeClick = async () => {
     setLoading(true);
     setResult(null);
-    setShowResult(false);
 
     try {
       const dataToAnalyze: HealthDataToAnalyze = {};
@@ -98,20 +96,26 @@ export default function HealthInsightsPage() {
         }),
       });
 
-      const data = await response.json();
-      setResult(data.result);
-      setShowResult(true);
+      let resultText = "";
+
+      if (!response.ok) {
+        console.error("AI API returned HTTP error:", response.status);
+        resultText = t.healthInsights.failedInsights;
+      } else {
+        const data = await response.json().catch(() => ({}));
+        resultText = data.result || t.healthInsights.failedInsights;
+      }
+
+      setResult(resultText);
     } catch (err) {
-      console.error(err);
+      console.error("AI analysis failed:", err);
       setResult(t.healthInsights.failedInsights);
-      setShowResult(true);
     } finally {
       setLoading(false);
     }
   };
 
   //type Section = keyof HealthInsightsTranslations["sections"];
-
   const sections: { id: Section; label: string; disabled?: boolean }[] = [
     { id: "profile", label: t.healthInsights.sections.profile },
     { id: "dailies", label: t.healthInsights.sections.dailies },
@@ -282,7 +286,7 @@ export default function HealthInsightsPage() {
                       {t.healthInsights.aiTitle}
                     </h1>
                     <div className="flex-1 overflow-y-auto p-5">
-                      {showResult && result ? (
+                      {result ? (
                         <p className="whitespace-pre-wrap text-sm">{result}</p>
                       ) : (
                         <p className="italic text-sm">
@@ -295,14 +299,17 @@ export default function HealthInsightsPage() {
                     <button
                       className="button-style-blue w-auto justify-center mb-5 ml-auto mr-5"
                       onClick={() => {
-                        if (showResult) setShowResult(false);
-                        else handleAnalyzeClick();
+                        if (result) {
+                          setResult(null);
+                        } else {
+                          handleAnalyzeClick();
+                        }
                       }}
                       disabled={loading || loadingData}
                     >
                       {loading
                         ? t.healthInsights.analyzing
-                        : showResult
+                        : result
                           ? t.healthInsights.clearAnalysis
                           : selectedActivityIds.size > 0
                             ? t.healthInsights.analyzeSection.replace(
