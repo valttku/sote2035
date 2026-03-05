@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type Activity = {
   id: string;
@@ -8,7 +9,7 @@ export type Activity = {
   duration_in_seconds?: number | null;
   distance_in_meters?: number | null;
   active_kilocalories?: number | null;
-  average_heart_rate?: number | null; 
+  average_heart_rate?: number | null;
   steps?: number | null;
   average_pace?: number | null;
   max_heart_rate?: number | null;
@@ -32,18 +33,23 @@ export function ActivitiesSection({
   onActivitiesSelected,
   selectedActivityIds = new Set(),
 }: ActivitiesSectionProps) {
+  const { t } = useTranslation();
+
+
+  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
+    new Set(),
+  );
+
   const hasData = activities && activities.length > 0;
 
-  // Check if the activity is fully empty (all numeric fields 0)
   const isEmptyActivity = (activity: Activity) =>
     !activity.duration_in_seconds &&
     !activity.distance_in_meters &&
     !activity.active_kilocalories &&
     !activity.average_heart_rate;
 
-  // Use dummy activities if none exist
   const displayActivities: Activity[] =
-    hasData && !activities.every(isEmptyActivity)
+    hasData && !activities!.every(isEmptyActivity)
       ? activities!
       : [
           {
@@ -64,7 +70,6 @@ export function ActivitiesSection({
           },
         ];
 
-  // show "No data" if value is null/undefined/NaN
   const checkData = (
     value: number | null | undefined,
     formatter?: (v: number) => string,
@@ -73,9 +78,15 @@ export function ActivitiesSection({
       ? formatter
         ? formatter(value)
         : String(value)
-      : "No data";
+      : t.healthInsights.noData;
 
-  // Handle activity selection toggle
+  const formatMinutes = (seconds: number) =>
+    `${(seconds / 60).toFixed(1)} min`;
+  const formatDistance = (meters: number) =>
+    `${(meters / 1000).toFixed(2)} km`;
+  const formatCalories = (kcal: number) => `${kcal} kcal`;
+  const formatHeartRate = (hr: number) => `${hr} bpm`;
+
   const handleActivityToggle = (activityId: string) => {
     const newSelected = new Set(selectedActivityIds);
     if (newSelected.has(activityId)) {
@@ -86,112 +97,153 @@ export function ActivitiesSection({
     onActivitiesSelected?.(newSelected);
   };
 
+  const toggleExpand = (id: string) => {
+    setExpandedActivities((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  };
+
   // Mapping keys to label + formatter for display
   const activityFieldMap: Record<
     keyof Activity,
-    { label: string; formatter?: (v: number) => string }> = {
-    duration_in_seconds: {label: "⏱️Duration", formatter: (v) => `${(v / 60).toFixed(1)} min`},
-    distance_in_meters: {label: "🛤️Distance", formatter: (v) => `${(v / 1000).toFixed(2)} km`},
-    active_kilocalories: { label: "🔥Calories", formatter: (v) => `${v} kcal` },
-    average_heart_rate: { label: "❤️Avg HR", formatter: (v) => `${v} bpm` },
-    max_heart_rate: { label: "💓Max HR", formatter: (v) => `${v} bpm` },
-    steps: { label: "👣Steps" },
-    average_pace: {label: "🏃‍♂️Avg Pace", formatter: (v) => `${v.toFixed(2)} min/km`},
-    avg_run_cadence: { label: "🏃‍♂️Run Cadence", formatter: (v) => `${v} spm` },
-    avg_bike_cadence: { label: "🚴‍♂️Bike Cadence", formatter: (v) => `${v} rpm` },
-    average_swim_cadence: {label: "🏊‍♂️Swim Cadence",formatter: (v) => `${v} spm`},
-    average_push_cadence: {label: "🤸‍♂️Push Cadence",formatter: (v) => `${v} spm`},
-    pushes: { label: "🤸‍♂️Pushes" },
-    total_elevation_gain: { label: "⬆️Elev Gain", formatter: (v) => `${v} m` },
-    total_elevation_loss: { label: "⬇️Elev Loss", formatter: (v) => `${v} m` },
-    activity_name: { label: "Activity" },
+    { label: string; formatter?: (v: number) => string }
+  > = {
+    duration_in_seconds: {
+      label: `⏱️ ${t.healthInsights.activities.fields.duration}`,
+      formatter: formatMinutes,
+    },
+    distance_in_meters: {
+      label: `🛤️ ${t.healthInsights.activities.fields.distance}`,
+      formatter: formatDistance,
+    },
+    active_kilocalories: {
+      label: `🔥 ${t.healthInsights.activities.fields.calories}`,
+      formatter: formatCalories,
+    },
+    average_heart_rate: {
+      label: `❤️ ${t.healthInsights.activities.fields.avgHeartRate}`,
+      formatter: formatHeartRate,
+    },
+    max_heart_rate: {
+      label: `💓 ${t.healthInsights.activities.fields.maxHeartRate}`,
+      formatter: formatHeartRate,
+    },
+    steps: {
+      label: `👣 ${t.healthInsights.activities.fields.steps}`,
+    },
+    average_pace: {
+      label: `🏃 ${t.healthInsights.activities.fields.avgPace}`,
+      formatter: (v) => `${v.toFixed(2)} min/km`,
+    },
+    avg_run_cadence: {
+      label: `🏃 ${t.healthInsights.activities.fields.runCadence}`,
+      formatter: (v) => `${v} spm`,
+    },
+    avg_bike_cadence: {
+      label: `🚴 ${t.healthInsights.activities.fields.bikeCadence}`,
+      formatter: (v) => `${v} rpm`,
+    },
+    average_swim_cadence: {
+      label: `🏊 ${t.healthInsights.activities.fields.swimCadence}`,
+      formatter: (v) => `${v} spm`,
+    },
+    average_push_cadence: {
+      label: `🤸 ${t.healthInsights.activities.fields.pushCadence}`,
+      formatter: (v) => `${v} spm`,
+    },
+    pushes: {
+      label: `🤸 ${t.healthInsights.activities.fields.pushes}`,
+    },
+    total_elevation_gain: {
+      label: `⬆️ ${t.healthInsights.activities.fields.elevationGain}`,
+      formatter: (v) => `${v} m`,
+    },
+    total_elevation_loss: {
+      label: `⬇️ ${t.healthInsights.activities.fields.elevationLoss}`,
+      formatter: (v) => `${v} m`,
+    },
+    activity_name: {  label: t.healthInsights.activities.activityName,},
     id: { label: "ID" },
   };
 
-  // State to track which activities are expanded to show details
-  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(
-    new Set(),
-  );
-
   return (
-    <div>
-      <div className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!hasData ? "opacity-50" : ""}`}>
-        <p className="pb-2">Count: {hasData ? activities!.length : 0}</p>
+  <div>
+    <div
+      className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${
+        !hasData ? "opacity-50" : ""
+      }`}
+    >
+      <p className="pb-2">
+        {t.healthInsights.activities.count}:{" "}
+        {hasData ? activities!.length : 0}
+      </p>
 
-        {/* Map activities to display */}
-        {displayActivities.map((activity: Activity) => {
-          const toggleActivity = (id: string) => {
-            setExpandedActivities((prev) => {
-              const newSet = new Set(prev);
-              if (newSet.has(id)) newSet.delete(id);
-              else newSet.add(id);
-              return newSet;
-            });
-          };
+      {displayActivities.map((activity) => (
+        <div
+          key={activity.id}
+          className="bg-white/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
+          onClick={() => toggleExpand(activity.id)}
+        >
+          {/* TITLE ROW */}
+          <div className="flex justify-between items-center">
+            <div className="text-lg flex items-baseline gap-2">
+              {t.healthInsights.activities.activityName}
 
-          return (
-            <div
-              key={activity.id}
-              className="bg-[white]/10 rounded-xl p-4 shadow-lg border border-white/20 text-white cursor-pointer"
-              onClick={() => toggleActivity(activity.id)}
-            >
-              {/* Title row */}
-              <div className="flex justify-between items-center">
-                <div className="text-lg flex items-baseline gap-2">
-                  {activity.activity_name}
-
-                  {/* Click to toggle details */}
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevent toggle expand when clicking details
-                      toggleActivity(activity.id);
-                    }}
-                    className="mt-2 text-sm text-gray-400 cursor-pointer hover:text-white"
-                  >
-                    {expandedActivities.has(activity.id)
-                      ? "- hide details"
-                      : "- open details"}
-                  </div>
-                </div>
-
-                {/* Select checkbox */}
-                {hasData && (
-                  <input
-                    type="checkbox"
-                    value={activity.id}
-                    checked={selectedActivityIds.has(activity.id)}
-                    onClick={(e) => e.stopPropagation()} // ⬅️ stop bubbling here
-                    onChange={() => handleActivityToggle(activity.id)}
-                    className="cursor-pointer accent-[#1d9dad] w-5 h-5"
-                  />
-                )}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleExpand(activity.id);
+                }}
+                className="text-sm text-gray-400 hover:text-white cursor-pointer"
+              >
+                {expandedActivities.has(activity.id)
+                  ? t.healthInsights.activities.hideDetails
+                  : t.healthInsights.activities.openDetails}
               </div>
+            </div>
 
-              {/* Expanded content */}
-              {expandedActivities.has(activity.id) && (
-                <div className="mt-2 text-sm text-gray-200 flex flex-wrap gap-4">
-                  {Object.entries(activityFieldMap).map(
-                    ([key, { label, formatter }]) => {
-                      const value = activity[key as keyof Activity];
-                      if (
-                        value == null ||
-                        key === "activity_name" ||
-                        key === "id"
-                      )
-                        return null;
-                      return (
-                        <div key={key}>
-                          {label}: {checkData(value as number, formatter)}
-                        </div>
-                      );
-                    },
-                  )}
-                </div>
+            {/* Checkbox */}
+            {hasData && (
+              <input
+                type="checkbox"
+                checked={selectedActivityIds.has(activity.id)}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleActivityToggle(activity.id);
+                }}
+                className="cursor-pointer accent-[#1d9dad] w-5 h-5"
+              />
+            )}
+          </div>
+
+          {/* DETAILS SECTION */}
+          {expandedActivities.has(activity.id) && (
+            <div className="mt-2 text-sm text-gray-200 flex flex-wrap gap-4">
+              {Object.entries(activityFieldMap).map(
+                ([key, { label, formatter }]) => {
+                  const value = activity[key as keyof Activity];
+
+                  if (
+                    value == null ||
+                    key === "activity_name" ||
+                    key === "id"
+                  )
+                    return null;
+
+                  return (
+                    <div key={key}>
+                      {label}: {checkData(value as number, formatter)}
+                    </div>
+                  );
+                }
               )}
             </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
+      ))}
     </div>
-  );
-}
+  </div>
+)}

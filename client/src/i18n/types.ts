@@ -191,30 +191,8 @@ export type CalendarTranslations = {
   };
 };
 
-// Health Insights page
-export type HealthInsightsTranslations = {
-  title: string;
-  sections: {
-    profile: string;
-    dailies: string;
-    activities: string;
-    sleep: string;
-    stress: string;
-    bodyComposition: string;
-    respiration: string;
-    hrv: string;
-  };
-  loading: string;
-  aiTitle: string;
-  aiPlaceholder: string;
-  comingSoon: string;
-  analyzing: string;
-  clearAnalysis: string;
-  analyzeAll: string;
-  analyzeSection: string;
-  failedInsights: string;
-  noData: string;
-};
+
+
 
 //home
 export type HomeTranslations = {
@@ -301,6 +279,170 @@ export type AuthTranslations = {
   logout: string;
 };
 
+//Health AI chat translation
+
+export interface ChatTranslation {
+  title: string;
+  description: string;
+  placeholder: string;
+  send: string;
+  thinking: string;
+}; 
+
+// Health Insights page
+export type HealthInsightsTranslations = {
+  title: string;
+  description : string;
+  sections: SectionsTranslation; 
+
+
+  loading: string;
+  aiTitle: string;
+  aiPlaceholder: string;
+  comingSoon: string;
+  analyzing: string;
+  clearAnalysis: string;
+  analyzeAll: string;
+  analyzeSection: string;
+  failedInsights: string;
+  noData: string;
+  updatedAt: string;
+  notEnoughData: string;
+
+  activities: ActivitiesTranslation;
+  dailies: DailiesTranslation;
+  sleep: SleepTranslation;
+  stress: StressTranslation;
+  respiration: RespirationTranslation;
+  hrv: HRVTranslation;
+  profile: ProfileTranslation;
+
+ 
+};
+//activities
+export interface ActivitiesTranslation {
+  count: string;
+  openDetails: string;
+  hideDetails: string;
+  activityName: string;
+  fields: {
+    duration: string;
+    distance: string;
+    calories: string;
+    avgHeartRate: string;
+    maxHeartRate: string;
+    steps: string;
+    avgPace: string;
+    runCadence: string;
+    bikeCadence: string;
+    swimCadence: string;
+    pushCadence: string;
+    pushes: string;
+    elevationGain: string;
+    elevationLoss: string;
+  };
+}
+
+//Dailies
+
+export type DailiesTranslation = {
+  heartRateTimeline?: string;
+
+  stats: {
+    steps: string;
+    distance?: string;
+    floorsClimbed?: string;
+    activeCalories?: string;
+    bmrCalories?: string;
+    totalCalories?: string;
+    moderateExercise?: string;
+    vigorousExercise?: string;
+    weeklyIntensity?: string;
+    restingHeartRate?: string;
+    avgHeartRate?: string;
+    maxHeartRate?: string;
+  };
+};
+
+//sleep
+export interface SleepTranslation {
+  sleepStagesTimeline: string;
+  deepSleep: string;
+  lightSleep: string;
+  remSleep: string;
+  awake: string;
+  totalSleep: string;
+  startTime: string;
+  endTime: string;
+  sleepScore: string;
+  unmeasurable: string;
+  hour: string;
+  minute: string;
+  second: string;
+}
+
+//stress
+export interface StressTranslation {
+  overall: string;
+  stressDuration: string;
+  restStressDuration: string;
+  lowStressDuration: string;
+  mediumStressDuration: string;
+  highStressDuration: string;
+  stressQualifier: string;
+}
+
+//Respiration
+export interface RespirationTranslation {
+  title: string;
+  minRespirationRate: string;
+  avgRespirationRate: string;
+  maxRespirationRate: string;
+}
+
+//HRV
+export interface HRVTranslation {
+  title: string;
+  dailyAverage: string;
+  lastNightAverage: string;
+  lastNightHigh: string;
+  sevenDayNightAvg: string;
+  sevenDayAvg: string;
+  notEnoughData: string;
+  updatedAt: string;
+}
+
+//Userprofile
+
+export interface ProfileTranslation {
+  basicInfo: string;
+  bodyComposition: string;
+  fitness: string;
+  age: string;
+  gender: string;
+  height: string;
+  weight: string;
+  bmi: string;
+  bodyFat: string;
+  muscleMass: string;
+  fitnessAge: string;
+  vo2Run: string;
+  vo2Cycling: string;
+}
+
+//sections Navigation
+export interface SectionsTranslation {
+  activities: string;
+  dailies: string;
+  sleep: string;
+  stress: string;
+  respiration: string;
+  hrv: string;
+  profile: string;
+}
+
+
+
 // Complete translation type
 export type Translations = {
   //forgot_password: any;
@@ -310,6 +452,7 @@ export type Translations = {
   forgotPassword: ForgotPasswordTranslations;
   calendar: CalendarTranslations;
   healthInsights: HealthInsightsTranslations;
+ sections: SectionsTranslation; 
   navbar: NavbarTranslations;
   locale: string;
   login: LoginTranslations;
@@ -317,4 +460,8 @@ export type Translations = {
   darkmodetoggle: DarkModeToggle;
   auth: AuthTranslations;
   home: HomeTranslations;
+  chat:ChatTranslation;
 };
+
+
+

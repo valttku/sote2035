@@ -1,5 +1,6 @@
 "use client";
 import { StatCard } from "../../../components/health-insights/StatCard";
+import { useTranslation } from "@/i18n/LanguageProvider";
 import {
   LineChart,
   Line,
@@ -23,6 +24,7 @@ export type HRV = {
 
 export function HRVSection({ HRV }: { HRV?: HRV }) {
   const hasData = !!HRV;
+  const { t } = useTranslation();
 
   const displayHRV: HRV = hasData
     ? HRV!
@@ -69,7 +71,7 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
     >
       <h1>
         <span>
-          Updated at:{" "}
+           {t.healthInsights.updatedAt}:{" "}
           {new Date(displayHRV.updated_at).toLocaleString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
@@ -148,30 +150,30 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          label="💓Last Night Average HRV"
+          label={`💓${t.healthInsights.hrv.lastNightAverage}`}
           value={checkData(displayHRV.last_night_avg)}
         />
         <StatCard
-          label="💓Last Night 5-min High HRV"
+          label={`💓${t.healthInsights.hrv.lastNightHigh}`}
           value={checkData(displayHRV.last_night_5min_high)}
         />
         <StatCard
-          label="💓Average Day HRV"
+          label={`💓${t.healthInsights.hrv.dailyAverage}`}
           value={checkData(displayHRV.avg_day_hrv)}
         />
         <StatCard
-          label="💓7-Day Average Night HRV"
+          label={`💓${t.healthInsights.hrv.sevenDayNightAvg}`}
           value={
             displayHRV.days_in_7d_window < 7
-              ? "Not enough data"
+              ? t.healthInsights.hrv.notEnoughData
               : checkData(displayHRV.avg_7d_night_hrv)
           }
         />
         <StatCard
-          label="💓7-Day Average HRV"
+          label={`💓${t.healthInsights.hrv.sevenDayAvg}`}
           value={
             displayHRV.days_in_7d_window < 7
-              ? "Not enough data"
+              ? t.healthInsights.hrv.notEnoughData
               : checkData(displayHRV.avg_7d_hrv)
           }
         />

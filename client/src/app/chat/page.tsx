@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import AppLayout from "@/components/AppLayout";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 export default function ChatPage() {
 
@@ -10,6 +11,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   // Auto scroll chat ⭐
   useEffect(() => {
@@ -70,10 +72,10 @@ export default function ChatPage() {
     {/* Header */}
     <div className="mb-6 text-center">
       <h1 className="text-3xl font-semibold text-[#31c2d5]">
-        ⚕️ Health AI Assistant
+        ⚕️ {t.chat.title}
       </h1>
       <p className="text-white/60 text-sm mt-2">
-        Ask health-related questions. Not a medical diagnosis tool.
+        {t.chat.description}
       </p>
     </div>
 
@@ -96,7 +98,7 @@ export default function ChatPage() {
 
       {loading && (
         <p className="text-white/50 text-sm animate-pulse">
-          AI is thinking...
+          {t.chat.thinking}
         </p>
       )}
 
@@ -108,7 +110,7 @@ export default function ChatPage() {
 
       <input
         type="text"
-        placeholder="Ask your health question..."
+        placeholder={t.chat.placeholder}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -124,7 +126,7 @@ export default function ChatPage() {
             : "button-style-blue"
         }
       >
-        Send
+        {t.chat.send}
       </button>
 
     </div>
