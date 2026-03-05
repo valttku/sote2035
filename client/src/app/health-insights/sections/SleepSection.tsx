@@ -161,7 +161,7 @@ const stageLabelMap: Record<string, string> = {
       className="rounded-xl shadow p-4 text-white border border-white/20 bg-white/5 w-full"
     >
       <h3 className="mb-4 text-lg font-semibold">
-        {t.healthInsights.sleep.sleepScore}{" "}
+        {t.healthInsights.sleep.sleepStagesTimeline}{" "}
         {!sleep.sleep_levels_map ||
         Object.keys(sleep.sleep_levels_map).length === 0
           ? t.healthInsights.noData 

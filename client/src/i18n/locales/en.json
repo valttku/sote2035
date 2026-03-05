@@ -104,7 +104,7 @@
     "general_error": "An error occurred. Please try again."
   },
 
-  "forgotPassword":{
+  "forgotPassword": {
     "forgot_password": "Forgot password?",
     "send_password": "Send password reset link",
     "back_to_login": "Back to login",
@@ -268,7 +268,6 @@
     "logout": "Log off"
   },
 
-  
   "healthInsights": {
     "title": "Health Insights",
     "description": "Overview of your health data",
@@ -285,8 +284,8 @@
     "updatedAt": "Updated",
     "notEnoughData": "Not enough data",
 
-  "sections": {
-     "activities": "Activities",
+    "sections": {
+      "activities": "Activities",
       "dailies": "Dailies",
       "sleep": "Sleep",
       "stress": "Stress",
@@ -295,12 +294,12 @@
       "profile": "Profile"
     },
 
-  "activities": {
+    "activities": {
       "count": "Count",
       "openDetails": "Open details",
       "hideDetails": "Hide details",
-       "activityName": "Activity",
-    
+      "activityName": "Activity",
+
       "fields": {
         "duration": "Duration",
         "distance": "Distance",
@@ -316,7 +315,6 @@
         "pushes": "Pushes",
         "elevationGain": "Elevation gain",
         "elevationLoss": "Elevation loss"
-         
       }
     },
 
@@ -348,9 +346,9 @@
       "startTime": "Start time",
       "endTime": "End time",
       "sleepScore": "Sleep score",
-      "unmeasurable": "Unmeasurable", 
+      "unmeasurable": "Unmeasurable",
 
-       "hour": "h",
+      "hour": "h",
       "minute": "m",
       "second": "s"
     },
@@ -400,10 +398,7 @@
     }
   },
 
-
-
-
-   "chat": {
+  "chat": {
     "title": "Health AI Assistant",
     "description": "Ask health-related questions. Not a medical diagnosis tool.",
     "placeholder": "Ask your health question...",
@@ -411,4 +406,3 @@
     "thinking": "AI is thinking..."
   }
 }
-

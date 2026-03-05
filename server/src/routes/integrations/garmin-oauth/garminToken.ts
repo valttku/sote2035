@@ -42,6 +42,30 @@ export async function exchangeGarminCodeForToken(
   return data;
 }
 
+export const refreshGarminToken = async (refreshToken: string) => {
+  const response = await fetch("https://diauth.garmin.com/di-oauth2-service/oauth/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization:
+        "Basic " +
+        Buffer.from(
+          `${process.env.GARMIN_CLIENT_ID}:${process.env.GARMIN_CLIENT_SECRET}`,
+        ).toString("base64"),
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Token refresh failed: ${response.status}`);
+  }
+
+  return response.json(); // contains new access_token + refresh_token
+};
+
 export async function fetchGarminUserProfile(accessToken: string) {
   const response = await fetch(
     "https://apis.garmin.com/wellness-api/rest/user/id",
