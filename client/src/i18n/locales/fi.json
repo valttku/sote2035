@@ -261,7 +261,6 @@
     "logout": "Kirjaudu ulos"
   },
 
-  
   "healthInsights": {
     "title": "Terveysanalyysit",
 
@@ -341,7 +340,7 @@
       "sleepScore": "Unipisteet",
       "unmeasurable": "Ei mitattavissa",
 
-       "hour": "t",
+      "hour": "t",
       "minute": "min",
       "second": "s"
     },
@@ -389,16 +388,13 @@
       "vo2Run": "VO2max (juoksu)",
       "vo2Cycling": "VO2max (pyöräily)"
     }
-  
-
   },
 
-    "chat": {
+  "chat": {
     "title": "Terveys AI ",
     "description": "Esitä terveyteen liittyviä kysymyksiä. Tämä ei ole lääketieteellinen diagnoosityökalu.",
     "placeholder": "Kirjoita terveysaiheinen kysymyksesi...",
     "send": "Lähetä",
     "thinking": "AI käsittelee..."
   }
-
 }
