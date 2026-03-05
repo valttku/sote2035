@@ -191,9 +191,6 @@ export type CalendarTranslations = {
   };
 };
 
-
-
-
 //home
 export type HomeTranslations = {
   title: string;
@@ -287,14 +284,13 @@ export interface ChatTranslation {
   placeholder: string;
   send: string;
   thinking: string;
-}; 
+}
 
 // Health Insights page
 export type HealthInsightsTranslations = {
   title: string;
-  description : string;
-  sections: SectionsTranslation; 
-
+  description: string;
+  sections: SectionsTranslation;
 
   loading: string;
   aiTitle: string;
@@ -316,8 +312,6 @@ export type HealthInsightsTranslations = {
   respiration: RespirationTranslation;
   hrv: HRVTranslation;
   profile: ProfileTranslation;
-
- 
 };
 //activities
 export interface ActivitiesTranslation {
@@ -441,8 +435,6 @@ export interface SectionsTranslation {
   profile: string;
 }
 
-
-
 // Complete translation type
 export type Translations = {
   //forgot_password: any;
@@ -452,7 +444,7 @@ export type Translations = {
   forgotPassword: ForgotPasswordTranslations;
   calendar: CalendarTranslations;
   healthInsights: HealthInsightsTranslations;
- sections: SectionsTranslation; 
+  sections: SectionsTranslation;
   navbar: NavbarTranslations;
   locale: string;
   login: LoginTranslations;
@@ -460,8 +452,5 @@ export type Translations = {
   darkmodetoggle: DarkModeToggle;
   auth: AuthTranslations;
   home: HomeTranslations;
-  chat:ChatTranslation;
+  chat: ChatTranslation;
 };
-
-
-
