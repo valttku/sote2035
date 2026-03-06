@@ -168,10 +168,16 @@ export default function HealthStatsPanel({
 
   
 
-      const metricsObj =
-        data && typeof data === "object" && "metrics" in data
-          ? (data as any).metrics || {}
-          : {};
+          type ApiResponse = {
+      metrics?: HealthMetrics;
+    };
+
+    const metricsObj =
+      data &&
+      typeof data === "object" &&
+      "metrics" in data
+        ? ((data as ApiResponse).metrics ?? {})
+        : {};
 
       setMetrics(metricsObj);
     } catch (e) {
@@ -184,7 +190,7 @@ export default function HealthStatsPanel({
   }
 
   fetchHealthMetrics();
-}, [selected, selectedDate]);
+}, [selected, selectedDate, t.home.noMetrics]);
 
   return (
     <div className="panel-animation ui-component-styles backdrop-blur-3xl p-4 pt-2">
