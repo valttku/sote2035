@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "@/i18n/LanguageProvider";
 
 interface AIMessageButtonProps {
   aiStatus?: "none" | "generated" | "quota_exceeded" | "error";
@@ -9,6 +10,7 @@ const AIMessageButton: React.FC<AIMessageButtonProps> = ({
   aiStatus = "none",
   onClick,
 }) => {
+  const {t} = useTranslation();
   const hasNewMessage = aiStatus === "generated";
 
   return (
@@ -17,7 +19,7 @@ const AIMessageButton: React.FC<AIMessageButtonProps> = ({
         hasNewMessage ? "animate-pulse" : ""
       }`}
       style={{ width: 56, height: 56 }}
-      aria-label="Open AI Health Assistant"
+      aria-label={t.home.aiTitle}
       onClick={onClick}
     >
       <svg

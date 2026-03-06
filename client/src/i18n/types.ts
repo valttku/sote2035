@@ -201,6 +201,43 @@ export type HomeTranslations = {
   aiTitle: string;
   noMessage: string;
   generatingMessage: string;
+  quotaExceeded: string;
+  aiError: string;
+  closeAIMessage: string;
+  closeInfo: string;
+  noHealthAlertsForToday: string;
+
+  status: {
+    low: string;
+    good: string;
+    high: string;
+    no_status: string;
+  };
+
+  metrics: {
+  "restingHeartRate": string;
+  "overnightAverageHRV": string;
+  "averageRespiratoryRate": string;
+
+  "totalSleep": string;
+  "averageStress": string;
+
+  steps: string;
+  distance: string;
+
+  "intenseExerciseToday": string;
+  "intenseExerciseThisWeek": string;
+  "floorsClimbed": string;
+}
+
+  tooltip: {
+    noGoal: string;
+    range: string;
+    min: string;
+    max: string;
+    sevenDayAvg: string;
+    insufficientData: string;
+  };
 
   bodyParts: {
     brain: string;
@@ -434,6 +471,8 @@ export interface SectionsTranslation {
   hrv: string;
   profile: string;
 }
+
+
 
 // Complete translation type
 export type Translations = {

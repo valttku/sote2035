@@ -16,6 +16,44 @@
     "aiTitle": "AI-analyysi",
     "noMessage": "Ei viestejä saatavilla.",
     "generatingMessage": "Luodaan AI-viestiä...",
+     "quotaExceeded": "AI-viesti ei ole tilapäisesti saatavilla (kiintiö ylitetty).",
+    "aiError": "AI-viestiä ei voitu luoda järjestelmävirheen vuoksi.",
+    "closeAIMessage": "Sulje AI viesti",
+    "closeInfo": "Sulje Tiedot",
+    "noHealthAlertsForToday": "Ei terveysvaroituksia tänään",
+
+    "status": {
+      "low": "Matala",
+      "good": "Hyvä",
+      "high": "Korkea",
+      "no_status": "Ei määritelty"
+    },
+
+    "metrics": {
+      "restingHeartRate": "Leposyke",
+      "overnightAverageHRV": "Yön keskimääräinen HRV",
+
+      "averageRespiratoryRate": "Keskimääräinen hengitystiheys",
+
+      "totalSleep": "Uni yhteensä",
+      "averageStress": "Keskimääräinen stressi",
+
+      "steps": "Askeleet",
+      "distance": "Matka",
+      "intenseExerciseToday": "Raskas liikunta tänään",
+      "intenseExerciseThisWeek": "Raskas liikunta tällä viikolla",
+      "floorsClimbed": "Kerroksia noustu"
+    },
+
+    "tooltip": {
+      "noGoal": "Tavoitetta ei määritelty",
+      "range": "Alue",
+      "min": "Min",
+      "max": "Max",
+      "sevenDayAvg": "7 päivän keskiarvo",
+      "insufficientData": "Ei riittävästi tietoja"
+    },
+
     "bodyParts": {
       "brain": "Aivot",
       "heart": "Sydän",
@@ -389,6 +427,7 @@
       "vo2Cycling": "VO2max (pyöräily)"
     }
   },
+
 
   "chat": {
     "title": "Terveys AI ",
