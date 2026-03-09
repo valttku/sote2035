@@ -31,6 +31,8 @@ function labelForKind(kind: string, t?: Translations) {
       return t?.calendar.activity ?? "Activity";
     case "resp_daily":
       return t?.calendar.respiratory ?? "Respiratory";
+    case "nightly_recharge":
+      return "Nightly Recharge";
     case "manual_activity":
       return t?.calendar.manualActivity ?? "Manual Activity";
     default:
@@ -119,10 +121,14 @@ export default function HealthStatsList({entries, onDelete}: {
     };
   });
 
+  // Also include any entries whose kind is not in expectedKinds (e.g. manual_activity, nightly_recharge)
+  const extraEntries = entries.filter((e) => !expectedKinds.includes(e.kind));
+  const allEntries = [...mergedEntries, ...extraEntries];
+
   return (
     <div className="space-y-3 overflow-y-auto max-h-96">
       {/* Map each health stat entry to a card with details */ }
-      {mergedEntries.map((e) => (
+      {allEntries.map((e) => (
         <div key={e.id} className="border rounded-xl p-3">
           
           {/* Header: Health stat label + source + delete */}
