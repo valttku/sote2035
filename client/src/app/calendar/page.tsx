@@ -136,11 +136,10 @@ export default function CalendarPage() {
 
   async function loadManualActivities(date: string) {
     const data = await fetchJson<HealthStatsResponse>(
-      `/api/v1/calendar/health-stats?date=${encodeURIComponent(date)}`,
+      `/api/v1/calendar/manual-activities?date=${encodeURIComponent(date)}`,
     );
     if (data) {
-      const manual = data.entries.filter((e) => e.kind === "manual_activity");
-      setManualActivities({ date: data.date, entries: manual });
+      setManualActivities(data);
     }
   }
 
@@ -197,19 +196,9 @@ export default function CalendarPage() {
                     onClick={() => setHealthStats(null)}
                     className="w-full text-left hover:opacity-70"
                   >
-                    ▼ {t.calendar.healthStats} (
-                    {
-                      healthStats.entries.filter(
-                        (e) => e.kind !== "manual_activity",
-                      ).length
-                    }
-                    )
+                    ▼ {t.calendar.healthStats} ({healthStats.entries.length})
                   </button>
-                  <HealthStatsList
-                    entries={healthStats.entries.filter(
-                      (e) => e.kind !== "manual_activity",
-                    )}
-                  />
+                  <HealthStatsList entries={healthStats.entries} />
                 </div>
               ) : (
                 <button

@@ -148,57 +148,79 @@ export async function ensureSchema() {
       on app.oauth_states (expires_at);
   `);
 
-  // --- create health_days table ---
+  // --- drop legacy triggers and functions (safe to run on existing deployments) ---
+  // These triggers wrote to health_stat_entries / health_days which no longer exist.
+  // Must drop them BEFORE dropping those tables, or any INSERT to raw tables will crash.
   await db.query(`
-  create table if not exists app.health_days (
-    user_id integer not null references app.users(id) on delete cascade,
-    day_date date not null,
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
-    primary key (user_id, day_date)
-  );
+    -- ensure_health_day triggers (Garmin)
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_metrics     ON app.user_metrics_garmin;
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_dailies     ON app.user_dailies_garmin;
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_respiration ON app.user_respiration_garmin;
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_activities  ON app.user_activities_garmin;
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_sleeps      ON app.user_sleeps_garmin;
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_hrv         ON app.user_hrv_garmin;
 
-  create or replace function app.update_health_days_updated_at()
-  returns trigger as $$
-  begin
-    new.updated_at = now();
-    return new;
-  end;
-  $$ language plpgsql;
+    -- ensure_health_day triggers (Polar)
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_polar_exercises ON app.user_exercises_polar;
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_polar_activity  ON app.user_activity_summaries_polar;
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_polar_sleep     ON app.user_sleeps_polar;
+    DROP TRIGGER IF EXISTS trg_ensure_health_day_for_polar_recharge  ON app.user_nightly_recharge_polar;
 
-  drop trigger if exists update_health_days_updated_at on app.health_days;
+    -- health_stat write triggers (Garmin)
+    DROP TRIGGER IF EXISTS trg_update_health_stats_on_dailies      ON app.user_dailies_garmin;
+    DROP TRIGGER IF EXISTS trg_update_health_stats_on_respiration   ON app.user_respiration_garmin;
+    DROP TRIGGER IF EXISTS trg_update_health_stats_on_sleeps        ON app.user_sleeps_garmin;
 
-  create trigger update_health_days_updated_at
-  before update on app.health_days
-  for each row
-  execute function app.update_health_days_updated_at();
-`);
+    -- health_stat write triggers (Polar)
+    DROP TRIGGER IF EXISTS trg_update_health_stats_on_polar_exercise          ON app.user_exercises_polar;
+    DROP TRIGGER IF EXISTS trg_update_health_stats_on_polar_activity_summary  ON app.user_activity_summaries_polar;
+    DROP TRIGGER IF EXISTS trg_update_health_stats_on_polar_sleep              ON app.user_sleeps_polar;
+    DROP TRIGGER IF EXISTS trg_update_health_stats_on_polar_nightly_recharge  ON app.user_nightly_recharge_polar;
+  `);
 
-  // health_stat_entries table
   await db.query(`
-    create table if not exists app.health_stat_entries (
-      id uuid primary key default gen_random_uuid(),
-      user_id integer not null references app.users(id) on delete cascade,
-      day_date date not null,
-      source varchar(50),
-      kind varchar(80) not null,
-      data jsonb not null,
+    DROP FUNCTION IF EXISTS app.ensure_health_day_exists() CASCADE;
+    DROP FUNCTION IF EXISTS app.update_health_days_updated_at() CASCADE;
+    DROP FUNCTION IF EXISTS app.update_health_stats_on_dailies() CASCADE;
+    DROP FUNCTION IF EXISTS app.update_health_stats_on_respiration() CASCADE;
+    DROP FUNCTION IF EXISTS app.update_health_stats_on_sleeps() CASCADE;
+    DROP FUNCTION IF EXISTS app.update_health_stats_on_polar_exercise() CASCADE;
+    DROP FUNCTION IF EXISTS app.update_health_stats_on_polar_activity_summary() CASCADE;
+    DROP FUNCTION IF EXISTS app.update_health_stats_on_polar_sleep() CASCADE;
+    DROP FUNCTION IF EXISTS app.update_health_stats_on_polar_nightly_recharge() CASCADE;
+  `);
+
+  // --- drop legacy derived tables ---
+  await db.query(`
+    DROP TABLE IF EXISTS app.health_stat_entries CASCADE;
+    DROP TABLE IF EXISTS app.health_days CASCADE;
+  `);
+
+  // --- manual activities ---
+  // Simple table for user-entered activities. No triggers, no derived cache.
+  await db.query(`
+    create table if not exists app.user_manual_activities (
+      id         uuid primary key default gen_random_uuid(),
+      user_id    integer not null references app.users(id) on delete cascade,
+      day_date   date not null,
+      title      text not null,
+      type       text,
+      duration   integer,
+      calories   integer,
+      steps      integer,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
     );
 
-    create index if not exists idx_health_stat_entries_user_day
-      on app.health_stat_entries (user_id, day_date);
-
-    create unique index if not exists ux_health_stat_entries_user_day_kind
-      on app.health_stat_entries (user_id, day_date, kind);
+    create index if not exists idx_user_manual_activities_user_day
+      on app.user_manual_activities (user_id, day_date);
   `);
 
   await db.query(`
-    drop trigger if exists trg_ensure_health_day_exists_on_stats on app.health_stat_entries;
-    create trigger trg_ensure_health_day_exists_on_stats
-    after insert or update on app.health_stat_entries
-    for each row execute function app.ensure_health_day_exists();
+    drop trigger if exists update_user_manual_activities_updated_at on app.user_manual_activities;
+    create trigger update_user_manual_activities_updated_at
+    before update on app.user_manual_activities
+    for each row execute function app.update_updated_at_column();
   `);
 
   // Add verifier column if table already existed without it (e.g. before Garmin PKCE)
@@ -211,5 +233,11 @@ export async function ensureSchema() {
   await db.query(`
     alter table app.oauth_states
     add column if not exists return_to text;
+  `);
+
+  // ans_charge was originally INTEGER but Polar returns fractional values (e.g. -4.7)
+  await db.query(`
+    alter table app.user_nightly_recharge_polar
+    alter column ans_charge type numeric(6,2) using ans_charge::numeric;
   `);
 }

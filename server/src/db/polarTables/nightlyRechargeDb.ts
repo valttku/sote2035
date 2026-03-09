@@ -7,7 +7,7 @@ export type PolarNightlyRechargeRow = {
   beat_to_beat_avg: number | null;            // avg RR interval in ms
   heart_rate_variability_avg: number | null;  // avg HRV (RMSSD) in ms
   breathing_rate_avg: number | null;          // avg overnight breathing rate
-  ans_charge: number | null;                  // 1–100 Polar's ANS charge score
+  ans_charge: number | null;                  // Polar's ANS charge score (fractional)
   ans_rate: string | null;                    // "RECOVERING" | "STEADY" | "ACTIVATED"
   source: string;
 };
