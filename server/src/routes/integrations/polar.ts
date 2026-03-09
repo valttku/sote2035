@@ -272,15 +272,22 @@ polarRouter.delete("/unlink", authRequired, async (req, res, next) => {
     }
 
     await db.query("begin");
+
     await db.query(
       `delete from app.user_integrations where user_id = $1 and provider = 'polar'`,
       [userId]
     );
     await db.query(
-      `update app.users set active_provider = null
-       where id = $1 and active_provider = 'polar'`,
+      `update app.users set active_provider = null where id = $1 and active_provider = 'polar'`,
       [userId]
     );
+
+    // Delete all raw Polar data — no derived tables to clean up
+    await db.query(`delete from app.user_exercises_polar          where user_id = $1`, [userId]);
+    await db.query(`delete from app.user_activity_summaries_polar where user_id = $1`, [userId]);
+    await db.query(`delete from app.user_sleeps_polar             where user_id = $1`, [userId]);
+    await db.query(`delete from app.user_nightly_recharge_polar   where user_id = $1`, [userId]);
+
     await db.query("commit");
 
     res.json({ message: "Unlinked" });
