@@ -2,52 +2,7 @@ import { db } from "../db.js";
 
 // This file contains DB schema initialization related to Garmin watch data tables
 export async function createGarminTables() {
-  // ----------------------------
-  // Generic ensure_health_day_exists function
-  // ----------------------------
-  await db.query(`
-    create or replace function app.ensure_health_day_exists()
-    returns trigger as $$
-    declare
-      v_json jsonb;
-      v_user integer;
-      v_day date;
-      v_start_text text;
-      v_start_num double precision;
-    begin
-      -- Use row_to_json to safely inspect NEW without assuming specific columns
-      v_json := row_to_json(NEW)::jsonb;
 
-      -- extract user_id if present
-      if v_json ? 'user_id' then
-        v_user := (v_json ->> 'user_id')::integer;
-      end if;
-
-      if v_user is null then
-        return new;
-      end if;
-
-      -- prefer explicit day_date, otherwise fall back to start_time_in_seconds
-      if v_json ? 'day_date' then
-        v_day := (v_json ->> 'day_date')::date;
-      elsif v_json ? 'start_time_in_seconds' then
-        v_start_text := v_json ->> 'start_time_in_seconds';
-        if v_start_text is not null and v_start_text <> '' then
-          v_start_num := v_start_text::double precision;
-          v_day := to_timestamp(v_start_num)::date;
-        end if;
-      end if;
-
-      if v_day is not null then
-        insert into app.health_days (user_id, day_date)
-        values (v_user, v_day)
-        on conflict (user_id, day_date) do nothing;
-      end if;
-
-      return new;
-    end;
-    $$ language plpgsql;
-  `);
 
   // ----------------------------
   // Generic updated_at trigger function
@@ -87,11 +42,6 @@ export async function createGarminTables() {
   `);
 
   await db.query(`
-    drop trigger if exists trg_ensure_health_day_for_metrics on app.user_metrics_garmin;
-    create trigger trg_ensure_health_day_for_metrics
-    after insert or update on app.user_metrics_garmin
-    for each row execute function app.ensure_health_day_exists();
-
     drop trigger if exists update_user_metrics_garmin_updated_at on app.user_metrics_garmin;
     create trigger update_user_metrics_garmin_updated_at
     before update on app.user_metrics_garmin
@@ -152,11 +102,6 @@ export async function createGarminTables() {
   `);
 
   await db.query(`
-    drop trigger if exists trg_ensure_health_day_for_dailies on app.user_dailies_garmin;
-    create trigger trg_ensure_health_day_for_dailies
-    after insert or update on app.user_dailies_garmin
-    for each row execute function app.ensure_health_day_exists();
-
     drop trigger if exists update_user_dailies_garmin_updated_at on app.user_dailies_garmin;
     create trigger update_user_dailies_garmin_updated_at
     before update on app.user_dailies_garmin
@@ -187,11 +132,6 @@ export async function createGarminTables() {
   `);
 
   await db.query(`
-    drop trigger if exists trg_ensure_health_day_for_respiration on app.user_respiration_garmin;
-    create trigger trg_ensure_health_day_for_respiration
-    after insert or update on app.user_respiration_garmin
-    for each row execute function app.ensure_health_day_exists();
-
     drop trigger if exists update_user_respiration_garmin_updated_at on app.user_respiration_garmin;
     create trigger update_user_respiration_garmin_updated_at
     before update on app.user_respiration_garmin
@@ -254,11 +194,6 @@ export async function createGarminTables() {
   `);
 
   await db.query(`
-    drop trigger if exists trg_ensure_health_day_for_activities on app.user_activities_garmin;
-    create trigger trg_ensure_health_day_for_activities
-    after insert or update on app.user_activities_garmin
-    for each row execute function app.ensure_health_day_exists();
-
     drop trigger if exists update_user_activities_garmin_updated_at on app.user_activities_garmin;
     create trigger update_user_activities_garmin_updated_at
     before update on app.user_activities_garmin
@@ -305,11 +240,6 @@ export async function createGarminTables() {
 `);
 
   await db.query(`
-  drop trigger if exists trg_ensure_health_day_for_sleeps on app.user_sleeps_garmin;
-  create trigger trg_ensure_health_day_for_sleeps
-  after insert or update on app.user_sleeps_garmin
-  for each row execute function app.ensure_health_day_exists();
-
   drop trigger if exists update_user_sleeps_garmin_updated_at on app.user_sleeps_garmin;
   create trigger update_user_sleeps_garmin_updated_at
   before update on app.user_sleeps_garmin
@@ -343,139 +273,9 @@ export async function createGarminTables() {
   `);
 
   await db.query(`
-  drop trigger if exists trg_ensure_health_day_for_hrv on app.user_hrv_garmin;
-  create trigger trg_ensure_health_day_for_hrv
-  after insert or update on app.user_hrv_garmin
-  for each row execute function app.ensure_health_day_exists();
-
   drop trigger if exists update_user_hrv_garmin_updated_at on app.user_hrv_garmin;
   create trigger update_user_hrv_garmin_updated_at
   before update on app.user_hrv_garmin
   for each row execute function app.update_updated_at_column();
 `);
-
-  // ----------------------------
-  // Health stat triggers
-  // ----------------------------
-  // dailies -> heart_daily, activity_daily, stress_daily (overnight_avg_hrv  from user_hrv_garmin also added to heart_daily)
-  await db.query(`
-    create or replace function app.update_health_stats_on_dailies()
-    returns trigger as $$
-    begin
-      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      select new.user_id, new.day_date, 'garmin', 'heart_daily',
-        jsonb_build_object(
-          'hr_avg', new.avg_heart_rate,
-          'rhr', new.resting_heart_rate,
-          'overnight_avg_hrv', (
-            select uhrv.last_night_avg
-            from app.user_hrv_garmin uhrv
-            where uhrv.user_id = new.user_id and uhrv.day_date = new.day_date
-          )
-        )
-      on conflict (user_id, day_date, kind)
-      do update set data = EXCLUDED.data, updated_at = now();
-
-      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      select new.user_id, new.day_date, 'garmin', 'activity_daily',
-        jsonb_build_object(
-          'steps', new.steps,
-          'steps_goal', new.steps_goal,
-          'floors_climbed', new.floors_climbed,
-          'floors_climbed_goal', new.floors_climbed_goal,
-          'distance_meters', new.distance_in_meters,
-          'total_kcal', new.active_kilocalories + new.bmr_kilocalories,
-          'intensity_duration_seconds', new.moderate_intensity_duration_in_seconds + (new.vigorous_intensity_duration_in_seconds * 2),
-          'intensity_duration_goal_in_seconds', new.intensity_duration_goal_in_seconds,
-
-          -- weekly total (seconds), weighting vigorous = 2x
-          'weekly_intensity_total_seconds',
-            (
-                SELECT COALESCE(SUM(moderate_intensity_duration_in_seconds + (vigorous_intensity_duration_in_seconds * 2)), 0)
-                FROM app.user_dailies_garmin
-                WHERE user_id = new.user_id
-                  AND day_date >= date_trunc('week', new.day_date)::date
-                  AND day_date <= new.day_date
-            )
-        )
-      on conflict (user_id, day_date, kind)
-      do update set data = EXCLUDED.data, updated_at = now();
-
-      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      select new.user_id, new.day_date, 'garmin', 'stress_daily',
-        jsonb_build_object(
-          'stress_avg', new.avg_stress_level,
-          'stress_qualifier', new.stress_qualifier
-        )
-      on conflict (user_id, day_date, kind)
-      do update set data = EXCLUDED.data, updated_at = now();
-
-      return new;
-    end;
-    $$ language plpgsql;
-
-    drop trigger if exists trg_update_health_stats_on_dailies on app.user_dailies_garmin;
-    create trigger trg_update_health_stats_on_dailies
-    after insert or update on app.user_dailies_garmin
-    for each row execute function app.update_health_stats_on_dailies();
-  `);
-
-  // respiration -> resp_daily
-  await db.query(`
-    create or replace function app.update_health_stats_on_respiration()
-    returns trigger as $$
-    declare
-      avg_resp_rate double precision;
-    begin
-      select avg(value::double precision) into avg_resp_rate
-      from jsonb_each_text(new.time_offset_epoch_to_breaths);
-
-      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      values (
-        new.user_id,
-        new.day_date,
-        'garmin',
-        'resp_daily',
-        jsonb_build_object('resp_rate', round(avg_resp_rate::numeric, 2))
-      )
-      on conflict (user_id, day_date, kind)
-      do update set data = EXCLUDED.data, updated_at = now();
-
-      return new;
-    end;
-    $$ language plpgsql;
-
-    drop trigger if exists trg_update_health_stats_on_respiration on app.user_respiration_garmin;
-    create trigger trg_update_health_stats_on_respiration
-    after insert or update on app.user_respiration_garmin
-    for each row execute function app.update_health_stats_on_respiration();
-  `);
-
-  // sleeps -> sleep_daily
-  await db.query(`
-    create or replace function app.update_health_stats_on_sleeps()
-    returns trigger as $$
-    begin
-      insert into app.health_stat_entries (user_id, day_date, source, kind, data)
-      values (
-        new.user_id,
-        new.day_date,
-        'garmin',
-        'sleep_daily',
-        jsonb_build_object(
-          'duration_seconds', new.duration_in_seconds
-        )
-      )
-      on conflict (user_id, day_date, kind)
-      do update set data = EXCLUDED.data, updated_at = now();
-
-      return new;
-    end;
-    $$ language plpgsql;
-
-    drop trigger if exists trg_update_health_stats_on_sleeps on app.user_sleeps_garmin;
-    create trigger trg_update_health_stats_on_sleeps
-    after insert or update on app.user_sleeps_garmin
-    for each row execute function app.update_health_stats_on_sleeps();
-  `);
 }
