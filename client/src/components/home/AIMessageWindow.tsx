@@ -25,6 +25,7 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
 
   const { t } = useTranslation();
   if (!open) return null;
+  const hasMessage = message.trim().length > 0;
   return (
     <div className="fixed bottom-20 right-0 z-50 flex items-end justify-center px-2 lg:bottom-24 lg:right-2 lg:left-auto lg:justify-end">
       <div className="ui-component-styles backdrop-blur-lg bg-white/70 dark:bg-gray-900/70 relative mb-2 p-4 shadow-md min-w-[140px] max-w-[90vw] max-h-[70vh] overflow-auto text-xs sm:min-w-[320px] sm:max-w-[400px] sm:p-4 sm:text-base">
@@ -54,14 +55,16 @@ const AIMessageWindow: React.FC<AIMessageWindowProps> = ({
 
         {loading ? (
           <p className="italic">{generatingMessage}</p>
-        ) : message ? (
+        ) : hasMessage ? (
           <p className="whitespace-pre-line">{message}</p>
         ) : aiStatus === "quota_exceeded" ? (
-          <p>AI message is temporarily unavailable (quota exceeded).</p>
+          <p>{t.home.quotaExceeded}</p>
         ) : aiStatus === "error" ? (
-          <p>AI message could not be generated due to a system error.</p>
+          <p>{t.home.aiError}</p>
+        ) : aiStatus === "generated" ? (
+          <p>{placeholder}</p>
         ) : (
-          <p>No health alerts for today.</p>
+          <p>{t.home.noHealthAlertsForToday}</p>
         )}
       </div>
     </div>
