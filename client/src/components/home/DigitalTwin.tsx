@@ -39,8 +39,8 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({
         onClick={() => setSelected(id)}
         style={{
           position: "absolute",
-          width: "8%",
-          height: "3%",
+          width: "clamp(10px, 8%, 18px)",
+          aspectRatio: "1 / 1",
           borderRadius: "50%",
           cursor: "pointer",
           top,
