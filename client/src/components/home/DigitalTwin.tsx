@@ -33,7 +33,7 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({
       onLoad={onAvatarLoad}
       className="w-full max-h-[60vh] object-contain block"
     />
-    {BODY_PARTS.map(({ id, top, left }) => (
+    {BODY_PARTS.map(({ id, label, top, left }) => (
       <div
         key={id}
         onClick={() => setSelected(id)}
@@ -53,7 +53,7 @@ const DigitalTwin: React.FC<DigitalTwinProps> = ({
                 : "rgba(203, 215, 249, 0.8)",
         }}
         className={alerts[id] ? "animate-pulse" : undefined}
-        aria-label={id}
+        aria-label={label}
       />
     ))}
   </div>

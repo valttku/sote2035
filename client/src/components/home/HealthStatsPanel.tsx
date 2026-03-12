@@ -10,20 +10,15 @@ type Props = {
   selectedDate?: string;
 };
 
-type MetricValue =
-  | string
-  | number
-  | {
-      value: string; // formatted
-      rawValue: number;
-      status?: "low" | "good" | "high";
-      goal?: { min?: number; max?: number };
-      avg7?: { raw: number; formatted: string };
-    };
+type MetricValue = string | number | {
+  value: string;
+  rawValue: number;
+  status?: "low" | "good" | "high";
+  goal?: { min?: number; max?: number };
+  avg7?: { raw: number; formatted: string };
+};
 
 type HealthMetrics = Record<string, MetricValue>;
-
-//Translation
 
 function normalizeMetricKey(key: string): string {
   return key
@@ -32,11 +27,7 @@ function normalizeMetricKey(key: string): string {
     .replace(/^./, (c) => c.toLowerCase());
 }
 
-function StatusBadge({
-  status,
-}: {
-  status: "low" | "good" | "high" | "undefined";
-}) {
+function StatusBadge({status}: {status: "low" | "good" | "high" | "undefined";}) {
   const { t } = useTranslation();
   const styles = {
     good: "bg-green-400/40 text-green-200",
@@ -50,7 +41,7 @@ function StatusBadge({
 
   return (
     <span
-      className={`inline-flex whitespace-nowrap px-2 py-0.5 text-xs rounded-full ${styles[status]}`}
+      className={`inline-flex whitespace-nowrap px-2 py-0.5 text-xs rounded-full cursor-pointer ${styles[status]}`}
     >
       {t.home.status[displayText]}
     </span>
@@ -90,18 +81,18 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
 
   return (
     <li className="grid grid-cols-[50%_30%_1fr] items-start pb-2 gap-2">
-      <span>{label}</span>
-      <span>{displayValue}</span>
+      <span className="min-w-0 break-words">{label}</span>
+      <span className="min-w-0 break-words">{displayValue}</span>
       <span className="relative group/badge pr-0">
         <StatusBadge status={status} />
         {tooltip && (
           <span
             className="
               absolute
-              right-full
               top-1/2
               -translate-y-1/2
-              ml-2
+              right-full
+              mr-2
               min-w-[max-content]
               rounded
               bg-white/95
@@ -115,7 +106,6 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
               group-hover/badge:opacity-100
               transition-opacity
               whitespace-pre-line
-              cursor-pointer
               z-[1000]"
           >
             {tooltip}
@@ -186,7 +176,7 @@ export default function HealthStatsPanel({
   }, [selected, selectedDate, t.home.noMetrics]);
 
   return (
-    <div className="panel-animation ui-component-styles backdrop-blur-3xl p-4 pt-2">
+    <div className="panel-animation ui-component-styles backdrop-blur-3xl p-4 pt-2 overflow-x-hidden">
       {/* Header with close button */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl pb-2 pl-1 mb-2 border-b w-full">
