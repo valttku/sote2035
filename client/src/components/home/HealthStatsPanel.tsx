@@ -37,8 +37,7 @@ function StatusBadge({
 }: {
   status: "low" | "good" | "high" | "undefined";
 }) {
-
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const styles = {
     good: "bg-green-400/40 text-green-200",
     low: "bg-blue-500/50 text-blue-200",
@@ -50,15 +49,16 @@ function StatusBadge({
   const displayText = status === "undefined" ? "no_status" : status;
 
   return (
-    
-    <span className={`px-2 py-0.5 text-xs rounded-full ${styles[status]}`}>
+    <span
+      className={`inline-flex whitespace-nowrap px-2 py-0.5 text-xs rounded-full ${styles[status]}`}
+    >
       {t.home.status[displayText]}
     </span>
   );
 }
 
 function MetricRow({ label, value }: { label: string; value: MetricValue }) {
-  const { t } = useTranslation(); 
+  const { t } = useTranslation();
 
   const isObject =
     typeof value === "object" && value !== null && "value" in value;
@@ -84,7 +84,6 @@ function MetricRow({ label, value }: { label: string; value: MetricValue }) {
     tooltip += `\n${t.home.tooltip.sevenDayAvg}: ${
       value.avg7?.formatted ?? t.home.tooltip.insufficientData
     }`;
-
   } else {
     displayValue = String(value);
   }
@@ -138,59 +137,53 @@ export default function HealthStatsPanel({
   const [loading, setLoading] = useState(false);
 
   // Fetch metrics
- useEffect(() => {
-  async function fetchHealthMetrics() {
-    setMetrics({});
-    setError(null);
-    setLoading(true);
+  useEffect(() => {
+    async function fetchHealthMetrics() {
+      setMetrics({});
+      setError(null);
+      setLoading(true);
 
-    try {
-      const date =
-        selectedDate || new Date().toISOString().split("T")[0];
+      try {
+        const date = selectedDate || new Date().toISOString().split("T")[0];
 
-      const res = await fetch(
-        `/api/v1/home?date=${date}&part=${selected}`,
-        { credentials: "include" }
-      );
+        const res = await fetch(`/api/v1/home?date=${date}&part=${selected}`, {
+          credentials: "include",
+        });
 
-      if (!res.ok) {
-        if (res.status === 401) {
+        if (!res.ok) {
+          if (res.status === 401) {
+            setError(t.home.noMetrics);
+            return;
+          }
+
           setError(t.home.noMetrics);
           return;
         }
 
+        //  Correct place to parse response
+        const data = await res.json();
+
+        type ApiResponse = {
+          metrics?: HealthMetrics;
+        };
+
+        const metricsObj =
+          data && typeof data === "object" && "metrics" in data
+            ? ((data as ApiResponse).metrics ?? {})
+            : {};
+
+        setMetrics(metricsObj);
+      } catch (e) {
+        console.error(e);
+        setMetrics({});
         setError(t.home.noMetrics);
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      //  Correct place to parse response
-      const data = await res.json();
-
-  
-
-          type ApiResponse = {
-      metrics?: HealthMetrics;
-    };
-
-    const metricsObj =
-      data &&
-      typeof data === "object" &&
-      "metrics" in data
-        ? ((data as ApiResponse).metrics ?? {})
-        : {};
-
-      setMetrics(metricsObj);
-    } catch (e) {
-      console.error(e);
-      setMetrics({});
-      setError(t.home.noMetrics);
-    } finally {
-      setLoading(false);
     }
-  }
 
-  fetchHealthMetrics();
-}, [selected, selectedDate, t.home.noMetrics]);
+    fetchHealthMetrics();
+  }, [selected, selectedDate, t.home.noMetrics]);
 
   return (
     <div className="panel-animation ui-component-styles backdrop-blur-3xl p-4 pt-2">
@@ -211,21 +204,20 @@ export default function HealthStatsPanel({
         <p className="opacity-80">{t.home.noMetrics}</p>
       )}
 
-   {/* Metrics list */}
- <ul className="min-h-[170px] space-y-2">
+      {/* Metrics list */}
+      <ul className="min-h-[170px] space-y-2">
         {Object.entries(metrics).map(([key, value]) => (
           <MetricRow
             key={key}
             label={
-  (t.home.metrics as Record<string, string>)?.[
-    normalizeMetricKey(key)
-  ] || key
-} // ⭐ Translation happens here
+              (t.home.metrics as Record<string, string>)?.[
+                normalizeMetricKey(key)
+              ] || key
+            } // ⭐ Translation happens here
             value={value}
           />
         ))}
       </ul>
-
 
       {/* animation for panel */}
       <style jsx>{`
