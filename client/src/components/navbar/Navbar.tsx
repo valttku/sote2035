@@ -1,5 +1,5 @@
 "use client";
-import { useState,useEffect } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import DarkModeToggle from "./DarkModeToggle";
@@ -22,7 +22,7 @@ export default function Navbar() {
     { label: t.navbar.home, path: "/", icon: <FaHome /> },
     { label: t.navbar.calendar, path: "/calendar", icon: <FaCalendarAlt /> },
     { label: t.navbar.health, path: "/health-insights", icon: <FaHeartbeat /> },
-     { label: t.chat.title, path: "/chat", icon: <FaRobot /> },
+    { label: t.chat.title, path: "/chat", icon: <FaRobot /> },
     { label: t.navbar.settings, path: "/settings", icon: <FaCog /> },
   ];
 
@@ -32,7 +32,7 @@ export default function Navbar() {
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="w-40" />
           <nav className="flex gap-10">
-             {navItems.map((item) => {
+            {navItems.map((item) => {
               const active = pathname === item.path;
               return (
                 <Link
@@ -45,21 +45,18 @@ export default function Navbar() {
                   {item.icon}
                   <span>{item.label}</span>
                 </Link>
- );
-            })}      
-                </nav>
-                
+              );
+            })}
+          </nav>
+
           <div className="hidden md:flex items-center gap-2">
             <DarkModeToggle />
-            
-          </div> 
-
-          <div className="w-40 flex items-center justify-end gap-3">
-            
           </div>
+
+          <div className="w-40 flex items-center justify-end gap-3"></div>
         </div>
       </header>
-      
+
       {/* MOBILE MENU BUTTON */}
       <button
         className="md:hidden fixed top-4 right-4 z-[70] ui-component-styles px-3 py-2 rounded-xl touch-manipulation"
@@ -96,11 +93,11 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
-          <LanguageSelector className="absolute right-42 top-50 z-50" />
 
-          {/* Bottom section: Language, Dark mode + Logout */}
-          <div className="mt-auto pt-6 border-t border-gray-700 flex flex-col gap-2">
-            <DarkModeToggle />
+          <LanguageSelector />
+          <DarkModeToggle />
+
+          <div className="mt-auto text-center">
             <LogoutButton />
           </div>
         </nav>

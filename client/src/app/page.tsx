@@ -104,11 +104,11 @@ export default function Home() {
         <div className="flex flex-col w-full max-w-5xl gap-10 p-4 flex-1">
           <h1 className="text-5xl text-left">{t.home.title}</h1>
 
-          <div className="flex justify-center w-full">
+          <div className="mt-4 md:mt-10 lg:mt-14 flex justify-center w-full">
             <div className="relative flex flex-col md:flex-row items-center md:items-start">
               <div className="relative">
                 {(!isTwinDataReady || !isAvatarImageReady) && (
-                  <div className="w-[200px] h-[420px] flex items-center justify-center text-md">
+                  <div className="min-h-[50vh] flex items-center justify-center text-md">
                     {t.home.loading}
                   </div>
                 )}

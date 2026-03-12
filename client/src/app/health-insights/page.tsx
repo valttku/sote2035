@@ -25,15 +25,19 @@ type HealthDataToAnalyze = {
   hrv?: HRV[];
 };
 
+function getLocalDateISO(): string {
+  const now = new Date();
+  const tzOffsetMs = now.getTimezoneOffset() * 60_000;
+  return new Date(now.getTime() - tzOffsetMs).toISOString().split("T")[0];
+}
+
 export default function HealthInsightsPage() {
   const { t } = useTranslation();
 
   const [activeSection, setActiveSection] = useState<Section>("dailies");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0],
-  );
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateISO());
   const [selectedActivityIds, setSelectedActivityIds] = useState<Set<string>>(
     new Set(),
   );
@@ -54,6 +58,7 @@ export default function HealthInsightsPage() {
         case "dailies":
           dataToAnalyze.dailies = healthData?.dailies?.map((d) => {
             const { heart_rate_samples, ...rest } = d;
+            void heart_rate_samples;
             return rest;
           });
           break;
@@ -86,12 +91,18 @@ export default function HealthInsightsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: `Analyze my ${activeSection} data for ${selectedDate}:\n${JSON.stringify(
-            dataToAnalyze,
-            null,
-            2,
-          )}'If the date is in the past, use past tense ("on x date you had..."), if the updated_at date is today, use present tense ("so far today you have..."). 
-          Provide insights TO ME in a concise manner, max 5 sentences. Focus on the most interesting or unusual aspects of the data. 
+          prompt: `Analyze my ${activeSection} data. Selected analysis date: ${selectedDate}. Today's local date: ${getLocalDateISO()}.
+
+          Rules:
+          - Use ONLY the selected analysis date (${selectedDate}) as the date reference in your response.
+          - If selected date equals today's local date (${getLocalDateISO()}), use present tense ("so far today...").
+          - Otherwise use past tense ("on ${selectedDate}...").
+          - Do NOT infer or mention a different day based on updated_at or other timestamps.
+
+          Data:
+          ${JSON.stringify(dataToAnalyze, null, 2)}
+
+          Provide insights TO ME in a concise manner, max 5 sentences. Focus on the most interesting or unusual aspects of the data.
           If possible, provide actionable advice based on the data. If the data looks normal, say that everything looks good!`,
         }),
       });
@@ -160,10 +171,10 @@ export default function HealthInsightsPage() {
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="block w-full rounded-md 
-                border-gray-300 shadow-sm 
-                focus:border-blue-500 
-                focus:ring-blue-500 
-                sm:text-sm p-2 border"
+                    border-gray-300 shadow-sm 
+                    focus:border-blue-500 
+                    focus:ring-blue-500 
+                    sm:text-sm p-2 border"
                 />
               </div>
             </div>
