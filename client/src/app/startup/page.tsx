@@ -9,7 +9,7 @@ import { useTranslation } from "../../i18n/LanguageProvider";
 import Button from "@/components/Button/Button";
 import LanguageSelector from "@/components/language-selector/LanguageSelector";
 import AppLogo from "@/components/app-logo/AppLogo";
-import LoginRegisterModal from "../../components/LoginRegisterModal";
+import GlobalModal from "../../components/GlobalModal";
 
 export default function StartUpPage() {
   // States to track if login and registration modal visibility
@@ -128,7 +128,7 @@ export default function StartUpPage() {
 
       {/* Login modal */}
       {showLogin && (
-        <LoginRegisterModal onClose={toggleLoginForm}>
+        <GlobalModal onClose={toggleLoginForm}>
           <LoginForm
             toggleLoginForm={toggleLoginForm}
             toggleRegisterForm={toggleRegisterForm}
@@ -146,11 +146,11 @@ export default function StartUpPage() {
               {text.forgot_password}
             </a>
           </div>
-        </LoginRegisterModal>
+        </GlobalModal>
       )}
       {/* Registration modal */}
       {showRegister && (
-        <LoginRegisterModal onClose={toggleRegisterForm}>
+        <GlobalModal onClose={toggleRegisterForm}>
           <RegisterForm
             toggleLoginForm={toggleLoginForm}
             toggleRegisterForm={toggleRegisterForm}
@@ -158,7 +158,7 @@ export default function StartUpPage() {
               handleSubmit("register", email, password, displayName)
             }
           />
-        </LoginRegisterModal>
+        </GlobalModal>
       )}
     </main>
   );

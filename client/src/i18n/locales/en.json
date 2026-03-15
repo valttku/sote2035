@@ -134,7 +134,7 @@
     "patient": "Patient",
     "page_title": "Patient Digital Twin",
     "heading": "Welcome",
-    "sub_heading": "This is your didital health twin",
+    "sub_heading": "This is your digital health twin",
     "para_1": "A living model of your body built from Garmin & Polar data to help you uderstand recovery, performance, and long-term health",
     "started": "Get started",
     "already_have_account": "I already have an account",
@@ -246,8 +246,7 @@
 
   "login": {
     "title": "Welcome",
-    "sub_title": "Sign in to your health twin with one of the following options:",
-    "or": "Or",
+    "sub_title": "Sign in to your digital twin",
     "email": "Email",
     "password": "Password",
     "emailError": "Enter a valid email address",

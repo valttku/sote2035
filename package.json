@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev -H 0.0.0.0 -p 3000\""
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npx next dev -H 0.0.0.0 -p 3000\""
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
