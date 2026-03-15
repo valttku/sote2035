@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import healthChatRoute from "./routes/healthChatRoute.js";
+import healthChatRoute from "./routes/healthChat.js";
 
 import { ensureSchema } from "./db/init/init.js";
 import { dbOk } from "./db/healthCheckDb.js";
