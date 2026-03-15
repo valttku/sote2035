@@ -208,7 +208,7 @@ test.describe("Startup Page – Register Modal", () => {
 
   test("switches to login form via 'Login here' link", async ({ page }) => {
     await page.getByText(/login here/i).click();
-    await expect(page.getByRole("heading", { name: /login|sign in/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /welcome/i })).toBeVisible();
   });
 
   test("successful registration navigates to /choose-service (mocked API)", async ({ page }) => {
