@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getHealthStatEntriesData } from "../db/healthStatEntries/healthStatEntriesDb.js";
+import { getHealthStatEntriesData } from "../db/digitalTwin/healthMetricsDb.js";
 import { db } from "../db/db.js";
 import { authRequired } from "../middleware/authRequired.js";
 import { detectAlerts, getCachedAIAdvice } from "../services/homeService.js";
