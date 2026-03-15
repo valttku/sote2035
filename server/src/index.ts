@@ -30,7 +30,7 @@ app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://sote2035-client.onrender.com",
+  ...(process.env.APP_BASE_URL ? [process.env.APP_BASE_URL] : []),
 ];
 
 app.use(
