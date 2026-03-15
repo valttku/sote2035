@@ -12,48 +12,48 @@ import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type Dailies = {
   id: string;
-  steps: number;
-  floors_climbed: number;
-  floors_climbed_goal: number;
-  active_kilocalories: number;
-  bmr_kilocalories: number;
-  moderate_intensity_duration_in_seconds: number;
-  vigorous_intensity_duration_in_seconds: number;
-  weekly_intensity_total_seconds: number;
-  intensity_duration_goal_in_seconds: number;
-  distance_in_meters: number;
-  avg_heart_rate: number;
-  resting_heart_rate: number;
-  max_heart_rate: number;
-  avg_stress_level: number;
-  steps_goal: number;
-  body_battery_charged: number;
-  body_battery_drained: number;
-  heart_rate_samples: Record<string, number>;
+  steps: number | null;
+  floors_climbed: number | null;
+  floors_climbed_goal: number | null;
+  active_kilocalories: number | null;
+  bmr_kilocalories: number | null;
+  moderate_intensity_duration_in_seconds: number | null;
+  vigorous_intensity_duration_in_seconds: number | null;
+  weekly_intensity_total_seconds: number | null;
+  intensity_duration_goal_in_seconds: number | null;
+  distance_in_meters: number | null;
+  avg_heart_rate: number | null;
+  resting_heart_rate: number | null;
+  max_heart_rate: number | null;
+  avg_stress_level: number | null;
+  steps_goal: number | null;
+  body_battery_charged: number | null;
+  body_battery_drained: number | null;
+  heart_rate_samples: Record<string, number> | null;
   updated_at: string;
 };
 
 export function DailiesSection({ dailies }: { dailies?: Dailies }) {
   const displayData: Dailies = dailies || {
     id: "empty",
-    steps: 0,
-    floors_climbed: 0,
-    floors_climbed_goal: 10,
-    active_kilocalories: 0,
-    bmr_kilocalories: 0,
-    moderate_intensity_duration_in_seconds: 0,
-    vigorous_intensity_duration_in_seconds: 0,
-    weekly_intensity_total_seconds: 0,
-    intensity_duration_goal_in_seconds: 9000,
-    distance_in_meters: 0,
-    avg_heart_rate: 0,
-    resting_heart_rate: 0,
-    max_heart_rate: 0,
-    avg_stress_level: 0,
-    steps_goal: 10000,
-    body_battery_charged: 0,
-    body_battery_drained: 0,
-    heart_rate_samples: {},
+    steps: null,
+    floors_climbed: null,
+    floors_climbed_goal: null,
+    active_kilocalories: null,
+    bmr_kilocalories: null,
+    moderate_intensity_duration_in_seconds: null,
+    vigorous_intensity_duration_in_seconds: null,
+    weekly_intensity_total_seconds: null,
+    intensity_duration_goal_in_seconds: null,
+    distance_in_meters: null,
+    avg_heart_rate: null,
+    resting_heart_rate: null,
+    max_heart_rate: null,
+    avg_stress_level: null,
+    steps_goal: null,
+    body_battery_charged: null,
+    body_battery_drained: null,
+    heart_rate_samples: null,
     updated_at: new Date().toISOString(),
   };
 
@@ -76,6 +76,18 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
   const formatCalories = (kcal: number) => `${kcal} kcal`;
   const formatHeartRate = (hr: number) => `${hr} bpm`;
   const { t } = useTranslation()
+
+  // Returns formatted string or null — used to conditionally render stat cards
+  function fmt(value: number | null | undefined, formatter: (v: number) => string): string | null {
+    if (value == null || isNaN(value)) return null;
+    return formatter(value);
+  }
+
+  // Total calories — guard against null addends
+  const totalCalories =
+    displayData.active_kilocalories != null && displayData.bmr_kilocalories != null
+      ? displayData.active_kilocalories + displayData.bmr_kilocalories
+      : null;
 
   // ---- HEART RATE PARSING ----
   let hourlyData: { time: string; value: number | null }[] = [];
@@ -119,14 +131,6 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
     } catch {
       hourlyData = [];
     }
-  } else {
-    // If no samples, create empty hourly data
-    for (let hour = 0; hour < 24; hour++) {
-      hourlyData.push({
-        time: `${hour.toString().padStart(2, "0")}:00`,
-        value: null,
-      });
-    }
   }
 
   // Min/max for YAxis
@@ -154,11 +158,11 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
         })}
       </h1>
 
-      {/* Heart rate chart */}
+      {/* Heart rate chart — only shown when HR sample data exists (Garmin only) */}
+      {showLine && (
       <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
         <h3 className="mb-2 text-lg font-semibold">
-        {t.healthInsights.dailies.heartRateTimeline}
-          {!showLine ? ` (${t.healthInsights.noData})` : " "}
+          {t.healthInsights.dailies.heartRateTimeline}
         </h3>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart
@@ -202,76 +206,84 @@ export function DailiesSection({ dailies }: { dailies?: Dailies }) {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      )}
 
-      {/* Stat cards */}
+      {/* Stat cards — only rendered when value is not null */}
       <div className="grid grid-cols-4 lg:grid-cols-6 gap-2">
-        <StatCard
-          label={`👟${t.healthInsights.dailies.stats.steps}`}
-          value={checkData(
-            displayData.steps,
-            (v) => `${v} / ${displayData.steps_goal}`,
-          )}
-        />
-        <StatCard
-          label= {`🛣 ${t.healthInsights.dailies.stats.distance}`}
-          value={checkData(displayData.distance_in_meters, formatDistance)}
-        />
-        <StatCard
-          label={`🪜 ${t.healthInsights.dailies.stats.floorsClimbed}`}
-          value={checkData(
-            displayData.floors_climbed,
-            (v) => `${v} / ${displayData.floors_climbed_goal}`,
-          )}
-        />
-        <StatCard
-          label={`🔥 ${t.healthInsights.dailies.stats.activeCalories}`}
-          value={checkData(displayData.active_kilocalories, formatCalories)}
-        />
-        <StatCard
-          label={`🔥 ${t.healthInsights.dailies.stats.bmrCalories}`}
-          value={checkData(displayData.bmr_kilocalories, formatCalories)}
-        />
-        <StatCard
-          label={`🔥 ${t.healthInsights.dailies.stats.totalCalories}`}
-          value={checkData(
-            displayData.active_kilocalories + displayData.bmr_kilocalories,
-            formatCalories,
-          )}
-        />
-        <StatCard
-          label={`⚡ ${t.healthInsights.dailies.stats.moderateExercise}`}
-          value={checkData(
-            displayData.moderate_intensity_duration_in_seconds,
-            formatMinutes,
-          )}
-        />
-        <StatCard
-          label={`⚡ ${t.healthInsights.dailies.stats.vigorousExercise}`}
-          value={checkData(
-            displayData.vigorous_intensity_duration_in_seconds,
-            formatMinutes,
-          )}
-        />
-        <StatCard
-          label={`⚡ ${t.healthInsights.dailies.stats.weeklyIntensity}`}
-          value={checkData(
-            displayData.weekly_intensity_total_seconds,
-            (v) =>
-              `${Math.round(v / 60)} / ${Math.round(displayData.intensity_duration_goal_in_seconds / 60)} min`,
-          )}
-        />
-        <StatCard
-          label={`❤️ ${t.healthInsights.dailies.stats.restingHeartRate}`}
-          value={checkData(displayData.resting_heart_rate, formatHeartRate)}
-        />
-        <StatCard
-          label={`❤️ ${t.healthInsights.dailies.stats.avgHeartRate}`}
-          value={checkData(displayData.avg_heart_rate, formatHeartRate)}
-        />
-        <StatCard
-          label={`❤️ ${t.healthInsights.dailies.stats.maxHeartRate}`}
-          value={checkData(displayData.max_heart_rate, formatHeartRate)}
-        />
+        {displayData.steps != null && (
+          <StatCard
+            label={`👟${t.healthInsights.dailies.stats.steps}`}
+            value={displayData.steps_goal != null ? `${displayData.steps} / ${displayData.steps_goal}` : String(displayData.steps)}
+          />
+        )}
+        {fmt(displayData.distance_in_meters, formatDistance) && (
+          <StatCard
+            label={`🛣 ${t.healthInsights.dailies.stats.distance}`}
+            value={fmt(displayData.distance_in_meters, formatDistance)!}
+          />
+        )}
+        {displayData.floors_climbed != null && (
+          <StatCard
+            label={`🪜 ${t.healthInsights.dailies.stats.floorsClimbed}`}
+            value={displayData.floors_climbed_goal != null ? `${displayData.floors_climbed} / ${displayData.floors_climbed_goal}` : String(displayData.floors_climbed)}
+          />
+        )}
+        {fmt(displayData.active_kilocalories, formatCalories) && (
+          <StatCard
+            label={`🔥 ${t.healthInsights.dailies.stats.activeCalories}`}
+            value={fmt(displayData.active_kilocalories, formatCalories)!}
+          />
+        )}
+        {fmt(displayData.bmr_kilocalories, formatCalories) && (
+          <StatCard
+            label={`🔥 ${t.healthInsights.dailies.stats.bmrCalories}`}
+            value={fmt(displayData.bmr_kilocalories, formatCalories)!}
+          />
+        )}
+        {totalCalories != null && (
+          <StatCard
+            label={`🔥 ${t.healthInsights.dailies.stats.totalCalories}`}
+            value={formatCalories(totalCalories)}
+          />
+        )}
+        {fmt(displayData.moderate_intensity_duration_in_seconds, formatMinutes) && (
+          <StatCard
+            label={`⚡ ${t.healthInsights.dailies.stats.moderateExercise}`}
+            value={fmt(displayData.moderate_intensity_duration_in_seconds, formatMinutes)!}
+          />
+        )}
+        {fmt(displayData.vigorous_intensity_duration_in_seconds, formatMinutes) && (
+          <StatCard
+            label={`⚡ ${t.healthInsights.dailies.stats.vigorousExercise}`}
+            value={fmt(displayData.vigorous_intensity_duration_in_seconds, formatMinutes)!}
+          />
+        )}
+        {displayData.weekly_intensity_total_seconds != null && (
+          <StatCard
+            label={`⚡ ${t.healthInsights.dailies.stats.weeklyIntensity}`}
+            value={displayData.intensity_duration_goal_in_seconds != null
+              ? `${Math.round(displayData.weekly_intensity_total_seconds / 60)} / ${Math.round(displayData.intensity_duration_goal_in_seconds / 60)} min`
+              : `${Math.round(displayData.weekly_intensity_total_seconds / 60)} min`}
+          />
+        )}
+        {fmt(displayData.resting_heart_rate, formatHeartRate) && (
+          <StatCard
+            label={`❤️ ${t.healthInsights.dailies.stats.restingHeartRate}`}
+            value={fmt(displayData.resting_heart_rate, formatHeartRate)!}
+          />
+        )}
+        {fmt(displayData.avg_heart_rate, formatHeartRate) && (
+          <StatCard
+            label={`❤️ ${t.healthInsights.dailies.stats.avgHeartRate}`}
+            value={fmt(displayData.avg_heart_rate, formatHeartRate)!}
+          />
+        )}
+        {fmt(displayData.max_heart_rate, formatHeartRate) && (
+          <StatCard
+            label={`❤️ ${t.healthInsights.dailies.stats.maxHeartRate}`}
+            value={fmt(displayData.max_heart_rate, formatHeartRate)!}
+          />
+        )}
       </div>
     </div>
   );

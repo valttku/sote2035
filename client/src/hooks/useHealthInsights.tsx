@@ -8,6 +8,7 @@ import { Respiration } from "../app/health-insights/sections/RespirationSection"
 import { HRV } from "../app/health-insights/sections/HRVSection";
 
 export type HealthData = {
+  provider: "garmin" | "polar" | null;
   profile?: UserProfile;
   dailies?: Dailies[];
   activities?: Activity[];
@@ -17,7 +18,7 @@ export type HealthData = {
   hrv?: HRV[];
 };
 
-export function useGarminHealthInsights(date?: string) {
+export function useHealthInsights(date?: string) {
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export function useGarminHealthInsights(date?: string) {
         const dateParam = date || new Date().toISOString().split("T")[0];
 
         const response = await fetch(
-          `/api/v1/health-insights/garmin?date=${dateParam}`,
+          `/api/v1/health-insights?date=${dateParam}`,
           {
             credentials: "include",
           },
@@ -42,6 +43,7 @@ export function useGarminHealthInsights(date?: string) {
           return;
         }
         type RawHealthData = {
+          provider: "garmin" | "polar" | null;
           profile?: UserProfile | UserProfile[];
           dailies?: Dailies | Dailies[];
           activities?: Activity | Activity[];
@@ -54,6 +56,7 @@ export function useGarminHealthInsights(date?: string) {
         const raw = (await response.json()) as RawHealthData;
 
         const normalized: HealthData = {
+          provider: raw.provider ?? null,
           profile: raw.profile
             ? Array.isArray(raw.profile)
               ? raw.profile[0]

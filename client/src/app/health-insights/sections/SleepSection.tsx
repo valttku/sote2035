@@ -8,16 +8,16 @@ export type Sleep = {
   id: string;
   duration_in_seconds: number;
   start_time_in_seconds: number;
-  unmeasurable_sleep_in_seconds: number;
-  deep_sleep_in_seconds: number;
-  light_sleep_in_seconds: number;
-  rem_sleep_in_seconds: number;
-  awake_duration_in_seconds: number;
-  overall_sleep_score: { value: number; qualifierKey: string };
+  unmeasurable_sleep_in_seconds: number | null;
+  deep_sleep_in_seconds: number | null;
+  light_sleep_in_seconds: number | null;
+  rem_sleep_in_seconds: number | null;
+  awake_duration_in_seconds: number | null;
+  overall_sleep_score: { value: number; qualifierKey: string } | null;
   sleep_levels_map?: Record<
     string,
     Array<{ startTimeInSeconds: number; endTimeInSeconds: number }>
-  >;
+  > | null;
   updated_at: string;
 };
 
@@ -283,6 +283,115 @@ const stageLabelMap: Record<string, string> = {
   );
 }
 
+
+// Donut chart showing sleep stage breakdown — used when segment timeline data is unavailable
+function SleepDonut({ sleep }: { sleep: Sleep }) {
+  const { t } = useTranslation();
+
+  const deep         = sleep.deep_sleep_in_seconds         ?? 0;
+  const light        = sleep.light_sleep_in_seconds        ?? 0;
+  const rem          = sleep.rem_sleep_in_seconds          ?? 0;
+  const awake        = sleep.awake_duration_in_seconds     ?? 0;
+  const unrecognized = sleep.unmeasurable_sleep_in_seconds ?? 0;
+  // Total matches Polar Flow's "Sleep time" (includes interruptions)
+  const total = deep + light + rem + awake + unrecognized;
+
+  const colorMap: Record<string, string> = {
+    deep:  "#3510b9",
+    light: "#3bd7f6",
+    rem:   "#f50be9",
+    awake: "#fdb0fc",
+  };
+
+  const stageLabelMap: Record<string, string> = {
+    deep:  t.healthInsights.sleep.deepSleep,
+    light: t.healthInsights.sleep.lightSleep,
+    rem:   t.healthInsights.sleep.remSleep,
+    awake: t.healthInsights.sleep.awake,
+  };
+
+  const stages = [
+    { key: "deep",  seconds: deep },
+    { key: "light", seconds: light },
+    { key: "rem",   seconds: rem },
+    { key: "awake", seconds: awake },
+  ];
+
+  const radius = 90;
+  const cx = 150;
+  const cy = 150;
+  const strokeWidth = 36;
+  const circumference = 2 * Math.PI * radius;
+
+  // Build arc segments
+  let offset = 0;
+  const segments = stages
+    .filter((s) => s.seconds > 0)
+    .map((s) => {
+      const pct = s.seconds / (total || 1);
+      const dash = pct * circumference;
+      const seg = { ...s, dash, offset };
+      offset += dash;
+      return seg;
+    });
+
+  function formatHM(seconds: number) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.round((seconds % 3600) / 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+
+  return (
+    <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-white/5 w-full">
+      <h3 className="mb-4 text-lg font-semibold">
+        {t.healthInsights.sleep.sleepStagesTimeline}
+      </h3>
+      <div className="flex flex-col sm:flex-row items-center gap-6">
+        <svg width={300} height={300} viewBox="0 0 300 300" style={{ maxWidth: 240, flexShrink: 0 }}>
+          {/* Background ring */}
+          <circle r={radius} cx={cx} cy={cy} fill="transparent" stroke="#22223b" strokeWidth={strokeWidth} />
+          {/* Stage arcs */}
+          {segments.map((seg) => (
+            <circle
+              key={seg.key}
+              r={radius}
+              cx={cx}
+              cy={cy}
+              fill="transparent"
+              stroke={colorMap[seg.key]}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${seg.dash} ${circumference}`}
+              transform={`rotate(-90 ${cx} ${cy})`}
+              style={{
+                strokeDashoffset: -seg.offset,
+                filter: `drop-shadow(0 0 8px ${colorMap[seg.key]}aa)`,
+              }}
+            />
+          ))}
+          {/* Center: total sleep */}
+          <text x={cx} y={cy - 8} textAnchor="middle" fill="#ffffff" fontSize={22} fontWeight="bold">
+            {formatHM(deep + light + rem + unrecognized + awake)}
+          </text>
+          <text x={cx} y={cy + 16} textAnchor="middle" fill="rgba(255,255,255,0.6)" fontSize={13}>
+            {t.healthInsights.sleep.totalSleep ?? "Total sleep"}
+          </text>
+        </svg>
+        {/* Legend */}
+        <div className="flex flex-col gap-2 text-sm">
+          {stages.filter((s) => s.seconds > 0).map((s) => (
+            <div key={s.key} className="flex items-center gap-2">
+              <span
+                style={{ background: colorMap[s.key], width: 12, height: 12, borderRadius: "50%", display: "inline-block", flexShrink: 0 }}
+              />
+              <span>{stageLabelMap[s.key]}: {formatHM(s.seconds)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SleepSection({ sleep }: { sleep?: Sleep }) {
   const hasData = !!sleep;
    const  { t } = useTranslation();
@@ -294,16 +403,13 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
         id: "empty",
         duration_in_seconds: 0,
         start_time_in_seconds: 0,
-        unmeasurable_sleep_in_seconds: 0,
-        deep_sleep_in_seconds: 0,
-        light_sleep_in_seconds: 0,
-        rem_sleep_in_seconds: 0,
-        awake_duration_in_seconds: 0,
-        overall_sleep_score: {
-          value: 0,
-          qualifierKey: "unknown",
-        },
-        sleep_levels_map: {},
+        unmeasurable_sleep_in_seconds: null,
+        deep_sleep_in_seconds: null,
+        light_sleep_in_seconds: null,
+        rem_sleep_in_seconds: null,
+        awake_duration_in_seconds: null,
+        overall_sleep_score: null,
+        sleep_levels_map: null,
         updated_at: new Date().toISOString(),
       };
 
@@ -313,6 +419,12 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.round((seconds % 3600) / 60);
     return `${hours > 0 ? `${hours}h ` : ""}${minutes}m`;
+  }
+
+  // Returns formatted string or null — used to conditionally render stat cards
+  function fmt(value: number | null | undefined, formatter: (v: number) => string): string | null {
+    if (value == null || (typeof value === "number" && isNaN(value))) return null;
+    return formatter(value);
   }
 
   // if value is null/undefined/empty string/NaN, show "No data".
@@ -347,44 +459,51 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
       </h1>
 
       <div className="flex flex-col items-center gap-4 h-full">
-        <div className="w-full">
-          <SleepTimeline sleep={displaySleep} />
-        </div>
+        {/* Sleep timeline — only shown when segment data exists (Garmin only) */}
+        {displaySleep.sleep_levels_map && Object.keys(displaySleep.sleep_levels_map).length > 0 && (
+          <div className="w-full">
+            <SleepTimeline sleep={displaySleep} />
+          </div>
+        )}
 
-        {/* Stat cards */}
+        {/* Sleep stage donut chart — shown for Polar (no segment timeline, but has stage totals) */}
+        {!(displaySleep.sleep_levels_map && Object.keys(displaySleep.sleep_levels_map).length > 0) &&
+          (displaySleep.deep_sleep_in_seconds != null ||
+           displaySleep.light_sleep_in_seconds != null ||
+           displaySleep.rem_sleep_in_seconds != null) && (
+          <SleepDonut sleep={displaySleep} />
+        )}
+
+        {/* Stat cards — only rendered when value is not null */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full ">
-          <StatCard
-            label={t.healthInsights.sleep.deepSleep}
-            value={checkData(
-              displaySleep.deep_sleep_in_seconds,
-              formatSecondsToHoursMinutes,
-            )}
-            icon={<FaCircle color="#3510b9" size={16} />}
-          />
-          <StatCard
-            label={t.healthInsights.sleep.lightSleep}
-            value={checkData(
-              displaySleep.light_sleep_in_seconds,
-              formatSecondsToHoursMinutes,
-            )}
-            icon={<FaCircle color="#3bd7f6" size={16} />}
-          />
-          <StatCard
-            label={t.healthInsights.sleep.remSleep}
-            value={checkData(
-              displaySleep.rem_sleep_in_seconds,
-              formatSecondsToHoursMinutes,
-            )}
-            icon={<FaCircle color="#f50be9" size={16} />}
-          />
-          <StatCard
-            label={t.healthInsights.sleep.awake}
-            value={checkData(
-              displaySleep.awake_duration_in_seconds,
-              formatSecondsToHoursMinutes,
-            )}
-            icon={<FaCircle color="#fdb0fc" size={16} />}
-          />
+          {fmt(displaySleep.deep_sleep_in_seconds, formatSecondsToHoursMinutes) && (
+            <StatCard
+              label={t.healthInsights.sleep.deepSleep}
+              value={fmt(displaySleep.deep_sleep_in_seconds, formatSecondsToHoursMinutes)!}
+              icon={<FaCircle color="#3510b9" size={16} />}
+            />
+          )}
+          {fmt(displaySleep.light_sleep_in_seconds, formatSecondsToHoursMinutes) && (
+            <StatCard
+              label={t.healthInsights.sleep.lightSleep}
+              value={fmt(displaySleep.light_sleep_in_seconds, formatSecondsToHoursMinutes)!}
+              icon={<FaCircle color="#3bd7f6" size={16} />}
+            />
+          )}
+          {fmt(displaySleep.rem_sleep_in_seconds, formatSecondsToHoursMinutes) && (
+            <StatCard
+              label={t.healthInsights.sleep.remSleep}
+              value={fmt(displaySleep.rem_sleep_in_seconds, formatSecondsToHoursMinutes)!}
+              icon={<FaCircle color="#f50be9" size={16} />}
+            />
+          )}
+          {fmt(displaySleep.awake_duration_in_seconds, formatSecondsToHoursMinutes) && (
+            <StatCard
+              label={t.healthInsights.sleep.awake}
+              value={fmt(displaySleep.awake_duration_in_seconds, formatSecondsToHoursMinutes)!}
+              icon={<FaCircle color="#fdb0fc" size={16} />}
+            />
+          )}
           <StatCard
             label={`💤${t?.healthInsights?.sleep?.totalSleep ?? "Total sleep" }`}
             value={checkData(
@@ -408,17 +527,18 @@ export function SleepSection({ sleep }: { sleep?: Sleep }) {
             label={t.healthInsights.sleep.sleepScore}
             value={checkData(
               displaySleep.overall_sleep_score?.value
-                ? `${displaySleep.overall_sleep_score.value} (${displaySleep.overall_sleep_score.qualifierKey})`
+                ? (displaySleep.overall_sleep_score.qualifierKey && displaySleep.overall_sleep_score.qualifierKey !== "polar"
+                    ? `${displaySleep.overall_sleep_score.value} (${displaySleep.overall_sleep_score.qualifierKey})`
+                    : String(displaySleep.overall_sleep_score.value))
                 : null,
             )}
           />
-          <StatCard
-            label={t.healthInsights.sleep.unmeasurable}
-            value={checkData(
-              displaySleep.unmeasurable_sleep_in_seconds,
-              formatSecondsToHoursMinutes,
-            )}
-          />
+          {fmt(displaySleep.unmeasurable_sleep_in_seconds, formatSecondsToHoursMinutes) && (
+            <StatCard
+              label={t.healthInsights.sleep.unmeasurable}
+              value={fmt(displaySleep.unmeasurable_sleep_in_seconds, formatSecondsToHoursMinutes)!}
+            />
+          )}
         </div>
       </div>
     </div>

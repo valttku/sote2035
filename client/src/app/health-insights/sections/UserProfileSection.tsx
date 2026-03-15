@@ -72,6 +72,9 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
     return Math.round(bmi * 10) / 10; // round to 1 decimal
   }
 
+  // Only show the Fitness subsection if at least one Garmin-derived metric exists
+  const hasFitnessData = data.fitness_age != null || data.vo2_max != null || data.vo2_max_cycling != null;
+
   return (
     <div
       className={`flex flex-col p-0 md:p-4 w-full h-full space-y-4 ${!profile ? "opacity-50" : ""}`}
@@ -119,23 +122,32 @@ export function UserProfileSection({ profile }: { profile?: UserProfile }) {
         <StatCard label={t.healthInsights.profile.bmi} value={checkData(calculateBMI(data.weight, data.height))} />
       </div>
 
-      {/* Metrics Section */}
-
-      <h1 className="text-md mb-2">{t.healthInsights.profile.fitness}</h1>
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <StatCard
-          label={`🎂${t.healthInsights.profile.fitnessAge}`}
-          value={checkData(data.fitness_age, formatFitnessAge)}
-        />
-        <StatCard
-          label={`🏃‍♂️${t.healthInsights.profile.vo2Run}`}
-          value={checkData(data.vo2_max, formatVO2)}
-        />
-        <StatCard
-          label={`🚴‍♂️${t.healthInsights.profile.vo2Cycling}`}
-          value={checkData(data.vo2_max_cycling, formatVO2)}
-        />
-      </div>
+      {/* Metrics Section — only shown when Garmin fitness data exists */}
+      {hasFitnessData && (
+        <>
+          <h1 className="text-md mb-2">{t.healthInsights.profile.fitness}</h1>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {data.fitness_age != null && (
+              <StatCard
+                label={`🎂${t.healthInsights.profile.fitnessAge}`}
+                value={checkData(data.fitness_age, formatFitnessAge)}
+              />
+            )}
+            {data.vo2_max != null && (
+              <StatCard
+                label={`🏃‍♂️${t.healthInsights.profile.vo2Run}`}
+                value={checkData(data.vo2_max, formatVO2)}
+              />
+            )}
+            {data.vo2_max_cycling != null && (
+              <StatCard
+                label={`🚴‍♂️${t.healthInsights.profile.vo2Cycling}`}
+                value={checkData(data.vo2_max_cycling, formatVO2)}
+              />
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
