@@ -12,7 +12,6 @@ export async function saveOAuthState(
      VALUES ($1, $2, $3, $4, $5)`,
     [state, userId, expires, verifier, returnTo ?? null],
   );
-  console.log("OAuth state saved:", { state, userId, expires, verifier, returnTo });
 }
 
 export async function consumeOAuthState(state: string): Promise<{
@@ -29,8 +28,6 @@ export async function consumeOAuthState(state: string): Promise<{
       `,
       [state],
     );
-
-    console.log("consumeOAuthState result:", result.rows);
 
     if (result.rowCount === 0) return null;
 
