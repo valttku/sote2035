@@ -199,7 +199,6 @@ authRouter.post("/forgot-password", async (req, res, next) => {
       `,
     });
 
-    console.log("Password reset email sent to", email);
 
     return res.json({
       message: "If this email exists, a password reset email has been sent.",
@@ -275,4 +274,3 @@ authRouter.post("/reset-password", async (req, res, next) => {
     next(err);
   }
 });
-  

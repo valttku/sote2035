@@ -61,8 +61,6 @@ settingsRouter.get("/", authRequired, async (req, res, next) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    //add console for checking
-    console.log("SETTINGS USER FROM DB:", result.rows[0]);
 
     // Add booleans for frontend convenience
     const user = result.rows[0];
