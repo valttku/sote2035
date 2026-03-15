@@ -4,9 +4,9 @@ import { useTranslation } from "@/i18n/LanguageProvider";
 
 export type Respiration = {
   id: string;
-  min_respiration: number;
-  max_respiration: number;
-  avg_respiration: number;
+  min_respiration: number | null;
+  max_respiration: number | null;
+  avg_respiration: number | null;
   updated_at: string;
 };
 
@@ -22,9 +22,9 @@ export function RespirationSection({
     ? respiration!
     : {
         id: "empty",
-        min_respiration: 0,
-        avg_respiration: 0,
-        max_respiration: 0,
+        min_respiration: null,
+        avg_respiration: null,
+        max_respiration: null,
         updated_at: new Date().toISOString(),
       };
 
@@ -50,20 +50,26 @@ export function RespirationSection({
         </span>
       </h1>
 
-      {/* Stat cards */}
+      {/* Stat cards — only rendered when value is not null (Polar only has avg) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard
-          label={`🌬️${t.healthInsights.respiration.minRespirationRate}`}
-          value={checkData(displayRespiration.min_respiration)}
-        />
-        <StatCard
-          label={`🌬️${t.healthInsights.respiration.avgRespirationRate}`}
-          value={checkData(displayRespiration.avg_respiration)}
-        />
-        <StatCard
-          label={`🌬️${t.healthInsights.respiration.maxRespirationRate}`}
-          value={checkData(displayRespiration.max_respiration)}
-        />
+        {displayRespiration.min_respiration != null && (
+          <StatCard
+            label={`🌬️${t.healthInsights.respiration.minRespirationRate}`}
+            value={checkData(displayRespiration.min_respiration)}
+          />
+        )}
+        {displayRespiration.avg_respiration != null && (
+          <StatCard
+            label={`🌬️${t.healthInsights.respiration.avgRespirationRate}`}
+            value={checkData(displayRespiration.avg_respiration)}
+          />
+        )}
+        {displayRespiration.max_respiration != null && (
+          <StatCard
+            label={`🌬️${t.healthInsights.respiration.maxRespirationRate}`}
+            value={checkData(displayRespiration.max_respiration)}
+          />
+        )}
       </div>
     </div>
   );

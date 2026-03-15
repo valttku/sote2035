@@ -4,6 +4,8 @@ import { useTranslation } from "@/i18n/LanguageProvider";
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -13,12 +15,14 @@ import {
 export type HRV = {
   id: string;
   last_night_avg: number;
-  last_night_5min_high: number;
+  last_night_5min_high: number | null;
   avg_7d_night_hrv: number | null;
   avg_7d_hrv: number | null;
   avg_day_hrv: number | null;
   days_in_7d_window: number;
-  hrv_values?: Record<string, number>;
+  hrv_values?: Record<string, number> | null;
+  // Per-day HRV values for the 7-day trend chart (Polar only)
+  hrv_7d_values?: Array<{ date: string; value: number }> | null;
   updated_at: string;
 };
 
@@ -31,11 +35,12 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
     : {
         id: "empty",
         last_night_avg: 0,
-        last_night_5min_high: 0,
-        avg_7d_night_hrv: 0,
-        avg_7d_hrv: 0,
-        avg_day_hrv: 0,
+        last_night_5min_high: null,
+        avg_7d_night_hrv: null,
+        avg_7d_hrv: null,
+        avg_day_hrv: null,
         days_in_7d_window: 0,
+        hrv_7d_values: null,
         updated_at: new Date().toISOString(),
       };
 
@@ -83,11 +88,11 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
         </span>
       </h1>
 
-      {/* HRV chart */}
+      {/* HRV chart — only shown when time-series data exists (Garmin only) */}
+      {displayHRV.hrv_values && Object.keys(displayHRV.hrv_values).length > 0 && (
       <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
         <h3 className="mb-2 text-lg font-semibold">
           {t.healthInsights.hrv.title}
-          {!displayHRV.hrv_values ? ` (${t.healthInsights.noData})` : ""}
         </h3>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart
@@ -146,37 +151,94 @@ export function HRVSection({ HRV }: { HRV?: HRV }) {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      )}
 
-      {/* Stat cards */}
+      {/* 7-day HRV trend chart — shown for Polar (no hrv_values time-series, but has per-day averages) */}
+      {!displayHRV.hrv_values && displayHRV.hrv_7d_values && displayHRV.hrv_7d_values.length > 0 && (
+        <div className="rounded-xl shadow p-4 text-white border border-white/20 bg-[white]/5">
+          <h3 className="mb-2 text-lg font-semibold">
+            {t.healthInsights.hrv.title}
+          </h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart
+              data={displayHRV.hrv_7d_values}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <XAxis
+                dataKey="date"
+                tickFormatter={(d) => d.slice(5)}
+                tick={{ fill: "#fff", fontSize: 12 }}
+                stroke="#fff"
+              />
+              <YAxis
+                domain={["auto", "auto"]}
+                tick={{ fill: "#ffffff", fontSize: 12 }}
+                stroke="#ffffff"
+              />
+              <Tooltip
+                formatter={(value) =>
+                  typeof value === "number" ? `${value.toFixed(0)} ms` : "-"
+                }
+                labelFormatter={(label) => label}
+                contentStyle={{
+                  borderRadius: "8px",
+                  backgroundColor: "#090828",
+                  border: "none",
+                  color: "#fff",
+                }}
+                labelStyle={{ color: "#fff" }}
+                itemStyle={{ color: "#fff" }}
+                wrapperStyle={{ minWidth: 120 }}
+              />
+              <Bar
+                dataKey="value"
+                fill="#e63946"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Stat cards — only rendered when value is not null */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard
-          label={`💓${t.healthInsights.hrv.lastNightAverage}`}
-          value={checkData(displayHRV.last_night_avg)}
-        />
-        <StatCard
-          label={`💓${t.healthInsights.hrv.lastNightHigh}`}
-          value={checkData(displayHRV.last_night_5min_high)}
-        />
-        <StatCard
-          label={`💓${t.healthInsights.hrv.dailyAverage}`}
-          value={checkData(displayHRV.avg_day_hrv)}
-        />
-        <StatCard
-          label={`💓${t.healthInsights.hrv.sevenDayNightAvg}`}
-          value={
-            displayHRV.days_in_7d_window < 7
-              ? t.healthInsights.hrv.notEnoughData
-              : checkData(displayHRV.avg_7d_night_hrv)
-          }
-        />
-        <StatCard
-          label={`💓${t.healthInsights.hrv.sevenDayAvg}`}
-          value={
-            displayHRV.days_in_7d_window < 7
-              ? t.healthInsights.hrv.notEnoughData
-              : checkData(displayHRV.avg_7d_hrv)
-          }
-        />
+        {displayHRV.last_night_avg != null && (
+          <StatCard
+            label={`💓${t.healthInsights.hrv.lastNightAverage}`}
+            value={checkData(displayHRV.last_night_avg)}
+          />
+        )}
+        {displayHRV.last_night_5min_high != null && (
+          <StatCard
+            label={`💓${t.healthInsights.hrv.lastNightHigh}`}
+            value={checkData(displayHRV.last_night_5min_high)}
+          />
+        )}
+        {displayHRV.avg_day_hrv != null && (
+          <StatCard
+            label={`💓${t.healthInsights.hrv.dailyAverage}`}
+            value={checkData(displayHRV.avg_day_hrv)}
+          />
+        )}
+        {/* 7-day stats — only shown when enough history exists */}
+        {displayHRV.days_in_7d_window >= 7 && displayHRV.avg_7d_night_hrv != null && (
+          <StatCard
+            label={`💓${t.healthInsights.hrv.sevenDayNightAvg}`}
+            value={checkData(displayHRV.avg_7d_night_hrv)}
+          />
+        )}
+        {displayHRV.days_in_7d_window >= 7 && displayHRV.avg_7d_hrv != null && (
+          <StatCard
+            label={`💓${t.healthInsights.hrv.sevenDayAvg}`}
+            value={checkData(displayHRV.avg_7d_hrv)}
+          />
+        )}
+        {displayHRV.days_in_7d_window > 0 && displayHRV.days_in_7d_window < 7 && (
+          <StatCard
+            label={`💓${t.healthInsights.hrv.sevenDayNightAvg}`}
+            value={t.healthInsights.hrv.notEnoughData}
+          />
+        )}
       </div>
     </div>
   );
