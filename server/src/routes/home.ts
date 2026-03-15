@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getHealthStatEntriesData } from "../db/healthStatEntries/healthStatEntriesDb.js";
+import { getHealthStatEntriesData } from "../db/digitalTwin/healthMetricsDb.js";
 import { db } from "../db/db.js";
 import { authRequired } from "../middleware/authRequired.js";
 import { detectAlerts, getCachedAIAdvice } from "../services/homeService.js";
@@ -7,7 +7,7 @@ import { detectAlerts, getCachedAIAdvice } from "../services/homeService.js";
 const homeRouter = Router();
 
 // GET /api/v1/home?date=YYYY-MM-DD&part=heart|brain|legs|lungs|summary
-homeRouter.get("/", authRequired, async (req, res) => {
+homeRouter.get("/", authRequired, async (req, res, next) => {
   const date = String(req.query.date ?? "");
   const part = String(req.query.part ?? "");
   const aiRequested = req.query.ai === "1";
@@ -17,7 +17,6 @@ homeRouter.get("/", authRequired, async (req, res) => {
   }
 
   const userId = (req as any).userId;
-  if (!userId) return res.status(401).json({ error: "not authenticated" });
 
   try {
     // Fetch user gender for avatar
@@ -70,8 +69,7 @@ homeRouter.get("/", authRequired, async (req, res) => {
     });
 
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "failed to load metrics" });
+    next(e);
   }
 });
 

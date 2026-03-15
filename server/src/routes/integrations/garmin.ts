@@ -1,9 +1,9 @@
 import express from "express";
-import { buildGarminAuthUrl } from "./garmin-oauth/garminAuthUrl.js";
-import { consumeOAuthState } from "./garmin-oauth/stateStore.js";
-import { exchangeGarminCodeForToken } from "./garmin-oauth/garminToken.js";
-import { refreshGarminToken } from "./garmin-oauth/garminToken.js";
-import { fetchGarminUserProfile } from "./garmin-oauth/garminToken.js";
+import { buildGarminAuthUrl } from "../../services/garmin-oauth/garminAuthUrl.js";
+import { consumeOAuthState } from "../../services/garmin-oauth/stateStore.js";
+import { exchangeGarminCodeForToken } from "../../services/garmin-oauth/garminToken.js";
+import { refreshGarminToken } from "../../services/garmin-oauth/garminToken.js";
+import { fetchGarminUserProfile } from "../../services/garmin-oauth/garminToken.js";
 import { authRequired } from "../../middleware/authRequired.js";
 import { db } from "../../db/db.js";
 

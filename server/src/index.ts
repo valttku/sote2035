@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import healthChatRoute from "./routes/healthChatRoute.js";
+import healthChatRoute from "./routes/healthChat.js";
 
 import { ensureSchema } from "./db/init/init.js";
 import { dbOk } from "./db/healthCheckDb.js";
@@ -12,7 +12,7 @@ import { homeRouter } from "./routes/home.js";
 import { authRouter } from "./routes/auth.js";
 import { calendarRouter } from "./routes/calendar.js";
 import { settingsRouter } from "./routes/settings.js";
-import { meRouter } from "./routes/me.js";
+
 import { openAIRouter } from "./routes/openAI.js";
 import { healthInsightsRouter } from "./routes/healthInsights.js";
 
@@ -30,7 +30,7 @@ app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://sote2035-client.onrender.com",
+  ...(process.env.APP_BASE_URL ? [process.env.APP_BASE_URL] : []),
 ];
 
 app.use(
@@ -70,7 +70,6 @@ app.use("/api/v1/home", homeRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/calendar", calendarRouter);
 app.use("/api/v1/settings", settingsRouter);
-app.use("/api/v1/me", meRouter);
 app.use("/api/v1/openai", openAIRouter);
 app.use("/api/v1/health-insights", healthInsightsRouter);
 
