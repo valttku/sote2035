@@ -1,9 +1,8 @@
 "use client";
 import { useState, useRef } from "react";
-import { FaApple, FaEye, FaEyeSlash, FaTwitter } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import Button from "../Button/Button";
-import { FcGoogle } from "react-icons/fc";
 
 export default function LoginForm({
   onSubmit,
@@ -50,40 +49,6 @@ export default function LoginForm({
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold !text-white mb-2">{t.login.title}</h2>
           <p>{t.login.sub_title + ":"}</p>
-          <div className="flex justify-center gap-4 mt-4">
-            <Button
-              disabled
-              bgColor="bg-white"
-              size="large"
-              className="rounded-full w-18 flex items-center justify-center"
-            >
-              <FcGoogle />
-            </Button>
-
-            <Button
-              disabled
-              bgColor="bg-white"
-              size="large"
-              className="rounded-full w-18 flex items-center justify-center"
-            >
-              <FaTwitter className="text-blue-500 text-xl" />
-            </Button>
-
-            <Button
-              disabled
-              bgColor="bg-white"
-              size="large"
-              className="rounded-full w-18 flex items-center justify-center"
-            >
-              <FaApple className="text-black text-xl" />
-            </Button>
-          </div>
-
-          <div className="w-4/5 mx-auto flex items-center gap-3 my-4">
-            <div className="h-[2px] flex-1 bg-white rounded-full" />
-            <span className="text-sm text-white whitespace-nowrap">{t.login.or}</span>
-            <div className="h-[2px] flex-1 bg-white rounded-full" />
-          </div>
         </div>
         <div className="w-4/5 mx-auto">
           <label htmlFor="login-email" className="block mb-1">

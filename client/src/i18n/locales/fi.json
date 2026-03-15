@@ -236,8 +236,7 @@
 
   "login": {
     "title": "Tervetuloa",
-    "sub_title": "Kirjaudu terveyskaksoseesi jollakin seuraavista vaihtoehdoista",
-    "or": "Tai",
+    "sub_title": "Kirjaudu terveyskaksoseesi",
     "email": "Sähköposti",
     "password": "Salasana",
     "emailError": "Anna kelvollinen sähköpostiosoite",
