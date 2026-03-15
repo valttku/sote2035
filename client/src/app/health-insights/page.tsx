@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppLayout from "../../components/AppLayout";
 import { ActivitiesSection, Activity } from "./sections/ActivitiesSection";
 import { DailiesSection, Dailies } from "./sections/DailiesSection";
@@ -8,7 +8,7 @@ import { Sleep, SleepSection } from "./sections/SleepSection";
 import { Stress, StressSection } from "./sections/StressSection";
 import { Respiration, RespirationSection } from "./sections/RespirationSection";
 import { HRV, HRVSection } from "./sections/HRVSection";
-import { useGarminHealthInsights } from "../../hooks/useGarminHealthInsights";
+import { useHealthInsights } from "../../hooks/useHealthInsights";
 import { useTranslation } from "@/i18n/LanguageProvider";
 import { HealthInsightsTranslations } from "@/i18n/types";
 
@@ -42,7 +42,7 @@ export default function HealthInsightsPage() {
     new Set(),
   );
   const { healthData, loading: loadingData } =
-    useGarminHealthInsights(selectedDate);
+    useHealthInsights(selectedDate);
 
   const handleAnalyzeClick = async () => {
     setLoading(true);
@@ -131,10 +131,20 @@ export default function HealthInsightsPage() {
     { id: "dailies", label: t.healthInsights.sections.dailies },
     { id: "activities", label: t.healthInsights.sections.activities },
     { id: "sleep", label: t.healthInsights.sections.sleep },
-    { id: "stress", label: t.healthInsights.sections.stress },
+    // Stress is Garmin-only — not shown for Polar users
+    ...(healthData?.provider !== "polar"
+      ? [{ id: "stress" as Section, label: t.healthInsights.sections.stress }]
+      : []),
     { id: "respiration", label: t.healthInsights.sections.respiration },
     { id: "hrv", label: t.healthInsights.sections.hrv },
   ];
+
+  // Reset to dailies if the current section is not available for the active provider
+  useEffect(() => {
+    if (healthData?.provider === "polar" && activeSection === "stress") {
+      setActiveSection("dailies");
+    }
+  }, [healthData?.provider, activeSection]);
 
   return (
     <AppLayout>
@@ -186,6 +196,10 @@ export default function HealthInsightsPage() {
                 <div className="flex-1 min-w-0 overflow-y-auto">
                   {loadingData ? (
                     <p>{t.healthInsights.loading}</p>
+                  ) : healthData?.provider === null ? (
+                    <p className="p-4 italic text-gray-300">
+                      {t.healthInsights.noData}
+                    </p>
                   ) : (
                     <>
                       {activeSection === "profile" &&
