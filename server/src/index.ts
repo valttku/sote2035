@@ -12,7 +12,7 @@ import { homeRouter } from "./routes/home.js";
 import { authRouter } from "./routes/auth.js";
 import { calendarRouter } from "./routes/calendar.js";
 import { settingsRouter } from "./routes/settings.js";
-import { meRouter } from "./routes/me.js";
+
 import { openAIRouter } from "./routes/openAI.js";
 import { healthInsightsRouter } from "./routes/healthInsights.js";
 
@@ -70,7 +70,6 @@ app.use("/api/v1/home", homeRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/calendar", calendarRouter);
 app.use("/api/v1/settings", settingsRouter);
-app.use("/api/v1/me", meRouter);
 app.use("/api/v1/openai", openAIRouter);
 app.use("/api/v1/health-insights", healthInsightsRouter);
 
