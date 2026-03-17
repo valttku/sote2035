@@ -190,8 +190,7 @@ export function ActivitiesSection({
           {/* TITLE ROW */}
           <div className="flex justify-between items-center">
             <div className="text-lg flex items-baseline gap-2">
-              {t.healthInsights.activities.activityName}
-
+              {activity.activity_name}
               <div
                 onClick={(e) => {
                   e.stopPropagation();
